@@ -1,0 +1,9 @@
+<resources>
+    <declare-styleable name="CircleProgressBar">
+        <attr name="indeterminate" format="boolean"/>
+        <attr name="indeterminateDuration" format="integer"/>
+        <attr name="backgroundColor" format="color"/>
+        <attr name="fillColor" format="color"/>
+        <attr name="strokeWidth" format="dimension"/>
+    </declare-styleable>
+</resources>

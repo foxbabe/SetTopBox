@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_setting"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.savor.ads.activity.SettingActivity">
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="280px"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="85px"
+        android:layout_marginLeft="192px"
+        android:layout_marginTop="85px"
+        android:background="@mipmap/bg_list"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/setlistView1"
+            android:layout_width="280px"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="72px"
+            android:divider="@mipmap/set_item_sep"
+            android:listSelector="@mipmap/bg_set_focus" >
+        </ListView>
+    </LinearLayout>
+
+    <TabHost
+        android:id="@+id/tabhost"
+        android:layout_width="600px"
+        android:layout_height="550px"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/linearLayout1"
+        android:layout_marginRight="193px" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" >
+            </TabWidget>
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <RelativeLayout
+                    android:id="@+id/tab3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@mipmap/sout_setbg"
+                    android:visibility="gone">
+
+                    <Button
+                        android:id="@+id/button1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/btn_squed"
+                        android:nextFocusLeft="@id/setlistView1"
+                        android:onClick="sou_qued" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/tab4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@mipmap/server_bg" >
+
+                    <Button
+                        android:id="@+id/serbutton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/serurl"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="70px"
+                        android:background="@drawable/btn_qued"
+                        android:nextFocusLeft="@id/setlistView1"
+                        android:nextFocusUp="@id/serurl"
+                        android:onClick="ser_qued" />
+
+                    <com.savor.ads.customview.IPEditText
+                        android:id="@+id/serurl"
+                        android:layout_width="400px"
+                        android:layout_height="60px"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="192px"
+                        android:nextFocusDown="@id/serbutton"
+                        android:nextFocusLeft="@id/setlistView1" >
+                        <requestFocus />
+                    </com.savor.ads.customview.IPEditText>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/tab1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@mipmap/video_setbg" >
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/tab2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@mipmap/dians_setbg" >
+                </RelativeLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+</RelativeLayout>

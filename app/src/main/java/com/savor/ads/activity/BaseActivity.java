@@ -1,0 +1,397 @@
+package com.savor.ads.activity;
+
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.TextUtils;
+import android.view.KeyEvent;
+
+import com.mstar.tv.service.skin.AudioSkin;
+import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.core.Session;
+import com.savor.ads.database.DBHelper;
+import com.savor.ads.dialog.BoxInfoDialog;
+import com.savor.ads.utils.ActivitiesManager;
+import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.LogFileUtil;
+import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.ShowMessage;
+import com.savor.ads.utils.TechnicalLogReporter;
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.File;
+import java.util.ArrayList;
+
+
+/**
+ * Created by zhanghq on 2016/6/23.
+ */
+public abstract class BaseActivity extends Activity {
+
+    protected Activity mContext;
+    protected Session mSession;
+    public AudioManager mAudioManager = null;
+
+    private BoxInfoDialog mBoxInfoDialog;
+
+    private Handler mHandler = new Handler();
+//    private ArrayList<String> usbImgPathList;
+//    private ImageViewerDialog mImageViewerDialog;
+
+    protected boolean mIsGoneToSystemSetting;
+    private AudioSkin mAudioSkin;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContext = this;
+        ActivitiesManager.getInstance().pushActivity(this);
+        mSession = Session.get(mContext);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        LogFileUtil.write("BaseActivity onCreate this is " + this.toString());
+
+        mAudioSkin = new AudioSkin(this);
+        mAudioSkin.connect(null);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+        registerListener();
+
+//        if (this instanceof TvPlayerActivity && mIsGoneToSystemSetting) {
+//            gotoAdsPlayer();
+//        }
+//        mIsGoneToSystemSetting = false;
+    }
+
+    private void gotoAdsPlayer() {
+        if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod()) && !TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+            LogFileUtil.write("gotoAdsPlayer, will goto AdsPlayerActivity");
+            Intent intent = new Intent(this, AdsPlayerActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * 注册广播，判断sd卡以及U盘挂载状态
+     */
+    public void registerListener() {
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
+        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        intentFilter.addDataScheme("file");
+
+        registerReceiver(recevierListener, intentFilter);
+    }
+
+    private BroadcastReceiver recevierListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LogUtils.e("BroadcastReceiver: " + intent.getAction());
+            String usbPath = intent.getDataString();
+            if (intent.getAction().equals("android.intent.action.MEDIA_MOUNTED") && usbPath.contains("usb")) {//U盘插入
+                String pathString = usbPath.split("file://")[1];
+                insertUSB(pathString);
+            } else if (intent.getAction().equals("android.intent.action.MEDIA_REMOVED") && usbPath.contains("usb")) {
+                //U盘拔出
+                removeUSB(usbPath.split("file://")[1]);
+            }
+            String action = intent.getAction();
+            String path = intent.getData().getPath();
+            if (Intent.ACTION_MEDIA_SCANNER_FINISHED.equals(action)) {
+                LogUtils.v("ACTION_MEDIA_SCANNER_FINISHED path:::::" + path);
+                if (path.contains("/mnt/usb/")) {
+                    // u 盘挂载成功
+                    //	mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDREMOVED);
+                    return;
+                } else if (path.contains("/mnt/extsd")) {
+
+//                    if (mHandler.hasMessages(AppUtils.MSG_WHAT_TO_SDMOUNTED))
+//                        mHandler.removeMessages(AppUtils.MSG_WHAT_TO_SDMOUNTED);
+//
+//                    mHandler.sendEmptyMessageDelayed(
+//                            AppUtils.MSG_WHAT_TO_SDMOUNTED, 5 * 1000);
+                } else {
+//                    if (isSDInfo) {
+//                        //	isSDInfo = true;
+//                        mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDCARDSTATUS);
+//                    }
+                }
+            } else if (Intent.ACTION_MEDIA_REMOVED.equals(action)
+                    || Intent.ACTION_MEDIA_UNMOUNTED.equals(action)
+                    || Intent.ACTION_MEDIA_BAD_REMOVAL.equals(action)) {
+                if (path.contains("/mnt/extsd")) {//sd 卡拔除
+//                    AlarmUtil.SdRemove();、、、、、通过接口上传日志
+//                    mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDREMOVED);
+                    handleSDCardRemoved();
+                    return;
+                }
+                return;
+            } else if (action.equals("android.net.conn.CONNECTIVITY_CHANGE")) {
+            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                if (path.contains("/mnt/extsd")) {
+                    handleMediaMounted();
+                }
+            }
+        }
+    };
+
+    private void handleMediaMounted() {
+        TechnicalLogReporter.sdcardMounted(this);
+        fillPlayList();
+
+        if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+            LogFileUtil.write("handleMediaMounted, will goto AdsPlayerActivity");
+            Intent intent = new Intent(this, AdsPlayerActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    protected void fillPlayList() {
+        LogUtils.d("开始fillPlayList");
+        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+            if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod())) {
+                DBHelper dbHelper = DBHelper.get(mContext);
+                ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList(mSession.getAdvertMediaPeriod());
+
+                if (playList != null) {
+                    for (int i = 0; i < playList.size(); i++) {
+                        PlayListBean bean = playList.get(i);
+                        File mediaFile = new File(bean.getMediaPath());
+                        if (TextUtils.isEmpty(bean.getMd5()) ||
+                                TextUtils.isEmpty(bean.getMediaPath()) ||
+                                !mediaFile.exists() ||
+                                !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                            LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                            // 媒体文件校验失败时删除
+                            playList.remove(i);
+
+                            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
+                                    DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " + DBHelper.MediaDBInfo.FieldName.VID + "=?",
+                                    new String[]{bean.getPeriod(), bean.getVid()});
+
+                            if (mediaFile.exists()) {
+                                mediaFile.delete();
+                            }
+
+                            TechnicalLogReporter.md5Failed(this, bean.getVid());
+                        }
+
+                    }
+                }
+
+                dbHelper.close();
+                ConstantValues.PLAY_LIST = playList;
+            } else {
+                File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
+                if (mediaDir.exists() && mediaDir.isDirectory()) {
+                    File[] files = mediaDir.listFiles();
+                    ArrayList<PlayListBean> playList = new ArrayList<>();
+                    if (files != null) {
+                        for (File file : files) {
+                            if (file.isFile()) {
+                                PlayListBean bean = new PlayListBean();
+                                bean.setMediaPath(file.getPath());
+                                String fileName = file.getName();
+                                int dotIndex = fileName.indexOf(".");
+                                if (dotIndex > 0) {
+                                    fileName = fileName.substring(0, dotIndex);
+                                }
+                                bean.setVid(fileName);
+                                playList.add(bean);
+                            }
+                        }
+                    }
+                    ConstantValues.PLAY_LIST = playList;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+        if (recevierListener != null) {
+            unregisterReceiver(recevierListener);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivitiesManager.getInstance().popActivity(this);
+
+        if (mBoxInfoDialog != null && mBoxInfoDialog.isShowing()) {
+            mBoxInfoDialog.dismiss();
+        }
+        if (mAudioSkin != null) {
+            mAudioSkin.disconnect();
+            mAudioSkin = null;
+        }
+    }
+
+
+    private Runnable mHideInfoRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mBoxInfoDialog != null && mBoxInfoDialog.isShowing()) {
+                mBoxInfoDialog.dismiss();
+            }
+        }
+    };
+
+    /**
+     * 显示盒子信息
+     */
+    protected void showBoxInfo() {
+        if (mBoxInfoDialog == null) {
+            mBoxInfoDialog = new BoxInfoDialog(this);
+            mBoxInfoDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    mHandler.removeCallbacks(mHideInfoRunnable);
+                }
+            });
+        }
+        if (!mBoxInfoDialog.isShowing()) {
+            mBoxInfoDialog.show();
+        }
+        mHandler.postDelayed(mHideInfoRunnable, 10 * 1000);
+    }
+
+    /**
+     * 插入USB以后，读取USB中的内容,目前仅限图片
+     *
+     * @param pathString
+     */
+    private void insertUSB(String pathString) {
+        ShowMessage.showToast(mContext, "U盘已插入，正在读取...");
+
+        String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
+        File file = new File(imagesPath);
+        //指定存放图片的文件夹不存在的情况
+        if (!file.exists()) {
+            ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
+            return;
+        }
+        File[] files = file.listFiles();
+        //空文件夹的情况
+        if (files.length == 0) {
+            ShowMessage.showToast(mContext, "检测到【redian】文件夹是空的，请检查后重试！");
+            return;
+        }
+        ArrayList<String> usbImgPathList = getImagePath(files);//获取所有图片路径
+        if (usbImgPathList.size() <= 0) {
+            ShowMessage.showToast(mContext, "检测到【redian】文件夹中没有图片文件，请检查后重试！");
+            return;
+        }
+
+        if (!(this instanceof MainActivity)) {
+            if (this instanceof UsbImageViewerActivity) {
+                ((UsbImageViewerActivity) this).resetImages(usbImgPathList, imagesPath);
+            } else {
+                Intent intent = new Intent(this, UsbImageViewerActivity.class);
+                intent.putExtra(UsbImageViewerActivity.EXTRA_URLS, usbImgPathList);
+                intent.putExtra(UsbImageViewerActivity.EXTRA_USB_PATH, imagesPath);
+                startActivity(intent);
+            }
+        }
+    }
+
+    //获取所有图片路径
+    private ArrayList<String> getImagePath(File[] files) {
+
+        ArrayList<String> usbImgPathList = new ArrayList<>();
+        for (File file : files) {
+            if (AppUtils.checkIsImageFile(file.getPath())) {
+                usbImgPathList.add(file.getPath());
+            }
+        }
+        return usbImgPathList;
+    }
+
+    /**
+     * USB拔出
+     */
+    private void removeUSB(String pathString) {
+        ShowMessage.showToast(mContext, "U盘已拔出");
+        String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
+        if (this instanceof UsbImageViewerActivity && imagesPath.equals(((UsbImageViewerActivity) this).getCurrentUsbPath())) {
+            finish();
+        }
+    }
+
+
+    private void handleSDCardRemoved() {
+        TechnicalLogReporter.sdcardRemoved(this);
+        //SD移除时跳到TV页
+        if (this instanceof AdsPlayerActivity) {
+            Intent intent = new Intent(this, TvPlayerActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean handled = false;
+        switch (keyCode) {
+            case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
+                LogFileUtil.write("will gotoSystemSetting");
+                gotoSystemSetting();
+                handled = true;
+                break;
+            case KeyCodeConstant.KEY_CODE_SETTING:
+                gotoSetting();
+                handled = true;
+                break;
+        }
+        return handled || super.onKeyDown(keyCode, event);
+    }
+
+    private void gotoSystemSetting() {
+        mIsGoneToSystemSetting = true;
+        Intent intent = new Intent("android.settings.SETTINGS");
+        startActivity(intent);
+    }
+
+    private void gotoSetting() {
+        Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    protected void setVolume(int volume) {
+        if (mAudioSkin != null) {
+            if (volume > 100)
+                volume = 100;
+            else if (volume < 0)
+                volume = 0;
+            mAudioSkin.setVolume(volume);
+        }
+    }
+
+    protected int getVolume() {
+        if (mAudioSkin != null) {
+            return mAudioSkin.getVolume();
+        }
+        return -1;
+    }
+}
