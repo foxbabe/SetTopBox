@@ -85,6 +85,8 @@ public class AppApi {
         SP_POST_UPLOAD_PROGRAM_JSON,
         CP_GET_SP_IP_JSON,
         SP_GET_BOX_INIT_JSON,
+
+        MOBILE_DOWNLOAD_IMAGE,
     }
 
 
@@ -211,6 +213,16 @@ public class AppApi {
             LogUtils.d(ex.toString());
         }
     }
+
+    public static void downloadProjectionImage(String url, Context context, ApiRequestListener handler, String filePath) {
+        try {
+            final HashMap<String, Object> params = new HashMap<String, Object>();
+            new AppServiceOk(context, Action.MOBILE_DOWNLOAD_IMAGE, handler, params).downLoad(url, filePath);
+        } catch (Exception ex) {
+            LogUtils.d(ex.toString());
+        }
+    }
+
 //    /**
 //     * 上报技术日志
 //     * @param context
