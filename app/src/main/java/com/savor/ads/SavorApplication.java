@@ -63,21 +63,21 @@ public class SavorApplication extends MultiDexApplication {
                 // 检测播放时间
                 AppUtils.checkPlayTime(SavorApplication.this);
 
-//                // 设置并打开热点
-//                IntentFilter filter = new IntentFilter();
-//                filter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
-//                registerReceiver(mWifiStateBroadcastReceiver, filter);
-//
-//                boolean success = AppUtils.setWifiApEnabled(SavorApplication.this, true);
-//                LogFileUtil.writeApInfo("SavorApplication setWifiApEnabled " + (success ? "success" : "failed"));
-//
-//                mHandler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        int state = AppUtils.getWifiAPState(SavorApplication.this);
-//                        LogFileUtil.writeApInfo("SavorApplication wifi ap state =  " + state);
-//                    }
-//                }, 2000);
+                // 设置并打开热点
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
+                registerReceiver(mWifiStateBroadcastReceiver, filter);
+
+                boolean success = AppUtils.setWifiApEnabled(SavorApplication.this, true);
+                LogFileUtil.writeApInfo("SavorApplication setWifiApEnabled " + (success ? "success" : "failed"));
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        int state = AppUtils.getWifiAPState(SavorApplication.this);
+                        LogFileUtil.writeApInfo("SavorApplication wifi ap state =  " + state);
+                    }
+                }, 2000);
             }
         }).start();
     }
