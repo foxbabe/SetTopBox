@@ -331,7 +331,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             mUUID = String.valueOf(System.currentTimeMillis());
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "projection", "pic", mVideoId,
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
         } else {
             // PDF等其它
@@ -737,7 +737,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "end", "vod", mVideoId,
-                        "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                         "");
             }
             exitProjection();
@@ -766,7 +766,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, type, mVideoId,
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
             rescheduleToExit(false);
         }
