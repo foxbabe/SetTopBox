@@ -7,8 +7,8 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017022001
-        versionName "1.0.12"
+        versionCode 2017022402
+        versionName "1.0.14"
 
         multiDexEnabled true
     }
