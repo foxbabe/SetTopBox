@@ -10,12 +10,10 @@ public class PrepareRequestVo implements Serializable {
     private static final long serialVersionUID = 1666585004016142602L;
     private String function;
     private String action;
-    private String period;
     private String assettype;
     private String asseturl;
     private String assetid;
     private String assetname;
-    private int play;
     /**
      * 投屏设备ID
      */
@@ -31,17 +29,16 @@ public class PrepareRequestVo implements Serializable {
      */
     private int vodType;
 
+    /** 是否是缩略图
+     * 0：不是
+     * 1：是*/
+    private int isThumbnail;
+    /** 图片ID，
+     * 用来标识缩略图与原图，请确保缩略图与原图ID一致*/
+    private String imageId;
 
 
     public PrepareRequestVo() {
-    }
-
-    public String getPeriod() {
-        return this.period;
-    }
-
-    public void setPeriod(String period) {
-        this.period = period;
     }
 
     public String getAction() {
@@ -84,14 +81,6 @@ public class PrepareRequestVo implements Serializable {
         this.assetname = assetname;
     }
 
-    public int getPlay() {
-        return this.play;
-    }
-
-    public void setPlay(int play) {
-        this.play = play;
-    }
-
     public String getFunction() {
         return this.function;
     }
@@ -122,5 +111,21 @@ public class PrepareRequestVo implements Serializable {
 
     public void setVodType(int vodType) {
         this.vodType = vodType;
+    }
+
+    public int getIsThumbnail() {
+        return isThumbnail;
+    }
+
+    public void setIsThumbnail(int isThumbnail) {
+        this.isThumbnail = isThumbnail;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 }

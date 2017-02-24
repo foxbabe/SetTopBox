@@ -70,7 +70,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             String url = prepareRequestVo.getAsseturl();
             String assetType = prepareRequestVo.getAssettype();
             String type = assetType;
-            String period = prepareRequestVo.getPeriod();
             String vid = "";
             String vname = "";
             String deviceId = prepareRequestVo.getDeviceId();
@@ -164,7 +163,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 Bundle data = new Bundle();
                 data.putString(ScreenProjectionActivity.EXTRA_URL, url);
                 data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
-                data.putString(ScreenProjectionActivity.EXTRA_PERIOD, period);
                 data.putString(ScreenProjectionActivity.EXTRA_VID, vid);
                 data.putString(ScreenProjectionActivity.EXTRA_VNAME, vname);
                 data.putString(ScreenProjectionActivity.EXTRA_DEVICE_ID, deviceId);

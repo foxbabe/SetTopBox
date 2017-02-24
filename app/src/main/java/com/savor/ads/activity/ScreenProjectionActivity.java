@@ -2,14 +2,15 @@ package com.savor.ads.activity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -33,11 +34,9 @@ import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-import com.savor.ads.core.AppServiceOk;
 import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.KeyCodeConstant;
@@ -45,18 +44,12 @@ import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.zip.ZipInputStream;
 
 public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener {
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
-    public static final String EXTRA_THUMBNAIL_URL = "extra_thumbnail_url";
-    public static final String EXTRA_PERIOD = "extra_period";
     public static final String EXTRA_VID = "extra_vid";
     public static final String EXTRA_VNAME = "extra_vname";
     public static final String EXTRA_DEVICE_ID = "extra_device_id";
@@ -74,17 +67,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      */
     private String mProjectType;
     /**
-     * 点播视频期号
-     */
-    private String mVodPeriod;
-    /**
      * 媒体文件位置
      */
     private String mMediaPath;
-    /**
-     * 图片缩略图
-     */
-    private String mImageThumbnail;
     /**
      * 视频ID（只有点播会传进来）
      */
@@ -222,9 +207,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             handleBundleData(bundle);
 
             handleProjectRequest();
-            if (!TextUtils.isEmpty(mDeviceId) && !mDeviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-
-            }
         }
     }
 
@@ -238,8 +220,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private void handleBundleData(Bundle bundle) {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
-        mImageThumbnail = bundle.getString(EXTRA_THUMBNAIL_URL);
-        mVodPeriod = bundle.getString(EXTRA_PERIOD);
         mVideoId = bundle.getString(EXTRA_VID);
         mVideoName = bundle.getString(EXTRA_VNAME);
         mDeviceId = bundle.getString(EXTRA_DEVICE_ID);
@@ -261,6 +241,19 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mHandler.removeCallbacks(mProjectTipOutRunnable);
         mHandler.postDelayed(mProjectTipOutRunnable, PROJECT_TIP_DURATION);
 
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            doAnimationIn();
+        } else {
+            mProjectTipTv.post(new Runnable() {
+                @Override
+                public void run() {
+                    doAnimationIn();
+                }
+            });
+        }
+    }
+
+    private void doAnimationIn() {
         TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 1, Animation.RELATIVE_TO_SELF, 0,
                 Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
         animation.setDuration(1000);
@@ -293,7 +286,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list);
 
-            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
+//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
         } else if (ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -304,7 +297,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list);
 
-            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
+//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
         } else if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             // 图片投屏
             mSavorVideoView.setVisibility(View.GONE);
@@ -315,43 +308,56 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageView.setRotation(0);
             mImageView.setScaleX(1);
             mImageView.setScaleY(1);
-            mImageLoadingTip.setVisibility(View.VISIBLE);
-            mImageLoadingPb.setVisibility(View.VISIBLE);
-            mImageLoadingTv.setText("图片加载中...");
+//            mImageLoadingTip.setVisibility(View.VISIBLE);
+//            mImageLoadingPb.setVisibility(View.VISIBLE);
+//            mImageLoadingTv.setText("图片加载中...");
 
-            String zipFilePath = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + "img_temp";
-            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
-            AppApi.downloadProjectionImage(mMediaPath, this, this, zipFilePath);
+//            String zipFilePath = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + "img_temp";
+//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
+//            AppApi.downloadProjectionImage(mMediaPath, this, this, zipFilePath);
 //            GlideImageLoader.clearView(mImageView);
-//            GlideImageLoader.loadImageWithoutCache(this, mMediaPath, mImageView, new RequestListener() {
-//                @Override
-//                public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-//                    LogUtils.e("图片加载失败1: " + mMediaPath);
-//                    // 失败后再去加载一次
-//                    GlideImageLoader.loadImageWithoutCache(mContext, mMediaPath, mImageView, new RequestListener() {
-//                        @Override
-//                        public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+
+            if (TextUtils.isEmpty(mMediaPath)) {
+                if (ConstantValues.PROJECT_BITMAP != null) {
+                    if (mImageView.getDrawable() != null) {
+                        if (mImageView.getDrawable() instanceof BitmapDrawable) {
+                            BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
+                            bitmapDrawable.getBitmap().recycle();
+                        }
+                    }
+                    mImageView.setImageBitmap(ConstantValues.PROJECT_BITMAP);
+                }
+            } else {
+                GlideImageLoader.loadImageWithoutCache(this, mMediaPath, mImageView, new RequestListener() {
+                    @Override
+                    public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+                        LogUtils.e("图片加载失败1: " + mMediaPath);
+                        // 失败后再去加载一次
+                        GlideImageLoader.loadImageWithoutCache(mContext, mMediaPath, mImageView, new RequestListener() {
+                            @Override
+                            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
 //                            mImageLoadingPb.setVisibility(View.GONE);
 //                            mImageLoadingTv.setText("图片加载失败");
-//                            LogUtils.e("图片加载失败2: " + mMediaPath);
-//                            return false;
-//                        }
-//
-//                        @Override
-//                        public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-//                            mImageLoadingTip.setVisibility(View.GONE);
-//                            return false;
-//                        }
-//                    });
-//                    return true;
-//                }
-//
-//                @Override
-//                public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-//                    mImageLoadingTip.setVisibility(View.GONE);
-//                    return false;
-//                }
-//            });
+                                LogUtils.e("图片加载失败2: " + mMediaPath);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                mImageLoadingTip.setVisibility(View.GONE);
+                                return false;
+                            }
+                        });
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mImageLoadingTip.setVisibility(View.GONE);
+                        return false;
+                    }
+                });
+            }
 
             mUUID = String.valueOf(System.currentTimeMillis());
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
@@ -746,6 +752,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         LogUtils.d("onDestroy " + this.hashCode());
         super.onDestroy();
         mSavorVideoView.release();
+        if (mImageView.getDrawable() != null) {
+            if (mImageView.getDrawable() instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
+                bitmapDrawable.getBitmap().recycle();
+            }
+        }
         GlideImageLoader.clearView(mImageView);
         mHandler.removeCallbacksAndMessages(null);
         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
@@ -833,7 +845,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageLoadingPb.post(new Runnable() {
                     @Override
                     public void run() {
-                        mImageLoadingPb.setVisibility(View.GONE);
+//                        mImageLoadingPb.setVisibility(View.GONE);
                         mImageLoadingTv.setText("图片加载失败");
                         LogUtils.e("图片加载失败: " + mMediaPath);
                     }
@@ -849,7 +861,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageLoadingPb.post(new Runnable() {
                     @Override
                     public void run() {
-                        mImageLoadingPb.setVisibility(View.GONE);
+//                        mImageLoadingPb.setVisibility(View.GONE);
                         mImageLoadingTv.setText("图片加载失败");
                         LogUtils.e("图片加载失败: " + mMediaPath);
                     }

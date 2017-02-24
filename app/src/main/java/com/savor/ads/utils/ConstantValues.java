@@ -1,5 +1,7 @@
 package com.savor.ads.utils;
 
+import android.graphics.Bitmap;
+
 import com.savor.ads.bean.PlayListBean;
 
 import java.util.ArrayList;
@@ -62,4 +64,9 @@ public class ConstantValues {
      * 正式环境手机端APP下载页面
      */
     public static final String APP_DOWN_LINK = "http://rerdian.com/d";
+
+    /** 当前投屏图片*/
+    public volatile static Bitmap PROJECT_BITMAP;
+    /** 当前投屏图片ID*/
+    public volatile static String PROJECT_IMAGE_ID;
 }
