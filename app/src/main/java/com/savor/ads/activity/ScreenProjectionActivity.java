@@ -1,7 +1,5 @@
 package com.savor.ads.activity;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,8 +30,6 @@ import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
-import com.savor.ads.core.ApiRequestListener;
-import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
@@ -41,12 +37,10 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.ShowMessage;
 
-import java.io.File;
 import java.util.ArrayList;
 
-public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener {
+public class ScreenProjectionActivity extends BaseActivity {
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
@@ -285,8 +279,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             list.add(mMediaPath);
             mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list);
-
-//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
         } else if (ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -296,8 +288,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             list.add(mMediaPath);
             mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list);
-
-//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
         } else if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             // 图片投屏
             mSavorVideoView.setVisibility(View.GONE);
@@ -312,11 +302,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 //            mImageLoadingPb.setVisibility(View.VISIBLE);
 //            mImageLoadingTv.setText("图片加载中...");
 
-//            String zipFilePath = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + "img_temp";
-//            new AppServiceOk(this, AppApi.Action.MOBILE_DOWNLOAD_IMAGE).cancelByAction();
-//            AppApi.downloadProjectionImage(mMediaPath, this, this, zipFilePath);
-//            GlideImageLoader.clearView(mImageView);
-
             if (TextUtils.isEmpty(mMediaPath)) {
                 if (ConstantValues.PROJECT_BITMAP != null) {
                     if (mImageView.getDrawable() != null) {
@@ -328,6 +313,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                     mImageView.setImageBitmap(ConstantValues.PROJECT_BITMAP);
                 }
             } else {
+                GlideImageLoader.clearView(mImageView);
                 GlideImageLoader.loadImageWithoutCache(this, mMediaPath, mImageView, new RequestListener() {
                     @Override
                     public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
@@ -816,57 +802,4 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         public void onMediaResume(int index) {
         }
     };
-
-    @Override
-    public void onSuccess(AppApi.Action method, Object obj) {
-        switch (method) {
-            case MOBILE_DOWNLOAD_IMAGE:
-                if (obj instanceof File) {
-                    final File file = (File) obj;
-                    final Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
-                    mImageView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            LogUtils.d("投屏图片文件大小：" + file.length() / 1024f + "kb");
-                            ShowMessage.showToast(mContext, "投屏图片文件大小：" + file.length() / 1024f + "kb");
-                            mImageView.setImageBitmap(bitmap);
-                            mImageLoadingTip.setVisibility(View.GONE);
-                        }
-                    });
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onError(AppApi.Action method, Object obj) {
-        switch (method) {
-            case MOBILE_DOWNLOAD_IMAGE:
-                mImageLoadingPb.post(new Runnable() {
-                    @Override
-                    public void run() {
-//                        mImageLoadingPb.setVisibility(View.GONE);
-                        mImageLoadingTv.setText("图片加载失败");
-                        LogUtils.e("图片加载失败: " + mMediaPath);
-                    }
-                });
-                break;
-        }
-    }
-
-    @Override
-    public void onNetworkFailed(AppApi.Action method) {
-        switch (method) {
-            case MOBILE_DOWNLOAD_IMAGE:
-                mImageLoadingPb.post(new Runnable() {
-                    @Override
-                    public void run() {
-//                        mImageLoadingPb.setVisibility(View.GONE);
-                        mImageLoadingTv.setText("图片加载失败");
-                        LogUtils.e("图片加载失败: " + mMediaPath);
-                    }
-                });
-                break;
-        }
-    }
 }
