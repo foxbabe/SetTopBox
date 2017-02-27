@@ -52,7 +52,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
      */
-    private static final int PROJECT_DURATION = 1000 * 60 * 10;
+    private static final int PROJECT_DURATION = 1000 * 30 * 5;
 
     private static final int PROJECT_TIP_DURATION = 1000 * 5;
 
