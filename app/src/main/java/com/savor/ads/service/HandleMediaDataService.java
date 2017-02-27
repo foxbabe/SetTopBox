@@ -361,6 +361,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             session.setAdvertDownloadingPeriod(setTopBoxBean.getPeriod());
             mAdsList.clear();
             ServerInfo serverInfo = session.getServerInfo();
+            if (serverInfo == null)
+                return;
             String baseUrl = serverInfo.getDownloadUrl();
             if (!TextUtils.isEmpty(baseUrl)&&baseUrl.endsWith("/")){
                 baseUrl = baseUrl.substring(0,baseUrl.length()-1);
