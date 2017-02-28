@@ -118,7 +118,6 @@ public class BoxInfoDialog extends Dialog {
 
         mDownloadingVodIssueTv.setText(session.getMulticastDownloadingPeriod());
         if (session.getServerInfo() != null) {
-            // 没拿到盒子ID时认为没连上小平台，此时IP标红
             if (Session.get(getContext()).isConnectedToSP()) {
                 mServerIpTv.setText(session.getServerInfo().getServerIp());
             } else {
