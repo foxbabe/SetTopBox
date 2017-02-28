@@ -101,7 +101,7 @@ public class AppApi {
             put(Action.SP_POST_UPLOAD_LOG_JSON,SP_BASE_URL+"small/log/upload-file");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
 //            put(Action.CP_REPORT_TECHNICAL_LOG_PLAIN, BASE_URL + "getfaultInterface.html");
-            put(Action.CP_GET_HEARTBEAT_PLAIN, "https://sapi.rerdian.com/survival/api/2/survival");
+            put(Action.CP_GET_HEARTBEAT_PLAIN, BASE_URL + "survival/api/2/survival");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
             put(Action.CP_GET_SP_IP_JSON, BASE_URL + "mobile/api/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
