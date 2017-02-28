@@ -91,7 +91,16 @@ public class BoxInfoDialog extends Dialog {
         mSystemTimeTv.setText(AppUtils.getCurTime());
         mVolumeTv.setText(String.valueOf(session.getVolume()));
         mTvSwitchTimeTv.setText(String.valueOf(session.getSwitchTime()));
-        mRoomNameTv.setText(session.getBoxName());
+        String roomName = "";
+        if (TextUtils.isEmpty(session.getRoomType())) {
+            roomName = session.getBoxName();
+        } else {
+            roomName = session.getRoomType();
+            if (!TextUtils.isEmpty(session.getBoxName())) {
+                roomName = roomName + "-" + session.getBoxName();
+            }
+        }
+        mRoomNameTv.setText(roomName);
         mIpTv.setText(AppUtils.getLocalIPAddress());
         mSignalSourceTv.setText(AppUtils.getInputType(session.getTvInputSource()));
         mEthernetMacTv.setText(session.getEthernetMac());

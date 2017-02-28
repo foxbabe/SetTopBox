@@ -84,6 +84,8 @@ public class Session {
     private String boxId;
     /** 盒子名*/
     private String boxName;
+    /** 包间类型*/
+    private String roomType;
     /**广告期号*/
     private String advertMediaPeriod;
     /**下一期要播放的广告的期号*/
@@ -173,6 +175,7 @@ public class Session {
         roomName = mPreference.loadStringKey(P_APP_ROOMNAME, null);
         roomId = mPreference.loadStringKey(P_APP_ROOMID, null);
         boxName = mPreference.loadStringKey(P_APP_BOXNAME, null);
+        roomType = mPreference.loadStringKey(P_APP_ROOM_TYPE, null);
         advertMediaPeriod = mPreference.loadStringKey(P_APP_ADVERTMEDIAPERIOD, "");
         nextAdvertMediaPeriod = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIAPERIOD, "");
         nextAdvertMediaPubTime = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIA_PUBTIME, null);
@@ -242,6 +245,7 @@ public class Session {
                 || P_APP_ROOMNAME.equals(key)
                 || P_APP_ROOMID.equals(key)
                 || P_APP_BOXNAME.equals(key)
+                || P_APP_ROOM_TYPE.equals(key)
                 || P_APP_ADVERTMEDIAPERIOD.equals(key)
                 || P_APP_NEXT_ADVERTMEDIAPERIOD.equals(key)
                 || P_APP_NEXT_ADVERTMEDIA_PUBTIME.equals(key)
@@ -572,6 +576,15 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_BOXNAME, this.boxName));
     }
 
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
+        writePreference(new Pair<String, Object>(P_APP_ROOM_TYPE, this.roomType));
+    }
+
     public String getAdvertMediaPeriod() {
         return advertMediaPeriod;
     }
@@ -759,7 +772,10 @@ public class Session {
     public static final String P_APP_ROOMNAME = "com.savor.ads.roomName";
     //包间ID
     public static final String P_APP_ROOMID = "com.savor.ads.roomId";
+    // 机顶盒名称
     public static final String P_APP_BOXNAME = "com.savor.ads.boxName";
+    // 包间类型
+    public static final String P_APP_ROOM_TYPE = "com.savor.ads.roomType";
     //广告视频期号
     public static final String P_APP_ADVERTMEDIAPERIOD = "com.savor.ads.advertMediaPeriod";
     public static final String P_APP_NEXT_ADVERTMEDIAPERIOD = "com.savor.ads.nextAdvertMediaPeriod";

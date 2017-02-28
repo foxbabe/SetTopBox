@@ -27,6 +27,8 @@ public class BoxInitBean {
     private String ossBucketName;
     /**盒子名称*/
     private String box_name;
+    /**包间类型*/
+    private String room_type;
 
     public void setSwitch_time(int switch_time) {
         this.switch_time = switch_time;
@@ -114,5 +116,13 @@ public class BoxInitBean {
 
     public void setBox_name(String box_name) {
         this.box_name = box_name;
+    }
+
+    public String getRoom_type() {
+        return room_type;
+    }
+
+    public void setRoom_type(String room_type) {
+        this.room_type = room_type;
     }
 }
