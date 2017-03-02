@@ -192,6 +192,10 @@ public class RemoteService extends Service {
                     if (!TextUtils.isEmpty(stopRequest.getDeviceId()) && stopRequest.getDeviceId().equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
                         StopResponseVo object = RemoteService.listener.stop(stopRequest);
                         resJson = new Gson().toJson(object);
+
+                        ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+                        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
+                        ConstantValues.PROJECT_IMAGE_ID = null;
                     }
                 } else if ("volume".equalsIgnoreCase(fromJson.getFunction())) {
                     LogUtils.d("enter method listener.volume");

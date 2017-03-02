@@ -737,6 +737,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
         ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
+        ConstantValues.PROJECT_IMAGE_ID = null;
     }
 
     private SavorVideoView.PlayStateCallback mPlayStateCallback = new SavorVideoView.PlayStateCallback() {
