@@ -22,15 +22,9 @@ import com.savor.ads.service.MessageService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.ShowMessage;
-import com.savor.ads.utils.TechnicalLogReporter;
-
-import java.io.File;
-import java.util.Random;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -62,12 +56,6 @@ public class MainActivity extends BaseActivity {
                         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
                         startActivity(intent);
                     }
-//                        try{
-//                            deleteOldMedia();
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                        }
-
                 }
             }
         }, 5000);
@@ -120,7 +108,7 @@ public class MainActivity extends BaseActivity {
             getSpIpFromServer();
         }
 
-        startDownloadMeidaDataService();
+        startDownloadMediaDataService();
 
         startProduceLogService();
         startUploadLogService();
@@ -213,9 +201,9 @@ public class MainActivity extends BaseActivity {
     /**
      * 启动下载媒体文件服务
      */
-    private void startDownloadMeidaDataService() {
+    private void startDownloadMediaDataService() {
         LogUtils.v("========start download media service======");
-        LogFileUtil.write("MainActivity will startDownloadMeidaDataService");
+        LogFileUtil.write("MainActivity will startDownloadMediaDataService");
         Intent intent = new Intent(this, HandleMediaDataService.class);
         startService(intent);
     }

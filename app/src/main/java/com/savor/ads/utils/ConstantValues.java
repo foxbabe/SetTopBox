@@ -55,6 +55,8 @@ public class ConstantValues {
     public static ArrayList<PlayListBean> PLAY_LIST;
     /** 当前投屏设备ID*/
     public static String CURRENT_PROJECT_DEVICE_ID;
+    /** 当前投屏设备名称*/
+    public static String CURRENT_PROJECT_DEVICE_NAME;
 
 //    /**
 //     * 测试环境手机端APP下载页面

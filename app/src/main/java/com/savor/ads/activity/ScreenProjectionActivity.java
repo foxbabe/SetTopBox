@@ -737,7 +737,9 @@ public class ScreenProjectionActivity extends BaseActivity {
     protected void onDestroy() {
         LogUtils.d("onDestroy " + this.hashCode());
         super.onDestroy();
+
         mSavorVideoView.release();
+
         if (mImageView.getDrawable() != null) {
             if (mImageView.getDrawable() instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
@@ -745,8 +747,11 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
         }
         GlideImageLoader.clearView(mImageView);
+
         mHandler.removeCallbacksAndMessages(null);
+
         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
     }
 
     private SavorVideoView.PlayStateCallback mPlayStateCallback = new SavorVideoView.PlayStateCallback() {

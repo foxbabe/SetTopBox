@@ -149,17 +149,19 @@ public class RemoteService extends Service {
                             (TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_ID) ||
                                     prepareRequest.getDeviceId().equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID))) {
                         ConstantValues.CURRENT_PROJECT_DEVICE_ID = prepareRequest.getDeviceId();
+                        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = prepareRequest.getDeviceName();
                         PrepareResponseVo object = RemoteService.listener.prepare(prepareRequest);
                         if (object.getResult() != 0) {
                             ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+                            ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
                         }
                         resJson = new Gson().toJson(object);
                     } else {
-                        RemoteService.listener.showProjectionTip();
+//                        RemoteService.listener.showProjectionTip();
 
                         PrepareResponseVo vo = new PrepareResponseVo();
                         vo.setResult(-1);
-                        vo.setInfo("当前电视正在投屏,请稍后重试");
+                        vo.setInfo(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏,请稍后重试");
                         resJson = new Gson().toJson(vo);
                     }
                 } else if ("play".equalsIgnoreCase(fromJson.getFunction())) {
@@ -284,6 +286,7 @@ public class RemoteService extends Service {
                             (TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_ID) ||
                                     prepareRequest.getDeviceId().equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID))) {
                         ConstantValues.CURRENT_PROJECT_DEVICE_ID = prepareRequest.getDeviceId();
+                        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = prepareRequest.getDeviceName();
                         BaseResponse object = null;
                         if (bitmap != null) {
                             boolean showImage = false;
@@ -307,6 +310,7 @@ public class RemoteService extends Service {
                                 object = RemoteService.listener.prepare(prepareRequest);
                                 if (object.getResult() != 0) {
                                     ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+                                    ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
                                 }
                             } else {
                                 // 图片被忽略
@@ -316,11 +320,11 @@ public class RemoteService extends Service {
                         }
                         responseJson = new Gson().toJson(object);
                     } else {
-                        RemoteService.listener.showProjectionTip();
+//                        RemoteService.listener.showProjectionTip();
 
                         PrepareResponseVo vo = new PrepareResponseVo();
                         vo.setResult(-1);
-                        vo.setInfo("当前电视正在投屏,请稍后重试");
+                        vo.setInfo(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏,请稍后重试");
                         responseJson = new Gson().toJson(vo);
                     }
                 }
