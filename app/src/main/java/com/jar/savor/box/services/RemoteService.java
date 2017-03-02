@@ -129,15 +129,16 @@ public class RemoteService extends Service {
             baseRequest.setHandled(true);
 
             if (request.getContentType().contains("application/json")) {
+
+                //region 普通Json请求
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(request.getInputStream(), Charset.forName("UTF-8")));
                 char[] chars = new char[1024];
                 int length = 0;
                 while ((length = bufferedReader.read(chars, 0, 1024)) != -1) {
                     stringBuilder.append(chars, 0, length);
                 }
-
                 String reqJson = stringBuilder.toString();
-                //region 普通Json请求
+
                 LogUtils.d("ServerName = " + request.getServerName() + " 客户端请求的内容 = " + reqJson);
                 BaseRequestVo fromJson = (BaseRequestVo) (new Gson()).fromJson(reqJson, BaseRequestVo.class);
                 LogUtils.d(fromJson != null ? "客户端请求功能 = " + fromJson.getFunction() : "无法解析请求");
@@ -151,7 +152,7 @@ public class RemoteService extends Service {
                         ConstantValues.CURRENT_PROJECT_DEVICE_ID = prepareRequest.getDeviceId();
                         ConstantValues.CURRENT_PROJECT_DEVICE_NAME = prepareRequest.getDeviceName();
                         PrepareResponseVo object = RemoteService.listener.prepare(prepareRequest);
-                        if (object.getResult() != 0) {
+                        if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                             ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                             ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
                         }
@@ -160,7 +161,7 @@ public class RemoteService extends Service {
 //                        RemoteService.listener.showProjectionTip();
 
                         PrepareResponseVo vo = new PrepareResponseVo();
-                        vo.setResult(-1);
+                        vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         vo.setInfo(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏,请稍后重试");
                         resJson = new Gson().toJson(vo);
                     }
@@ -207,7 +208,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     } else {
                         QueryPosBySessionIdResponseVo vo = new QueryPosBySessionIdResponseVo();
-                        vo.setResult(-1);
+                        vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resJson = new Gson().toJson(vo);
                     }
                 } else if ("check".equalsIgnoreCase(fromJson.getFunction())) {
@@ -219,14 +220,14 @@ public class RemoteService extends Service {
                     BaseRequestVo requestQr = (BaseRequestVo) (new Gson()).fromJson(reqJson, BaseRequestVo.class);
                     RemoteService.listener.showQrcode(requestQr);
                     BaseResponse responseQr = new BaseResponse();
-                    responseQr.setResult(0);
+                    responseQr.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     responseQr.setInfo("成功");
                     resJson = new Gson().toJson(responseQr);
                 } else {
                     LogUtils.d(" not enter any method");
                     BaseResponse baseResponse9 = new BaseResponse();
                     baseResponse9.setInfo("错误的功能");
-                    baseResponse9.setResult(-1);
+                    baseResponse9.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     resJson = new Gson().toJson(baseResponse9);
                 }
 
@@ -235,6 +236,7 @@ public class RemoteService extends Service {
                 //endregion
             } else if (request.getContentType().contains("multipart/form-data;"))  {
 
+                //region 图片流投屏处理
                 String responseJson = "";
 
                 MultipartConfigElement multipartConfigElement = new MultipartConfigElement((String)null);
@@ -301,21 +303,21 @@ public class RemoteService extends Service {
                                     showImage = true;
                                 }
                             }
-                            FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+//                            FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");
+//                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
                             if (showImage) {
                                 // 显示图片
                                 ConstantValues.PROJECT_BITMAP = bitmap;
                                 object = RemoteService.listener.prepare(prepareRequest);
-                                if (object.getResult() != 0) {
+                                if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                                     ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
                                 }
                             } else {
                                 // 图片被忽略
                                 object = new BaseResponse();
-                                object.setResult(-1);
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_NOT_MATCH);
                             }
                         }
                         responseJson = new Gson().toJson(object);
@@ -323,7 +325,7 @@ public class RemoteService extends Service {
 //                        RemoteService.listener.showProjectionTip();
 
                         PrepareResponseVo vo = new PrepareResponseVo();
-                        vo.setResult(-1);
+                        vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         vo.setInfo(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏,请稍后重试");
                         responseJson = new Gson().toJson(vo);
                     }
@@ -331,6 +333,7 @@ public class RemoteService extends Service {
 
                 LogUtils.d("返回结果:" + responseJson);
                 response.getWriter().println(responseJson);
+                //endregion
             }
         }
     }

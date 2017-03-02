@@ -394,15 +394,15 @@ public class ScreenProjectionActivity extends BaseActivity {
         SeekResponseVo responseVo = new SeekResponseVo();
         if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                 !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
         } else {
             if (mSavorVideoView.isInPlaybackState()) {
                 mSavorVideoView.seekTo(seekRequestVo.getAbsolutepos() * 1000);
-                responseVo.setResult(0);
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 responseVo.setInfo("成功");
             } else {
-                responseVo.setResult(-1);
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 responseVo.setInfo("失败");
             }
         }
@@ -417,17 +417,17 @@ public class ScreenProjectionActivity extends BaseActivity {
      */
     public PlayResponseVo togglePlay(PlayRequstVo playRequestVo) {
         PlayResponseVo responseVo = new PlayResponseVo();
-        responseVo.setResult(-1);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         responseVo.setInfo("操作失败");
         if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                 !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
         } else {
             if (0 == playRequestVo.getRate()) {
                 // 暂停
                 if (mSavorVideoView.tryPause()) {
-                    responseVo.setResult(0);
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     responseVo.setInfo("暂停");
 
                     rescheduleToExit(true);
@@ -435,7 +435,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             } else if (1 == playRequestVo.getRate()) {
                 // 播放
                 if (mSavorVideoView.tryPlay()) {
-                    responseVo.setResult(0);
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     responseVo.setInfo("播放");
 
                     rescheduleToExit(false);
@@ -463,7 +463,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         mIsBeenStopped = true;
 
         StopResponseVo stopResponseVo = new StopResponseVo();
-        stopResponseVo.setResult(0);
+        stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         return stopResponseVo;
     }
 
@@ -482,13 +482,12 @@ public class ScreenProjectionActivity extends BaseActivity {
 
             rescheduleToExit(true);
 
-            responseVo.setResult(0);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             responseVo.setInfo("成功");
             responseVo.setRotateValue(rotateRequestVo.getRotatevalue());
         } else {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
-            responseVo.setRotateValue(100);
         }
         return responseVo;
     }
@@ -511,29 +510,15 @@ public class ScreenProjectionActivity extends BaseActivity {
             QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
             if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                     !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-                queryResponse.setResult(-1);
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             } else {
-                queryResponse.setResult(0);
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 int mCurrPos = mSavorVideoView.getCurrentPosition();
 
                 queryResponse.setPos(mCurrPos);
-//                if (mCurrPos == -1) {
-//                    queryResponse.setResult(-1);
-//                } else {
-//                    queryResponse.setResult(0);
-//                }
             }
             obj = queryResponse;
-        }/* else if ((queryRequestVo.getWhat()).contains("buf")) {
-            QueryBufferBySessionIdResponseVo bufferBySessionIdResponseVo = new QueryBufferBySessionIdResponseVo();
-            if (mLoadingComplete) {
-                bufferBySessionIdResponseVo.setResult(0);
-            } else {
-                bufferBySessionIdResponseVo.setResult(1);
-            }
-
-            obj = bufferBySessionIdResponseVo;
-        }*/
+        }
         return obj;
     }
 
@@ -608,7 +593,7 @@ public class ScreenProjectionActivity extends BaseActivity {
                 });
                 break;
         }
-        responseVo.setResult(0);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         responseVo.setVol(mCurrentVolume);
         return responseVo;
     }

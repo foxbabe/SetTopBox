@@ -42,6 +42,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initDisplay();
@@ -231,11 +232,10 @@ public class MainActivity extends BaseActivity {
         main_imgIv = (ImageView) findViewById(R.id.main_img);
         if (AppUtils.isFileExist("/mnt/sdcard/Pictures/logo.jpg")) {
             Bitmap bitmap = AppUtils.getLoacalBitmap("/mnt/sdcard/Pictures/logo.jpg");
-            ImageView sl = (ImageView) findViewById(R.id.main_img);
             if (bitmap != null) {
-                sl.setImageBitmap(bitmap);
+                main_imgIv.setImageBitmap(bitmap);
             } else {
-                sl.setImageResource(R.mipmap.logo);
+                main_imgIv.setImageResource(R.mipmap.bg_splash);
             }
 
         }

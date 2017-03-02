@@ -11,6 +11,17 @@ import java.util.ArrayList;
  */
 
 public class ConstantValues {
+    /** 手机端操作响应码*/
+    /** 成功*/
+    public static final int SERVER_RESPONSE_CODE_SUCCESS = 10000;
+    /** 失败*/
+    public static final int SERVER_RESPONSE_CODE_FAILED = 10001;
+    /** 大小图不匹配，失败*/
+    public static final int SERVER_RESPONSE_CODE_NOT_MATCH = 10002;
+    /** 视频播放完毕*/
+    public static final int SERVER_RESPONSE_CODE_VIDEO_COMPLETE = 10003;
+
+
     /**
      * 显示二维码指令
      */
