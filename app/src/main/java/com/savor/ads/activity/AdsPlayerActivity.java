@@ -238,7 +238,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", "ads", mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
         }
@@ -282,7 +282,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             action = "resume";
         }
         LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), action, "ads", mPlayList.get(index).getVid(),
+                String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                 "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                 "");
     }
@@ -295,7 +295,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         try {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "pause", "ads", mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
         } catch (Exception e) {
@@ -310,7 +310,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             mUUID = String.valueOf(System.currentTimeMillis());
         }
         LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), "resume", "ads", mPlayList.get(index).getVid(),
+                String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                 "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                 "");
     }

@@ -11,10 +11,6 @@ import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Message;
 import android.support.multidex.MultiDexApplication;
-import android.text.TextUtils;
-
-import java.text.DateFormat;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -24,17 +20,11 @@ import android.widget.TextView;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.callback.ProjectOperationListener;
-import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.QrCodeWindowManager;
 import com.savor.ads.utils.ShellUtils;
-import com.savor.ads.utils.WifiApUtil;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by Administrator on 2016/12/9.
@@ -57,29 +47,29 @@ public class SavorApplication extends MultiDexApplication {
         // 启动投屏类操作处理的Service
         startScreenProjectionService();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // 检测播放时间
-                AppUtils.checkPlayTime(SavorApplication.this);
-
-                // 设置并打开热点
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
-                registerReceiver(mWifiStateBroadcastReceiver, filter);
-
-                boolean success = AppUtils.setWifiApEnabled(SavorApplication.this, true);
-                LogFileUtil.writeApInfo("SavorApplication setWifiApEnabled " + (success ? "success" : "failed"));
-
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        int state = AppUtils.getWifiAPState(SavorApplication.this);
-                        LogFileUtil.writeApInfo("SavorApplication wifi ap state =  " + state);
-                    }
-                }, 2000);
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                // 检测播放时间
+//                AppUtils.checkPlayTime(SavorApplication.this);
+//
+//                // 设置并打开热点
+//                IntentFilter filter = new IntentFilter();
+//                filter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
+//                registerReceiver(mWifiStateBroadcastReceiver, filter);
+//
+//                boolean success = AppUtils.setWifiApEnabled(SavorApplication.this, true);
+//                LogFileUtil.writeApInfo("SavorApplication setWifiApEnabled " + (success ? "success" : "failed"));
+//
+//                mHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        int state = AppUtils.getWifiAPState(SavorApplication.this);
+//                        LogFileUtil.writeApInfo("SavorApplication wifi ap state =  " + state);
+//                    }
+//                }, 2000);
+//            }
+//        }).start();
     }
 
     //监听wifi热点的状态变化
