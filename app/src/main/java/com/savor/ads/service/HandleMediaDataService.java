@@ -560,6 +560,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
         session.setRoomId(boiteBean.getRoom_id());
         session.setRoomName(boiteBean.getRoom_name());
+        session.setRoomType(boiteBean.getRoom_type());
         session.setBoxName(boiteBean.getBox_name());
         /**桶名称*/
         if (!TextUtils.isEmpty(boiteBean.getOssBucketName())){
