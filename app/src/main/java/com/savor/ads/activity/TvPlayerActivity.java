@@ -21,6 +21,7 @@ import com.savor.ads.dialog.TvChannelListDialog;
 import com.savor.ads.dialog.TvChannelSearchingDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -206,6 +207,7 @@ public class TvPlayerActivity extends BaseActivity {
         }
 
         if (mIsAutoTurning) {
+            mIsAutoTurning = true;
             autoTurning();
         } else {
             if (mSession.getTvInputSource() >= mInputSource.length)
@@ -449,7 +451,7 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath()) && !TextUtils.isEmpty(mSession.getAdvertMediaPeriod())) {
+        if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
             Intent intent = new Intent(this, AdsPlayerActivity.class);
             startActivity(intent);
         }
@@ -542,7 +544,11 @@ public class TvPlayerActivity extends BaseActivity {
 
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
-            gotoAdsPlayer();
+            if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+                gotoAdsPlayer();
+            } else {
+                init();
+            }
         } else {
             init();
         }

@@ -57,12 +57,9 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public PrepareResponseVo prepare(PrepareRequestVo prepareRequestVo) {
         PrepareResponseVo localResult = new PrepareResponseVo();
-//        localResult.setResult(0);
-//        localResult.setSessionid(0);
-//        localResult.setInfo("加载成功！");
 
         if (prepareRequestVo == null) {
-            localResult.setResult(-8);
+            localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             localResult.setSessionid(0);
             localResult.setInfo("参数为空！");
         } else {
@@ -70,7 +67,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             String url = prepareRequestVo.getAsseturl();
             String assetType = prepareRequestVo.getAssettype();
             String type = assetType;
-            String period = prepareRequestVo.getPeriod();
             String vid = "";
             String vname = "";
             String deviceId = prepareRequestVo.getDeviceId();
@@ -156,7 +152,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             }
 
             if (vodCheckPass) {
-                localResult.setResult(0);
+                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 localResult.setSessionid(0);
                 localResult.setInfo("加载成功！");
 
@@ -164,7 +160,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 Bundle data = new Bundle();
                 data.putString(ScreenProjectionActivity.EXTRA_URL, url);
                 data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
-                data.putString(ScreenProjectionActivity.EXTRA_PERIOD, period);
                 data.putString(ScreenProjectionActivity.EXTRA_VID, vid);
                 data.putString(ScreenProjectionActivity.EXTRA_VNAME, vname);
                 data.putString(ScreenProjectionActivity.EXTRA_DEVICE_ID, deviceId);
@@ -189,7 +184,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                     }
                 }
             } else {
-                localResult.setResult(-1);
+                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 localResult.setSessionid(-1);
             }
         }
@@ -263,7 +258,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public ZoomResponseVo zoom(ZoomRequestVo zoomRequestVo) {
         ZoomResponseVo responseVo = new ZoomResponseVo();
-        responseVo.setResult(-1);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         responseVo.setInfo("暂不支持");
         return responseVo;
     }
@@ -271,7 +266,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public CoverResponseVo cover(CoverRequestVo coverRequestVo) {
         CoverResponseVo responseVo = new CoverResponseVo();
-        responseVo.setResult(-1);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         responseVo.setInfo("暂不支持");
         return responseVo;
     }
@@ -284,7 +279,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         } else {
             // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
             VolumeResponseVo responseVo = new VolumeResponseVo();
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             return responseVo;
         }
     }
@@ -303,7 +298,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         } else {
             // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
             QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
-            queryResponse.setResult(1);
+            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
             return queryResponse;
         }
     }
@@ -311,7 +306,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public CheckResponseVo check() {
         CheckResponseVo responseVo = new CheckResponseVo();
-        responseVo.setResult(0);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         int hotelId = -1;
         try {
             hotelId = Integer.parseInt(Session.get(mContext).getBoiteId());

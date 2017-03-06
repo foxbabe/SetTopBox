@@ -84,7 +84,7 @@ public class ServerDiscoveryService extends Service {
             }
         }, 1000 * 5);
 
-        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         final WifiManager.MulticastLock multicastLock = wm.createMulticastLock("multicastLock");
         multicastLock.setReferenceCounted(false);
         multicastLock.acquire();

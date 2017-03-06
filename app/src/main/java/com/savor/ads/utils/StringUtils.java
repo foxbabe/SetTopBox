@@ -15,6 +15,9 @@
  */
 package com.savor.ads.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 
 import android.graphics.Rect;
@@ -165,6 +168,23 @@ public class StringUtils {
         int width = bounds.width();
 
         return width;
+    }/**
+     * 将InputStream转换成String
+     *
+     * @param in InputStream
+     * @return String
+     * @throws Exception
+     */
+    public static String inputStreamToString(InputStream in) throws IOException {
+        int BUFFER_SIZE = 512;
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        byte[] data = new byte[BUFFER_SIZE];
+        int count = -1;
+        while ((count = in.read(data, 0, BUFFER_SIZE)) != -1) {
+            outStream.write(data, 0, count);
+        }
+        data = null;
+        return new String(outStream.toByteArray(), "utf-8");
     }
 
     /**

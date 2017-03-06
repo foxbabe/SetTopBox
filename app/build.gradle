@@ -1,4 +1,12 @@
 apply plugin: 'com.android.application'
+//定义打包时间函数
+def releaseTime() {
+    return new Date().format("yyyyMMddHHmm", TimeZone.getDefault())
+}
+// 将打的包按日期归类
+def releaseDate() {
+    return new Date().format("yyyyMMdd", TimeZone.getDefault())
+}
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
@@ -7,15 +15,53 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017022402
-        versionName "1.0.14"
+        versionCode 2017030601
+        versionName "1.0.18"
 
         multiDexEnabled true
+
+
     }
+
+    // 签名配置
+    signingConfigs {
+        release {
+            storeFile file("/savor-box.jks")
+            storePassword "savor123456"
+            keyAlias "savor-box"
+            keyPassword "savor123456"
+        }
+    }
+
     buildTypes {
         release {
+            // 是否混淆
             minifyEnabled false
+            zipAlignEnabled false
+            // 移除无用的resource文件
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    productFlavors {
+        wifi {
+            buildConfigField "boolean", "IS_AP_MODE", "false"
+        }
+        ap {
+            buildConfigField "boolean", "IS_AP_MODE", "true"
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
+                def fileName = "SavorBox_${variant.productFlavors[0].name}_v${variant.versionName}_${variant.versionCode}.apk"
+                def filePath = "${outputFile.parent}\\${releaseDate()}"
+                output.outputFile = new File(filePath, fileName)
+            }
         }
     }
 }

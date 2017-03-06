@@ -10,6 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.savor.ads.BuildConfig;
 import com.savor.ads.R;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
@@ -87,11 +88,20 @@ public class BoxInfoDialog extends Dialog {
         Session session = Session.get(getContext());
         mHotelNameTv.setText(session.getBoiteName());
         mRomVersionTv.setText(session.getRomVersion());
-        mAppVersionTv.setText(session.getVersionName());
+        mAppVersionTv.setText((BuildConfig.IS_AP_MODE ? "AP_" : "Wifi_") + session.getVersionName());
         mSystemTimeTv.setText(AppUtils.getCurTime());
         mVolumeTv.setText(String.valueOf(session.getVolume()));
         mTvSwitchTimeTv.setText(String.valueOf(session.getSwitchTime()));
-        mRoomNameTv.setText(session.getBoxName());
+        String roomName = "";
+        if (TextUtils.isEmpty(session.getRoomType())) {
+            roomName = session.getBoxName();
+        } else {
+            roomName = session.getRoomType();
+            if (!TextUtils.isEmpty(session.getBoxName())) {
+                roomName = roomName + "-" + session.getBoxName();
+            }
+        }
+        mRoomNameTv.setText(roomName);
         mIpTv.setText(AppUtils.getLocalIPAddress());
         mSignalSourceTv.setText(AppUtils.getInputType(session.getTvInputSource()));
         mEthernetMacTv.setText(session.getEthernetMac());
@@ -109,7 +119,6 @@ public class BoxInfoDialog extends Dialog {
 
         mDownloadingVodIssueTv.setText(session.getMulticastDownloadingPeriod());
         if (session.getServerInfo() != null) {
-            // 没拿到盒子ID时认为没连上小平台，此时IP标红
             if (Session.get(getContext()).isConnectedToSP()) {
                 mServerIpTv.setText(session.getServerInfo().getServerIp());
             } else {
@@ -119,6 +128,6 @@ public class BoxInfoDialog extends Dialog {
         } else {
             mServerIpTv.setText("");
         }
-        mLastPowerOnTimeTv.setText(session.getLastStartTime());
+        mLastPowerOnTimeTv.setText(TextUtils.isEmpty(session.getLastStartTime()) ? "初次开机" : session.getLastStartTime());
     }
 }

@@ -50,16 +50,16 @@ public class QrCodeWindowManager {
 
         LogUtils.v("QrCodeWindowManager 开始获取SSID");
         LogFileUtil.write("QrCodeWindowManager 开始获取SSID");
-        String ssid = "";
-        if (AppUtils.isWifiEnabled(context)) {
-            ssid = AppUtils.getWifiName(context);
-        } else {
-            ssid = AppUtils.getWifiApName(context);
-        }
+        String ssid = Session.get(context).getBoxName();
+//        if (AppUtils.isWifiEnabled(context)) {
+//            ssid = AppUtils.getWifiName(context);
+//        } else {
+//            ssid = AppUtils.getWifiApName(context);
+//        }
         LogUtils.v("QrCodeWindowManager 开始获取AP IP");
         LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");
         String boxUrl = ConstantValues.APP_DOWN_LINK + "?" +
-                "ip=" + AppUtils.getWifiApIp() + "&bid=" + Session.get(context).getBoiteId() +
+                "ip=" + AppUtils.getLocalIPAddress() /*AppUtils.getWifiApIp()*/ + "&bid=" + Session.get(context).getBoiteId() +
                 "&rid=" + Session.get(context).getRoomId() + "&sid=" + ssid;
         File file = new File(filePath);
         if (!boxUrl.equals(ConstantValues.QRCODE_CONTENT) || !file.exists()) {

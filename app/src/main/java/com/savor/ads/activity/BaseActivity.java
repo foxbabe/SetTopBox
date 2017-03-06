@@ -44,8 +44,6 @@ public abstract class BaseActivity extends Activity {
     private BoxInfoDialog mBoxInfoDialog;
 
     private Handler mHandler = new Handler();
-//    private ArrayList<String> usbImgPathList;
-//    private ImageViewerDialog mImageViewerDialog;
 
     protected boolean mIsGoneToSystemSetting;
     private AudioSkin mAudioSkin;
@@ -70,10 +68,6 @@ public abstract class BaseActivity extends Activity {
         MobclickAgent.onResume(this);
         registerListener();
 
-//        if (this instanceof TvPlayerActivity && mIsGoneToSystemSetting) {
-//            gotoAdsPlayer();
-//        }
-//        mIsGoneToSystemSetting = false;
     }
 
     private void gotoAdsPlayer() {

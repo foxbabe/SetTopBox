@@ -1,13 +1,14 @@
 package com.savor.ads.activity;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -32,7 +33,6 @@ import com.savor.ads.SavorApplication;
 import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.KeyCodeConstant;
@@ -44,8 +44,6 @@ public class ScreenProjectionActivity extends BaseActivity {
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
-    public static final String EXTRA_THUMBNAIL_URL = "extra_thumbnail_url";
-    public static final String EXTRA_PERIOD = "extra_period";
     public static final String EXTRA_VID = "extra_vid";
     public static final String EXTRA_VNAME = "extra_vname";
     public static final String EXTRA_DEVICE_ID = "extra_device_id";
@@ -54,7 +52,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
      */
-    private static final int PROJECT_DURATION = 1000 * 60 * 10;
+    private static final int PROJECT_DURATION = 1000 * 30 * 5;
 
     private static final int PROJECT_TIP_DURATION = 1000 * 5;
 
@@ -63,15 +61,9 @@ public class ScreenProjectionActivity extends BaseActivity {
      */
     private String mProjectType;
     /**
-     * 点播视频期号
-     */
-    private String mVodPeriod;
-    /**
      * 媒体文件位置
      */
     private String mMediaPath;
-    /** 图片缩略图*/
-    private String mImageThumbnail;
     /**
      * 视频ID（只有点播会传进来）
      */
@@ -120,14 +112,18 @@ public class ScreenProjectionActivity extends BaseActivity {
             projectTipAnimateOut();
         }
     };
-    /** 隐藏音量显示Runnable*/
+    /**
+     * 隐藏音量显示Runnable
+     */
     private Runnable mHideVolumeViewRunnable = new Runnable() {
         @Override
         public void run() {
             mVolumeRl.setVisibility(View.GONE);
         }
     };
-    /** 隐藏静音显示Runnable*/
+    /**
+     * 隐藏静音显示Runnable
+     */
     private Runnable mHideMuteViewRunnable = new Runnable() {
         @Override
         public void run() {
@@ -205,9 +201,6 @@ public class ScreenProjectionActivity extends BaseActivity {
             handleBundleData(bundle);
 
             handleProjectRequest();
-            if (!TextUtils.isEmpty(mDeviceId) && !mDeviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-
-            }
         }
     }
 
@@ -221,8 +214,6 @@ public class ScreenProjectionActivity extends BaseActivity {
     private void handleBundleData(Bundle bundle) {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
-        mImageThumbnail = bundle.getString(EXTRA_THUMBNAIL_URL);
-        mVodPeriod = bundle.getString(EXTRA_PERIOD);
         mVideoId = bundle.getString(EXTRA_VID);
         mVideoName = bundle.getString(EXTRA_VNAME);
         mDeviceId = bundle.getString(EXTRA_DEVICE_ID);
@@ -244,6 +235,19 @@ public class ScreenProjectionActivity extends BaseActivity {
         mHandler.removeCallbacks(mProjectTipOutRunnable);
         mHandler.postDelayed(mProjectTipOutRunnable, PROJECT_TIP_DURATION);
 
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            doAnimationIn();
+        } else {
+            mProjectTipTv.post(new Runnable() {
+                @Override
+                public void run() {
+                    doAnimationIn();
+                }
+            });
+        }
+    }
+
+    private void doAnimationIn() {
         TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 1, Animation.RELATIVE_TO_SELF, 0,
                 Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
         animation.setDuration(1000);
@@ -294,39 +298,52 @@ public class ScreenProjectionActivity extends BaseActivity {
             mImageView.setRotation(0);
             mImageView.setScaleX(1);
             mImageView.setScaleY(1);
-            mImageLoadingTip.setVisibility(View.VISIBLE);
-            mImageLoadingPb.setVisibility(View.VISIBLE);
-            mImageLoadingTv.setText("图片加载中...");
-            GlideImageLoader.clearView(mImageView);
-            GlideImageLoader.loadImageWithoutCache(this, mMediaPath, mImageView, new RequestListener() {
-                @Override
-                public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-                    LogUtils.e("图片加载失败1: " + mMediaPath);
-                    // 失败后再去加载一次
-                    GlideImageLoader.loadImageWithoutCache(mContext, mMediaPath, mImageView, new RequestListener() {
-                        @Override
-                        public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-                            mImageLoadingPb.setVisibility(View.GONE);
-                            mImageLoadingTv.setText("图片加载失败");
-                            LogUtils.e("图片加载失败2: " + mMediaPath);
-                            return false;
-                        }
+//            mImageLoadingTip.setVisibility(View.VISIBLE);
+//            mImageLoadingPb.setVisibility(View.VISIBLE);
+//            mImageLoadingTv.setText("图片加载中...");
 
-                        @Override
-                        public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            mImageLoadingTip.setVisibility(View.GONE);
-                            return false;
+            if (TextUtils.isEmpty(mMediaPath)) {
+                if (ConstantValues.PROJECT_BITMAP != null) {
+                    if (mImageView.getDrawable() != null) {
+                        if (mImageView.getDrawable() instanceof BitmapDrawable) {
+                            BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
+                            bitmapDrawable.getBitmap().recycle();
                         }
-                    });
-                    return true;
+                    }
+                    mImageView.setImageBitmap(ConstantValues.PROJECT_BITMAP);
                 }
+            } else {
+                GlideImageLoader.clearView(mImageView);
+                GlideImageLoader.loadImageWithoutCache(this, mMediaPath, mImageView, new RequestListener() {
+                    @Override
+                    public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+                        LogUtils.e("图片加载失败1: " + mMediaPath);
+                        // 失败后再去加载一次
+                        GlideImageLoader.loadImageWithoutCache(mContext, mMediaPath, mImageView, new RequestListener() {
+                            @Override
+                            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+//                            mImageLoadingPb.setVisibility(View.GONE);
+//                            mImageLoadingTv.setText("图片加载失败");
+                                LogUtils.e("图片加载失败2: " + mMediaPath);
+                                return false;
+                            }
 
-                @Override
-                public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    mImageLoadingTip.setVisibility(View.GONE);
-                    return false;
-                }
-            });
+                            @Override
+                            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                mImageLoadingTip.setVisibility(View.GONE);
+                                return false;
+                            }
+                        });
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mImageLoadingTip.setVisibility(View.GONE);
+                        return false;
+                    }
+                });
+            }
 
             mUUID = String.valueOf(System.currentTimeMillis());
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
@@ -377,15 +394,15 @@ public class ScreenProjectionActivity extends BaseActivity {
         SeekResponseVo responseVo = new SeekResponseVo();
         if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                 !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
         } else {
             if (mSavorVideoView.isInPlaybackState()) {
                 mSavorVideoView.seekTo(seekRequestVo.getAbsolutepos() * 1000);
-                responseVo.setResult(0);
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 responseVo.setInfo("成功");
             } else {
-                responseVo.setResult(-1);
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 responseVo.setInfo("失败");
             }
         }
@@ -400,17 +417,17 @@ public class ScreenProjectionActivity extends BaseActivity {
      */
     public PlayResponseVo togglePlay(PlayRequstVo playRequestVo) {
         PlayResponseVo responseVo = new PlayResponseVo();
-        responseVo.setResult(-1);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         responseVo.setInfo("操作失败");
         if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                 !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
         } else {
             if (0 == playRequestVo.getRate()) {
                 // 暂停
                 if (mSavorVideoView.tryPause()) {
-                    responseVo.setResult(0);
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     responseVo.setInfo("暂停");
 
                     rescheduleToExit(true);
@@ -418,7 +435,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             } else if (1 == playRequestVo.getRate()) {
                 // 播放
                 if (mSavorVideoView.tryPlay()) {
-                    responseVo.setResult(0);
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     responseVo.setInfo("播放");
 
                     rescheduleToExit(false);
@@ -446,7 +463,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         mIsBeenStopped = true;
 
         StopResponseVo stopResponseVo = new StopResponseVo();
-        stopResponseVo.setResult(0);
+        stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         return stopResponseVo;
     }
 
@@ -465,13 +482,12 @@ public class ScreenProjectionActivity extends BaseActivity {
 
             rescheduleToExit(true);
 
-            responseVo.setResult(0);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             responseVo.setInfo("成功");
             responseVo.setRotateValue(rotateRequestVo.getRotatevalue());
         } else {
-            responseVo.setResult(-1);
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
-            responseVo.setRotateValue(100);
         }
         return responseVo;
     }
@@ -494,29 +510,15 @@ public class ScreenProjectionActivity extends BaseActivity {
             QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
             if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                     !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-                queryResponse.setResult(-1);
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             } else {
-                queryResponse.setResult(0);
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 int mCurrPos = mSavorVideoView.getCurrentPosition();
 
                 queryResponse.setPos(mCurrPos);
-//                if (mCurrPos == -1) {
-//                    queryResponse.setResult(-1);
-//                } else {
-//                    queryResponse.setResult(0);
-//                }
             }
             obj = queryResponse;
-        }/* else if ((queryRequestVo.getWhat()).contains("buf")) {
-            QueryBufferBySessionIdResponseVo bufferBySessionIdResponseVo = new QueryBufferBySessionIdResponseVo();
-            if (mLoadingComplete) {
-                bufferBySessionIdResponseVo.setResult(0);
-            } else {
-                bufferBySessionIdResponseVo.setResult(1);
-            }
-
-            obj = bufferBySessionIdResponseVo;
-        }*/
+        }
         return obj;
     }
 
@@ -591,7 +593,7 @@ public class ScreenProjectionActivity extends BaseActivity {
                 });
                 break;
         }
-        responseVo.setResult(0);
+        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         responseVo.setVol(mCurrentVolume);
         return responseVo;
     }
@@ -720,10 +722,22 @@ public class ScreenProjectionActivity extends BaseActivity {
     protected void onDestroy() {
         LogUtils.d("onDestroy " + this.hashCode());
         super.onDestroy();
+
         mSavorVideoView.release();
+
+        if (mImageView.getDrawable() != null) {
+            if (mImageView.getDrawable() instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
+                bitmapDrawable.getBitmap().recycle();
+            }
+        }
         GlideImageLoader.clearView(mImageView);
+
         mHandler.removeCallbacksAndMessages(null);
+
         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
+        ConstantValues.PROJECT_IMAGE_ID = null;
     }
 
     private SavorVideoView.PlayStateCallback mPlayStateCallback = new SavorVideoView.PlayStateCallback() {

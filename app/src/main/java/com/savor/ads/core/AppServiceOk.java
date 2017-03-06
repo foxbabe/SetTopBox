@@ -15,6 +15,8 @@ import com.savor.ads.okhttp.request.RequestCall;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogUtils;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -368,9 +370,8 @@ public class AppServiceOk {
                 } catch (Exception e) {
                     LogUtils.e("下载文件写入异常", e);
                 } finally {
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                    inputStream.close();
+                    IOUtils.closeQuietly(fileOutputStream);
+                    IOUtils.closeQuietly(inputStream);
                     response.close();
                 }
 

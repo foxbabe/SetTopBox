@@ -22,15 +22,9 @@ import com.savor.ads.service.MessageService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.ShowMessage;
-import com.savor.ads.utils.TechnicalLogReporter;
-
-import java.io.File;
-import java.util.Random;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -48,6 +42,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initDisplay();
@@ -62,12 +57,6 @@ public class MainActivity extends BaseActivity {
                         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
                         startActivity(intent);
                     }
-//                        try{
-//                            deleteOldMedia();
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                        }
-
                 }
             }
         }, 5000);
@@ -120,7 +109,7 @@ public class MainActivity extends BaseActivity {
             getSpIpFromServer();
         }
 
-        startDownloadMeidaDataService();
+        startDownloadMediaDataService();
 
         startProduceLogService();
         startUploadLogService();
@@ -213,9 +202,9 @@ public class MainActivity extends BaseActivity {
     /**
      * 启动下载媒体文件服务
      */
-    private void startDownloadMeidaDataService() {
+    private void startDownloadMediaDataService() {
         LogUtils.v("========start download media service======");
-        LogFileUtil.write("MainActivity will startDownloadMeidaDataService");
+        LogFileUtil.write("MainActivity will startDownloadMediaDataService");
         Intent intent = new Intent(this, HandleMediaDataService.class);
         startService(intent);
     }
@@ -243,11 +232,10 @@ public class MainActivity extends BaseActivity {
         main_imgIv = (ImageView) findViewById(R.id.main_img);
         if (AppUtils.isFileExist("/mnt/sdcard/Pictures/logo.jpg")) {
             Bitmap bitmap = AppUtils.getLoacalBitmap("/mnt/sdcard/Pictures/logo.jpg");
-            ImageView sl = (ImageView) findViewById(R.id.main_img);
             if (bitmap != null) {
-                sl.setImageBitmap(bitmap);
+                main_imgIv.setImageBitmap(bitmap);
             } else {
-                sl.setImageResource(R.mipmap.logo);
+                main_imgIv.setImageResource(R.mipmap.bg_splash);
             }
 
         }

@@ -1,5 +1,7 @@
 package com.savor.ads.utils;
 
+import android.graphics.Bitmap;
+
 import com.savor.ads.bean.PlayListBean;
 
 import java.util.ArrayList;
@@ -9,6 +11,17 @@ import java.util.ArrayList;
  */
 
 public class ConstantValues {
+    /** 手机端操作响应码*/
+    /** 成功*/
+    public static final int SERVER_RESPONSE_CODE_SUCCESS = 0;
+    /** 失败*/
+    public static final int SERVER_RESPONSE_CODE_FAILED = -1;
+    /** 大小图不匹配，失败*/
+    public static final int SERVER_RESPONSE_CODE_NOT_MATCH = 2;
+    /** 视频播放完毕*/
+    public static final int SERVER_RESPONSE_CODE_VIDEO_COMPLETE = 1;
+
+
     /**
      * 显示二维码指令
      */
@@ -53,6 +66,8 @@ public class ConstantValues {
     public static ArrayList<PlayListBean> PLAY_LIST;
     /** 当前投屏设备ID*/
     public static String CURRENT_PROJECT_DEVICE_ID;
+    /** 当前投屏设备名称*/
+    public static String CURRENT_PROJECT_DEVICE_NAME;
 
 //    /**
 //     * 测试环境手机端APP下载页面
@@ -62,4 +77,9 @@ public class ConstantValues {
      * 正式环境手机端APP下载页面
      */
     public static final String APP_DOWN_LINK = "http://rerdian.com/d";
+
+    /** 当前投屏图片*/
+    public volatile static Bitmap PROJECT_BITMAP;
+    /** 当前投屏图片ID*/
+    public volatile static String PROJECT_IMAGE_ID;
 }
