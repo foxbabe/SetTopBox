@@ -46,7 +46,7 @@ public class QrCodeWindowManager {
         LogUtils.v("QrCodeWindowManager 开始拼接二维码内容");
         LogFileUtil.write("QrCodeWindowManager 开始拼接二维码内容");
 
-        String ssid = Session.get(context).getBoxName();
+        String ssid = AppUtils.getWifiName(context);
 
         LogUtils.v("QrCodeWindowManager 开始获取AP IP");
         LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");
