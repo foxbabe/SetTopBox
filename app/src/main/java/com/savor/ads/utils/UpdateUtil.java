@@ -155,6 +155,7 @@ public class UpdateUtil implements ApiRequestListener {
                     } else if (fileName.equals(AppApi.APK_DOWNLOAD_FILENAME)) {
                         if (md5Value != null && md5Value.equals(upgradeInfo.getApkMd5())) {
                             //升级APK
+							ShowMessage.showToast(mContext, "版本更新，即将重启");
                             updateApk();
                         }
                     }
@@ -191,7 +192,7 @@ public class UpdateUtil implements ApiRequestListener {
             AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getRomUrl(), mContext, this, 1);
         }
         if (serverInfo != null && !TextUtils.isEmpty(upgradeInfo.getApkUrl())) {
-            ShowMessage.showToast(mContext, "发现新版，开始下载");
+            ShowMessage.showToast(mContext, "发现新版本，开始下载");
             TechnicalLogReporter.apkUpdate(mContext, upgradeInfo.getNewestApkVersion());
             AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getApkUrl(), mContext, this, 2);
         }
