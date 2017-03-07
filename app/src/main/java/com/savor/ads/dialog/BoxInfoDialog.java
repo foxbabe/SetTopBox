@@ -88,7 +88,7 @@ public class BoxInfoDialog extends Dialog {
         Session session = Session.get(getContext());
         mHotelNameTv.setText(session.getBoiteName());
         mRomVersionTv.setText(session.getRomVersion());
-        mAppVersionTv.setText((BuildConfig.IS_AP_MODE ? "AP_" : "Wifi_") + session.getVersionName());
+        mAppVersionTv.setText(session.getVersionName());
         mSystemTimeTv.setText(AppUtils.getCurTime());
         mVolumeTv.setText(String.valueOf(session.getVolume()));
         mTvSwitchTimeTv.setText(String.valueOf(session.getSwitchTime()));
