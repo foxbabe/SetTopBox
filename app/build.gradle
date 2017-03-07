@@ -15,12 +15,10 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017030601
-        versionName "1.0.18"
+        versionCode 2017030602
+        versionName "1.0.19"
 
         multiDexEnabled true
-
-
     }
 
     // 签名配置
@@ -45,20 +43,11 @@ android {
         }
     }
 
-    productFlavors {
-        wifi {
-            buildConfigField "boolean", "IS_AP_MODE", "false"
-        }
-        ap {
-            buildConfigField "boolean", "IS_AP_MODE", "true"
-        }
-    }
-
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
-                def fileName = "SavorBox_${variant.productFlavors[0].name}_v${variant.versionName}_${variant.versionCode}.apk"
+                def fileName = "SavorBox_v${variant.versionName}_${variant.versionCode}.apk"
                 def filePath = "${outputFile.parent}\\${releaseDate()}"
                 output.outputFile = new File(filePath, fileName)
             }
