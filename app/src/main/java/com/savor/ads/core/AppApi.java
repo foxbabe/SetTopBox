@@ -25,18 +25,14 @@ import java.util.List;
 public class AppApi {
 
     /**
-     * 小平台地址
+     * 小平台地址（默认值是一个假数据，获取到真实的小平台地址后会被重置）
      */
 	public static String SP_BASE_URL = "http://192.168.1.2/";
 
 //    /**
-//     * 云平台线上环境
-//     **/
-//    public static final String BASE_URL = "http://www.savorx.cn/";
-//    /**
 //     * 云平台测试环境
 //     **/
-//    public static final String BASE_URL = "http://devp.api.rerdian.com/";
+//    public static final String BASE_URL = "http://devp.sapi.rerdian.com/";
     /**
      * 云平台正式环境
      **/
@@ -56,27 +52,17 @@ public class AppApi {
         }
     }
 
-    /**
-     * 常用的一些key值 ,签名、时间戳、token、params
-     */
-    public static final String SIGN = "sign";
-    public static final String TIME = "time";
-    public static final String TOKEN = "token";
-    public static final String PARAMS = "params";
-
     public static final String APK_DOWNLOAD_FILENAME =  "updateapksamples.apk";
     public static final String ROM_DOWNLOAD_FILENAME =  "update_signed.zip";
     /**
      * Action-自定义行为 注意：自定义后缀必须为以下结束 _FORM:该请求是Form表单请求方式 _JSON:该请求是Json字符串
-     * _XML:该请求是XML请求描述文件 _GOODS_DESCRIPTION:图文详情 __NOSIGN:参数不需要进行加密
+     * _XML:该请求是XML请求描述文件
+     * CP_前缀标识云平台接口；SP_前缀标识小平台接口
      */
     public static enum Action {
-        TEST_POST_JSON,
-        TEST_GET_JSON,
         SP_GET_ADVERT_DATA_FROM_JSON,
         SP_GET_ON_DEMAND_DATA_FROM_JSON,
         SP_GET_TV_MATCH_DATA_FROM_JSON,
-//        CP_REPORT_TECHNICAL_LOG_PLAIN,
         SP_POST_UPLOAD_LOG_JSON,
         SP_GET_UPGRADE_INFO_JSON,
         SP_GET_LOGO_DOWN,
@@ -89,7 +75,7 @@ public class AppApi {
 
 
     /**
-     * API_URLS:TODO(URL集合)
+     * URL集合
      */
     public static HashMap<Action, String> API_URLS = new HashMap<Action, String>() {
         private static final long serialVersionUID = -8469661978245513712L;
@@ -100,23 +86,12 @@ public class AppApi {
             put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
             put(Action.SP_POST_UPLOAD_LOG_JSON,SP_BASE_URL+"small/log/upload-file");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
-//            put(Action.CP_REPORT_TECHNICAL_LOG_PLAIN, BASE_URL + "getfaultInterface.html");
-            put(Action.CP_GET_HEARTBEAT_PLAIN, "https://sapi.rerdian.com/survival/api/2/survival");
+            put(Action.CP_GET_HEARTBEAT_PLAIN, BASE_URL + "survival/api/2/survival");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
             put(Action.CP_GET_SP_IP_JSON, BASE_URL + "mobile/api/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
         }
     };
-
-    public static void testPost(Context context, String orderNo, ApiRequestListener handler) {
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("loginfield", "15901559579");
-        params.put("password", "123456");
-        params.put("dr_rg_cd", "86");
-        params.put("version_code", 19 + "");
-        new AppServiceOk(context, Action.TEST_POST_JSON, handler, params).post(false, false, true, true);
-
-    }
 
     /**
      * 获取盒子初始化信息
@@ -149,18 +124,6 @@ public class AppApi {
     public static void getTVMatchDataFromSmallPlatform(Context context, ApiRequestListener handler) {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_TV_MATCH_DATA_FROM_JSON, handler, params).get();
-
-    }
-
-    /**
-     * 上传业务日志
-     * @param context
-     * @param handler
-     * @param fileName
-     */
-    public static void postUploadLog(Context context, ApiRequestListener handler,String fileName,String archive) {
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-        new AppServiceOk(context, Action.SP_POST_UPLOAD_LOG_JSON, handler, params).uploadFile(fileName,archive);
 
     }
 
@@ -212,66 +175,6 @@ public class AppApi {
         }
     }
 
-//    /**
-//     * 上报技术日志
-//     * @param context
-//     * @param handler
-//     * @param event             事件类型
-//     * @param md5FailedVid      MD5校验失败的视频ID
-//     * @param newAdsPeriod      更新的广告期号
-//     * @param newVodPeriod      当前的点播期号
-//     * @param newApkVer         更新的APK version name
-//     * @param newRomVer         更新的Rom version
-//     */
-//    public static void reportTechnicalLog(Context context, ApiRequestListener handler, @NonNull String event,
-//                                          String md5FailedVid, String newAdsPeriod, String newVodPeriod,
-//                                          String newApkVer, String newRomVer) {
-////        List<Object> list = new ArrayList<Object>();
-////        list.add(log);
-////        String md5 = AppUtils.MD5(("body" + list).getBytes());
-////        String msg = list.toString();
-//        final HashMap<String, Object> params = new HashMap<String, Object>();
-//        // 标识是机顶盒发的
-//        params.put("type", "stb");
-//        // 盒子MAC地址
-//        params.put("mac", Session.get(context).getEthernetMac());
-//        // 事件类型
-//        params.put("event", event);
-//        // 酒楼ID
-//        params.put("boite", Session.get(context).getBoiteId());
-//        // MD5校验失败的视频ID
-//        params.put("fvid", md5FailedVid);
-//        if (!TextUtils.isEmpty(newApkVer)) {
-//            // 正在使用的apk version name
-//            params.put("apkv", Session.get(context).getVersionName());
-//        }
-//        // 更新的APK version name
-//        params.put("apkvnew", newApkVer);
-//        if (!TextUtils.isEmpty(newRomVer)) {
-//            // 正在使用的rom version
-//            params.put("romv", Session.get(context).getRomVersion());
-//        }
-//        // 更新的Rom version
-//        params.put("romvnew", newRomVer);
-//        if (!TextUtils.isEmpty(newAdsPeriod)) {
-//            // 更新的广告期号
-//            params.put("aperiodnew", newAdsPeriod);
-//        }
-//        // 当前的广告期号
-//        params.put("aperiod", Session.get(context).getAdvertMediaPeriod());
-//        if (!TextUtils.isEmpty(newVodPeriod)) {
-//            // 更新的点播期号
-//            params.put("vperiodnew", newVodPeriod);
-//        }
-//        // 当前的点播期号
-//        params.put("vperiod", Session.get(context).getMulticastMediaPeriod());
-//        // 时间戳
-//        params.put("ts", System.currentTimeMillis());
-////        params.put("encrypt", md5);
-////        params.put("body", msg);
-//        new AppServiceOk(context, Action.CP_REPORT_TECHNICAL_LOG_PLAIN, handler, params).get();
-//    }
-
     /**
      * 心跳接口
      * @param context
@@ -307,19 +210,6 @@ public class AppApi {
         final HashMap<String, Object> params = new HashMap<>();
         params.put("data", programInfo);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
-    }
-
-    public static void testDownload(Context context, String url, ApiRequestListener handler) {
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-//        String target = AppUtils.getPath(context, AppUtils.StorageFile.file);
-
-//        String targetApk = target + "123.apk";
-//        File tarFile = new File(targetApk);
-//        if (tarFile.exists()) {
-//            tarFile.delete();
-//        }
-//        new AppServiceOk(context, Action.TEST_DOWNLOAD_JSON, handler, params).downLoad(url, targetApk);
-
     }
 
     // 超时（网络）异常

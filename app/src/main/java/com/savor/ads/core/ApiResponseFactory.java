@@ -158,12 +158,6 @@ public class ApiResponseFactory {
             return result;
         }
         switch (action) {
-            case TEST_POST_JSON:
-                LogUtils.i(info);
-                break;
-            case TEST_GET_JSON:
-                LogUtils.i(info);
-                break;
             case SP_GET_ADVERT_DATA_FROM_JSON:
                 result = gson.fromJson(info, new TypeToken<SetTopBoxBean>() {
                 }.getType());
