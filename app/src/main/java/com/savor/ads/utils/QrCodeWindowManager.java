@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -46,7 +47,10 @@ public class QrCodeWindowManager {
         LogUtils.v("QrCodeWindowManager 开始拼接二维码内容");
         LogFileUtil.write("QrCodeWindowManager 开始拼接二维码内容");
 
-        String ssid = Session.get(context).getBoxName();
+        String ssid = AppUtils.getWifiName(context);
+        if (TextUtils.isEmpty(ssid)) {
+            ssid = Session.get(context).getBoxName();
+        }
 
         LogUtils.v("QrCodeWindowManager 开始获取AP IP");
         LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");

@@ -266,7 +266,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     handleSmallPlatformOnDemandData();
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
