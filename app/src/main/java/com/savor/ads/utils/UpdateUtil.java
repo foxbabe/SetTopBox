@@ -155,7 +155,6 @@ public class UpdateUtil implements ApiRequestListener {
                     } else if (fileName.equals(AppApi.APK_DOWNLOAD_FILENAME)) {
                         if (md5Value != null && md5Value.equals(upgradeInfo.getApkMd5())) {
                             //升级APK
-							ShowMessage.showToast(mContext, "版本更新，即将重启");
                             updateApk();
                         }
                     }
