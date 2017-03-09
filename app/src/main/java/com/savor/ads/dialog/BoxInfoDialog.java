@@ -88,7 +88,7 @@ public class BoxInfoDialog extends Dialog {
         Session session = Session.get(getContext());
         mHotelNameTv.setText(session.getBoiteName());
         mRomVersionTv.setText(session.getRomVersion());
-        mAppVersionTv.setText(session.getVersionName());
+        mAppVersionTv.setText(session.getVersionName() + "_" + session.getVersionCode());
         mSystemTimeTv.setText(AppUtils.getCurTime());
         mVolumeTv.setText(String.valueOf(session.getVolume()));
         mTvSwitchTimeTv.setText(String.valueOf(session.getSwitchTime()));
