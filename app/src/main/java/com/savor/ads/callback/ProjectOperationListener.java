@@ -145,7 +145,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                     }
 
 
-                    dbHelper.close();
+//                    dbHelper.close();
                 } else {
                     type = ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN;
                 }
