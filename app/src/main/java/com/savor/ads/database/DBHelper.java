@@ -321,17 +321,17 @@ public class DBHelper extends SQLiteOpenHelper {
      * @throws SQLException
      */
     public SQLiteDatabase open(){
-        if (db==null){
+        if (db==null||!db.isOpen()){
             db = getWritableDatabase();
             db.enableWriteAheadLogging();
         }
         return db;
     }
 
-    public static DBHelper get(Context context){
-        if (dbHelper == null){
-            dbHelper = new DBHelper(context);
-        }
+    public synchronized static DBHelper get(Context context){
+            if (dbHelper == null){
+                dbHelper = new DBHelper(context);
+            }
         return dbHelper;
     }
 
@@ -727,46 +727,49 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public List<OnDemandBean> findMutlicastMediaLibByWhere(String selection, String[] selectionArgs) throws SQLException {
-        Cursor cursor = null;
         List<OnDemandBean> list = null;
-        try{
-            open();
-            cursor = db.query(MediaDBInfo.TableName.MULTICASTMEDIALIB, null,
-                selection, selectionArgs, null, null, null, null);
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    list = new ArrayList<>();
-                    do {
-                        OnDemandBean bean = new OnDemandBean();
-                        bean.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.TITLE)));
-                        bean.setVodId(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
-                        bean.setCatagory(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.CATAGORY)));
-                        bean.setPicUrlMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PICMD5)));
-                        bean.setMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MD5)));
-                        bean.setLengthClassify(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.LENGTHCLASSIFY)));
-                        bean.setAreaId(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.AREAID)));
-                        bean.setPeriod(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PERIOD)));
-                        bean.setMedia_type(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MEDIATYPE)));
-                        list.add(bean);
-                    } while (cursor.moveToNext());
-                }
-
-
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
+        synchronized (dbHelper){
+            Cursor cursor = null;
             try{
-                if (cursor!=null&&!cursor.isClosed()){
-                    cursor.close();
-                    cursor = null;
-                }
+                open();
+//                db.beginTransaction();
+                cursor = db.query(MediaDBInfo.TableName.MULTICASTMEDIALIB, null,
+                        selection, selectionArgs, null, null, null, null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        list = new ArrayList<>();
+                        do {
+                            OnDemandBean bean = new OnDemandBean();
+                            bean.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.TITLE)));
+                            bean.setVodId(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
+                            bean.setCatagory(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.CATAGORY)));
+                            bean.setPicUrlMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PICMD5)));
+                            bean.setMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MD5)));
+                            bean.setLengthClassify(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.LENGTHCLASSIFY)));
+                            bean.setAreaId(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.AREAID)));
+                            bean.setPeriod(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PERIOD)));
+                            bean.setMedia_type(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MEDIATYPE)));
+                            list.add(bean);
+                        } while (cursor.moveToNext());
+                    }
+//                    db.setTransactionSuccessful();
 
+                }
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                try{
+                    if (cursor!=null&&!cursor.isClosed()){
+                        cursor.close();
+                        cursor = null;
+                    }
+//                    db.endTransaction();
+//                    db.close();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         }
-
         return list;
     }
 
