@@ -29,14 +29,14 @@ public class AppApi {
      */
 	public static String SP_BASE_URL = "http://192.168.1.2/";
 
-//    /**
-//     * 云平台测试环境
-//     **/
-//    public static final String BASE_URL = "http://devp.sapi.rerdian.com/";
     /**
-     * 云平台正式环境
+     * 云平台测试环境
      **/
-    public static final String BASE_URL = "https://mb.rerdian.com/";
+    public static final String BASE_URL = "http://devp.api.rerdian.com/";
+//    /**
+//     * 云平台正式环境
+//     **/
+//    public static final String BASE_URL = "https://mb.rerdian.com/";
 
     public static void resetSmallPlatformInterface(Context context) {
         ServerInfo serverInfo = Session.get(context).getServerInfo();
