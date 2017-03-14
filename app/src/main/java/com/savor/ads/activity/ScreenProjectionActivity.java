@@ -307,7 +307,9 @@ public class ScreenProjectionActivity extends BaseActivity {
                     if (mImageView.getDrawable() != null) {
                         if (mImageView.getDrawable() instanceof BitmapDrawable) {
                             BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
-                            bitmapDrawable.getBitmap().recycle();
+                            if (bitmapDrawable.getBitmap()!=ConstantValues.PROJECT_BITMAP){
+                                bitmapDrawable.getBitmap().recycle();
+                            }
                         }
                     }
                     mImageView.setImageBitmap(ConstantValues.PROJECT_BITMAP);
