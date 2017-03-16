@@ -803,34 +803,20 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             return false;
         }
     }
-    //本期视频是否下载完成
-    @Deprecated
-    protected boolean isCurrentPeriodDownloadCompleted(String period){
-        boolean flag = false;
-        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
-        String[] selectionArgs = new String[]{session.getAdvertMediaPeriod()};
-        List<PlayListBean> list = dbHelper.findPlayListByWhere(selection,selectionArgs);
-        if (list!=null&&list.size()==setTopBoxBean.getMedia_lib().size()){
-            //本期所有视频全部下载完成
-            flag = true;
-            session.setAdvertMediaPeriod(period);
-        }
-        return flag;
-    }
+
 
     /**
      * 处理小平台返回的点播视频
      */
     private void handleSmallPlatformOnDemandData(){
         if (mulitcasrtBoxBean==null||mulitcasrtBoxBean.getMedia_lib().size()==0){
-//            setAutoClose(true);
             return;
         }
 
         String period = mulitcasrtBoxBean.getPeriod();
         List<String> list = new ArrayList<>();
 
-        dbHelper.deleteAllData(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB);
+//        dbHelper.deleteAllData(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB);
         session.setMulticastDownloadingPeriod(mulitcasrtBoxBean.getPeriod());
         LogUtils.d("---------点播视频开始下载---------");
         mDemandList.clear();
@@ -849,7 +835,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogUtils.d("---------点播视频下载完成---------");
         }
         deleteMediaFileNotInConfig(list, AppUtils.StorageFile.multicast);
-//        setAutoClose(true);
+
     }
 
 
@@ -886,7 +872,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             }
             if (downloaded){
                 mDemandList.add(bean.getName());
-                dbHelper.insertmulticastLib(bean);
+                String selection = DBHelper.MediaDBInfo.FieldName.TITLE + "=? ";
+                String[] selectionArgs = new String[]{bean.getName()};
+                List<OnDemandBean> list= dbHelper.findMutlicastMediaLib(selection,selectionArgs);
+                if (list!=null&&list.size()>1){
+                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,selection,selectionArgs);
+                    dbHelper.insertOrUpdateMulticastLib(bean,false);
+                }else if (list!=null&&list.size()==1){
+                    dbHelper.insertOrUpdateMulticastLib(bean,true);
+                }else {
+                    dbHelper.insertOrUpdateMulticastLib(bean,false);
+                }
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -896,17 +893,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     }
 
-    /**
-     * 创建点播广告下载任务
-     * @param bean
-     * @param path
-     */
-    private void createMulticastDownloadTask(OnDemandBean bean,String path){
-        File f = new File(path);
-        long taskId = getTaskId("url",f);
-        bean.setTaskId(String.valueOf(taskId));
-//        dbHelper.insertmulticastLib(bean);
-    }
 
     /**
      * 删除没有在小平台配置文件内的视频文件
@@ -944,7 +930,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 multicastThreadRunning =  true;
                 int count = 0;
                 while (true){
-                    List<OnDemandBean> list = dbHelper.findMutlicastMediaLib();
+                    List<OnDemandBean> list = null;//dbHelper.findMutlicastMediaLib();
                     if (list==null){
                         break;
                     }
