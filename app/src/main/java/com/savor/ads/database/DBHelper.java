@@ -653,7 +653,7 @@ public class DBHelper extends SQLiteOpenHelper {
      *
      * @throws JSONException
      */
-    public boolean insertmulticastLib(MediaLibBean bean) {
+    public boolean insertOrUpdateMulticastLib(MediaLibBean bean,boolean isUpdate) {
         if (bean == null) {
             return false;
         }
@@ -669,8 +669,17 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.AREAID, bean.getArea_id());
             initialValues.put(MediaDBInfo.FieldName.PERIOD, bean.getPeriod());
             initialValues.put(MediaDBInfo.FieldName.MEDIATYPE, bean.getType());
+            long success = 0;
+            if (isUpdate){
+                success = db.update(MediaDBInfo.TableName.MULTICASTMEDIALIB,
+                        initialValues,MediaDBInfo.FieldName.TITLE+"=? ",
+                        new String[]{bean.getName()});
+            }else {
+                success = db.insert(MediaDBInfo.TableName.MULTICASTMEDIALIB,
+                        null,
+                        initialValues);
+            }
 
-            long success = db.insert(MediaDBInfo.TableName.MULTICASTMEDIALIB, null, initialValues);
             if (success > 0) {
                 flag = true;
             }
@@ -683,10 +692,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     //查询点播下载表
-    public List<OnDemandBean> findMutlicastMediaLib() throws SQLException {
+    public List<OnDemandBean> findMutlicastMediaLib(String selection,String[] selectionArgs) throws SQLException {
 
-        String selection = "";
-        String[] selectionArgs = new String[]{};
+//        String selection = "";
+//        String[] selectionArgs = new String[]{};
         String groupBy = null;
         String having = null;
         String orderBy = null;
@@ -694,7 +703,7 @@ public class DBHelper extends SQLiteOpenHelper {
         List<OnDemandBean> list = null;
         try {
             open();
-            cursor = db.query(MediaDBInfo.TableName.MEDIALIB, null,
+            cursor = db.query(MediaDBInfo.TableName.MULTICASTMEDIALIB, null,
                     selection, selectionArgs, groupBy, having, orderBy, null);
             if (cursor != null && cursor.moveToFirst()) {
                 list = new ArrayList<>();

@@ -252,14 +252,14 @@ public class HandleMediaDataService_bak extends Service implements ApiRequestLis
             dbHelper.deleteAllData(DBHelper.MediaDBInfo.TableName.MEDIALIB);
 
         }else{
-            List<OnDemandBean> list = dbHelper.findMutlicastMediaLib();
-            if (list!=null&&list.size()>0) {
-                for (OnDemandBean bean : list) {
-                    if (downloadManager != null&&!TextUtils.isEmpty(bean.getTaskId())) {
-                        downloadManager.remove(Long.valueOf(bean.getTaskId()));
-                    }
-                }
-            }
+//            List<OnDemandBean> list = dbHelper.findMutlicastMediaLib();
+//            if (list!=null&&list.size()>0) {
+//                for (OnDemandBean bean : list) {
+//                    if (downloadManager != null&&!TextUtils.isEmpty(bean.getTaskId())) {
+//                        downloadManager.remove(Long.valueOf(bean.getTaskId()));
+//                    }
+//                }
+//            }
         }
 
     }
@@ -530,7 +530,7 @@ public class HandleMediaDataService_bak extends Service implements ApiRequestLis
                 multicastThreadRunning =  true;
                 int count = 0;
                 while (true){
-                    List<OnDemandBean> list = dbHelper.findMutlicastMediaLib();
+                    List<OnDemandBean> list = null;//dbHelper.findMutlicastMediaLib();
                     if (list==null){
                         break;
                     }
