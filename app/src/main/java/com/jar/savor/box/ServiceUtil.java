@@ -19,16 +19,16 @@ public class ServiceUtil {
 
     public static ServiceConnection registerService(final OnRemoteOperationListener listener) {
         ServiceConnection conn = new ServiceConnection() {
-            private RemoteService.OpreationBinder binder;
+            private RemoteService.OperationBinder binder;
 
             public void onServiceDisconnected(ComponentName name) {
                 this.binder = null;
             }
 
             public void onServiceConnected(ComponentName name, IBinder service) {
-                this.binder = (RemoteService.OpreationBinder)service;
-                RemoteService controllor = this.binder.getControllor();
-                controllor.setOnRemoteOpreationListener(listener);
+                this.binder = (RemoteService.OperationBinder)service;
+                RemoteService controller = this.binder.getController();
+                controller.setOnRemoteOpreationListener(listener);
             }
         };
         return conn;

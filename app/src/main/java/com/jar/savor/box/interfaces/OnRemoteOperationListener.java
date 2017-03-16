@@ -1,11 +1,7 @@
 package com.jar.savor.box.interfaces;
 
-import com.jar.savor.box.vo.BaseRequestVo;
 import com.jar.savor.box.vo.BaseResponse;
-import com.jar.savor.box.vo.CheckResponseVo;
-import com.jar.savor.box.vo.CoverRequestVo;
-import com.jar.savor.box.vo.CoverResponseVo;
-import com.jar.savor.box.vo.PlayRequstVo;
+import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
@@ -18,8 +14,6 @@ import com.jar.savor.box.vo.StopRequestVo;
 import com.jar.savor.box.vo.StopResponseVo;
 import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
-import com.jar.savor.box.vo.ZoomRequestVo;
-import com.jar.savor.box.vo.ZoomResponseVo;
 
 /**
  * Created by zhanghq on 2016/12/22.
@@ -28,25 +22,36 @@ import com.jar.savor.box.vo.ZoomResponseVo;
 public interface OnRemoteOperationListener {
     PrepareResponseVo prepare(PrepareRequestVo var1);
 
-    SeekResponseVo seekTo(SeekRequestVo var1);
+    BaseResponse showVod(String mediaName, String vodType);
 
-    PlayResponseVo play(PlayRequstVo var1);
+    BaseResponse showImage();
 
-    StopResponseVo stop(StopRequestVo var1);
+    BaseResponse showVideo(String videoPath);
 
-    RotateResponseVo rotate(RotateRequestVo var1);
+    SeekResponseVo seek(int position);
 
-    ZoomResponseVo zoom(ZoomRequestVo var1);
+    /**
+     * 控制播放、暂停
+     * @param action 0：暂停；
+     *               1：播放
+     * @return
+     */
+    PlayResponseVo play(int action);
 
-    CoverResponseVo cover(CoverRequestVo var1);
+    StopResponseVo stop();
 
-    VolumeResponseVo volume(VolumeRequestVo var1);
+    RotateResponseVo rotate(int rotateDegree);
 
-    Object query(QueryRequestVo var1);
+    /**
+     * 控制音量
+     * @param action 音量操作类型
+     * 1：静音
+     * 2：取消静音
+     * 3：音量减
+     * 4：音量加
+     * @return
+     */
+    VolumeResponseVo volume(int action);
 
-    CheckResponseVo check();
-
-    void showQrcode(BaseRequestVo req);
-
-    void showProjectionTip();
+    Object query();
 }

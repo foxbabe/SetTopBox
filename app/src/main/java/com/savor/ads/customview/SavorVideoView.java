@@ -775,8 +775,8 @@ public class SavorVideoView extends RelativeLayout {
      * @param position
      */
     public void seekTo(int position) {
-        LogUtils.w(TAG + "seekTo mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "seekTo mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + "seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogFileUtil.write(TAG + "seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (isInPlaybackState()) {
             mMediaPlayer.seekTo(position);
         } else {

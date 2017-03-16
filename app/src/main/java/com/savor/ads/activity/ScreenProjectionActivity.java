@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.jar.savor.box.vo.PlayRequstVo;
+import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.QueryRequestVo;
@@ -45,9 +45,6 @@ public class ScreenProjectionActivity extends BaseActivity {
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
     public static final String EXTRA_VID = "extra_vid";
-    public static final String EXTRA_VNAME = "extra_vname";
-    public static final String EXTRA_DEVICE_ID = "extra_device_id";
-    public static final String EXTRA_DEVICE_NAME = "extra_device_name";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
@@ -68,18 +65,6 @@ public class ScreenProjectionActivity extends BaseActivity {
      * 视频ID（只有点播会传进来）
      */
     private String mVideoId;
-    /**
-     * 投屏设备ID
-     */
-    private String mDeviceId;
-    /**
-     * 投屏设备名
-     */
-    private String mDeviceName;
-    /**
-     * 视频名字（只有点播会传进来）
-     */
-    private String mVideoName;
 
     private Handler mHandler = new Handler();
 
@@ -215,9 +200,6 @@ public class ScreenProjectionActivity extends BaseActivity {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
         mVideoId = bundle.getString(EXTRA_VID);
-        mVideoName = bundle.getString(EXTRA_VNAME);
-        mDeviceId = bundle.getString(EXTRA_DEVICE_ID);
-        mDeviceName = bundle.getString(EXTRA_DEVICE_NAME);
     }
 
     private void exitProjection() {
@@ -350,7 +332,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             mUUID = String.valueOf(System.currentTimeMillis());
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "projection", "pic", mVideoId,
-                    mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
         } else {
             // PDF等其它
@@ -360,8 +342,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         }
 
 
-        if (!TextUtils.isEmpty(mDeviceName)) {
-            mProjectTipTv.setText(mDeviceName + "正在投屏");
+        if (!TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_NAME)) {
+            mProjectTipTv.setText(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏");
             mProjectTipTv.setVisibility(View.VISIBLE);
         } else {
             mProjectTipTv.setVisibility(View.GONE);
@@ -389,10 +371,10 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 更改进度
      *
-     * @param seekRequestVo
+     * @param position
      * @return
      */
-    public SeekResponseVo seekTo(SeekRequestVo seekRequestVo) {
+    public SeekResponseVo seekTo(int position) {
         SeekResponseVo responseVo = new SeekResponseVo();
         if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
                 !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
@@ -400,7 +382,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             responseVo.setInfo("失败");
         } else {
             if (mSavorVideoView.isInPlaybackState()) {
-                mSavorVideoView.seekTo(seekRequestVo.getAbsolutepos() * 1000);
+                mSavorVideoView.seekTo(position * 1000);
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 responseVo.setInfo("成功");
             } else {
@@ -414,10 +396,10 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 播放、暂停
      *
-     * @param playRequestVo
+     * @param action
      * @return
      */
-    public PlayResponseVo togglePlay(PlayRequstVo playRequestVo) {
+    public PlayResponseVo togglePlay(int action) {
         PlayResponseVo responseVo = new PlayResponseVo();
         responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         responseVo.setInfo("操作失败");
@@ -426,7 +408,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
         } else {
-            if (0 == playRequestVo.getRate()) {
+            if (0 == action) {
                 // 暂停
                 if (mSavorVideoView.tryPause()) {
                     responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
@@ -434,7 +416,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
                     rescheduleToExit(true);
                 }
-            } else if (1 == playRequestVo.getRate()) {
+            } else if (1 == action) {
                 // 播放
                 if (mSavorVideoView.tryPlay()) {
                     responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
@@ -456,10 +438,9 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 停止投屏
      *
-     * @param stopRequestVo
      * @return
      */
-    public StopResponseVo stop(StopRequestVo stopRequestVo) {
+    public StopResponseVo stop() {
         LogUtils.w("StopResponseVo will exitProjection " + this.hashCode());
         mHandler.post(mExitProjectionRunnable);
         mIsBeenStopped = true;
@@ -472,13 +453,13 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 旋转投屏图片
      *
-     * @param rotateRequestVo
+     * @param rotateDegree
      * @return
      */
-    public RotateResponseVo rotate(RotateRequestVo rotateRequestVo) {
+    public RotateResponseVo rotate(int rotateDegree) {
         RotateResponseVo responseVo = new RotateResponseVo();
         if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
-            mImageRotationDegree = (mImageRotationDegree + rotateRequestVo.getRotatevalue()) % 360;
+            mImageRotationDegree = (mImageRotationDegree + rotateDegree) % 360;
 
             mHandler.post(mRotateImageRunnable);
 
@@ -486,7 +467,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
             responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             responseVo.setInfo("成功");
-            responseVo.setRotateValue(rotateRequestVo.getRotatevalue());
+            responseVo.setRotateValue(rotateDegree);
         } else {
             responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             responseVo.setInfo("失败");
@@ -497,36 +478,26 @@ public class ScreenProjectionActivity extends BaseActivity {
     /**
      * 查询播放进度
      *
-     * @param queryRequestVo
      * @return
      */
-    public Object query(QueryRequestVo queryRequestVo) {
-        Object obj = null;
-        /*if ("all".equalsIgnoreCase(queryRequestVo.getWhat())) {
+    public Object query() {
+        QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+        if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
+                !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
+            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+        } else {
+            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+            int mCurrPos = mSavorVideoView.getCurrentPosition();
 
-        } else */
-
-        // 获取播放进度
-        if (queryRequestVo != null && queryRequestVo.getWhat() != null &&
-                (queryRequestVo.getWhat()).contains("pos")) {
-            QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
-            if (!ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) &&
-                    !ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
-                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            } else {
-                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                int mCurrPos = mSavorVideoView.getCurrentPosition();
-
-                queryResponse.setPos(mCurrPos);
-            }
-            obj = queryResponse;
+            queryResponse.setPos(mCurrPos);
         }
-        return obj;
+
+        return queryResponse;
     }
 
-    public VolumeResponseVo volume(VolumeRequestVo volumeRequestVo) {
+    public VolumeResponseVo volume(int action) {
         VolumeResponseVo responseVo = new VolumeResponseVo();
-        switch (volumeRequestVo.getAction()) {
+        switch (action) {
             case 1:
                 // 静音
                 setVolume(0);
@@ -753,7 +724,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "end", "vod", mVideoId,
-                        mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                         "");
             }
             exitProjection();
@@ -782,7 +753,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, type, mVideoId,
-                    mDeviceId, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
             rescheduleToExit(false);
         }
