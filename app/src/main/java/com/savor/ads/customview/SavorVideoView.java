@@ -266,7 +266,7 @@ public class SavorVideoView extends RelativeLayout {
                     if (mIsSurfaceCreated && !mIsPauseByOut) {
                         mp.setDisplay(mSurfaceHolder);
 
-                        if (mAssignedPlayPosition >= 0 && mAssignedPlayPosition < mp.getDuration()) {
+                        if (mAssignedPlayPosition > 0 && mAssignedPlayPosition < mp.getDuration()) {
                             mp.seekTo(mAssignedPlayPosition);
                             mAssignedPlayPosition = -1;
                         } else {

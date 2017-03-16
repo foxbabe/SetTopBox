@@ -48,6 +48,9 @@ public class HeartbeatService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        //  启动时立即心跳一次
+        doHeartbeat();
+
         while (true) {
 
             // 小平台信息监测周期到达
@@ -58,30 +61,7 @@ public class HeartbeatService extends IntentService {
                     Intent intent1 = new Intent(this, ServerDiscoveryService.class);
                     startService(intent1);
 
-                    LogUtils.w("HeartbeatService 将发HTTP请求去发现小平台信息");
-                    LogFileUtil.write("HeartbeatService 将发HTTP请求去发现小平台信息");
-                    AppApi.getSpIp(this, new ApiRequestListener() {
-                        @Override
-                        public void onSuccess(AppApi.Action method, Object obj) {
-                            LogUtils.w("HeartbeatService HTTP接口发现小平台信息");
-                            LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息");
-                            if (obj instanceof ServerInfo) {
-                                handleServerIp((ServerInfo) obj);
-                            }
-                        }
-
-                        @Override
-                        public void onError(AppApi.Action method, Object obj) {
-                            LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
-                            LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
-                        }
-
-                        @Override
-                        public void onNetworkFailed(AppApi.Action method) {
-                            LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
-                            LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
-                        }
-                    });
+                    httpGetIp();
                 }
             }
 
@@ -89,22 +69,7 @@ public class HeartbeatService extends IntentService {
             if (mHeartbeatElapsedTime >= HEARTBEAT_DURATION) {
                 mHeartbeatElapsedTime = 0;
 
-                AppApi.heartbeat(this, new ApiRequestListener() {
-                    @Override
-                    public void onSuccess(AppApi.Action method, Object obj) {
-
-                    }
-
-                    @Override
-                    public void onError(AppApi.Action method, Object obj) {
-
-                    }
-
-                    @Override
-                    public void onNetworkFailed(AppApi.Action method) {
-
-                    }
-                });
+                doHeartbeat();
             }
 
             try {
@@ -116,6 +81,52 @@ public class HeartbeatService extends IntentService {
             mHeartbeatElapsedTime += ONE_CYCLE_TIME;
             mServerInfoCheckElapsedTime += ONE_CYCLE_TIME;
         }
+    }
+
+    private void doHeartbeat() {
+        AppApi.heartbeat(this, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+
+            }
+        });
+    }
+
+    private void httpGetIp() {
+        LogUtils.w("HeartbeatService 将发HTTP请求去发现小平台信息");
+        LogFileUtil.write("HeartbeatService 将发HTTP请求去发现小平台信息");
+        AppApi.getSpIp(this, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息");
+                if (obj instanceof ServerInfo) {
+                    handleServerIp((ServerInfo) obj);
+                }
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
+            }
+        });
     }
 
 
