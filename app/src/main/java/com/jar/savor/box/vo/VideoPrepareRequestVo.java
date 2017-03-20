@@ -6,6 +6,7 @@ package com.jar.savor.box.vo;
 
 public class VideoPrepareRequestVo {
     private String mediaPath;
+    private int position;
 
     public String getMediaPath() {
         return mediaPath;
@@ -13,5 +14,13 @@ public class VideoPrepareRequestVo {
 
     public void setMediaPath(String mediaPath) {
         this.mediaPath = mediaPath;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 }

@@ -16,17 +16,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
-import com.jar.savor.box.vo.QueryRequestVo;
-import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
-import com.jar.savor.box.vo.SeekRequestVo;
 import com.jar.savor.box.vo.SeekResponseVo;
-import com.jar.savor.box.vo.StopRequestVo;
 import com.jar.savor.box.vo.StopResponseVo;
-import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
@@ -45,11 +39,19 @@ public class ScreenProjectionActivity extends BaseActivity {
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
     public static final String EXTRA_VID = "extra_vid";
+    public static final String EXTRA_VIDEO_POSITION = "extra_video_position";
+    public static final String EXTRA_IMAGE_ROTATION = "extra_image_rotation";
+    public static final String EXTRA_IS_THUMBNAIL = "extra_is_thumbnail";
+    public static final String EXTRA_IMAGE_TYPE = "extra_image_type";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
      */
     private static final int PROJECT_DURATION = 1000 * 30 * 5;
+    /**
+     * 文件投屏持续时间
+     */
+    private static final int PROJECT_DURATION_FILE = 1000 * 60 * 5;
 
     private static final int PROJECT_TIP_DURATION = 1000 * 5;
 
@@ -65,6 +67,16 @@ public class ScreenProjectionActivity extends BaseActivity {
      * 视频ID（只有点播会传进来）
      */
     private String mVideoId;
+    /**
+     * 是否是缩略图（只有投图会传进来）
+     */
+    private boolean mIsThumbnail;
+    /**
+     * 图片类型
+     * 1：普通图片；
+     * 2：文件图片
+     */
+    private int mImageType;
 
     private Handler mHandler = new Handler();
 
@@ -131,6 +143,10 @@ public class ScreenProjectionActivity extends BaseActivity {
      * 图片旋转角度
      */
     private int mImageRotationDegree;
+    /**
+     * 视频初始位置
+     */
+    private int mVideoInitPosition;
     /**
      * 日志用的播放记录标识
      */
@@ -200,6 +216,10 @@ public class ScreenProjectionActivity extends BaseActivity {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
         mVideoId = bundle.getString(EXTRA_VID);
+        mVideoInitPosition = bundle.getInt(EXTRA_VIDEO_POSITION);
+        mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
+        mIsThumbnail = bundle.getBoolean(EXTRA_IS_THUMBNAIL, true);
+        mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
     }
 
     private void exitProjection() {
@@ -260,7 +280,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
             mSavorVideoView.release();
-            mSavorVideoView.setMediaFiles(list);
+            mSavorVideoView.setMediaFiles(list, 0 ,mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -269,32 +289,35 @@ public class ScreenProjectionActivity extends BaseActivity {
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
             mSavorVideoView.release();
-            mSavorVideoView.setMediaFiles(list);
+            mSavorVideoView.setMediaFiles(list, 0 ,mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             // 图片投屏
             mSavorVideoView.setVisibility(View.GONE);
             mSavorVideoView.release();
             mImageArea.setVisibility(View.VISIBLE);
 
-            mImageRotationDegree = 0;
-            mImageView.setRotation(0);
-            mImageView.setScaleX(1);
-            mImageView.setScaleY(1);
+            if (mIsThumbnail) {
+                // 只有当传过来是缩略图时才去重置ImageView状态
+                mImageView.setRotation(0);
+                mImageView.setScaleX(1);
+                mImageView.setScaleY(1);
+                rotatePicture();
+            }
 //            mImageLoadingTip.setVisibility(View.VISIBLE);
 //            mImageLoadingPb.setVisibility(View.VISIBLE);
 //            mImageLoadingTv.setText("图片加载中...");
 
             if (TextUtils.isEmpty(mMediaPath)) {
-                if (ConstantValues.PROJECT_BITMAP != null) {
+                if (ConstantValues.CURRENT_PROJECT_BITMAP != null) {
                     if (mImageView.getDrawable() != null) {
                         if (mImageView.getDrawable() instanceof BitmapDrawable) {
                             BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
-                            if (bitmapDrawable.getBitmap()!=ConstantValues.PROJECT_BITMAP){
+                            if (bitmapDrawable.getBitmap()!=ConstantValues.CURRENT_PROJECT_BITMAP){
                                 bitmapDrawable.getBitmap().recycle();
                             }
                         }
                     }
-                    mImageView.setImageBitmap(ConstantValues.PROJECT_BITMAP);
+                    mImageView.setImageBitmap(ConstantValues.CURRENT_PROJECT_BITMAP);
                 }
             } else {
                 GlideImageLoader.clearView(mImageView);
@@ -593,7 +616,11 @@ public class ScreenProjectionActivity extends BaseActivity {
     private void rescheduleToExit(boolean scheduleNewOne) {
         mHandler.removeCallbacks(mExitProjectionRunnable);
         if (scheduleNewOne) {
-            mHandler.postDelayed(mExitProjectionRunnable, PROJECT_DURATION);
+            int duration = PROJECT_DURATION;
+            if (2 == mImageType) {
+                duration = PROJECT_DURATION_FILE;
+            }
+            mHandler.postDelayed(mExitProjectionRunnable, duration);
         }
     }
 
@@ -710,7 +737,8 @@ public class ScreenProjectionActivity extends BaseActivity {
 
         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
         ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
-        ConstantValues.PROJECT_IMAGE_ID = null;
+        ConstantValues.CURRENT_PROJECT_IMAGE_ID = null;
+        ConstantValues.CURRENT_PROJECT_ID = null;
     }
 
     private SavorVideoView.PlayStateCallback mPlayStateCallback = new SavorVideoView.PlayStateCallback() {

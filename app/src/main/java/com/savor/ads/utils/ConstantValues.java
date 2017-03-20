@@ -12,14 +12,16 @@ import java.util.ArrayList;
 
 public class ConstantValues {
     /** 手机端操作响应码*/
-    /** 成功*/
-    public static final int SERVER_RESPONSE_CODE_SUCCESS = 0;
     /** 失败*/
     public static final int SERVER_RESPONSE_CODE_FAILED = -1;
-    /** 大小图不匹配，失败*/
-    public static final int SERVER_RESPONSE_CODE_NOT_MATCH = 2;
+    /** 成功*/
+    public static final int SERVER_RESPONSE_CODE_SUCCESS = 0;
     /** 视频播放完毕*/
     public static final int SERVER_RESPONSE_CODE_VIDEO_COMPLETE = 1;
+    /** 大小图不匹配*/
+    public static final int SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED = 2;
+    /** 投屏ID不匹配*/
+    public static final int SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED = 3;
 
 
     /**
@@ -64,10 +66,17 @@ public class ConstantValues {
 
     /** 播放列表*/
     public static ArrayList<PlayListBean> PLAY_LIST;
+
     /** 当前投屏设备ID*/
-    public static String CURRENT_PROJECT_DEVICE_ID;
+    public volatile static String CURRENT_PROJECT_DEVICE_ID;
     /** 当前投屏设备名称*/
-    public static String CURRENT_PROJECT_DEVICE_NAME;
+    public volatile static String CURRENT_PROJECT_DEVICE_NAME;
+    /** 当前投屏图片*/
+    public volatile static Bitmap CURRENT_PROJECT_BITMAP;
+    /** 当前投屏图片ID*/
+    public volatile static String CURRENT_PROJECT_IMAGE_ID;
+    /** 当前投屏动作ID*/
+    public volatile static String CURRENT_PROJECT_ID;
 
 //    /**
 //     * 测试环境手机端APP下载页面
@@ -77,9 +86,4 @@ public class ConstantValues {
      * 正式环境手机端APP下载页面
      */
     public static final String APP_DOWN_LINK = "http://rerdian.com/d";
-
-    /** 当前投屏图片*/
-    public volatile static Bitmap PROJECT_BITMAP;
-    /** 当前投屏图片ID*/
-    public volatile static String PROJECT_IMAGE_ID;
 }

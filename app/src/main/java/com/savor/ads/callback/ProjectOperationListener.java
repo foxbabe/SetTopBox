@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.BaseResponse;
@@ -11,6 +12,7 @@ import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
+import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.QueryRequestVo;
 import com.jar.savor.box.vo.RotateRequestVo;
@@ -32,6 +34,7 @@ import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 点播、投屏类操作的接收回调
@@ -171,8 +174,8 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public BaseResponse showVod(String mediaName, String vodType) {
-        BaseResponse localResult = new BaseResponse();
+    public PrepareResponseVoNew showVod(String mediaName, String vodType, int position) {
+        PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         String type = ConstantValues.PROJECT_TYPE_VIDEO_VOD;
         String vid = "";
         String url = "";
@@ -244,6 +247,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         dbHelper.close();
         if (vodCheckPass) {
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+            localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
             localResult.setInfo("加载成功！");
 
             // 跳转或将参数设置到ScreenProjectionActivity
@@ -251,6 +255,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             data.putString(ScreenProjectionActivity.EXTRA_URL, url);
             data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
             data.putString(ScreenProjectionActivity.EXTRA_VID, vid);
+            data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
 
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
             if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
@@ -278,15 +283,18 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public BaseResponse showImage() {
-        BaseResponse localResult = new BaseResponse();
-
+    public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail) {
+        PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+        localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
         // 跳转或将参数设置到ScreenProjectionActivity
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
+        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
+        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
+        data.putInt(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, imageType);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
             LogUtils.d("Listener will setNewProjection");
@@ -309,9 +317,9 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public BaseResponse showVideo(String videoPath) {
-        BaseResponse localResult = new BaseResponse();
-
+    public PrepareResponseVoNew showVideo(String videoPath, int position) {
+        PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+        localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
@@ -319,6 +327,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_URL, videoPath);
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN);
+        data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
             LogUtils.d("Listener will setNewProjection");
@@ -356,6 +365,26 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         }
     }
 
+    @Override
+    public SeekResponseVo seek(int position, String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).seekTo(position);
+            } else {
+                SeekResponseVo responseVo = new SeekResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            SeekResponseVo responseVo = new SeekResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
+        }
+    }
+
     /**
      * 暂停、恢复播放
      *
@@ -371,6 +400,26 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         }
     }
 
+    @Override
+    public PlayResponseVo play(int action, String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).togglePlay(action);
+            } else {
+                PlayResponseVo responseVo = new PlayResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            PlayResponseVo responseVo = new PlayResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
+        }
+    }
+
     /**
      * 停止投屏
      *
@@ -383,6 +432,26 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             return ((ScreenProjectionActivity) activity).stop();
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public StopResponseVo stop(String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).stop();
+            } else {
+                StopResponseVo responseVo = new StopResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            StopResponseVo responseVo = new StopResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
         }
     }
 
@@ -403,6 +472,26 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
+    public RotateResponseVo rotate(int rotateDegree, String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
+            } else {
+                RotateResponseVo responseVo = new RotateResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            RotateResponseVo responseVo = new RotateResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
+        }
+    }
+
+    @Override
     public VolumeResponseVo volume(int action) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
@@ -411,6 +500,26 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
             VolumeResponseVo responseVo = new VolumeResponseVo();
             responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            return responseVo;
+        }
+    }
+
+    @Override
+    public VolumeResponseVo volume(int action, String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).volume(action);
+            } else {
+                VolumeResponseVo responseVo = new VolumeResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            VolumeResponseVo responseVo = new VolumeResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
             return responseVo;
         }
     }
@@ -427,6 +536,24 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             return ((ScreenProjectionActivity) activity).query();
         } else {
             // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
+            QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
+            return queryResponse;
+        }
+    }
+
+    @Override
+    public Object query(String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof ScreenProjectionActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+                return ((ScreenProjectionActivity) activity).query();
+            } else {
+                QueryPosBySessionIdResponseVo responseVo = new QueryPosBySessionIdResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                return responseVo;
+            }
+        } else {
             QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
             queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
             return queryResponse;

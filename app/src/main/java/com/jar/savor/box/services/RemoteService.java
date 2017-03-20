@@ -179,7 +179,7 @@ public class RemoteService extends Service {
 
                         ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                         ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
-                        ConstantValues.PROJECT_IMAGE_ID = null;
+                        ConstantValues.CURRENT_PROJECT_IMAGE_ID = null;
                     }
                 } else if ("volume".equalsIgnoreCase(fromJson.getFunction())) {
                     LogUtils.d("enter method listener.volume");
@@ -229,6 +229,13 @@ public class RemoteService extends Service {
             return stringBuilder.toString();
         }
 
+        /**
+         * v1.0接口处理请求的逻辑
+         * @param request
+         * @param response
+         * @throws IOException
+         * @throws ServletException
+         */
         private void handleRequestV10(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
             String resJson = "";
             String path = request.getPathInfo();
@@ -253,12 +260,18 @@ public class RemoteService extends Service {
                         case "vod":
                             String type = request.getParameter("type");
                             String mediaName = request.getParameter("name");
+                            int position = 0;
+                            try {
+                                position = Integer.parseInt(request.getParameter("position"));
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
                             if (!TextUtils.isEmpty(deviceId) &&
                                     (TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_ID) ||
                                             deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID))) {
                                 ConstantValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 ConstantValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                BaseResponse object = RemoteService.listener.showVod(mediaName, type);
+                                BaseResponse object = RemoteService.listener.showVod(mediaName, type, position);
                                 if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                                     ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
@@ -273,14 +286,13 @@ public class RemoteService extends Service {
                             break;
                         case "video":
                             String reqJson = getBodyString(request);
-                            VideoPrepareRequestVo req = (new Gson()).fromJson(reqJson, VideoPrepareRequestVo.class);
-                            String videoPath = req.getMediaPath();
                             if (!TextUtils.isEmpty(deviceId) &&
                                     (TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_ID) ||
                                             deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID))) {
+                                VideoPrepareRequestVo req = (new Gson()).fromJson(reqJson, VideoPrepareRequestVo.class);
                                 ConstantValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 ConstantValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                BaseResponse object = RemoteService.listener.showVideo(videoPath);
+                                BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition());
                                 if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                                     ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
@@ -296,50 +308,67 @@ public class RemoteService extends Service {
                         case "pic":
                             String isThumbnail = request.getParameter("isThumbnail");
                             String imageId = request.getParameter("imageId");
+                            int imageType = 1;
+                            try {
+                                imageType = Integer.parseInt(request.getParameter("imageType"));
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                            int rotation = 0;
+                            try {
+                                rotation = Integer.parseInt(request.getParameter("rotation"));
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
                             if (request.getContentType().contains("multipart/form-data;")) {
 
                                 // 图片流投屏处理
-                                handleStreamImageProjection(request, response, deviceId, deviceName,
-                                        isThumbnail, imageId);
+                                resJson = handleStreamImageProjection(request, imageType, deviceId, deviceName,
+                                        isThumbnail, imageId, rotation);
                             }
                             break;
                         case "stop":
                             LogUtils.e("enter method listener.stop");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                StopResponseVo object = RemoteService.listener.stop();
+                                String projectId = request.getParameter("projectId");
+                                StopResponseVo object = RemoteService.listener.stop(projectId);
                                 resJson = new Gson().toJson(object);
 
-                                ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
-                                ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
-                                ConstantValues.PROJECT_IMAGE_ID = null;
+//                                ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
+//                                ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
+//                                ConstantValues.CURRENT_PROJECT_IMAGE_ID = null;
                             }
                             break;
                         case "rotate":
                             LogUtils.d("enter method listener.rotate");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                RotateResponseVo object = RemoteService.listener.rotate(90);
+                                String projectId = request.getParameter("projectId");
+                                RotateResponseVo object = RemoteService.listener.rotate(90, projectId);
                                 resJson = new Gson().toJson(object);
                             }
                             break;
                         case "resume":
                             LogUtils.d("enter method listener.play");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                PlayResponseVo object = RemoteService.listener.play(1);
+                                String projectId = request.getParameter("projectId");
+                                PlayResponseVo object = RemoteService.listener.play(1, projectId);
                                 resJson = new Gson().toJson(object);
                             }
                             break;
                         case "pause":
                             LogUtils.d("enter method listener.play");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                PlayResponseVo object = RemoteService.listener.play(0);
+                                String projectId = request.getParameter("projectId");
+                                PlayResponseVo object = RemoteService.listener.play(0, projectId);
                                 resJson = new Gson().toJson(object);
                             }
                             break;
                         case "seek":
                             LogUtils.d("enter method listener.play");
-                            int position = Integer.parseInt(request.getParameter("position"));
+                            int positionSeek = Integer.parseInt(request.getParameter("position"));
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                SeekResponseVo object = RemoteService.listener.seek(position);
+                                String projectId = request.getParameter("projectId");
+                                SeekResponseVo object = RemoteService.listener.seek(positionSeek, projectId);
                                 resJson = new Gson().toJson(object);
                             }
                             break;
@@ -347,14 +376,16 @@ public class RemoteService extends Service {
                             LogUtils.d("enter method listener.volume");
                             int volumeAction = Integer.parseInt(request.getParameter("action"));
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                VolumeResponseVo object = RemoteService.listener.volume(volumeAction);
+                                String projectId = request.getParameter("projectId");
+                                VolumeResponseVo object = RemoteService.listener.volume(volumeAction, projectId);
                                 resJson = new Gson().toJson(object);
                             }
                             break;
                         case "query":
                             LogUtils.d("enter method listener.query");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                Object object = RemoteService.listener.query();
+                                String projectId = request.getParameter("projectId");
+                                Object object = RemoteService.listener.query(projectId);
                                 resJson = new Gson().toJson(object);
                             } else {
                                 QueryPosBySessionIdResponseVo vo = new QueryPosBySessionIdResponseVo();
@@ -423,12 +454,12 @@ public class RemoteService extends Service {
                         boolean showImage = false;
                         if (prepareRequest.getIsThumbnail() == 1) {
                             // 缩略图
-                            ConstantValues.PROJECT_IMAGE_ID = prepareRequest.getImageId();
+                            ConstantValues.CURRENT_PROJECT_IMAGE_ID = prepareRequest.getImageId();
                             showImage = true;
                         } else {
                             // 大图
                             if (!TextUtils.isEmpty(prepareRequest.getImageId()) &&
-                                    prepareRequest.getImageId().equals(ConstantValues.PROJECT_IMAGE_ID)) {
+                                    prepareRequest.getImageId().equals(ConstantValues.CURRENT_PROJECT_IMAGE_ID)) {
                                 showImage = true;
                             }
                         }
@@ -437,8 +468,8 @@ public class RemoteService extends Service {
 
                         if (showImage) {
                             // 显示图片
-                            ConstantValues.PROJECT_BITMAP = bitmap;
-                            object = RemoteService.listener.showImage();
+                            ConstantValues.CURRENT_PROJECT_BITMAP = bitmap;
+                            object = RemoteService.listener.showImage(1, 0, prepareRequest.getIsThumbnail() == 1);
                             if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                 ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                                 ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
@@ -446,7 +477,7 @@ public class RemoteService extends Service {
                         } else {
                             // 图片被忽略
                             object = new BaseResponse();
-                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_NOT_MATCH);
+                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED);
                         }
                     }
                     responseJson = new Gson().toJson(object);
@@ -462,11 +493,10 @@ public class RemoteService extends Service {
             response.getWriter().println(responseJson);
         }
 
-        private void handleStreamImageProjection(HttpServletRequest request, HttpServletResponse response,
+        private String handleStreamImageProjection(HttpServletRequest request, int imageType,
                                                  String deviceId, String deviceName, String isThumbnail,
-                                                 String imageId) throws IOException, ServletException {
-            String responseJson = "";
-
+                                                 String imageId, int rotation) throws IOException, ServletException {
+            String respJson = "";
             if (!TextUtils.isEmpty(deviceId) &&
                     (TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_ID) ||
                             deviceId.equals(ConstantValues.CURRENT_PROJECT_DEVICE_ID))) {
@@ -477,12 +507,12 @@ public class RemoteService extends Service {
                 boolean showImage = false;
                 if ("1".equals(isThumbnail)) {
                     // 缩略图
-                    ConstantValues.PROJECT_IMAGE_ID = imageId;
+                    ConstantValues.CURRENT_PROJECT_IMAGE_ID = imageId;
                     showImage = true;
                 } else {
                     // 大图
                     if (!TextUtils.isEmpty(imageId) &&
-                            imageId.equals(ConstantValues.PROJECT_IMAGE_ID)) {
+                            imageId.equals(ConstantValues.CURRENT_PROJECT_IMAGE_ID)) {
                         showImage = true;
                     }
                 }
@@ -505,8 +535,8 @@ public class RemoteService extends Service {
                         }
 
                         // 显示图片
-                        ConstantValues.PROJECT_BITMAP = bitmap;
-                        object = RemoteService.listener.showImage();
+                        ConstantValues.CURRENT_PROJECT_BITMAP = bitmap;
+                        object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail));
                         if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                             ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
                             ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
@@ -519,19 +549,17 @@ public class RemoteService extends Service {
                 } else {
                     // 图片被忽略
                     object = new BaseResponse();
-                    object.setResult(ConstantValues.SERVER_RESPONSE_CODE_NOT_MATCH);
+                    object.setResult(ConstantValues.SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED);
                 }
 
-                responseJson = new Gson().toJson(object);
+                respJson = new Gson().toJson(object);
             } else {
                 BaseResponse vo = new BaseResponse();
                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 vo.setInfo("请稍等，" + ConstantValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                responseJson = new Gson().toJson(vo);
+                respJson = new Gson().toJson(vo);
             }
-
-            LogUtils.d("返回结果:" + responseJson);
-            response.getWriter().println(responseJson);
+            return respJson;
         }
     }
 

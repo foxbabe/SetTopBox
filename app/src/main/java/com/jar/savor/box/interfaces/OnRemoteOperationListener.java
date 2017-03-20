@@ -5,6 +5,7 @@ import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
+import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryRequestVo;
 import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
@@ -22,13 +23,15 @@ import com.jar.savor.box.vo.VolumeResponseVo;
 public interface OnRemoteOperationListener {
     PrepareResponseVo prepare(PrepareRequestVo var1);
 
-    BaseResponse showVod(String mediaName, String vodType);
+    PrepareResponseVoNew showVod(String mediaName, String vodType, int position);
 
-    BaseResponse showImage();
+    PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail);
 
-    BaseResponse showVideo(String videoPath);
+    PrepareResponseVoNew showVideo(String videoPath, int position);
 
     SeekResponseVo seek(int position);
+
+    SeekResponseVo seek(int position, String projectId);
 
     /**
      * 控制播放、暂停
@@ -37,10 +40,13 @@ public interface OnRemoteOperationListener {
      * @return
      */
     PlayResponseVo play(int action);
+    PlayResponseVo play(int action, String projectId);
 
     StopResponseVo stop();
+    StopResponseVo stop(String projectId);
 
     RotateResponseVo rotate(int rotateDegree);
+    RotateResponseVo rotate(int rotateDegree, String projectId);
 
     /**
      * 控制音量
@@ -52,6 +58,8 @@ public interface OnRemoteOperationListener {
      * @return
      */
     VolumeResponseVo volume(int action);
+    VolumeResponseVo volume(int action, String projectId);
 
     Object query();
+    Object query(String projectId);
 }
