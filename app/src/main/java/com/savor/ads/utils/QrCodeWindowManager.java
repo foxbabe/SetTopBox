@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -100,12 +101,12 @@ public class QrCodeWindowManager {
         LogUtils.v("QrCodeWindowManager 开始addView");
         LogFileUtil.write("QrCodeWindowManager 开始addView");
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            addToWindow(context, filePath, qrCodeIv, connectCodeTv, wifiNameTv, wmParams, ssid, code);
+            addToWindow(context, filePath, qrCodeIv, wifiNameTv, connectCodeTv, wmParams, ssid, code);
         } else {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    addToWindow(context, filePath, qrCodeIv, connectCodeTv, wifiNameTv, wmParams, ssid, code);
+                    addToWindow(context, filePath, qrCodeIv, wifiNameTv, connectCodeTv, wmParams, ssid, code);
                 }
             });
         }
@@ -134,7 +135,11 @@ public class QrCodeWindowManager {
             }
         });
 
-        codeTv.setText(code);
+        if (!TextUtils.isEmpty(code)) {
+            GlobalValues.AUTH_CODE = code;
+        }
+        codeTv.setText(GlobalValues.AUTH_CODE);
+
         if (AppUtils.isWifiEnabled(context)) {
             wifiNameTv.setText("WiFi:" + ssid);
         } else {

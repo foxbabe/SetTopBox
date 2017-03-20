@@ -14,6 +14,8 @@ public class GlobalValues {
 
     /** 二维码内容*/
     public static String QRCODE_CONTENT = "";
+    /** 输入验证码*/
+    public static String AUTH_CODE = "";
 
     /** 播放列表*/
     public static ArrayList<PlayListBean> PLAY_LIST;

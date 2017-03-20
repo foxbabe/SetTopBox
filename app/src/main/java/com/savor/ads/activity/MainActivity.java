@@ -38,7 +38,6 @@ import static com.savor.ads.utils.KeyCodeConstant.KEY_CODE_SHOW_INFO;
 public class MainActivity extends BaseActivity {
     Handler mHandler = new Handler();
     private ImageView main_imgIv;
-    private DBHelper dbHelper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,7 +227,6 @@ public class MainActivity extends BaseActivity {
     }
 
     void initDisplay() {
-        dbHelper = DBHelper.get(this);
         main_imgIv = (ImageView) findViewById(R.id.main_img);
         if (AppUtils.isFileExist("/mnt/sdcard/Pictures/logo.jpg")) {
             Bitmap bitmap = AppUtils.getLoacalBitmap("/mnt/sdcard/Pictures/logo.jpg");
