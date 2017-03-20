@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -34,7 +33,7 @@ public class QrCodeWindowManager {
     private boolean mIsAdded;
     private boolean mIsHandling;
 
-    public void showQrCode(final Context context) {
+    public void showQrCode(final Context context, final String code) {
         LogUtils.e("showQrCode");
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable, 10 * 1000);
@@ -47,18 +46,15 @@ public class QrCodeWindowManager {
         LogUtils.v("QrCodeWindowManager 开始拼接二维码内容");
         LogFileUtil.write("QrCodeWindowManager 开始拼接二维码内容");
 
-        String ssid = AppUtils.getWifiName(context);
-        if (TextUtils.isEmpty(ssid)) {
-            ssid = Session.get(context).getBoxName();
-        }
+        final String ssid = AppUtils.getShowingSSID(context);
 
         LogUtils.v("QrCodeWindowManager 开始获取AP IP");
         LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");
-        String boxUrl = ConstantValues.APP_DOWN_LINK + "?" +
+        String boxUrl = GlobalValues.APP_DOWN_LINK + "?" +
                 "ip=" + AppUtils.getLocalIPAddress() + "&bid=" + Session.get(context).getBoiteId() +
                 "&rid=" + Session.get(context).getRoomId() + "&sid=" + ssid;
         File file = new File(filePath);
-        if (!boxUrl.equals(ConstantValues.QRCODE_CONTENT) || !file.exists()) {
+        if (!boxUrl.equals(GlobalValues.QRCODE_CONTENT) || !file.exists()) {
             if (file.exists()) {
                 file.delete();
             }
@@ -73,7 +69,7 @@ public class QrCodeWindowManager {
                 return;
             }
         }
-        ConstantValues.QRCODE_CONTENT = boxUrl;
+        GlobalValues.QRCODE_CONTENT = boxUrl;
 
         final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
         //获取WindowManager
@@ -99,24 +95,24 @@ public class QrCodeWindowManager {
 
         final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_qrcode);
         final TextView wifiNameTv = (TextView) mFloatLayout.findViewById(R.id.tv_wifi_name);
+        final TextView connectCodeTv = (TextView) mFloatLayout.findViewById(R.id.tv_code);
 
         LogUtils.v("QrCodeWindowManager 开始addView");
         LogFileUtil.write("QrCodeWindowManager 开始addView");
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            addToWindow(context, filePath, qrCodeIv, wifiNameTv, wmParams, ssid);
+            addToWindow(context, filePath, qrCodeIv, connectCodeTv, wifiNameTv, wmParams, ssid, code);
         } else {
-            final String finalSsid = ssid;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    addToWindow(context, filePath, qrCodeIv, wifiNameTv, wmParams, finalSsid);
+                    addToWindow(context, filePath, qrCodeIv, connectCodeTv, wifiNameTv, wmParams, ssid, code);
                 }
             });
         }
     }
 
     private void addToWindow(final Context context, String filePath, ImageView qrCodeIv, TextView wifiNameTv,
-                             final WindowManager.LayoutParams wmParams, String ssid) {
+                             TextView codeTv, final WindowManager.LayoutParams wmParams, String ssid, String code) {
         GlideImageLoader.loadImageWithoutCache(context, filePath, qrCodeIv, new RequestListener() {
             @Override
             public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
@@ -137,6 +133,8 @@ public class QrCodeWindowManager {
                 return false;
             }
         });
+
+        codeTv.setText(code);
         if (AppUtils.isWifiEnabled(context)) {
             wifiNameTv.setText("WiFi:" + ssid);
         } else {

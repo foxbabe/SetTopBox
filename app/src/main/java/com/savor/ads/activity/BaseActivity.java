@@ -21,6 +21,7 @@ import com.savor.ads.dialog.BoxInfoDialog;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -152,7 +153,7 @@ public abstract class BaseActivity extends Activity {
         TechnicalLogReporter.sdcardMounted(this);
         fillPlayList();
 
-        if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
             LogFileUtil.write("handleMediaMounted, will goto AdsPlayerActivity");
             Intent intent = new Intent(this, AdsPlayerActivity.class);
             startActivity(intent);
@@ -193,7 +194,7 @@ public abstract class BaseActivity extends Activity {
                 }
 
                 dbHelper.close();
-                ConstantValues.PLAY_LIST = playList;
+                GlobalValues.PLAY_LIST = playList;
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {
@@ -214,7 +215,7 @@ public abstract class BaseActivity extends Activity {
                             }
                         }
                     }
-                    ConstantValues.PLAY_LIST = playList;
+                    GlobalValues.PLAY_LIST = playList;
                 }
             }
         }

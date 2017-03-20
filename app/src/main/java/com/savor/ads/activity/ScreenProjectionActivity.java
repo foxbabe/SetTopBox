@@ -29,6 +29,7 @@ import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 
@@ -280,7 +281,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
             mSavorVideoView.release();
-            mSavorVideoView.setMediaFiles(list, 0 ,mVideoInitPosition * 1000);
+            mSavorVideoView.setMediaFiles(list, 0, mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -289,7 +290,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
             mSavorVideoView.release();
-            mSavorVideoView.setMediaFiles(list, 0 ,mVideoInitPosition * 1000);
+            mSavorVideoView.setMediaFiles(list, 0, mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             // 图片投屏
             mSavorVideoView.setVisibility(View.GONE);
@@ -308,16 +309,16 @@ public class ScreenProjectionActivity extends BaseActivity {
 //            mImageLoadingTv.setText("图片加载中...");
 
             if (TextUtils.isEmpty(mMediaPath)) {
-                if (ConstantValues.CURRENT_PROJECT_BITMAP != null) {
+                if (GlobalValues.CURRENT_PROJECT_BITMAP != null) {
                     if (mImageView.getDrawable() != null) {
                         if (mImageView.getDrawable() instanceof BitmapDrawable) {
                             BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
-                            if (bitmapDrawable.getBitmap()!=ConstantValues.CURRENT_PROJECT_BITMAP){
+                            if (bitmapDrawable.getBitmap() != GlobalValues.CURRENT_PROJECT_BITMAP) {
                                 bitmapDrawable.getBitmap().recycle();
                             }
                         }
                     }
-                    mImageView.setImageBitmap(ConstantValues.CURRENT_PROJECT_BITMAP);
+                    mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
                 }
             } else {
                 GlideImageLoader.clearView(mImageView);
@@ -355,7 +356,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             mUUID = String.valueOf(System.currentTimeMillis());
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "projection", "pic", mVideoId,
-                    ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
         } else {
             // PDF等其它
@@ -365,8 +366,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         }
 
 
-        if (!TextUtils.isEmpty(ConstantValues.CURRENT_PROJECT_DEVICE_NAME)) {
-            mProjectTipTv.setText(ConstantValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏");
+        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
+            mProjectTipTv.setText(GlobalValues.CURRENT_PROJECT_DEVICE_NAME + "正在投屏");
             mProjectTipTv.setVisibility(View.VISIBLE);
         } else {
             mProjectTipTv.setVisibility(View.GONE);
@@ -689,7 +690,7 @@ public class ScreenProjectionActivity extends BaseActivity {
                 break;
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow();
+                ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;
         }
@@ -735,10 +736,10 @@ public class ScreenProjectionActivity extends BaseActivity {
 
         mHandler.removeCallbacksAndMessages(null);
 
-        ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
-        ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
-        ConstantValues.CURRENT_PROJECT_IMAGE_ID = null;
-        ConstantValues.CURRENT_PROJECT_ID = null;
+        GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
+        GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
+        GlobalValues.CURRENT_PROJECT_ID = null;
     }
 
     private SavorVideoView.PlayStateCallback mPlayStateCallback = new SavorVideoView.PlayStateCallback() {
@@ -752,7 +753,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "end", "vod", mVideoId,
-                        ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                         "");
             }
             exitProjection();
@@ -781,7 +782,7 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, type, mVideoId,
-                    ConstantValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
                     "");
             rescheduleToExit(false);
         }

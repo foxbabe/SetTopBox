@@ -40,8 +40,8 @@ public class SavorApplication extends MultiDexApplication {
     /**
      * 显示二维码
      */
-    public void showQrCodeWindow() {
-        mQrCodeWindowManager.showQrCode(this);
+    public void showQrCodeWindow(String code) {
+        mQrCodeWindowManager.showQrCode(this, code);
     }
 
 

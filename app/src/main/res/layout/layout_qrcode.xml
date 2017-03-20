@@ -2,7 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="360dp"
+    android:layout_height="wrap_content"
     android:background="@mipmap/bg_qrcode"
     android:orientation="vertical"
     android:padding="12dp">
@@ -31,8 +31,18 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="请使用热点儿APP扫码投屏"
+        android:text="请在小热点app中扫码或输入以下三位数字进行连接"
         android:textColor="@android:color/black"
-        android:textSize="20dp"/>
+        android:textSize="18dp"/>
 
+    <TextView
+        android:id="@+id/tv_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="389"
+        android:textSize="30sp"
+        android:textColor="@android:color/black"/>
 </LinearLayout>

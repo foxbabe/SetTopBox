@@ -1417,4 +1417,12 @@ public class AppUtils {
         }
         return canPlayNext;
     }
+
+    public static String getShowingSSID(Context context) {
+        String ssid = AppUtils.getWifiName(context);
+        if (TextUtils.isEmpty(ssid)) {
+            ssid = Session.get(context).getBoxName();
+        }
+        return ssid;
+    }
 }

@@ -190,6 +190,8 @@ public class AppApi {
         params.put("logo ", Session.get(context).getSplashVersion() + "");
         params.put("ip", AppUtils.getLocalIPAddress() + "");
         params.put("hotelId", Session.get(context).getBoiteId() + "");
+        params.put("roomId", Session.get(context).getRoomId() + "");
+        params.put("signal", AppUtils.getInputType(Session.get(context).getTvInputSource()) + "");
         new AppServiceOk(context, Action.CP_GET_HEARTBEAT_PLAIN, handler, params).get();
     }
 

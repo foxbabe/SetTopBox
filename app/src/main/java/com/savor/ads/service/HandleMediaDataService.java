@@ -10,20 +10,17 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.activity.MainActivity;
-import com.savor.ads.bean.BoiteBean;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
-import com.savor.ads.bean.RoomBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.bean.SetTopBoxBean;
@@ -40,6 +37,7 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileDownProgress;
 import com.savor.ads.utils.FileUtils;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShellUtils;
@@ -499,7 +497,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             }
 
             dbHelper.close();
-            ConstantValues.PLAY_LIST = playList;
+            GlobalValues.PLAY_LIST = playList;
         }
     }
 

@@ -21,7 +21,7 @@ import com.savor.ads.dialog.TvChannelListDialog;
 import com.savor.ads.dialog.TvChannelSearchingDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -378,7 +378,7 @@ public class TvPlayerActivity extends BaseActivity {
         switch (keyCode) {
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow();
+                ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;
             case KeyCodeConstant.KEY_CODE_SHOW_INFO:
@@ -451,9 +451,15 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
-            Intent intent = new Intent(this, AdsPlayerActivity.class);
-            startActivity(intent);
+        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+            // 尝试填充播放列表
+            fillPlayList();
+
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+                Intent intent = new Intent(this, AdsPlayerActivity.class);
+                startActivity(intent);
+            } else {
+            }
         }
     }
 
@@ -544,7 +550,7 @@ public class TvPlayerActivity extends BaseActivity {
 
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
-            if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
                 gotoAdsPlayer();
             } else {
                 init();

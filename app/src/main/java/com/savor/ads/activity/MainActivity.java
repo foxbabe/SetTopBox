@@ -21,8 +21,8 @@ import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -53,7 +53,7 @@ public class MainActivity extends BaseActivity {
                 String SDCardPath = AppUtils.getExternalSDCardPath();
                 if (!TextUtils.isEmpty(SDCardPath)) {
                     fillPlayList();
-                    if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+                    if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
                         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
                         startActivity(intent);
                     }
@@ -76,7 +76,7 @@ public class MainActivity extends BaseActivity {
             fillPlayList();
 
             // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
-            if (ConstantValues.PLAY_LIST != null && !ConstantValues.PLAY_LIST.isEmpty()) {
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
                 Intent intent = new Intent(this, AdsPlayerActivity.class);
                 startActivity(intent);
             }

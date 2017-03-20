@@ -11,6 +11,9 @@
 package cn.savor.small.netty;
 
 
+import android.content.Context;
+
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -38,11 +41,13 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean> {
     private NettyClient.NettyMessageCallback callback;
-    private String mac;
+    private Session session;
+    private Context mContext;
 
-    public NettyClientHandler(NettyClient.NettyMessageCallback m, String mac) {
+    public NettyClientHandler(NettyClient.NettyMessageCallback m, Context context) {
         this.callback = m;
-        this.mac = mac;
+        this.mContext = context;
+        this.session = Session.get(context);
     }
 
     @Override
@@ -59,32 +64,36 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 //        LogUtils.i(("Client received: " + ByteBufUtil.hexDump(msg.readBytes(msg.readableBytes())));
         if (msg == null) return;
         /**来自服务端的数据包请求*/
-        MessageBean.Action Order=msg.getCmd();
-        switch (Order){
+        MessageBean.Action Order = msg.getCmd();
+        switch (Order) {
             case SERVER_HEART_RESP:
-                List<String >contentMsgH=msg.getContent();
-                for(String tmp:contentMsgH) {
-                    LogUtils.i("SERVER_HEART_RESP： 收到来自服务端的...心跳回应."+tmp+"===>>接收到内容:"+msg.getContent());
-                    LogFileUtil.write("SERVER_HEART_RESP： 收到来自服务端的...心跳回应."+tmp+"===>>接收到内容:"+msg.getContent());
+                List<String> contentMsgH = msg.getContent();
+                for (String tmp : contentMsgH) {
+                    LogUtils.i("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
+                    LogFileUtil.write("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
                 }
                 break;
             case SERVER_ORDER_REQ:
-                List<String >contentMsg=msg.getContent();
-                for(String tmp:contentMsg) {
-                    LogUtils.i("ORDER_REQ： 收到来自服务端的...指令."+tmp+"===>>接收到内容:"+msg.getContent());
-                    LogFileUtil.write("ORDER_REQ： 收到来自服务端的...指令."+tmp+"===>>接收到内容:"+msg.getContent());
+                List<String> contentMsg = msg.getContent();
+                for (String tmp : contentMsg) {
+
+                    LogUtils.i("ORDER_REQ： 收到来自服务端的...指令." + tmp + "===>>接收到内容:" + msg.getContent());
+                    LogFileUtil.write("ORDER_REQ： 收到来自服务端的...指令." + tmp + "===>>接收到内容:" + msg.getContent());
                     if (callback != null) {
-                        callback.onReceiveServerMessage(tmp);
+                        callback.onReceiveServerMessage(tmp, msg.getConnectCode());
                     }
                 }
-                MessageBean message=new MessageBean();
+                MessageBean message = new MessageBean();
                 message.setCmd(MessageBean.Action.CLIENT_ORDER_RESP);
-                ArrayList<String> contList=new ArrayList<String>();
-                String xContent="我收到了.数据包..回应下";
+                ArrayList<String> contList = new ArrayList<String>();
+                String xContent = "我收到了.数据包..回应下";
                 contList.add(xContent);
                 message.setContent(contList);
                 message.setIp(AppUtils.getLocalIPAddress());
-                message.setMac(mac);
+                message.setMac(session.getEthernetMac());
+                message.setHotelId(session.getBoiteId());
+                message.setRoomId(session.getRoomId());
+                message.setSsid(AppUtils.getShowingSSID(mContext));
                 ctx.writeAndFlush(message);
                 break;
             default:
@@ -96,7 +105,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
-        String channelId=ctx.channel().id().toString();
+        String channelId = ctx.channel().id().toString();
         if (evt instanceof IdleStateEvent) {
 
             IdleStateEvent event = (IdleStateEvent) evt;
@@ -119,18 +128,21 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 //客户端发起REQ心跳查询==========
                 LogUtils.i("ALL_IDLE");
                 // 发送心跳消息
-                MessageBean message=new MessageBean();
+                MessageBean message = new MessageBean();
                 message.setCmd(MessageBean.Action.CLIENT_HEART_REQ);
-                ArrayList<String> contList=new ArrayList<String>();
+                ArrayList<String> contList = new ArrayList<String>();
                 contList.add("I am a Heart Pakage...");
                 message.setContent(contList);
-                String number=channelId+System.currentTimeMillis();
+                String number = channelId + System.currentTimeMillis();
                 message.setSerialnumber(number);
                 message.setIp(AppUtils.getLocalIPAddress());
-                message.setMac(mac);
+                message.setMac(session.getEthernetMac());
+                message.setHotelId(session.getBoiteId());
+                message.setRoomId(session.getRoomId());
+                message.setSsid(AppUtils.getShowingSSID(mContext));
                 ctx.writeAndFlush(message);
-                LogUtils.i("客户端向服务端发送===="+channelId+"====>>>>心跳包.....流水号:"+message.getSerialnumber());
-                LogFileUtil.write("NettyClientHandler 客户端向服务端发送===="+channelId+"====>>>>心跳包.....流水号:"+message.getSerialnumber());
+                LogUtils.i("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
+                LogFileUtil.write("NettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
             }
 
         }
@@ -152,13 +164,14 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
         LogFileUtil.write("NettyClientHandler channelUnregistered......." + NettyClient.host + ':' + NettyClient.port);
         reconnect(ctx);
     }
-    public void reconnect(ChannelHandlerContext ctx){
+
+    public void reconnect(ChannelHandlerContext ctx) {
         if (callback != null) {
             callback.onReconnect();
         }
-        try{
+        try {
             Thread.sleep(3000);
-            if(ctx != null) {
+            if (ctx != null) {
                 ctx.close();
             }
             final EventLoop loop = ctx.channel().eventLoop();
@@ -170,7 +183,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                     NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap(), loop));
                 }
             }, 5, TimeUnit.SECONDS);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.toString();
         }
     }

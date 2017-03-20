@@ -19,8 +19,6 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 
-import java.util.Random;
-
 import io.netty.bootstrap.Bootstrap;
 
 /**
@@ -72,7 +70,7 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
             LogUtils.d("MessageService fetchMessage");
             if (serverInfo != null) {
                 LogUtils.d("MessageService serverInfo != null");
-                NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, Session.get(this).getEthernetMac());
+                NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, getApplicationContext());
                 NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap()));
             } else {
                 LogUtils.d("MessageService serverInfo == null");
@@ -93,14 +91,14 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
     }
 
     @Override
-    public void onReceiveServerMessage(String msg) {
+    public void onReceiveServerMessage(String msg, String code) {
         if (ConstantValues.NETTY_SHOW_QRCODE_COMMAND.equals(msg)) {
             LogUtils.d("收到显示二维码指令");
             LogFileUtil.write("收到显示二维码指令");
 
             if (!(ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity)) {
                 if (getApplication() instanceof SavorApplication) {
-                    ((SavorApplication) getApplication()).showQrCodeWindow();
+                    ((SavorApplication) getApplication()).showQrCodeWindow(code);
                 }
             }
 

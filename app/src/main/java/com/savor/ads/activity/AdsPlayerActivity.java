@@ -15,6 +15,7 @@ import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -80,7 +81,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private void checkAndPlay() {
         LogFileUtil.write("AdsPlayerActivity checkAndPlay");
         // 未发现SD卡时跳到TV
-        mPlayList = ConstantValues.PLAY_LIST;
+        mPlayList = GlobalValues.PLAY_LIST;
         if (mPlayList == null || mPlayList.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
             Intent intent = new Intent(this, TvPlayerActivity.class);
             startActivity(intent);
@@ -185,7 +186,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 break;
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow();
+                ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;
             // 暂停、继续播放

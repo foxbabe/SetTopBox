@@ -10,6 +10,10 @@
  */
 package cn.savor.small.netty;
 
+import android.content.Context;
+
+import com.savor.ads.core.Session;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -45,11 +49,16 @@ public class NettyClient {
     static String host;
     public static Channel mChannel = null;
     private NettyMessageCallback callback;
-    private String mac;
+    private Session session;
+    private Context mContext;
+//    private String mac;
+//    private String bid;
+//    private String sid;
+//    private String rid;
     private static NettyClient instance;
 
-    public static void init(int port, String host, NettyMessageCallback callback, String mac) {
-        instance = new NettyClient(port, host, callback, mac);
+    public static void init(int port, String host, NettyMessageCallback callback, Context context) {
+        instance = new NettyClient(port, host, callback, context);
     }
 
     /**
@@ -60,11 +69,12 @@ public class NettyClient {
         return instance;
     }
 
-    private NettyClient(int port, String host, NettyMessageCallback c, String mac) {
+    private NettyClient(int port, String host, NettyMessageCallback c, Context context) {
         this.port = port;
         this.host = host;
         this.callback = c;
-        this.mac = mac;
+        mContext = context;
+        this.session = Session.get(context);
     }
 
     public void setServer(int port, String host) {
@@ -89,7 +99,7 @@ public class NettyClient {
                         ch.pipeline().addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
                         //设置发送消息编码器
                         ch.pipeline().addLast(new ObjectEncoder());
-                        ch.pipeline().addLast(new NettyClientHandler(callback, mac));
+                        ch.pipeline().addLast(new NettyClientHandler(callback, mContext));
                     }
                 });
 
@@ -125,7 +135,7 @@ public class NettyClient {
 
 
     public interface NettyMessageCallback {
-        void onReceiveServerMessage(String msg);
+        void onReceiveServerMessage(String msg, String code);
         void onConnected();
         void onReconnect();
     }

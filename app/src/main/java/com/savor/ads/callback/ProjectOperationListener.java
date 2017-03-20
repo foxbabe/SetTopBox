@@ -30,6 +30,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
@@ -247,7 +248,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         dbHelper.close();
         if (vodCheckPass) {
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-            localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+            localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
             localResult.setInfo("加载成功！");
 
             // 跳转或将参数设置到ScreenProjectionActivity
@@ -285,7 +286,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
-        localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
@@ -319,7 +320,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public PrepareResponseVoNew showVideo(String videoPath, int position) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
-        localResult.setProjectId(ConstantValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
@@ -369,7 +370,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public SeekResponseVo seek(int position, String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).seekTo(position);
             } else {
                 SeekResponseVo responseVo = new SeekResponseVo();
@@ -404,7 +405,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public PlayResponseVo play(int action, String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).togglePlay(action);
             } else {
                 PlayResponseVo responseVo = new PlayResponseVo();
@@ -439,7 +440,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public StopResponseVo stop(String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).stop();
             } else {
                 StopResponseVo responseVo = new StopResponseVo();
@@ -475,7 +476,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public RotateResponseVo rotate(int rotateDegree, String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
             } else {
                 RotateResponseVo responseVo = new RotateResponseVo();
@@ -508,7 +509,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public VolumeResponseVo volume(int action, String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).volume(action);
             } else {
                 VolumeResponseVo responseVo = new VolumeResponseVo();
@@ -546,7 +547,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public Object query(String projectId) {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(ConstantValues.CURRENT_PROJECT_ID)) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).query();
             } else {
                 QueryPosBySessionIdResponseVo responseVo = new QueryPosBySessionIdResponseVo();
