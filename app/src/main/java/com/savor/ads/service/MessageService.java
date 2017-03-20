@@ -76,15 +76,6 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
                 LogUtils.d("MessageService serverInfo == null");
             }
 
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-//            while (true) {
-//                String sendMessage = String.format("服务器，给我一个 APPLE 啊！ [%s]", simpleDateFormat.format(new Date()));
-//                if (NettyClient.mChannel!=null&& NettyClient.mChannel.isWritable()){
-//                    NettyClient.mChannel.writeAndFlush(sendMessage);
-//                }
-//                Thread.sleep(6000);
-//
-//            }
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -49,12 +49,7 @@ public class NettyClient {
     static String host;
     public static Channel mChannel = null;
     private NettyMessageCallback callback;
-    private Session session;
     private Context mContext;
-//    private String mac;
-//    private String bid;
-//    private String sid;
-//    private String rid;
     private static NettyClient instance;
 
     public static void init(int port, String host, NettyMessageCallback callback, Context context) {
@@ -74,7 +69,6 @@ public class NettyClient {
         this.host = host;
         this.callback = c;
         mContext = context;
-        this.session = Session.get(context);
     }
 
     public void setServer(int port, String host) {
