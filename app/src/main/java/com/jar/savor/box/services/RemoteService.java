@@ -103,20 +103,25 @@ public class RemoteService extends Service {
     private class ControllHandler extends AbstractHandler {
 
         private ControllHandler() {
+            mLock = new Object();
         }
 
+        private Object mLock;
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-            LogUtils.d("***********一次请求...***********");
-            LogUtils.d("target = " + target);
-            response.setContentType("application/json;charset=utf-8");
-            response.setStatus(200);
-            baseRequest.setHandled(true);
+            synchronized (mLock) {
+                LogUtils.w("***********一次请求处理开始...***********");
+                LogUtils.d("target = " + target);
+                response.setContentType("application/json;charset=utf-8");
+                response.setStatus(200);
+                baseRequest.setHandled(true);
 
-            String version = request.getHeader("version");
-            if ("1.0".equals(version)) {
-                handleRequestV10(request, response);
-            } else {
-                handleRequestOld(request, response);
+                String version = request.getHeader("version");
+                if ("1.0".equals(version)) {
+                    handleRequestV10(request, response);
+                } else {
+                    handleRequestOld(request, response);
+                }
+                LogUtils.w("***********一次请求处理结束...***********");
             }
         }
 

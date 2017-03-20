@@ -295,7 +295,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
-        data.putInt(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, imageType);
+        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
             LogUtils.d("Listener will setNewProjection");
