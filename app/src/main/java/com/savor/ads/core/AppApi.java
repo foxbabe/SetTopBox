@@ -66,6 +66,7 @@ public class AppApi {
         SP_POST_UPLOAD_LOG_JSON,
         SP_GET_UPGRADE_INFO_JSON,
         SP_GET_LOGO_DOWN,
+        SP_GET_LOADING_IMG_DOWN,
         SP_GET_UPGRADEDOWN,
         CP_GET_HEARTBEAT_PLAIN,
         SP_POST_UPLOAD_PROGRAM_JSON,
@@ -140,12 +141,13 @@ public class AppApi {
     }
 
     public static void downloadLOGO(String url,Context context, ApiRequestListener handler,String filePath){
-        try{
-            final HashMap<String, Object> params = new HashMap<String, Object>();
-            new AppServiceOk(context, Action.SP_GET_LOGO_DOWN, handler, params).downLoad(url, filePath);
-        }catch(Exception ex){
-            LogUtils.d(ex.toString());
-        }
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        new AppServiceOk(context, Action.SP_GET_LOGO_DOWN, handler, params).downLoad(url, filePath);
+    }
+
+    public static void downloadLoadingImg(String url,Context context, ApiRequestListener handler,String filePath){
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
     }
 
     /**

@@ -559,8 +559,7 @@ public class Session {
     }
 
     public String getBoxId() {
-
-        return getWiredMacAddr();
+        return boxId;
     }
 
     public void setBoxId(String boxId) {

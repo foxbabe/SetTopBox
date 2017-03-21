@@ -42,35 +42,35 @@ public class QrCodeWindowManager {
             return;
         }
         mIsHandling = true;
-        // 开始创建二维码
-        final String filePath = AppUtils.getSDCardPath() + "qrcode.jpg";
-        LogUtils.v("QrCodeWindowManager 开始拼接二维码内容");
-        LogFileUtil.write("QrCodeWindowManager 开始拼接二维码内容");
+//        // 开始创建二维码
+//        final String filePath = AppUtils.getSDCardPath() + "qrcode.jpg";
+//        LogUtils.v("QrCodeWindowManager 开始拼接二维码内容");
+//        LogFileUtil.write("QrCodeWindowManager 开始拼接二维码内容");
 
         final String ssid = AppUtils.getShowingSSID(context);
 
-        LogUtils.v("QrCodeWindowManager 开始获取AP IP");
-        LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");
-        String boxUrl = GlobalValues.APP_DOWN_LINK + "?" +
-                "ip=" + AppUtils.getLocalIPAddress() + "&bid=" + Session.get(context).getBoiteId() +
-                "&rid=" + Session.get(context).getRoomId() + "&sid=" + ssid;
-        File file = new File(filePath);
-        if (!boxUrl.equals(GlobalValues.QRCODE_CONTENT) || !file.exists()) {
-            if (file.exists()) {
-                file.delete();
-            }
-            LogUtils.v("QrCodeWindowManager 开始创建二维码图片");
-            LogFileUtil.write("QrCodeWindowManager 开始创建二维码图片");
-            boolean success = BarcodeUtil.createQRImage(boxUrl, 500, 500,
-                    BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_redian), filePath);
-            // 二维码创建失败则直接返回
-            if (!success) {
-                LogFileUtil.write("QrCodeWindowManager 创建二维码图片失败");
-                mIsHandling = false;
-                return;
-            }
-        }
-        GlobalValues.QRCODE_CONTENT = boxUrl;
+//        LogUtils.v("QrCodeWindowManager 开始获取AP IP");
+//        LogFileUtil.write("QrCodeWindowManager 开始获取AP IP");
+//        String boxUrl = GlobalValues.APP_DOWN_LINK + "?" +
+//                "ip=" + AppUtils.getLocalIPAddress() + "&bid=" + Session.get(context).getBoiteId() +
+//                "&rid=" + Session.get(context).getRoomId() + "&sid=" + ssid;
+//        File file = new File(filePath);
+//        if (!boxUrl.equals(GlobalValues.QRCODE_CONTENT) || !file.exists()) {
+//            if (file.exists()) {
+//                file.delete();
+//            }
+//            LogUtils.v("QrCodeWindowManager 开始创建二维码图片");
+//            LogFileUtil.write("QrCodeWindowManager 开始创建二维码图片");
+//            boolean success = BarcodeUtil.createQRImage(boxUrl, 500, 500,
+//                    BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_redian), filePath);
+//            // 二维码创建失败则直接返回
+//            if (!success) {
+//                LogFileUtil.write("QrCodeWindowManager 创建二维码图片失败");
+//                mIsHandling = false;
+//                return;
+//            }
+//        }
+//        GlobalValues.QRCODE_CONTENT = boxUrl;
 
         final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
         //获取WindowManager
@@ -94,46 +94,46 @@ public class QrCodeWindowManager {
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_qrcode, null);
 
-        final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_qrcode);
+//        final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_qrcode);
         final TextView wifiNameTv = (TextView) mFloatLayout.findViewById(R.id.tv_wifi_name);
         final TextView connectCodeTv = (TextView) mFloatLayout.findViewById(R.id.tv_code);
 
         LogUtils.v("QrCodeWindowManager 开始addView");
         LogFileUtil.write("QrCodeWindowManager 开始addView");
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            addToWindow(context, filePath, qrCodeIv, wifiNameTv, connectCodeTv, wmParams, ssid, code);
+            addToWindow(context, wifiNameTv, connectCodeTv, wmParams, ssid, code);
         } else {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    addToWindow(context, filePath, qrCodeIv, wifiNameTv, connectCodeTv, wmParams, ssid, code);
+                    addToWindow(context, wifiNameTv, connectCodeTv, wmParams, ssid, code);
                 }
             });
         }
     }
 
-    private void addToWindow(final Context context, String filePath, ImageView qrCodeIv, TextView wifiNameTv,
+    private void addToWindow(final Context context, TextView wifiNameTv,
                              TextView codeTv, final WindowManager.LayoutParams wmParams, String ssid, String code) {
-        GlideImageLoader.loadImageWithoutCache(context, filePath, qrCodeIv, new RequestListener() {
-            @Override
-            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-                mIsHandling = false;
-                ShowMessage.showToast(context, "加载二维码失败");
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-
-                if (mFloatLayout.getParent() == null) {
-                    mWindowManager.addView(mFloatLayout, wmParams);
-                }
-
-                mIsHandling = false;
-                mIsAdded = true;
-                return false;
-            }
-        });
+//        GlideImageLoader.loadImageWithoutCache(context, filePath, qrCodeIv, new RequestListener() {
+//            @Override
+//            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+//                mIsHandling = false;
+//                ShowMessage.showToast(context, "加载二维码失败");
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+//
+//                if (mFloatLayout.getParent() == null) {
+//                    mWindowManager.addView(mFloatLayout, wmParams);
+//                }
+//
+//                mIsHandling = false;
+//                mIsAdded = true;
+//                return false;
+//            }
+//        });
 
         if (!TextUtils.isEmpty(code)) {
             GlobalValues.AUTH_CODE = code;
@@ -145,6 +145,12 @@ public class QrCodeWindowManager {
         } else {
             wifiNameTv.setText("WiFi:" + ssid);
         }
+
+        if (mFloatLayout.getParent() == null) {
+            mWindowManager.addView(mFloatLayout, wmParams);
+        }
+        mIsHandling = false;
+        mIsAdded = true;
     }
 
     private Runnable mHideRunnable = new Runnable() {

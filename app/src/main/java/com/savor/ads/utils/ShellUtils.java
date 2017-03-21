@@ -113,8 +113,8 @@ public class ShellUtils {
     //更新启动图的位置
     public static boolean updateLogoPic(String arg) {
         try {
-            if(AppUtils.isFileExist("/mnt/sdcard/Pictures/logo.jpg")){
-                File file = new File("/mnt/sdcard/Pictures/logo.jpg");
+            if(AppUtils.isFileExist(ConstantValues.LOGO_FILE_PATH)){
+                File file = new File(ConstantValues.LOGO_FILE_PATH);
                 file.delete();
             }
         }catch (Exception e){
@@ -128,7 +128,7 @@ public class ShellUtils {
             if (dos != null) {
                 try {
 
-                    dos.writeBytes("cat " + arg + " > /mnt/sdcard/Pictures/logo.jpg\n");
+                    dos.writeBytes("cat " + arg + " > " + ConstantValues.LOGO_FILE_PATH +"\n");
                     dos.flush();
                     dos.writeBytes("exit\n");
                     dos.flush();

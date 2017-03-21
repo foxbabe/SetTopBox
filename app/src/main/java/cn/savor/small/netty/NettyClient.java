@@ -12,10 +12,10 @@ package cn.savor.small.netty;
 
 import android.content.Context;
 
-import com.savor.ads.core.Session;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+
+import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -30,10 +30,6 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author bichao

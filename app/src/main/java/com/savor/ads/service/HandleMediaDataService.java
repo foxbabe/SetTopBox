@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -66,6 +67,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private Context context;
     private Session session;
     private String logo_md5=null;
+    private String loading_img_md5=null;
     //接口返回的广告数据
     private SetTopBoxBean setTopBoxBean;
     //接口返回的点播数据
@@ -289,15 +291,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 }
                 break;
             case SP_GET_LOGO_DOWN:
-                if (obj instanceof FileDownProgress){
-                    FileDownProgress fs = (FileDownProgress) obj;
-                    long now = fs.getNow();
-                    long total = fs.getTotal();
-
-                }else if (obj instanceof File) {
+                if (obj instanceof File) {
                     File f = (File) obj;
                     byte[] fRead = new byte[0];
-                    String md5Value=null;
+                    String md5Value = null;
                     try {
                         fRead = org.apache.commons.io.FileUtils.readFileToByteArray(f);
                         md5Value = AppUtils.getMD5(fRead);
@@ -305,8 +302,25 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         e.printStackTrace();
                     }
                     //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
-                    if (md5Value!=null&&md5Value.equals(logo_md5)){
-                        ShellUtils.updateLogoPic(f.getAbsolutePath());
+                    if (md5Value != null && md5Value.equals(logo_md5)) {
+                        FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH);
+                    }
+                }
+                break;
+            case SP_GET_LOADING_IMG_DOWN:
+                if (obj instanceof File) {
+                    File f = (File) obj;
+                    byte[] fRead = new byte[0];
+                    String md5Value = null;
+                    try {
+                        fRead = org.apache.commons.io.FileUtils.readFileToByteArray(f);
+                        md5Value = AppUtils.getMD5(fRead);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
+                    if (md5Value != null && md5Value.equals(loading_img_md5)) {
+                        FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOADING_IMG_FILE_PATH);
                     }
                 }
                 break;
@@ -496,7 +510,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 }
             }
 
-            dbHelper.close();
+//            dbHelper.close();
             GlobalValues.PLAY_LIST = playList;
         }
     }
@@ -552,7 +566,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                !session.getBoiteId().equals(boiteBean.getHotel_id())){
 //            deleteDataByChangeBoite();
 //        }
-        session.setBoxId(session.getMacAddress());
+        session.setBoxId(boiteBean.getBox_id());
         session.setBoiteId(boiteBean.getHotel_id());
         session.setBoiteName(boiteBean.getHotel_name());
 
@@ -572,24 +586,53 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             session.setOss_file_path(OSSValues.uploadFilePath+boiteBean.getAreaId()+File.separator+datestr+File.separator);
         }
         /**下载启动图*/
-        if (!TextUtils.isEmpty(boiteBean.getLogo_url())){
+        if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5())){
+            File logoFile = new File(Environment.getExternalStorageDirectory(), ConstantValues.LOGO_FILE_PATH);
+            String md5 = null;
+            try {
+                if (logoFile.exists()) {
+                    md5 = AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(logoFile));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (!boiteBean.getLogo_md5().equals(md5)) {
+                ServerInfo serverInfo = session.getServerInfo();
+                if (serverInfo != null) {
+                    String baseUrl = serverInfo.getDownloadUrl();
+                    String url = baseUrl + boiteBean.getLogo_url();
+                    if (!TextUtils.isEmpty(boiteBean.getLogo_url())) {
+                        String[] split = boiteBean.getLogo_url().split("/");
+                        String logo_name = split[split.length - 1];
+                        logo_md5 = boiteBean.getLogo_md5();
+                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + logo_name;
+                        File tarFile = new File(path);
+                        if (tarFile.exists()) {
+                            tarFile.delete();
+                        }
+                        AppApi.downloadLOGO(url, context, this, path);
+                    }
+                }
+            }
+        }
+        /**下载视频投屏加载图*/
+        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
             ServerInfo serverInfo = session.getServerInfo();
             if (serverInfo != null) {
                 String baseUrl = serverInfo.getDownloadUrl();
-                String url =baseUrl+boiteBean.getLogo_url();
-                if (!TextUtils.isEmpty(boiteBean.getLogo_url())){
-                    String[] split = boiteBean.getLogo_url().split("/");
-                    String logo_name = split[split.length-1];
-                    logo_md5 = boiteBean.getLogo_md5();
-                    File tarFile =new File(AppUtils.getFilePath(context, AppUtils.StorageFile.cache));
-                    if(tarFile.exists()){
-                        com.savor.ads.utils.FileUtils.delDir(tarFile);
+                String url = baseUrl + boiteBean.getLoading_img_url();
+                if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
+                    String[] split = boiteBean.getLoading_img_url().split("/");
+                    String imageName = split[split.length - 1];
+                    loading_img_md5 = boiteBean.getLoading_img_md5();
+                    String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
+                    File tarFile = new File(path);
+                    if (tarFile.exists()) {
+                        tarFile.delete();
                     }
-                    String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache)+ logo_name;
-                    AppApi.downloadLOGO(url,context,this,path);
+                    AppApi.downloadLoadingImg(url, context, this, path);
                 }
             }
-
         }
     }
 

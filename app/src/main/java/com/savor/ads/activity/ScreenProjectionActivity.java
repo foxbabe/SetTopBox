@@ -739,6 +739,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
+        GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_ID = null;
     }
 

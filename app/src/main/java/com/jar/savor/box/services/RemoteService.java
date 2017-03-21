@@ -291,19 +291,26 @@ public class RemoteService extends Service {
                             }
                             break;
                         case "video":
-                            String reqJson = getBodyString(request);
                             if (!TextUtils.isEmpty(deviceId) &&
                                     (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                                             deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID))) {
+                                String reqJson = getBodyString(request);
                                 VideoPrepareRequestVo req = (new Gson()).fromJson(reqJson, VideoPrepareRequestVo.class);
-                                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition());
-                                if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
+                                if (!TextUtils.isEmpty(req.getMediaPath())) {
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                    BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition());
+                                    if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
+                                    }
+                                    resJson = new Gson().toJson(object);
+                                } else {
+                                    PrepareResponseVo vo = new PrepareResponseVo();
+                                    vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                    vo.setInfo("缺少视频路径");
+                                    resJson = new Gson().toJson(vo);
                                 }
-                                resJson = new Gson().toJson(object);
                             } else {
                                 PrepareResponseVo vo = new PrepareResponseVo();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);

@@ -70,7 +70,7 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
             LogUtils.d("MessageService fetchMessage");
             if (serverInfo != null) {
                 LogUtils.d("MessageService serverInfo != null");
-                NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, getApplicationContext());
+                NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, /*Session.get(this).getEthernetMac()*/ getApplicationContext());
                 NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap()));
             } else {
                 LogUtils.d("MessageService serverInfo == null");

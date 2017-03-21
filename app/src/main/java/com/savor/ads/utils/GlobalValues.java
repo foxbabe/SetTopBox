@@ -30,6 +30,8 @@ public class GlobalValues {
     public volatile static String CURRENT_PROJECT_IMAGE_ID;
     /** 当前投屏动作ID*/
     public volatile static String CURRENT_PROJECT_ID;
+    /** 上次投屏ID*/
+    public volatile static String LAST_PROJECT_ID;
 
 //    /**
 //     * 测试环境手机端APP下载页面

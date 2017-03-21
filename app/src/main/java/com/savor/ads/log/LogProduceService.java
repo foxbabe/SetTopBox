@@ -109,7 +109,7 @@ public class LogProduceService {
 			boxId = mparam.getBoxId();
 			logHour = mparam.getLogHour();
 		}else {
-			boxId = session.getBoxId();
+			boxId = session.getEthernetMac();
 			logHour = logTime;
 		}
 		String ret = mparam.getUUid() + ","
@@ -136,7 +136,7 @@ public class LogProduceService {
 		try {
 			String roomId = session.getRoomId();
 			String boiteid = session.getBoiteId();
-			String boxId = session.getBoxId();
+			String boxId = session.getEthernetMac();
 			if (TextUtils.isEmpty(roomId)
 					||TextUtils.isEmpty(boiteid)
 					||TextUtils.isEmpty(boxId)){

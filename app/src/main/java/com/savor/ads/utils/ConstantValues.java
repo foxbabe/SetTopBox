@@ -55,4 +55,9 @@ public class ConstantValues {
     /** 广告下载完成广播Action*/
     public static final String ADS_DOWNLOAD_COMPLETE_ACCTION = "com.savor.ads.ads_download_complete";
 
+
+    /** 下载的启动图*/
+    public static final String LOGO_FILE_PATH = "/Pictures/logo.jpg";
+    /** 下载的投屏加载图*/
+    public static final String LOADING_IMG_FILE_PATH = "/Pictures/loading.jpg";
 }

@@ -18,6 +18,10 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,10 +29,6 @@ import io.netty.channel.EventLoop;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author bichao</a>
@@ -94,6 +94,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 message.setHotelId(session.getBoiteId());
                 message.setRoomId(session.getRoomId());
                 message.setSsid(AppUtils.getShowingSSID(mContext));
+                message.setBoxId(session.getBoxId());
                 ctx.writeAndFlush(message);
                 break;
             default:
@@ -140,6 +141,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 message.setHotelId(session.getBoiteId());
                 message.setRoomId(session.getRoomId());
                 message.setSsid(AppUtils.getShowingSSID(mContext));
+                message.setBoxId(session.getBoxId());
                 ctx.writeAndFlush(message);
                 LogUtils.i("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
                 LogFileUtil.write("NettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());

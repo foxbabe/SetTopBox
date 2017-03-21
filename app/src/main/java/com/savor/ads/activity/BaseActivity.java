@@ -193,7 +193,7 @@ public abstract class BaseActivity extends Activity {
                     }
                 }
 
-                dbHelper.close();
+//                dbHelper.close();
                 GlobalValues.PLAY_LIST = playList;
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));

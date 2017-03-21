@@ -455,7 +455,7 @@ public class AppServiceOk {
             final Request request = new Request
                     .Builder()
                     .url(uri)
-                    .addHeader("Savor-Box-MAC",appSession.getBoxId())
+                    .addHeader("Savor-Box-MAC",appSession.getEthernetMac())
                     .post(ProgressHelper.addProgressRequestListener(requestBody, uiProgressRequestListener))
                     .build();
             //开始请求

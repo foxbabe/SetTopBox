@@ -23,10 +23,16 @@ public class BoxInitBean {
     private String logo_url;
     /**logo检验MD5*/
     private String logo_md5;
+    /**视频投屏加载图地址*/
+    private String loading_img_url;
+    /**视频投屏加载图检验MD5*/
+    private String loading_img_md5;
     /**OSS桶ID*/
     private String ossBucketName;
     /**盒子名称*/
     private String box_name;
+    /**盒子ID*/
+    private String box_id;
     /**包间类型*/
     private String room_type;
 
@@ -102,6 +108,22 @@ public class BoxInitBean {
         return logo_md5;
     }
 
+    public String getLoading_img_url() {
+        return loading_img_url;
+    }
+
+    public void setLoading_img_url(String loading_img_url) {
+        this.loading_img_url = loading_img_url;
+    }
+
+    public String getLoading_img_md5() {
+        return loading_img_md5;
+    }
+
+    public void setLoading_img_md5(String loading_img_md5) {
+        this.loading_img_md5 = loading_img_md5;
+    }
+
     public void setOssBucketName(String ossBucketName) {
         this.ossBucketName = ossBucketName;
     }
@@ -124,5 +146,13 @@ public class BoxInitBean {
 
     public void setRoom_type(String room_type) {
         this.room_type = room_type;
+    }
+
+    public String getBox_id() {
+        return box_id;
+    }
+
+    public void setBox_id(String box_id) {
+        this.box_id = box_id;
     }
 }

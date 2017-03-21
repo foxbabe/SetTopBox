@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.savor.ads.R;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
@@ -21,10 +23,13 @@ import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+
+import java.io.File;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -228,15 +233,16 @@ public class MainActivity extends BaseActivity {
 
     void initDisplay() {
         main_imgIv = (ImageView) findViewById(R.id.main_img);
-        if (AppUtils.isFileExist("/mnt/sdcard/Pictures/logo.jpg")) {
-            Bitmap bitmap = AppUtils.getLoacalBitmap("/mnt/sdcard/Pictures/logo.jpg");
-            if (bitmap != null) {
-                main_imgIv.setImageBitmap(bitmap);
-            } else {
-                main_imgIv.setImageResource(R.mipmap.bg_splash);
-            }
-
-        }
+        GlideImageLoader.loadImage(this, Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH, main_imgIv, R.mipmap.bg_splash, R.mipmap.bg_splash);
+//        if (AppUtils.isFileExist(ConstantValues.LOGO_FILE_PATH)) {
+//            Bitmap bitmap = AppUtils.getLoacalBitmap(ConstantValues.LOGO_FILE_PATH);
+//            if (bitmap != null) {
+//                main_imgIv.setImageBitmap(bitmap);
+//            } else {
+//                main_imgIv.setImageResource(R.mipmap.bg_splash);
+//            }
+//
+//        }
         if (mAudioManager != null) {
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
         }

@@ -245,7 +245,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             }
         }
 
-        dbHelper.close();
+//        dbHelper.close();
         if (vodCheckPass) {
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
@@ -286,7 +286,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
-        localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        if (isThumbnail) {
+            localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        } else {
+            // 大图的时候不生成新的ProjectId
+            localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID);
+        }
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
@@ -545,9 +550,15 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
     @Override
     public Object query(String projectId) {
+        if (TextUtils.isEmpty(projectId)) {
+            QueryPosBySessionIdResponseVo responseVo = new QueryPosBySessionIdResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+            return responseVo;
+        }
+
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 return ((ScreenProjectionActivity) activity).query();
             } else {
                 QueryPosBySessionIdResponseVo responseVo = new QueryPosBySessionIdResponseVo();
@@ -555,9 +566,22 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 return responseVo;
             }
         } else {
-            QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
-            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
-            return queryResponse;
+            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                // 播放正在准备，还没来得及跳到投屏页
+                QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                queryResponse.setPos(0);
+                return queryResponse;
+            } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
+                // 播放已结束
+                QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+                queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
+                return queryResponse;
+            }
         }
+
+        QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+        queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+        return queryResponse;
     }
 }

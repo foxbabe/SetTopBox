@@ -60,7 +60,7 @@ public class LogReportUtil {
 		mLogEn.setAdsPeriod(session.getAdvertMediaPeriod());
 		mLogEn.setVodPeriod(session.getMulticastMediaPeriod());
 		mLogEn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
-		mLogEn.setBoxId(session.getBoxId());
+		mLogEn.setBoxId(session.getEthernetMac());
 		mLogEn.setLogHour("");
 		offer(mLogEn);
 		/*******开机即生成一条信号源日志*******/

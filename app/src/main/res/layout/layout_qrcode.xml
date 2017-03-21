@@ -18,12 +18,12 @@
         android:textColor="@android:color/black"
         android:textSize="20dp"/>
 
-    <ImageView
+    <!--<ImageView
         android:id="@+id/iv_qrcode"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_gravity="center_horizontal"
-        />
+        />-->
 
     <TextView
         android:layout_width="250dp"
@@ -31,7 +31,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="请在小热点app中扫码或输入以下三位数字进行连接"
+        android:text="请在小热点app中输入以下三位数字进行连接"
         android:textColor="@android:color/black"
         android:textSize="18dp"/>
 
@@ -43,6 +43,7 @@
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="389"
-        android:textSize="30sp"
+        android:textScaleX="2"
+        android:textSize="40sp"
         android:textColor="@android:color/black"/>
 </LinearLayout>
