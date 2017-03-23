@@ -155,7 +155,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
     private boolean mIsFirstResume = true;
 
-    private int mCurrentVolume = 100;
+    private int mCurrentVolume = 60;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
