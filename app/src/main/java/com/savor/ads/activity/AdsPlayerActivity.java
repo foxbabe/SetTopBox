@@ -274,12 +274,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     @Override
     public void onMediaPrepared(int index) {
         // 准备播放新视频时产生一个新的UUID作为日志标识
-        mUUID = String.valueOf(System.currentTimeMillis());
         String action = "start";
         if (mCurrentPlayingIndex != index) {
+            mUUID = String.valueOf(System.currentTimeMillis());
             mCurrentPlayingIndex = index;
             action = "start";
         } else {
+            // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在onMediaPrepared()中赋值
+            if (TextUtils.isEmpty(mUUID)) {
+                mUUID = String.valueOf(System.currentTimeMillis());
+            }
             action = "resume";
         }
         LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),

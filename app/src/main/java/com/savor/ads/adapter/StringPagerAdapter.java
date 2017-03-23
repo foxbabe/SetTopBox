@@ -50,7 +50,7 @@ public class StringPagerAdapter extends PagerAdapter {
 //                    ImageViewerDialog.this.dismiss();
 //                }
 //            });
-        GlideImageLoader.loadImageWithoutCache(mContext, mImages.get(position), imageView);
+        GlideImageLoader.loadImageWithoutCache(mContext, mImages.get(position), imageView, 0, 0);
         mViewList.put(position, view);
         container.addView(view);
         return view;

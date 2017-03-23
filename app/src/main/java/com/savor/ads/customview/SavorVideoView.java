@@ -458,7 +458,7 @@ public class SavorVideoView extends RelativeLayout {
 
             if (mIfShowLoading) {
                 GlideImageLoader.loadImage(getContext(), Environment.getExternalStorageDirectory().getAbsolutePath() +
-                        ConstantValues.LOADING_IMG_FILE_PATH, mLoadingIv, R.mipmap.ads, R.mipmap.ads);
+                        ConstantValues.LOADING_IMG_FILE_PATH, mLoadingIv, 0, R.mipmap.ads);
                 mLoadingIv.setVisibility(VISIBLE);
                 mProgressBar.setVisibility(VISIBLE);
             }
