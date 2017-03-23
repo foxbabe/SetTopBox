@@ -35,7 +35,11 @@ public class QrCodeWindowManager {
     private boolean mIsHandling;
 
     public void showQrCode(final Context context, final String code) {
-        LogUtils.e("showQrCode");
+        LogUtils.d("showQrCode");
+        if (TextUtils.isEmpty(code)) {
+            LogUtils.e("Code is empty, will not show code window!!");
+            return;
+        }
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable, 10 * 1000);
         if (mIsAdded || mIsHandling) {

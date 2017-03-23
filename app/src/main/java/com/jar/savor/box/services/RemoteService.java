@@ -245,6 +245,7 @@ public class RemoteService extends Service {
         private void handleRequestV10(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
             String resJson = "";
             String path = request.getPathInfo();
+            LogUtils.d("request:--" + request.toString());
             if (TextUtils.isEmpty(path)) {
                 BaseResponse baseResponse = new BaseResponse();
                 baseResponse.setInfo("错误的功能");

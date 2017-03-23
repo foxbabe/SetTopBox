@@ -62,6 +62,7 @@ public class LogProduceService {
 							}
 							if (mparam != null) {
 								String log = makeLog();
+								LogUtils.i("log:" + log);
 								try {
 									mwriter.write(log);
 									mwriter.flush();
