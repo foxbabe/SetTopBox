@@ -396,7 +396,9 @@ public class RemoteService extends Service {
                             break;
                         case "query":
                             LogUtils.d("enter method listener.query");
-                            if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                            if (!TextUtils.isEmpty(deviceId) &&
+                                    (deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            deviceId.equals(GlobalValues.LAST_PROJECT_DEVICE_ID))) {
                                 String projectId = request.getParameter("projectId");
                                 Object object = RemoteService.listener.query(projectId);
                                 resJson = new Gson().toJson(object);
