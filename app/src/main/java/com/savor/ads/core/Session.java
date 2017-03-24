@@ -140,6 +140,8 @@ public class Session {
     private String oss_file_path;
 
     private boolean mIsConnectedToSP;
+    /** 呼玛验证码*/
+    private String mAuthCode;
 
     private Session(Context context) {
 
@@ -196,6 +198,7 @@ public class Session {
         oss_bucket = mPreference.loadStringKey(P_APP_OSS_BUCKET,null);
         oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
         splashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION,null);
+        mAuthCode = mPreference.loadStringKey(P_APP_AUTH_CODE,null);
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -259,7 +262,8 @@ public class Session {
                 || P_APP_ETHERNET_MAC.equals(key)
                 || P_APP_WLAN_MAC.equals(key)
                 || P_APP_OSS_PATH.equals(key)
-                || P_APP_OSS_BUCKET.equals(key)) {
+                || P_APP_OSS_BUCKET.equals(key)
+                || P_APP_AUTH_CODE.equals(key)) {
             mPreference.saveStringKey(key, (String) updateItem.second);
         } else if (P_APP_VOLUME.equals(key) ||
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
@@ -761,6 +765,17 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_SPLASH_VERSION, splashVersion));
     }
 
+    public String getAuthCode() {
+        return mAuthCode;
+    }
+
+    public void setAuthCode(String authCode) {
+        if (!TextUtils.isEmpty(authCode) && !authCode.equals(mAuthCode)) {
+            writePreference(new Pair<String, Object>(P_APP_AUTH_CODE, authCode));
+        }
+        mAuthCode = authCode;
+    }
+
     //电视播放声音
     public static final String P_APP_VOLUME = "com.savor.ads.volume";
     //酒楼名称
@@ -808,4 +823,6 @@ public class Session {
     public static final String P_APP_OSS_PATH = "com.savor.ads.oss.path";
     //启动图版本key
     public static final String P_APP_SPLASH_VERSION = "com.savor.ads.splashVersion";
+    //呼玛验证码key
+    public static final String P_APP_AUTH_CODE = "com.savor.ads.authCode";
 }

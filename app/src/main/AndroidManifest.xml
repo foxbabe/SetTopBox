@@ -37,17 +37,19 @@
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="official"/>
-
         <meta-data
             android:name="com.savor.ads.core.SavorGlideModule"
             android:value="GlideModule"/>
+
         <receiver android:name=".receiver.NetworkBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
-        <activity android:name=".activity.MainActivity"
-                  android:theme="@style/SplashTheme">
+
+        <activity
+            android:name=".activity.MainActivity"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
 
@@ -94,12 +96,12 @@
             android:launchMode="singleTask">
         </activity>
         <!-- 投屏类播放页面 -->
-        <activity
-            android:name=".activity.ScreenProjectionActivity">
+        <activity android:name=".activity.ScreenProjectionActivity">
         </activity>
         <!-- 应用设置页面 -->
-        <activity android:name=".activity.SettingActivity"
-                  android:launchMode="singleTask">
+        <activity
+            android:name=".activity.SettingActivity"
+            android:launchMode="singleTask">
         </activity>
 
         <service
@@ -119,6 +121,11 @@
         -->
         <activity android:name=".activity.UsbImageViewerActivity">
         </activity>
+
+        <service
+            android:name=".service.SSDPMulticastService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

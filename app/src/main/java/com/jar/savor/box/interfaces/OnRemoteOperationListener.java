@@ -1,12 +1,14 @@
 package com.jar.savor.box.interfaces;
 
 import com.jar.savor.box.vo.BaseResponse;
+import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryRequestVo;
+import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekRequestVo;
@@ -62,4 +64,8 @@ public interface OnRemoteOperationListener {
 
     Object query();
     Object query(String projectId);
+
+    void showCode();
+
+    ResponseT<CodeVerifyBean> verify(String code);
 }

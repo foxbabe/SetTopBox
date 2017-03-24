@@ -41,8 +41,8 @@ public class QrCodeWindowManager {
             LogUtils.e("Code is empty, will not show code window!!");
             return;
         }
-        GlobalValues.AUTH_CODE = code;
-        
+        Session.get(context).setAuthCode(code);
+
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable, 10 * 1000);
         if (mIsAdded || mIsHandling) {
@@ -95,8 +95,8 @@ public class QrCodeWindowManager {
         wmParams.y = DensityUtil.dip2px(context, 40);
 
         //设置悬浮窗口长宽数据
-        wmParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        wmParams.width = DensityUtil.dip2px(context, 228);
+        wmParams.height = DensityUtil.dip2px(context, 188);
 
         //获取浮动窗口视图所在布局
         mFloatLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.layout_qrcode, null);

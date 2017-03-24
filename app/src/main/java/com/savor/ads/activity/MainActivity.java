@@ -21,6 +21,7 @@ import com.savor.ads.log.LogUploadService;
 import com.savor.ads.service.HandleMediaDataService;
 import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
+import com.savor.ads.service.SSDPMulticastService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -117,6 +118,8 @@ public class MainActivity extends BaseActivity {
 
         startProduceLogService();
         startUploadLogService();
+
+        startMulticatSendService();
     }
 
     /**
@@ -194,6 +197,12 @@ public class MainActivity extends BaseActivity {
     private void startSsdpService() {
         LogFileUtil.write("MainActivity will startSsdpService");
         Intent intent = new Intent(this, ServerDiscoveryService.class);
+        startService(intent);
+    }
+
+    private void startMulticatSendService() {
+        LogFileUtil.write("MainActivity will startMulticatSendService");
+        Intent intent = new Intent(this, SSDPMulticastService.class);
         startService(intent);
     }
 

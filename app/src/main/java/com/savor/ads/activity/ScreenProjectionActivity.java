@@ -1,5 +1,6 @@
 package com.savor.ads.activity;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
@@ -318,6 +320,12 @@ public class ScreenProjectionActivity extends BaseActivity {
                             }
                         }
                     }
+
+                    if(GlobalValues.CURRENT_PROJECT_BITMAP.getWidth() > DensityUtil.getScreenRealSize(this).x){
+                        GlobalValues.CURRENT_PROJECT_BITMAP = Bitmap.createScaledBitmap(GlobalValues.CURRENT_PROJECT_BITMAP,
+                                DensityUtil.getScreenRealSize(this).x,
+                                GlobalValues.CURRENT_PROJECT_BITMAP.getHeight() * DensityUtil.getScreenRealSize(this).x / GlobalValues.CURRENT_PROJECT_BITMAP.getWidth(), true);
+                    }
                     mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
                 }
             } else {
@@ -373,7 +381,10 @@ public class ScreenProjectionActivity extends BaseActivity {
             mProjectTipTv.setVisibility(View.GONE);
         }
 
-        rescheduleToExit(true);
+        // 只有是投图片时才开始计划定时退出投屏
+        if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) && mIsThumbnail) {
+            rescheduleToExit(true);
+        }
     }
 
     /**
@@ -737,10 +748,10 @@ public class ScreenProjectionActivity extends BaseActivity {
         mHandler.removeCallbacksAndMessages(null);
 
         GlobalValues.LAST_PROJECT_DEVICE_ID = GlobalValues.CURRENT_PROJECT_DEVICE_ID;
+        GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
-        GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_ID = null;
     }
 

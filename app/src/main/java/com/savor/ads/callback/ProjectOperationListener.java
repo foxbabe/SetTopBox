@@ -1,6 +1,7 @@
 package com.savor.ads.callback;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.BaseResponse;
+import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
@@ -15,6 +17,7 @@ import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.QueryRequestVo;
+import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekRequestVo;
@@ -23,9 +26,11 @@ import com.jar.savor.box.vo.StopRequestVo;
 import com.jar.savor.box.vo.StopResponseVo;
 import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
+import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.ScreenProjectionActivity;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
@@ -43,9 +48,9 @@ import java.util.UUID;
  */
 
 public class ProjectOperationListener implements OnRemoteOperationListener {
-    private final Context mContext;
+    private final Application mContext;
 
-    public ProjectOperationListener(Context context) {
+    public ProjectOperationListener(Application context) {
         mContext = context;
     }
 
@@ -583,5 +588,33 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
         queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         return queryResponse;
+    }
+
+    @Override
+    public void showCode() {
+        if (mContext instanceof SavorApplication) {
+            ((SavorApplication) mContext).showQrCodeWindow(null);
+        }
+    }
+
+    @Override
+    public ResponseT<CodeVerifyBean> verify(String code) {
+        ResponseT responseT = new ResponseT();
+        Session session = Session.get(mContext);
+        if (!TextUtils.isEmpty(code) && code.equals(session.getAuthCode())) {
+            responseT.setCode(10000);
+            CodeVerifyBean bean = new CodeVerifyBean();
+            bean.setBox_id(session.getBoxId());
+            bean.setBox_ip(AppUtils.getLocalIPAddress());
+            bean.setBox_mac(session.getEthernetMac());
+            bean.setHotel_id(session.getBoiteId());
+            bean.setRoom_id(session.getRoomId());
+            bean.setSsid(AppUtils.getShowingSSID(mContext));
+            responseT.setResult(bean);
+        } else {
+            responseT.setCode(10001);
+            responseT.setMsg("验证未通过");
+        }
+        return responseT;
     }
 }

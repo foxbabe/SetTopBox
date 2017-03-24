@@ -19,6 +19,7 @@ import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.QueryRequestVo;
+import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekRequestVo;
@@ -348,9 +349,7 @@ public class RemoteService extends Service {
                                 StopResponseVo object = RemoteService.listener.stop(projectId);
                                 resJson = new Gson().toJson(object);
 
-//                                ConstantValues.CURRENT_PROJECT_DEVICE_ID = null;
-//                                ConstantValues.CURRENT_PROJECT_DEVICE_NAME = null;
-//                                ConstantValues.CURRENT_PROJECT_IMAGE_ID = null;
+                                GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
                             }
                             break;
                         case "rotate":
@@ -406,6 +405,32 @@ public class RemoteService extends Service {
                             } else {
                                 QueryPosBySessionIdResponseVo vo = new QueryPosBySessionIdResponseVo();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                resJson = new Gson().toJson(vo);
+                            }
+                            break;
+                        case "showCode":
+                            LogUtils.d("enter method listener.showCode");
+                            if (!TextUtils.isEmpty(deviceId)) {
+                                RemoteService.listener.showCode();
+                                ResponseT vo = new ResponseT();
+
+                                vo.setCode(10000);
+                                resJson = new Gson().toJson(vo);
+                            } else {
+                                ResponseT vo = new ResponseT();
+                                vo.setCode(10001);
+                                resJson = new Gson().toJson(vo);
+                            }
+                            break;
+                        case "verify":
+                            LogUtils.d("enter method listener.verify");
+                            if (!TextUtils.isEmpty(deviceId)) {
+                                String code = request.getParameter("code");
+                                ResponseT vo = RemoteService.listener.verify(code);
+                                resJson = new Gson().toJson(vo);
+                            } else {
+                                ResponseT vo = new ResponseT();
+                                vo.setCode(10001);
                                 resJson = new Gson().toJson(vo);
                             }
                             break;
@@ -532,8 +557,6 @@ public class RemoteService extends Service {
                         showImage = true;
                     }
                 }
-//                            FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");
-//                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
                 if (showImage) {
                     Bitmap bitmap = null;
@@ -550,6 +573,8 @@ public class RemoteService extends Service {
                             part.delete();
                         }
 
+//                        FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");
+//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         // 显示图片
                         GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
                         object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail));

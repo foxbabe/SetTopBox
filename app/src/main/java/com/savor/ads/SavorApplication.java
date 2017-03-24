@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.callback.ProjectOperationListener;
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
@@ -44,7 +45,7 @@ public class SavorApplication extends MultiDexApplication {
      */
     public void showQrCodeWindow(String code) {
         if (TextUtils.isEmpty(code)) {
-            code = GlobalValues.AUTH_CODE;
+            code = Session.get(this).getAuthCode();
         }
         mQrCodeWindowManager.showQrCode(this, code);
     }
