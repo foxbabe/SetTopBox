@@ -127,6 +127,7 @@ public class LogProduceService {
 					+ boxId + ","
 					+ logHour
 					+ "\r\n";
+        LogUtils.d("makeLog=="+ret);
 		return ret;
 	}
 	/**
