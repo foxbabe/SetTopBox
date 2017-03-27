@@ -355,7 +355,7 @@ public class DBHelper extends SQLiteOpenHelper {
             return -1;
         }
         try{
-            open();
+//            open();
             ContentValues initialValues = new ContentValues();
             initialValues.put(MediaDBInfo.FieldName.VID, mediaLib.getVid());
             initialValues.put(MediaDBInfo.FieldName.MD5, mediaLib.getMd5());
@@ -392,7 +392,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         List<MediaLibBean> list = null;
         try {
-            open();
+//            open();
             cursor = db.query(MediaDBInfo.TableName.MEDIALIB, columns,
                     selection, selectionArgs, groupBy, having, orderBy, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -432,7 +432,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         long in = 0;
         try{
-            open();
+//            open();
             ContentValues initialValues = new ContentValues();
             initialValues.put(MediaDBInfo.FieldName.VID, playList.getVid());
             initialValues.put(MediaDBInfo.FieldName.MEDIANAME, playList.getMedia_name());
@@ -480,7 +480,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         List<PlayListBean> playList = null;
         try {
-            open();
+//            open();
             cursor = db.query(MediaDBInfo.TableName.NEWPLAYLIST, columns,
                     selection, selectionArgs, groupBy, having, orderBy, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -526,7 +526,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         List<PlayListBean> playList = null;
         try {
-            open();
+//            open();
             cursor = db.query(MediaDBInfo.TableName.PLAYLIST, columns,
                     selection, selectionArgs, groupBy, having, orderBy, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -557,11 +557,16 @@ public class DBHelper extends SQLiteOpenHelper {
         return playList;
     }
 
+    /**
+     * 按顺序查询播放表
+     * @param period
+     * @return
+     */
     public ArrayList<PlayListBean> getOrderedPlayList(String period) {
         ArrayList<PlayListBean> playList = null;
         Cursor cursor=null;
         try{
-            open();
+//            open();
             cursor = db.query(MediaDBInfo.TableName.PLAYLIST, null, MediaDBInfo.FieldName.PERIOD + "='" + period+"'", null,null, null, MediaDBInfo.FieldName.ADS_ORDER);
             if (cursor != null && cursor.moveToFirst()) {
                 playList = new ArrayList<>();
@@ -602,7 +607,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public boolean deleteDataByWhere(String DBtable, String selection, String[] selectionArgs) {
         boolean flag = false;
         try {
-            open();
+//            open();
             flag = db.delete(DBtable, selection, selectionArgs) > 0;
         }catch (Exception e){
             e.printStackTrace();
@@ -619,7 +624,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public boolean deleteAllData(String DBtable) {
         boolean flag =false;
         try{
-            open();
+//            open();
             flag = db.delete(DBtable, null, null) > 0;
 
         }catch (Exception e){
@@ -638,7 +643,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     public void copyPlaylist(String fromTable, String ToTable) {
         try{
-            open();
+//            open();
             db.delete(ToTable, "1=1", null);
             db.execSQL("insert into " + ToTable + " select * from  " + fromTable);
         }catch (Exception e){
@@ -659,7 +664,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         boolean flag = false;
         try {
-            open();
+//            open();
             ContentValues initialValues = new ContentValues();
             initialValues.put(MediaDBInfo.FieldName.TITLE, bean.getName());
             initialValues.put(MediaDBInfo.FieldName.VID, bean.getVid());
@@ -691,56 +696,19 @@ public class DBHelper extends SQLiteOpenHelper {
         return flag;
     }
 
-    //查询点播下载表
-    public List<OnDemandBean> findMutlicastMediaLib(String selection,String[] selectionArgs) throws SQLException {
-
-//        String selection = "";
-//        String[] selectionArgs = new String[]{};
-        String groupBy = null;
-        String having = null;
-        String orderBy = null;
-        Cursor cursor = null;
-        List<OnDemandBean> list = null;
-        try {
-            open();
-            cursor = db.query(MediaDBInfo.TableName.MULTICASTMEDIALIB, null,
-                    selection, selectionArgs, groupBy, having, orderBy, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                list = new ArrayList<>();
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    OnDemandBean bean = new OnDemandBean();
-                    bean.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.TITLE)));
-                    bean.setCatagory(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.CATAGORY)));
-                    bean.setPicUrlMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PICMD5)));
-                    bean.setMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MD5)));
-                    bean.setLengthClassify(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.LENGTHCLASSIFY)));
-                    bean.setAreaId(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.AREAID)));
-                    bean.setPeriod(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.PERIOD)));
-                    bean.setMedia_type(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MEDIATYPE)));
-                    list.add(bean);
-                }
-            }
-        } catch (Exception e) {
-            LogUtils.e(e.toString());
-        } finally {
-            try {
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-            } catch (Exception e2) {
-                LogUtils.e(e2.toString());
-            }
-
-        }
-        return list;
-    }
-
+    /**
+     * 查询点播表
+     * @param selection
+     * @param selectionArgs
+     * @return
+     * @throws SQLException
+     */
     public List<OnDemandBean> findMutlicastMediaLibByWhere(String selection, String[] selectionArgs) throws SQLException {
         List<OnDemandBean> list = null;
         synchronized (dbHelper){
             Cursor cursor = null;
             try{
-                open();
+//                open();
 //                db.beginTransaction();
                 cursor = db.query(MediaDBInfo.TableName.MULTICASTMEDIALIB, null,
                         selection, selectionArgs, null, null, null, null);
