@@ -245,6 +245,7 @@ public class RemoteService extends Service {
         private void handleRequestV10(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
             String resJson = "";
             String path = request.getPathInfo();
+            LogUtils.d("request:--" + request.toString());
             if (TextUtils.isEmpty(path)) {
                 BaseResponse baseResponse = new BaseResponse();
                 baseResponse.setInfo("错误的功能");
@@ -396,7 +397,9 @@ public class RemoteService extends Service {
                             break;
                         case "query":
                             LogUtils.d("enter method listener.query");
-                            if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                            if (!TextUtils.isEmpty(deviceId) &&
+                                    (deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            deviceId.equals(GlobalValues.LAST_PROJECT_DEVICE_ID))) {
                                 String projectId = request.getParameter("projectId");
                                 Object object = RemoteService.listener.query(projectId);
                                 resJson = new Gson().toJson(object);

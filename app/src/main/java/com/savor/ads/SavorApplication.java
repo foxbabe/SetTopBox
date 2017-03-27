@@ -4,11 +4,13 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.support.multidex.MultiDexApplication;
+import android.text.TextUtils;
 
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.QrCodeWindowManager;
 
@@ -41,6 +43,9 @@ public class SavorApplication extends MultiDexApplication {
      * 显示二维码
      */
     public void showQrCodeWindow(String code) {
+        if (TextUtils.isEmpty(code)) {
+            code = GlobalValues.AUTH_CODE;
+        }
         mQrCodeWindowManager.showQrCode(this, code);
     }
 

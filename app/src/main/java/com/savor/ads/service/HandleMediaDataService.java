@@ -616,21 +616,32 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             }
         }
         /**下载视频投屏加载图*/
-        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
-            ServerInfo serverInfo = session.getServerInfo();
-            if (serverInfo != null) {
-                String baseUrl = serverInfo.getDownloadUrl();
-                String url = baseUrl + boiteBean.getLoading_img_url();
-                if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
-                    String[] split = boiteBean.getLoading_img_url().split("/");
-                    String imageName = split[split.length - 1];
-                    loading_img_md5 = boiteBean.getLoading_img_md5();
-                    String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
-                    File tarFile = new File(path);
-                    if (tarFile.exists()) {
-                        tarFile.delete();
+        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url()) && !TextUtils.isEmpty(boiteBean.getLoading_img_md5())) {
+            File loadingFile = new File(Environment.getExternalStorageDirectory(), ConstantValues.LOADING_IMG_FILE_PATH);
+            String md5 = null;
+            try {
+                if (loadingFile.exists()) {
+                    md5 = AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(loadingFile));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (!boiteBean.getLoading_img_md5().equals(md5)) {
+                ServerInfo serverInfo = session.getServerInfo();
+                if (serverInfo != null) {
+                    String baseUrl = serverInfo.getDownloadUrl();
+                    String url = baseUrl + boiteBean.getLoading_img_url();
+                    if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
+                        String[] split = boiteBean.getLoading_img_url().split("/");
+                        String imageName = split[split.length - 1];
+                        loading_img_md5 = boiteBean.getLoading_img_md5();
+                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
+                        File tarFile = new File(path);
+                        if (tarFile.exists()) {
+                            tarFile.delete();
+                        }
+                        AppApi.downloadLoadingImg(url, context, this, path);
                     }
-                    AppApi.downloadLoadingImg(url, context, this, path);
                 }
             }
         }

@@ -62,7 +62,7 @@ public class GlideImageLoader {
         loadImage(appContext, imgPath, imageView, globalPlaceholderResId, globalFailedResId);
     }
 
-    public static void loadImageWithoutCache(Context context, String imgPath, ImageView imageView) {
+    public static void loadImageWithoutCache(Context context, String imgPath, ImageView imageView, int placeholderResId, int failedResId) {
         if (context == null) {
             return;
         }
@@ -71,6 +71,8 @@ public class GlideImageLoader {
                 .load(imgPath)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
+                .placeholder(placeholderResId)
+                .error(failedResId)
                 .into(imageView);
     }
 

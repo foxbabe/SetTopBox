@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.request.RequestListener;
@@ -29,13 +30,19 @@ public class QrCodeWindowManager {
     private Handler mHandler = new Handler();
 
     WindowManager mWindowManager;
-    private LinearLayout mFloatLayout;
+    private RelativeLayout mFloatLayout;
 
     private boolean mIsAdded;
     private boolean mIsHandling;
 
     public void showQrCode(final Context context, final String code) {
-        LogUtils.e("showQrCode");
+        LogUtils.d("showQrCode");
+        if (TextUtils.isEmpty(code)) {
+            LogUtils.e("Code is empty, will not show code window!!");
+            return;
+        }
+        GlobalValues.AUTH_CODE = code;
+        
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable, 10 * 1000);
         if (mIsAdded || mIsHandling) {
@@ -84,15 +91,15 @@ public class QrCodeWindowManager {
         //调整悬浮窗显示的停靠位置为左侧置顶
         wmParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        wmParams.x = DensityUtil.dip2px(context, 60);
-        wmParams.y = DensityUtil.dip2px(context, 60);
+        wmParams.x = DensityUtil.dip2px(context, 40);
+        wmParams.y = DensityUtil.dip2px(context, 40);
 
         //设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         //获取浮动窗口视图所在布局
-        mFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_qrcode, null);
+        mFloatLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.layout_qrcode, null);
 
 //        final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_qrcode);
         final TextView wifiNameTv = (TextView) mFloatLayout.findViewById(R.id.tv_wifi_name);
@@ -136,14 +143,21 @@ public class QrCodeWindowManager {
 //        });
 
         if (!TextUtils.isEmpty(code)) {
-            GlobalValues.AUTH_CODE = code;
+            StringBuilder builder = new StringBuilder();
+            for(int i = 0; i < code.length(); i++) {
+                builder.append(code.charAt(i));
+                if(i + 1 < code.length()) {
+                    builder.append(" ");
+                }
+            }
+            code = builder.toString();
         }
-        codeTv.setText(GlobalValues.AUTH_CODE);
+        codeTv.setText(code);
 
         if (AppUtils.isWifiEnabled(context)) {
-            wifiNameTv.setText("WiFi:" + ssid);
+            wifiNameTv.setText(ssid);
         } else {
-            wifiNameTv.setText("WiFi:" + ssid);
+            wifiNameTv.setText(ssid);
         }
 
         if (mFloatLayout.getParent() == null) {
