@@ -299,17 +299,11 @@ public class ScreenProjectionActivity extends BaseActivity {
             mSavorVideoView.release();
             mImageArea.setVisibility(View.VISIBLE);
 
-            if (mIsThumbnail) {
-                // 只有当传过来是缩略图时才去重置ImageView状态
-                mImageView.setRotation(0);
-                mImageView.setScaleX(1);
-                mImageView.setScaleY(1);
-                rotatePicture();
-            }
 //            mImageLoadingTip.setVisibility(View.VISIBLE);
 //            mImageLoadingPb.setVisibility(View.VISIBLE);
 //            mImageLoadingTv.setText("图片加载中...");
 
+            // 展示图片
             if (TextUtils.isEmpty(mMediaPath)) {
                 if (GlobalValues.CURRENT_PROJECT_BITMAP != null) {
                     if (mImageView.getDrawable() != null) {
@@ -359,6 +353,14 @@ public class ScreenProjectionActivity extends BaseActivity {
                         return false;
                     }
                 });
+            }
+
+            if (mIsThumbnail) {
+                // 只有当传过来是缩略图时才去重置ImageView状态
+                mImageView.setRotation(0);
+                mImageView.setScaleX(1);
+                mImageView.setScaleY(1);
+                rotatePicture();
             }
 
             mUUID = String.valueOf(System.currentTimeMillis());

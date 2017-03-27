@@ -578,10 +578,6 @@ public class RemoteService extends Service {
                         // 显示图片
                         GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
                         object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail));
-                        if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
-                            GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
-                            GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
-                        }
                     } else {
                         // 请求格式错误
                         object = new BaseResponse();
@@ -591,6 +587,10 @@ public class RemoteService extends Service {
                     // 图片被忽略
                     object = new BaseResponse();
                     object.setResult(ConstantValues.SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED);
+                }
+                if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
                 }
 
                 respJson = new Gson().toJson(object);
