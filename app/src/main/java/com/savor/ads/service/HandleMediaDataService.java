@@ -882,8 +882,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
 
     private void onDemandDownloadMethod(final MediaLibBean bean){
-
-
         String p = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast);
         String path = p+bean.getName();
         ServerInfo serverInfo = session.getServerInfo();
@@ -915,7 +913,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 mDemandList.add(bean.getName());
                 String selection = DBHelper.MediaDBInfo.FieldName.TITLE + "=? ";
                 String[] selectionArgs = new String[]{bean.getName()};
-                List<OnDemandBean> list= dbHelper.findMutlicastMediaLib(selection,selectionArgs);
+                List<OnDemandBean> list= dbHelper.findMutlicastMediaLibByWhere(selection,selectionArgs);
                 if (list!=null&&list.size()>1){
                     dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,selection,selectionArgs);
                     dbHelper.insertOrUpdateMulticastLib(bean,false);
