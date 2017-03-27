@@ -631,6 +631,8 @@ public class SavorVideoView extends RelativeLayout {
         LogUtils.w(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
 
+        removeCallbacks(mPrepareTimeoutRunnable);
+
         if (mPlayStateCallback != null) {
             mPlayStateCallback.onMediaPause(mCurrentFileIndex);
         }

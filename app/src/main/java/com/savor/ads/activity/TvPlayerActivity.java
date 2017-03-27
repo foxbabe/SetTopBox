@@ -21,6 +21,7 @@ import com.savor.ads.dialog.TvChannelListDialog;
 import com.savor.ads.dialog.TvChannelSearchingDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
@@ -107,7 +108,7 @@ public class TvPlayerActivity extends BaseActivity {
 
     private int mCurrentProgramIndex;
 
-    private long mActivityCreateTime;
+    private long mActivityResumeTime;
 
     private String mLastAdsVid;
 
@@ -119,7 +120,6 @@ public class TvPlayerActivity extends BaseActivity {
         handleIntent();
         findView();
         setView();
-        mActivityCreateTime = System.currentTimeMillis();
     }
 
     private void handleIntent() {
@@ -371,7 +371,7 @@ public class TvPlayerActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 禁止进入页面后马上操作
-        if (System.currentTimeMillis() - mActivityCreateTime < 2000)
+        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG)
             return true;
 
         boolean handled = false;
@@ -548,6 +548,7 @@ public class TvPlayerActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
+        mActivityResumeTime = System.currentTimeMillis();
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {

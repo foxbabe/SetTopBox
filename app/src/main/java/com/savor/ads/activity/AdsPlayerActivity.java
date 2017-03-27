@@ -35,6 +35,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private boolean mNeedPlayNewer;
     /** 日志用的播放记录标识*/
     private String mUUID;
+    private long mActivityResumeTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         super.onResume();
 
         LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
+        mActivityResumeTime = System.currentTimeMillis();
 
         setVolume(mSession.getVolume());
         mSavorVideoView.onResume();
@@ -172,6 +174,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // 禁止进入页面后马上操作
+        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG)
+            return true;
+
         boolean handled = false;
         switch (keyCode) {
             // 后退

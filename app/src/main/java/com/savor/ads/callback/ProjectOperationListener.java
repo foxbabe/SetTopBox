@@ -613,7 +613,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             responseT.setResult(bean);
         } else {
             responseT.setCode(10001);
-            responseT.setMsg("验证未通过");
+            responseT.setMsg("输入有误，请重新输入");
         }
         return responseT;
     }
