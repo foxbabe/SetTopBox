@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 
+import com.savor.ads.bean.ServerInfo;
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogUtils;
 
@@ -19,15 +21,25 @@ import java.net.MulticastSocket;
  */
 public class SSDPMulticastService extends IntentService {
     /**
-     * SSDP发送周期，2分钟
+     * SSDP发送周期
      */
-    private static final int MULTICAST_DURATION = 1000 * 60 * 2;
+    private static final int MULTICAST_DURATION = 1000 * 3;
 
     private static final int PORT = 11900;
     private static final String IP_TARGET = "238.255.255.250";
 
+    /** 组播类型，box*/
     private static final String TYPE_LABEL_PREFIX = "Savor-Type:";
+    /** 机顶盒IP*/
+    private static final String BOX_IP_LABEL_PREFIX = "Savor-Box-HOST:";
+    /** 小平台IP*/
     private static final String IP_LABEL_PREFIX = "Savor-HOST:";
+    /** 以下为小平台端口信息*/
+    private static final String NETTY_PORT_LABEL_PREFIX = "Savor-Port-Netty:";
+    private static final String COMMAND_PORT_LABEL_PREFIX = "Savor-Port-Command:";
+    private static final String DOWNLOAD_PORT_LABEL_PREFIX = "Savor-Port-Download:";
+    /** 酒楼ID前缀*/
+    private static final String HOTEL_ID_PREFIX = "Savor-Hotel-ID:";
     private static final String CRLF = "\r\n";
 
     private MulticastSocket mSocketSend;
@@ -51,8 +63,18 @@ public class SSDPMulticastService extends IntentService {
 //                mSocketSend.setTimeToLive(0);
                 mSocketSend.joinGroup(InetAddress.getByName(IP_TARGET));
 
+                // 拼接message
                 String msg = TYPE_LABEL_PREFIX + "box" + CRLF +
-                        IP_LABEL_PREFIX + AppUtils.getLocalIPAddress() + CRLF;
+                        BOX_IP_LABEL_PREFIX + AppUtils.getLocalIPAddress() + CRLF +
+                        HOTEL_ID_PREFIX + Session.get(this).getBoiteId() + CRLF;
+                ServerInfo serverInfo = Session.get(this).getServerInfo();
+                if (serverInfo != null) {
+                    msg += IP_LABEL_PREFIX + serverInfo.getServerIp() + CRLF +
+                            NETTY_PORT_LABEL_PREFIX + serverInfo.getNettyPort() + CRLF +
+                            COMMAND_PORT_LABEL_PREFIX + serverInfo.getCommandPort() + CRLF +
+                            DOWNLOAD_PORT_LABEL_PREFIX + serverInfo.getDownloadPort() + CRLF;
+                }
+
                 DatagramPacket packetSend = new DatagramPacket(msg.getBytes(), msg.length(), InetAddress.getByName(IP_TARGET), PORT);
                 mSocketSend.send(packetSend);
             } catch (IOException e) {
@@ -66,6 +88,7 @@ public class SSDPMulticastService extends IntentService {
             }
             LogUtils.d("完成发送一次SSDP");
 
+            // 休息
             try {
                 Thread.sleep(MULTICAST_DURATION);
             } catch (InterruptedException e) {

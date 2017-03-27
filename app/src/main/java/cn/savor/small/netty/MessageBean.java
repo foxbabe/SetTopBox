@@ -29,26 +29,6 @@ public class MessageBean implements Serializable {
     private String serialnumber = null;
     private String ip = null;
     private String mac = null;
-    /**
-     * 酒楼ID
-     */
-    private String hotelId;
-    /**
-     * 包间ID
-     */
-    private String roomId;
-    /**
-     * 机顶盒ID
-     */
-    private String boxId;
-    /**
-     * SSID
-     */
-    private String ssid;
-    /**
-     * 手机连接码（展示二维码时使用）
-     */
-    private String connectCode;
 
     public List<String> getContent() {
         if (this.content == null)
@@ -90,44 +70,5 @@ public class MessageBean implements Serializable {
 
     public void setMac(String mac) {
         this.mac = mac;
-    }
-
-    public String getHotelId() {
-        return hotelId;
-    }
-
-    public void setHotelId(String hotelId) {
-        this.hotelId = hotelId;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-
-    public String getSsid() {
-        return ssid;
-    }
-
-    public void setSsid(String ssid) {
-        this.ssid = ssid;
-    }
-    public String getConnectCode() {
-        return connectCode;
-    }
-
-    public void setConnectCode(String connectCode) {
-        this.connectCode = connectCode;
-    }
-
-    public String getBoxId() {
-        return boxId;
-    }
-
-    public void setBoxId(String boxId) {
-        this.boxId = boxId;
     }
 }

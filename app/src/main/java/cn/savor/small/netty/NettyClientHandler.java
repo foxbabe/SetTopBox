@@ -13,6 +13,9 @@ package cn.savor.small.netty;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
@@ -70,18 +73,27 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 List<String> contentMsgH = msg.getContent();
                 for (String tmp : contentMsgH) {
                     LogUtils.i("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
-                    LogFileUtil.write("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
                 }
                 break;
             case SERVER_ORDER_REQ:
                 List<String> contentMsg = msg.getContent();
-                for (String tmp : contentMsg) {
-
-                    LogUtils.i("ORDER_REQ： 收到来自服务端的...指令." + tmp + "===>>接收到内容:" + msg.getContent());
-                    LogFileUtil.write("ORDER_REQ： 收到来自服务端的...指令." + tmp + "===>>接收到内容:" + msg.getContent());
-                    if (callback != null) {
-                        callback.onReceiveServerMessage(tmp, msg.getConnectCode());
+                String order = "";
+                String connectCode = "";
+                for (int i = 0; i < contentMsg.size(); i++) {
+                    String tmp = contentMsg.get(i);
+                    if (i == 0) {
+                        order = tmp;
+                    } else if (i == 1) {
+                        try {
+                            InnerBean bean = new Gson().fromJson(tmp, new TypeToken<InnerBean>(){}.getType());
+                            connectCode = bean.getConnectCode();
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+                        }
                     }
+                }
+                if (callback != null) {
+                    callback.onReceiveServerMessage(order, connectCode);
                 }
                 MessageBean message = new MessageBean();
                 message.setCmd(MessageBean.Action.CLIENT_ORDER_RESP);
@@ -91,10 +103,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 message.setContent(contList);
                 message.setIp(AppUtils.getLocalIPAddress());
                 message.setMac(session.getEthernetMac());
-                message.setHotelId(session.getBoiteId());
-                message.setRoomId(session.getRoomId());
-                message.setSsid(AppUtils.getShowingSSID(mContext));
-                message.setBoxId(session.getBoxId());
                 ctx.writeAndFlush(message);
                 break;
             default:
@@ -131,17 +139,19 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 // 发送心跳消息
                 MessageBean message = new MessageBean();
                 message.setCmd(MessageBean.Action.CLIENT_HEART_REQ);
-                ArrayList<String> contList = new ArrayList<String>();
-                contList.add("I am a Heart Pakage...");
-                message.setContent(contList);
                 String number = channelId + System.currentTimeMillis();
                 message.setSerialnumber(number);
                 message.setIp(AppUtils.getLocalIPAddress());
                 message.setMac(session.getEthernetMac());
-                message.setHotelId(session.getBoiteId());
-                message.setRoomId(session.getRoomId());
-                message.setSsid(AppUtils.getShowingSSID(mContext));
-                message.setBoxId(session.getBoxId());
+                InnerBean bean = new InnerBean();
+                bean.setHotelId(session.getBoiteId());
+                bean.setRoomId(session.getRoomId());
+                bean.setSsid(AppUtils.getShowingSSID(mContext));
+                bean.setBoxId(session.getBoxId());
+                ArrayList<String> contList = new ArrayList<String>();
+                contList.add("I am a Heart Pakage...");
+                contList.add(new Gson().toJson(bean));
+                message.setContent(contList);
                 ctx.writeAndFlush(message);
                 LogUtils.i("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
                 LogFileUtil.write("NettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
