@@ -265,17 +265,17 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
             if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-                LogUtils.d("Listener will setNewProjection");
+                LogUtils.e("Listener will setNewProjection");
                 ((ScreenProjectionActivity) activity).setNewProjection(data);
             } else {
                 if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-                    LogUtils.d("Listener will startActivity in new task");
+                    LogUtils.e("Listener will startActivity in new task");
                     Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
                     intent.putExtras(data);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
-                    LogUtils.d("Listener will startActivity in " + activity);
+                    LogUtils.e("Listener will startActivity in " + activity.toString());
                     Intent intent = new Intent(activity, ScreenProjectionActivity.class);
                     intent.putExtras(data);
                     activity.startActivity(intent);
@@ -440,7 +440,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public StopResponseVo stop() {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).stop();
+            ((ScreenProjectionActivity) activity).stop();
+
+            StopResponseVo stopResponseVo = new StopResponseVo();
+            stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+            return stopResponseVo;
         } else {
             return null;
         }
@@ -448,10 +453,21 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
     @Override
     public StopResponseVo stop(String projectId) {
+        if (TextUtils.isEmpty(projectId)) {
+            StopResponseVo responseVo = new StopResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
+        }
+
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                return ((ScreenProjectionActivity) activity).stop();
+            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                ((ScreenProjectionActivity) activity).stop();
+                StopResponseVo stopResponseVo = new StopResponseVo();
+                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                return stopResponseVo;
             } else {
                 StopResponseVo responseVo = new StopResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
@@ -459,10 +475,23 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 return responseVo;
             }
         } else {
-            StopResponseVo responseVo = new StopResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
+            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                // 播放正在准备，还没来得及跳到投屏页
+                StopResponseVo stopResponseVo = new StopResponseVo();
+                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                stopResponseVo.setInfo("正在准备投屏，请稍候再试");
+                return stopResponseVo;
+            } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
+                // 播放已结束
+                StopResponseVo stopResponseVo = new StopResponseVo();
+                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                return stopResponseVo;
+            } else {
+                StopResponseVo responseVo = new StopResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
         }
     }
 

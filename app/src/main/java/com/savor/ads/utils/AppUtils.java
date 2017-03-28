@@ -1128,11 +1128,11 @@ public class AppUtils {
             reader = new BufferedReader(
                     new InputStreamReader(is));
             String line = reader.readLine();
-            result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                    .replaceAll(":", "");
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            if (!TextUtils.isEmpty(line)) {
+                result = line.substring(line.indexOf("HWaddr") + 6).trim()
+                        .replaceAll(":", "");
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (reader != null) {

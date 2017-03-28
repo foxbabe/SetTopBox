@@ -114,7 +114,7 @@ public class SavorVideoView extends RelativeLayout {
                                 mPlayState != MediaPlayerState.END)*/) {
 
                     try {
-                        LogUtils.e("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
+                        LogUtils.w("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         LogFileUtil.write("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         mMediaPlayer.setDisplay(mSurfaceHolder);
                         mMediaPlayer.setScreenOnWhilePlaying(true);
@@ -431,7 +431,7 @@ public class SavorVideoView extends RelativeLayout {
             return;
         }
         try {
-            LogUtils.e("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
+            LogUtils.w("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
             LogFileUtil.write("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
             mMediaPlayer.setDataSource(mMediaFiles.get(mCurrentFileIndex));
             mPlayState = MediaPlayerState.INITIALIZED;

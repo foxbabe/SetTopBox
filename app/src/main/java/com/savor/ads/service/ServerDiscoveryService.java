@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -110,8 +111,13 @@ public class ServerDiscoveryService extends Service {
                             LogFileUtil.write("收到的消息是：" + msgReceived + "\ngetHostAddress:" + packetReceived.getAddress().getHostAddress());
 
                             if (msgReceived.length() > 0) {
-                                // 解析并保存小平台信息到Session
                                 type = parseStringMetadata(msgReceived, TYPE_LABEL_PREFIX);
+                                // 忽略自己发出的组播
+                                if (ConstantValues.SSDP_CONTENT_TYPE.equals(type)) {
+                                    continue;
+                                }
+
+                                // 解析并保存小平台信息到Session
                                 address = parseStringMetadata(msgReceived, IP_LABEL_PREFIX);
                                 nettyPort = parseIntMetadata(msgReceived, NETTY_PORT_LABEL_PREFIX);
                                 commandPort = parseIntMetadata(msgReceived, COMMAND_PORT_LABEL_PREFIX);

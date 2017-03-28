@@ -242,7 +242,7 @@ public class MainActivity extends BaseActivity {
 
     void initDisplay() {
         main_imgIv = (ImageView) findViewById(R.id.main_img);
-        GlideImageLoader.loadImage(this, Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH,
+        GlideImageLoader.loadImageWithoutCache(this, Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH,
                 main_imgIv, 0, R.mipmap.bg_splash);
 //        if (AppUtils.isFileExist(ConstantValues.LOGO_FILE_PATH)) {
 //            Bitmap bitmap = AppUtils.getLoacalBitmap(ConstantValues.LOGO_FILE_PATH);

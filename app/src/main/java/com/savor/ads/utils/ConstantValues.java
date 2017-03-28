@@ -62,4 +62,6 @@ public class ConstantValues {
     public static final String LOADING_IMG_FILE_PATH = "/Pictures/loading.jpg";
 
     public static final int KEY_DOWN_LAG = 2000;
+
+    public static final String SSDP_CONTENT_TYPE = "box";
 }

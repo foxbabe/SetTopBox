@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class SSDPMulticastService extends IntentService {
                 mSocketSend.joinGroup(InetAddress.getByName(IP_TARGET));
 
                 // 拼接message
-                String msg = TYPE_LABEL_PREFIX + "box" + CRLF +
+                String msg = TYPE_LABEL_PREFIX + ConstantValues.SSDP_CONTENT_TYPE + CRLF +
                         BOX_IP_LABEL_PREFIX + AppUtils.getLocalIPAddress() + CRLF +
                         HOTEL_ID_PREFIX + Session.get(this).getBoiteId() + CRLF;
                 ServerInfo serverInfo = Session.get(this).getServerInfo();

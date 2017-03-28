@@ -21,7 +21,6 @@ import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekResponseVo;
-import com.jar.savor.box.vo.StopResponseVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
@@ -98,7 +97,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     private Runnable mExitProjectionRunnable = new Runnable() {
         @Override
         public void run() {
-            LogUtils.w("mExitProjectionRunnable " + ScreenProjectionActivity.this.hashCode());
+            LogUtils.e("mExitProjectionRunnable " + ScreenProjectionActivity.this.hashCode());
             exitProjection();
         }
     };
@@ -162,6 +161,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LogUtils.e("onCreate " + this.hashCode());
         setContentView(R.layout.activity_screen_projection);
 
         findView();
@@ -226,7 +226,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     }
 
     private void exitProjection() {
-        LogUtils.w("will exitProjection " + this.hashCode());
+        LogUtils.e("will exitProjection " + this.hashCode());
         mIsBeenStopped = true;
         if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) ||
                 ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN.equals(mProjectType)) {
@@ -477,14 +477,10 @@ public class ScreenProjectionActivity extends BaseActivity {
      *
      * @return
      */
-    public StopResponseVo stop() {
-        LogUtils.w("StopResponseVo will exitProjection " + this.hashCode());
-        mHandler.post(mExitProjectionRunnable);
+    public void stop() {
+        LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
         mIsBeenStopped = true;
-
-        StopResponseVo stopResponseVo = new StopResponseVo();
-        stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-        return stopResponseVo;
+        mHandler.post(mExitProjectionRunnable);
     }
 
     /**
@@ -628,6 +624,7 @@ public class ScreenProjectionActivity extends BaseActivity {
      * @param scheduleNewOne 是否重置
      */
     private void rescheduleToExit(boolean scheduleNewOne) {
+        LogUtils.e("rescheduleToExit scheduleNewOne=" + scheduleNewOne + " " + this.hashCode());
         mHandler.removeCallbacks(mExitProjectionRunnable);
         if (scheduleNewOne) {
             int duration = PROJECT_DURATION;
@@ -734,7 +731,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        LogUtils.d("onDestroy " + this.hashCode());
+        LogUtils.e("onDestroy " + this.hashCode());
         super.onDestroy();
 
         mSavorVideoView.release();

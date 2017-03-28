@@ -568,9 +568,12 @@ public class RemoteService extends Service {
                             switch (part.getName()) {
                                 case "fileUpload":
                                     bitmap = BitmapFactory.decodeStream(part.getInputStream());
+                                    part.delete();
+                                    break;
+                                default:
+                                    part.delete();
                                     break;
                             }
-                            part.delete();
                         }
 
 //                        FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");

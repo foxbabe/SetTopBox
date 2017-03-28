@@ -152,14 +152,10 @@ public class ActivitiesManager {
 	/**
 	 * 遍历目前栈中的activity
 	 */
-	public void peekActivity() {
-		for (Activity activity : mActivityStack) {
-			if (null == activity) {
-				break;
-			}
-			LogUtils.i("peekActivity()-->"
-					+ activity.getClass().getSimpleName());
-		}
+	public Activity peekActivity() {
+		Activity activity = mActivityStack.peek();
+		LogUtils.i("peekActivity()-->" + activity.getClass().getSimpleName());
+		return activity;
 	}
 	
 	public boolean contains(Class<? extends Activity> clazz) {
