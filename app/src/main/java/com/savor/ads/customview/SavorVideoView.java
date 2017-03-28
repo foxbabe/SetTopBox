@@ -693,7 +693,6 @@ public class SavorVideoView extends RelativeLayout {
      * @param mediaFiles
      */
     public void setMediaFiles(ArrayList<String> mediaFiles) {
-        mIsPauseByOut = false;
         setMediaFiles(mediaFiles, 0, 0);
     }
 
@@ -707,6 +706,7 @@ public class SavorVideoView extends RelativeLayout {
     public void setMediaFiles(ArrayList<String> mediaFiles, int currentFileIndex, int playPosition) {
         LogUtils.w(TAG + "setMediaFiles mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "setMediaFiles mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        mIsPauseByOut = false;
         if (mediaFiles != null && !mediaFiles.isEmpty()) {
             mCurrentFileIndex = currentFileIndex;
             mAssignedPlayPosition = playPosition;
