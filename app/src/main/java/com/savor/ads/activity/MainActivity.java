@@ -1,7 +1,11 @@
 package com.savor.ads.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,12 +14,10 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.savor.ads.R;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogProduceService;
 import com.savor.ads.log.LogUploadService;
 import com.savor.ads.service.HandleMediaDataService;
@@ -23,14 +25,13 @@ import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
 import com.savor.ads.service.SSDPMulticastService;
 import com.savor.ads.service.ServerDiscoveryService;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-
-import java.io.File;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -45,6 +46,8 @@ public class MainActivity extends BaseActivity {
     Handler mHandler = new Handler();
     private ImageView main_imgIv;
 
+    private boolean mIsLagElapse;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -52,24 +55,53 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         initDisplay();
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                String SDCardPath = AppUtils.getExternalSDCardPath();
-                if (!TextUtils.isEmpty(SDCardPath)) {
-                    fillPlayList();
-                    if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-                        Intent intent = new Intent(mContext, AdsPlayerActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            }
-        }, 5000);
-
         mSession.setStartTime(AppUtils.getCurTime());
+
+        registerDownloadReceiver();
 
         // 清楚Glide图片缓存
         GlideImageLoader.clearCache(mContext, true, true);
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mIsLagElapse = true;
+                gotoAdsActivity();
+            }
+        }, 5000);
+    }
+
+    private void gotoAdsActivity() {
+        String SDCardPath = AppUtils.getExternalSDCardPath();
+        if (!TextUtils.isEmpty(SDCardPath)) {
+            fillPlayList();
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+                Intent intent = new Intent(mContext, AdsPlayerActivity.class);
+                startActivity(intent);
+            }
+        }
+    }
+
+    private void registerDownloadReceiver() {
+        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION);
+        registerReceiver(mDownloadCompleteReceiver, intentFilter);
+    }
+
+    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LogUtils.d("收到下载完成广播");
+            if (mIsLagElapse && ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity) {
+                // 停留时间已到却仍未调到Ads的话，这里做跳转
+                gotoAdsActivity();
+            }
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mDownloadCompleteReceiver);
     }
 
     private boolean mIsFirstResume = true;
@@ -242,17 +274,16 @@ public class MainActivity extends BaseActivity {
 
     void initDisplay() {
         main_imgIv = (ImageView) findViewById(R.id.main_img);
-        GlideImageLoader.loadImageWithoutCache(this, Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH,
-                main_imgIv, 0, R.mipmap.bg_splash);
-//        if (AppUtils.isFileExist(ConstantValues.LOGO_FILE_PATH)) {
-//            Bitmap bitmap = AppUtils.getLoacalBitmap(ConstantValues.LOGO_FILE_PATH);
-//            if (bitmap != null) {
-//                main_imgIv.setImageBitmap(bitmap);
-//            } else {
-//                main_imgIv.setImageResource(R.mipmap.bg_splash);
-//            }
-//
-//        }
+//        GlideImageLoader.loadImage(this,
+//                Environment.getExternalStorageDirectory().getAbsolutePath() + mSession.getSplashPath(),
+//                main_imgIv, 0, R.mipmap.bg_splash);
+        Bitmap bitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + mSession.getSplashPath());
+        if (bitmap != null) {
+            main_imgIv.setImageBitmap(bitmap);
+        } else {
+            main_imgIv.setImageResource(R.mipmap.bg_splash);
+        }
+
         if (mAudioManager != null) {
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
         }

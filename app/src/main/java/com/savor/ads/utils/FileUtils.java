@@ -41,6 +41,10 @@ public class FileUtils {
             int bytesum = 0;
             int byteread = 0;
             File oldfile = new File(oldPath);
+            File newfile = new File(newPath);
+            if (!newfile.getParentFile().exists()) {
+                newfile.getParentFile().mkdirs();
+            }
             if (oldfile.exists()) { //文件存在时
                 inStream = new FileInputStream(oldPath); //读入原文件
                 fs = new FileOutputStream(newPath);

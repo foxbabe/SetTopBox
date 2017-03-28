@@ -71,14 +71,6 @@ public abstract class BaseActivity extends Activity {
 
     }
 
-    private void gotoAdsPlayer() {
-        if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod()) && !TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
-            LogFileUtil.write("gotoAdsPlayer, will goto AdsPlayerActivity");
-            Intent intent = new Intent(this, AdsPlayerActivity.class);
-            startActivity(intent);
-        }
-    }
-
     /**
      * 注册广播，判断sd卡以及U盘挂载状态
      */
@@ -153,11 +145,11 @@ public abstract class BaseActivity extends Activity {
         TechnicalLogReporter.sdcardMounted(this);
         fillPlayList();
 
-        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-            LogFileUtil.write("handleMediaMounted, will goto AdsPlayerActivity");
-            Intent intent = new Intent(this, AdsPlayerActivity.class);
-            startActivity(intent);
-        }
+//        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+//            LogFileUtil.write("handleMediaMounted, will goto AdsPlayerActivity");
+//            Intent intent = new Intent(this, AdsPlayerActivity.class);
+//            startActivity(intent);
+//        }
     }
 
     protected void fillPlayList() {

@@ -110,57 +110,57 @@ public class ShellUtils {
         }
     }
 
-    //更新启动图的位置
-    public static boolean updateLogoPic(String arg) {
-        try {
-            if(AppUtils.isFileExist(ConstantValues.LOGO_FILE_PATH)){
-                File file = new File(ConstantValues.LOGO_FILE_PATH);
-                file.delete();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        boolean isflag = false;
-        try {
-            java.lang.Process proc = Runtime.getRuntime().exec("su");
-            DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
-            if (dos != null) {
-                try {
-
-                    dos.writeBytes("cat " + arg + " > " + ConstantValues.LOGO_FILE_PATH +"\n");
-                    dos.flush();
-                    dos.writeBytes("exit\n");
-                    dos.flush();
-                    isflag = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    LogUtils.d(e.toString());
-                } finally {
-                    if (dos!=null){
-                        dos.close();
-                    }
-                }
-            }
-            try {
-                proc.waitFor();
-            } catch (InterruptedException e) {
-                LogUtils.d(e.toString());
-                e.printStackTrace();
-            }
-
-            try {
-                if (proc != null) {
-                    proc.exitValue();
-                }
-            } catch (IllegalThreadStateException e) {
-                proc.destroy();
-            }
-        } catch (IOException e) {
-            LogUtils.d(e.toString());
-            e.printStackTrace();
-        }
-        return isflag;
-
-    }
+//    //更新启动图的位置
+//    public static boolean updateLogoPic(String arg) {
+//        try {
+//            if(AppUtils.isFileExist(GlobalValues.LOGO_FILE_PATH)){
+//                File file = new File(GlobalValues.LOGO_FILE_PATH);
+//                file.delete();
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//
+//        boolean isflag = false;
+//        try {
+//            java.lang.Process proc = Runtime.getRuntime().exec("su");
+//            DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
+//            if (dos != null) {
+//                try {
+//
+//                    dos.writeBytes("cat " + arg + " > " + GlobalValues.LOGO_FILE_PATH +"\n");
+//                    dos.flush();
+//                    dos.writeBytes("exit\n");
+//                    dos.flush();
+//                    isflag = true;
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    LogUtils.d(e.toString());
+//                } finally {
+//                    if (dos!=null){
+//                        dos.close();
+//                    }
+//                }
+//            }
+//            try {
+//                proc.waitFor();
+//            } catch (InterruptedException e) {
+//                LogUtils.d(e.toString());
+//                e.printStackTrace();
+//            }
+//
+//            try {
+//                if (proc != null) {
+//                    proc.exitValue();
+//                }
+//            } catch (IllegalThreadStateException e) {
+//                proc.destroy();
+//            }
+//        } catch (IOException e) {
+//            LogUtils.d(e.toString());
+//            e.printStackTrace();
+//        }
+//        return isflag;
+//
+//    }
 }

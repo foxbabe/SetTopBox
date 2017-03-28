@@ -18,7 +18,7 @@ import java.io.InputStream;
 public class SavorGlideModule implements GlideModule {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
-//        builder.setDecodeFormat(DecodeFormat.PREFER_RGB_565);
+        builder.setDecodeFormat(DecodeFormat.PREFER_ARGB_8888);
     }
 
     @Override

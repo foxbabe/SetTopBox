@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 import com.savor.ads.R;
 import com.savor.ads.bean.MediaPlayerError;
 import com.savor.ads.bean.MediaPlayerState;
-import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -457,8 +457,9 @@ public class SavorVideoView extends RelativeLayout {
             mPlayState = MediaPlayerState.PREPARING;
 
             if (mIfShowLoading) {
-                GlideImageLoader.loadImageWithoutCache(getContext(), Environment.getExternalStorageDirectory().getAbsolutePath() +
-                        ConstantValues.LOADING_IMG_FILE_PATH, mLoadingIv, 0, R.mipmap.ads);
+                GlideImageLoader.loadImage(getContext(), Environment.getExternalStorageDirectory().getAbsolutePath() +
+                        Session.get(getContext()).getLoadingPath(), mLoadingIv, 0, R.mipmap.ads);
+
                 mLoadingIv.setVisibility(VISIBLE);
                 mProgressBar.setVisibility(VISIBLE);
             }

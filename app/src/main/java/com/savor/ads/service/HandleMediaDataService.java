@@ -1,6 +1,5 @@
 package com.savor.ads.service;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.Service;
 import android.content.Context;
@@ -15,8 +14,6 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.savor.ads.activity.AdsPlayerActivity;
-import com.savor.ads.activity.MainActivity;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
 import com.savor.ads.bean.MediaLibBean;
@@ -33,15 +30,12 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
 import com.savor.ads.oss.OSSValues;
-import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileDownProgress;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.ShellUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.UpdateUtil;
 import com.savor.ads.utils.tv.TvOperate;
@@ -303,7 +297,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                     //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
                     if (md5Value != null && md5Value.equals(logo_md5)) {
-                        FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOGO_FILE_PATH);
+                        try {
+                            File file = new File(Environment.getExternalStorageDirectory(), session.getSplashPath());
+                            if (file.exists()) {
+                                file.delete();
+                            }
+                            String newPath = "/Pictures/" + f.getName();
+                            FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + newPath);
+                            session.setSplashPath(newPath);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 break;
@@ -320,7 +325,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                     //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
                     if (md5Value != null && md5Value.equals(loading_img_md5)) {
-                        FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + ConstantValues.LOADING_IMG_FILE_PATH);
+                        try {
+                            File file = new File(Environment.getExternalStorageDirectory(), session.getLoadingPath());
+                            if (file.exists()) {
+                                file.delete();
+                            }
+                            String newPath = "/Pictures/" + f.getName();
+                            FileUtils.copyFile(f.getAbsolutePath(), Environment.getExternalStorageDirectory().getAbsolutePath() + newPath);
+                            session.setLoadingPath(newPath);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 break;
@@ -467,15 +482,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void notifyToPlay() {
         fillPlayList();
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof MainActivity) {
-            LogFileUtil.write("广告下载完成, will goto AdsPlayerActivity");
-            Intent intent = new Intent(activity, AdsPlayerActivity.class);
-            activity.startActivity(intent);
-        } else {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof MainActivity) {
+//            LogFileUtil.write("广告下载完成, will goto AdsPlayerActivity");
+//            Intent intent = new Intent(activity, AdsPlayerActivity.class);
+//            activity.startActivity(intent);
+//        } else {
             LogUtils.d("发送广告下载完成广播");
             sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
-        }
+//        }
     }
 
 
@@ -587,7 +602,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
         /**下载启动图*/
         if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5())){
-            File logoFile = new File(Environment.getExternalStorageDirectory(), ConstantValues.LOGO_FILE_PATH);
+            File logoFile = new File(Environment.getExternalStorageDirectory(), session.getSplashPath());
             String md5 = null;
             try {
                 if (logoFile.exists()) {
@@ -617,7 +632,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
         /**下载视频投屏加载图*/
         if (!TextUtils.isEmpty(boiteBean.getLoading_img_url()) && !TextUtils.isEmpty(boiteBean.getLoading_img_md5())) {
-            File loadingFile = new File(Environment.getExternalStorageDirectory(), ConstantValues.LOADING_IMG_FILE_PATH);
+            File loadingFile = new File(Environment.getExternalStorageDirectory(), session.getLoadingPath());
             String md5 = null;
             try {
                 if (loadingFile.exists()) {

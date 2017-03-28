@@ -142,6 +142,10 @@ public class Session {
     private boolean mIsConnectedToSP;
     /** 呼玛验证码*/
     private String mAuthCode;
+    /** 启动图路径*/
+    private String mSplashPath;
+    /** 加载图路径*/
+    private String mLoadingPath;
 
     private Session(Context context) {
 
@@ -199,6 +203,8 @@ public class Session {
         oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
         splashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION,null);
         mAuthCode = mPreference.loadStringKey(P_APP_AUTH_CODE,null);
+        mSplashPath = mPreference.loadStringKey(P_APP_SPLASH_PATH, "/Pictures/logo.jpg");
+        mLoadingPath = mPreference.loadStringKey(P_APP_LOADING_PATH, "/Pictures/loading.jpg");
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -263,7 +269,9 @@ public class Session {
                 || P_APP_WLAN_MAC.equals(key)
                 || P_APP_OSS_PATH.equals(key)
                 || P_APP_OSS_BUCKET.equals(key)
-                || P_APP_AUTH_CODE.equals(key)) {
+                || P_APP_AUTH_CODE.equals(key)
+                || P_APP_SPLASH_PATH.equals(key)
+                || P_APP_LOADING_PATH.equals(key)) {
             mPreference.saveStringKey(key, (String) updateItem.second);
         } else if (P_APP_VOLUME.equals(key) ||
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
@@ -776,6 +784,24 @@ public class Session {
         mAuthCode = authCode;
     }
 
+    public String getSplashPath() {
+        return mSplashPath;
+    }
+
+    public void setSplashPath(String splashPath) {
+        mSplashPath = splashPath;
+        writePreference(new Pair<String, Object>(P_APP_SPLASH_PATH, splashPath));
+    }
+
+    public String getLoadingPath() {
+        return mLoadingPath;
+    }
+
+    public void setLoadingPath(String loadingPath) {
+        mLoadingPath = loadingPath;
+        writePreference(new Pair<String, Object>(P_APP_LOADING_PATH, loadingPath));
+    }
+
     //电视播放声音
     public static final String P_APP_VOLUME = "com.savor.ads.volume";
     //酒楼名称
@@ -825,4 +851,8 @@ public class Session {
     public static final String P_APP_SPLASH_VERSION = "com.savor.ads.splashVersion";
     //呼玛验证码key
     public static final String P_APP_AUTH_CODE = "com.savor.ads.authCode";
+    //启动图路径key
+    public static final String P_APP_SPLASH_PATH = "com.savor.ads.splashPath";
+    //加载图路径key
+    public static final String P_APP_LOADING_PATH = "com.savor.ads.loadingPath";
 }

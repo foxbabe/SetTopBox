@@ -56,11 +56,6 @@ public class ConstantValues {
     public static final String ADS_DOWNLOAD_COMPLETE_ACCTION = "com.savor.ads.ads_download_complete";
 
 
-    /** 下载的启动图*/
-    public static final String LOGO_FILE_PATH = "/Pictures/logo.jpg";
-    /** 下载的投屏加载图*/
-    public static final String LOADING_IMG_FILE_PATH = "/Pictures/loading.jpg";
-
     public static final int KEY_DOWN_LAG = 2000;
 
     public static final String SSDP_CONTENT_TYPE = "box";
