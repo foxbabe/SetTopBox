@@ -451,7 +451,7 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty()) {
             // 尝试填充播放列表
             fillPlayList();
 
@@ -459,6 +459,7 @@ public class TvPlayerActivity extends BaseActivity {
                 Intent intent = new Intent(this, AdsPlayerActivity.class);
                 startActivity(intent);
             } else {
+                ShowMessage.showToast(this, "未发现可播放内容");
             }
         }
     }
