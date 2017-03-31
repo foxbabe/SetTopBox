@@ -207,7 +207,7 @@ public class TvPlayerActivity extends BaseActivity {
         }
 
         if (mIsAutoTurning) {
-            mIsAutoTurning = true;
+            mIsAutoTurning = false;
             autoTurning();
         } else {
             if (mSession.getTvInputSource() >= mInputSource.length)
