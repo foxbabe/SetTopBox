@@ -112,6 +112,8 @@ public class TvPlayerActivity extends BaseActivity {
 
     private String mLastAdsVid;
 
+    private static final int DELAY_TIME = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,9 +146,9 @@ public class TvPlayerActivity extends BaseActivity {
                 TvPlayer tvPlayer = TvManager.getPlayerManager();
                 try {
 //                    if (!mIsSurfaceDestroyed) {
-                        tvPlayer.setDisplay(holder);
-                        // 产生一个新的UUID作为日志标识
-                        mUUID = String.valueOf(System.currentTimeMillis());
+                    tvPlayer.setDisplay(holder);
+                    // 产生一个新的UUID作为日志标识
+                    mUUID = String.valueOf(System.currentTimeMillis());
                     LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                             String.valueOf(System.currentTimeMillis()), "start", "tv", mLastAdsVid,
                             "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
@@ -161,7 +163,6 @@ public class TvPlayerActivity extends BaseActivity {
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
             }
 
             @Override
@@ -327,15 +328,23 @@ public class TvPlayerActivity extends BaseActivity {
 
     private void showChannelTips() {
         mHandler.removeCallbacks(mHideChannelTipRunnable);
-        mChannelTipRl.setVisibility(View.VISIBLE);
-        mChannelNumberTv.setText(String.format("%03d", (mSession.getTvCurrentChannelNumber())));
+        String name = "";
         for (AtvProgramInfo pro : mChannelList) {
             if (pro.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
-                mChannelNameTv.setText(pro.getChannelName());
+                name = pro.getChannelName();
                 LogUtils.d("name:" + pro.getChannelName() + " freq:" + pro.getFreq());
                 break;
             }
         }
+        final String finalName = name;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mChannelTipRl.setVisibility(View.VISIBLE);
+                mChannelNumberTv.setText(String.format("%03d", (mSession.getTvCurrentChannelNumber())));
+                mChannelNameTv.setText(finalName);
+            }
+        });
 
         mHandler.postDelayed(mHideChannelTipRunnable, 5 * 1000);
     }
@@ -371,7 +380,7 @@ public class TvPlayerActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 禁止进入页面后马上操作
-        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG)
+        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG + DELAY_TIME * 1000)
             return true;
 
         boolean handled = false;
@@ -455,12 +464,12 @@ public class TvPlayerActivity extends BaseActivity {
             // 尝试填充播放列表
             fillPlayList();
 
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-                Intent intent = new Intent(this, AdsPlayerActivity.class);
-                startActivity(intent);
-            } else {
-                ShowMessage.showToast(this, "未发现可播放内容");
-            }
+        }
+        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+            Intent intent = new Intent(this, AdsPlayerActivity.class);
+            startActivity(intent);
+        } else {
+            ShowMessage.showToast(this, "未发现可播放视频内容");
         }
     }
 
@@ -502,7 +511,7 @@ public class TvPlayerActivity extends BaseActivity {
 //
 //            gotoAdsPlayer();
 //        } else {
-            switchInputSource(index);
+        switchInputSource(index);
 //        }
     }
 
@@ -550,21 +559,45 @@ public class TvPlayerActivity extends BaseActivity {
         super.onResume();
 
         mActivityResumeTime = System.currentTimeMillis();
+
+        boolean doInit = true;
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+                doInit = false;
                 gotoAdsPlayer();
-            } else {
-                init();
             }
-        } else {
-            init();
+        }
+
+        if (doInit) {
+            GlobalValues.IS_BOX_BUSY = true;
+            ShowMessage.showToast(mContext, "电视节目准备中，即将开始播放");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000 * DELAY_TIME);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    init();
+                    GlobalValues.IS_BOX_BUSY = false;
+                }
+            }).start();
+//            mHandler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    init();
+//                }
+//            }, 4000);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
         mHandler.removeCallbacks(mBackToAdsPlayerRunnable);
         try {
             TvManager.setInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);

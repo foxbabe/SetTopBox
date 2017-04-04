@@ -19,6 +19,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.ShowMessage;
 
 import java.util.ArrayList;
 
@@ -37,6 +38,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private String mUUID;
     private long mActivityResumeTime;
 
+    private static final int DELAY_TIME = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,12 +53,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
         registerDownloadReceiver();
         LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        LogFileUtil.write("AdsPlayerActivity onNewIntent" + intent.toString());
     }
 
     @Override
@@ -108,15 +105,32 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
     }
 
+    private boolean mIsGoneToTv;
+
+
+
     @Override
     protected void onResume() {
         super.onResume();
 
         LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
         mActivityResumeTime = System.currentTimeMillis();
-
-        setVolume(mSession.getVolume());
-        mSavorVideoView.onResume();
+        if (!mIsGoneToTv) {
+            setVolume(mSession.getVolume());
+            mSavorVideoView.onResume();
+        } else {
+            GlobalValues.IS_BOX_BUSY = true;
+            ShowMessage.showToast(mContext, "视频节目准备中，即将开始播放");
+            mSavorVideoView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setVolume(mSession.getVolume());
+                    mSavorVideoView.onResume();
+                    mIsGoneToTv = false;
+                    GlobalValues.IS_BOX_BUSY = false;
+                }
+            }, 1000 * DELAY_TIME);
+        }
     }
 
 
@@ -175,7 +189,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 禁止进入页面后马上操作
-        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG)
+        if (System.currentTimeMillis() - mActivityResumeTime < ConstantValues.KEY_DOWN_LAG + DELAY_TIME * 1000)
             return true;
 
         boolean handled = false;
@@ -228,6 +242,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && mCurrentPlayingIndex >= 0 && mCurrentPlayingIndex < mPlayList.size()) {
             vid = mPlayList.get(mCurrentPlayingIndex).getVid();
         }
+        mIsGoneToTv = true;
         Intent intent = new Intent(this, TvPlayerActivity.class);
         intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
         startActivity(intent);

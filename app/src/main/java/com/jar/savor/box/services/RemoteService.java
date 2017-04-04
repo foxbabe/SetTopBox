@@ -116,11 +116,20 @@ public class RemoteService extends Service {
                 response.setStatus(200);
                 baseRequest.setHandled(true);
 
-                String version = request.getHeader("version");
-                if ("1.0".equals(version)) {
-                    handleRequestV10(request, response);
+                if (GlobalValues.IS_BOX_BUSY) {
+                    BaseResponse baseResponse = new BaseResponse();
+                    baseResponse.setInfo("机顶盒繁忙，请稍候再试");
+                    baseResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    String resp = new Gson().toJson(baseResponse);
+                    LogUtils.d("返回结果:" + resp);
+                    response.getWriter().println(resp);
                 } else {
-                    handleRequestOld(request, response);
+                    String version = request.getHeader("version");
+                    if ("1.0".equals(version)) {
+                        handleRequestV10(request, response);
+                    } else {
+                        handleRequestOld(request, response);
+                    }
                 }
                 LogUtils.w("***********一次请求处理结束...***********");
             }

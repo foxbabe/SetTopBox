@@ -1,13 +1,10 @@
 package com.savor.ads.utils.tv;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.google.gson.annotations.SerializedName;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.core.Session;
-import com.savor.ads.utils.LogFileUtil;
 import com.tvos.atv.AtvManager;
 import com.tvos.atv.AtvPlayer;
 import com.tvos.atv.AtvScanManager;
@@ -19,10 +16,6 @@ import com.tvos.common.exception.TvCommonException;
 import com.tvos.common.vo.ProgramInfo;
 import com.tvos.common.vo.ProgramInfoQueryCriteria;
 import com.tvos.common.vo.TvOsType;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,6 +124,7 @@ public class TvOperate {
             e.printStackTrace();
         }
     }
+
     public AtvProgramInfo[] getAllProgramInfoT() {
         AtvProgramInfo[] progList = new AtvProgramInfo[10];
         for (int i = 0; i < 10; i++) {
@@ -349,9 +343,7 @@ public class TvOperate {
 //        writeToDatabase(newlist.toArray(new AtvProgramInfo[newlist.size()]));
 //        String defNum = jsonObject.optString("defaultNum");
 
-        LogFileUtil.write("TvOperate will write channel list To Database");
         writeToDatabase(programResponse.getTvChannelList().toArray(new AtvProgramInfo[programResponse.getTvChannelList().size()]));
-        LogFileUtil.write("TvOperate will setTvDefaultChannelNumber");
         Session.get(context).setTvDefaultChannelNumber(programResponse.getLockingChannelNum());
     }
 

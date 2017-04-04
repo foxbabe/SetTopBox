@@ -108,6 +108,7 @@ public class SavorVideoView extends RelativeLayout {
             public void surfaceCreated(SurfaceHolder holder) {
                 LogUtils.w(TAG + "surfaceCreated mPlayState:" + mPlayState + " mMediaPlayer == null?" +(mMediaPlayer == null) + "  " + SavorVideoView.this.hashCode());
                 LogFileUtil.write(TAG + "surfaceCreated mPlayState:" + mPlayState + " mMediaPlayer == null?" +(mMediaPlayer == null) + "  " + SavorVideoView.this.hashCode());
+                mIsSurfaceCreated = true;
                 if (mMediaPlayer != null /*&&
                         (mPlayState != MediaPlayerState.ERROR &&
                                 mPlayState != MediaPlayerState.IDLE &&
@@ -118,7 +119,6 @@ public class SavorVideoView extends RelativeLayout {
                         LogFileUtil.write("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         mMediaPlayer.setDisplay(mSurfaceHolder);
                         mMediaPlayer.setScreenOnWhilePlaying(true);
-                        mIsSurfaceCreated = true;
                     } catch (Exception e) {
                         LogUtils.e("setDisplay Exception, Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         LogFileUtil.write("setDisplay Exception, Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());

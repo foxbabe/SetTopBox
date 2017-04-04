@@ -43,4 +43,6 @@ public class GlobalValues {
      * 正式环境手机端APP下载页面
      */
     public static final String APP_DOWN_LINK = "http://rerdian.com/d";
+
+    public static volatile boolean IS_BOX_BUSY = false;
 }

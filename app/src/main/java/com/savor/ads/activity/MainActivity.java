@@ -104,21 +104,21 @@ public class MainActivity extends BaseActivity {
         unregisterReceiver(mDownloadCompleteReceiver);
     }
 
-    private boolean mIsFirstResume = true;
+//    private boolean mIsFirstResume = true;
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mIsFirstResume) {
-            fillPlayList();
-
-            // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-                Intent intent = new Intent(this, AdsPlayerActivity.class);
-                startActivity(intent);
-            }
-        }
-        mIsFirstResume = false;
+//        if (!mIsFirstResume) {
+//            fillPlayList();
+//
+//            // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
+//            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+//                Intent intent = new Intent(this, AdsPlayerActivity.class);
+//                startActivity(intent);
+//            }
+//        }
+//        mIsFirstResume = false;
     }
 
     @Override
