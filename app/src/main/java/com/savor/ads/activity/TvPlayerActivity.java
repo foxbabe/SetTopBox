@@ -199,7 +199,12 @@ public class TvPlayerActivity extends BaseActivity {
         if (inputSource == TvOsType.EnumInputSource.E_INPUT_SOURCE_ATV) {
             if (mChannelList == null || mChannelList.size() == 0) {
                 mChannelTipRl.setVisibility(View.GONE);
-                ShowMessage.showToast(this, "未获取到频道信息");
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ShowMessage.showToast(mContext, "未获取到频道信息");
+                    }
+                });
             } else {
                 initCurrentProgram();
             }
@@ -248,7 +253,12 @@ public class TvPlayerActivity extends BaseActivity {
         mSession.setTvInputSource(0);
 
         mTvOperate.autoTuning(mTurningCallback);
-        showAutoTurningDialog();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                showAutoTurningDialog();
+            }
+        });
     }
 
     private TvOperate.AutoTurningCallback mTurningCallback = new TvOperate.AutoTurningCallback() {

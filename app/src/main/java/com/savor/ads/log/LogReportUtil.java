@@ -133,17 +133,17 @@ public class LogReportUtil {
 		LogReportParam mLogEn = new LogReportParam();
 
 		mLogEn.setUUid(uuid);
-		mLogEn.setHotel_id(hotel_id+"");
-		mLogEn.setRoom_id(room_id+"");
+		mLogEn.setHotel_id(hotel_id);
+		mLogEn.setRoom_id(room_id);
 		mLogEn.setTime(time);
-		mLogEn.setAction(action+"");
+		mLogEn.setAction(action);
 		mLogEn.setType(type);
-		mLogEn.setMedia_id(media_id+"");
-		mLogEn.setMobile_id(mobile_id+"");
-		mLogEn.setApk_version(apk_version+"");
-		mLogEn.setAdsPeriod(ads_period+"");
-		mLogEn.setVodPeriod(vod_period+"");
-		mLogEn.setCustom(custom+"");
+		mLogEn.setMedia_id(media_id);
+		mLogEn.setMobile_id(mobile_id);
+		mLogEn.setApk_version(apk_version);
+		mLogEn.setAdsPeriod(ads_period);
+		mLogEn.setVodPeriod(vod_period);
+		mLogEn.setCustom(custom);
 		offer(mLogEn);
 	}
 	
