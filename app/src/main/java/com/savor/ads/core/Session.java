@@ -369,7 +369,7 @@ public class Session {
         if (TextUtils.isEmpty(versionName)) {
             getApplicationInfo();
         }
-        return versionName;
+        return versionName == null ? "" : versionName;
     }
 
     public int getVersionCode() {
@@ -544,7 +544,7 @@ public class Session {
     }
 
     public String getBoiteId() {
-        return boiteId;
+        return boiteId == null ? "" : boiteId;
     }
 
     public void setBoiteId(String boiteId) {
@@ -562,7 +562,7 @@ public class Session {
     }
 
     public String getRoomId() {
-        return roomId;
+        return roomId == null ? "" : roomId;
     }
 
     public void setRoomId(String roomId) {
@@ -597,7 +597,7 @@ public class Session {
     }
 
     public String getAdvertMediaPeriod() {
-        return advertMediaPeriod;
+        return advertMediaPeriod == null ? "" : advertMediaPeriod;
     }
 
     public void setAdvertMediaPeriod(String advertMediaPeriod) {
@@ -651,7 +651,7 @@ public class Session {
     }
 
     public String getMulticastMediaPeriod() {
-        return multicastMediaPeriod;
+        return multicastMediaPeriod == null ? "" : multicastMediaPeriod;
     }
 
     public void setMulticastMediaPeriod(String multicastMediaPeriod) {
@@ -727,7 +727,7 @@ public class Session {
             mEthernetMac = AppUtils.getEthernetMacAddr();
             writePreference(new Pair<String, Object>(P_APP_ETHERNET_MAC, mEthernetMac));
         }
-        return mEthernetMac;
+        return mEthernetMac == null ? "" : mEthernetMac;
     }
 
     public String getWlanMac() {
@@ -765,7 +765,7 @@ public class Session {
     }
 
     public String getSplashVersion() {
-        return splashVersion;
+        return splashVersion == null ? "" : splashVersion;
     }
 
     public void setSplashVersion(String splashVersion) {
