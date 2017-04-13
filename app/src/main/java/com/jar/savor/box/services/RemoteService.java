@@ -332,6 +332,7 @@ public class RemoteService extends Service {
                         case "pic":
                             String isThumbnail = request.getParameter("isThumbnail");
                             String imageId = request.getParameter("imageId");
+                            String seriesId = request.getParameter("seriesId");
                             int imageType = 1;
                             try {
                                 imageType = Integer.parseInt(request.getParameter("imageType"));
@@ -348,7 +349,7 @@ public class RemoteService extends Service {
 
                                 // 图片流投屏处理
                                 resJson = handleStreamImageProjection(request, imageType, deviceId, deviceName,
-                                        isThumbnail, imageId, rotation);
+                                        isThumbnail, imageId, rotation, seriesId);
                             }
                             break;
                         case "stop":
@@ -519,7 +520,7 @@ public class RemoteService extends Service {
                         if (showImage) {
                             // 显示图片
                             GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
-                            object = RemoteService.listener.showImage(1, 0, prepareRequest.getIsThumbnail() == 1);
+                            object = RemoteService.listener.showImage(1, 0, prepareRequest.getIsThumbnail() == 1, "");
                             if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
@@ -545,7 +546,7 @@ public class RemoteService extends Service {
 
         private String handleStreamImageProjection(HttpServletRequest request, int imageType,
                                                  String deviceId, String deviceName, String isThumbnail,
-                                                 String imageId, int rotation) throws IOException, ServletException {
+                                                 String imageId, int rotation, String seriesId) throws IOException, ServletException {
             String respJson = "";
             if (!TextUtils.isEmpty(deviceId) &&
                     (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
@@ -589,7 +590,7 @@ public class RemoteService extends Service {
 //                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         // 显示图片
                         GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
-                        object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail));
+                        object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail), seriesId);
                     } else {
                         // 请求格式错误
                         object = new BaseResponse();

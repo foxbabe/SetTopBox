@@ -32,21 +32,9 @@ public class ConstantValues {
      */
     public static final String PROJECT_TYPE_VIDEO = "video";
     /**
-     * 投屏类型:PDF
-     */
-    public static final String PROJECT_TYPE_PDF = "pdf";
-    /**
-     * 投屏类型:文件
-     */
-    public static final String PROJECT_TYPE_FILE = "file";
-    /**
-     * 视频投屏:点播
+     * 点播
      */
     public static final String PROJECT_TYPE_VIDEO_VOD = "vod";
-    /**
-     * 视频投屏:投屏
-     */
-    public static final String PROJECT_TYPE_VIDEO_2SCREEN = "2screen";
 
     public static final String CONFIG_TXT = "config.txt";
 

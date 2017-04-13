@@ -2,29 +2,21 @@ package com.savor.ads.callback;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
-import com.jar.savor.box.vo.BaseResponse;
 import com.jar.savor.box.vo.CodeVerifyBean;
-import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
-import com.jar.savor.box.vo.QueryRequestVo;
 import com.jar.savor.box.vo.ResponseT;
-import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
-import com.jar.savor.box.vo.SeekRequestVo;
 import com.jar.savor.box.vo.SeekResponseVo;
-import com.jar.savor.box.vo.StopRequestVo;
 import com.jar.savor.box.vo.StopResponseVo;
-import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.ScreenProjectionActivity;
@@ -141,7 +133,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
 //                    dbHelper.close();
                 } else {
-                    type = ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN;
+                    type = ConstantValues.PROJECT_TYPE_VIDEO;
                 }
             }
 
@@ -153,7 +145,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 Bundle data = new Bundle();
                 data.putString(ScreenProjectionActivity.EXTRA_URL, url);
                 data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
-                data.putString(ScreenProjectionActivity.EXTRA_VID, vid);
+                data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
                 Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
                 if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
                     LogUtils.d("Listener will setNewProjection");
@@ -182,7 +174,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public PrepareResponseVoNew showVod(String mediaName, String vodType, int position) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
-        String type = ConstantValues.PROJECT_TYPE_VIDEO_VOD;
         String vid = "";
         String url = "";
         boolean vodCheckPass = true;
@@ -259,8 +250,8 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             // 跳转或将参数设置到ScreenProjectionActivity
             Bundle data = new Bundle();
             data.putString(ScreenProjectionActivity.EXTRA_URL, url);
-            data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
-            data.putString(ScreenProjectionActivity.EXTRA_VID, vid);
+            data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_VOD);
+            data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
             data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
 
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
@@ -289,7 +280,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail) {
+    public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (isThumbnail) {
             localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
@@ -306,6 +297,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
+        data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, seriesId);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
             LogUtils.d("Listener will setNewProjection");
@@ -337,7 +329,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         // 跳转或将参数设置到ScreenProjectionActivity
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_URL, videoPath);
-        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_2SCREEN);
+        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO);
         data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {

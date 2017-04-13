@@ -1,21 +1,14 @@
 package com.jar.savor.box.interfaces;
 
-import com.jar.savor.box.vo.BaseResponse;
 import com.jar.savor.box.vo.CodeVerifyBean;
-import com.jar.savor.box.vo.PlayRequestVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
-import com.jar.savor.box.vo.QueryRequestVo;
 import com.jar.savor.box.vo.ResponseT;
-import com.jar.savor.box.vo.RotateRequestVo;
 import com.jar.savor.box.vo.RotateResponseVo;
-import com.jar.savor.box.vo.SeekRequestVo;
 import com.jar.savor.box.vo.SeekResponseVo;
-import com.jar.savor.box.vo.StopRequestVo;
 import com.jar.savor.box.vo.StopResponseVo;
-import com.jar.savor.box.vo.VolumeRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 
 /**
@@ -27,7 +20,7 @@ public interface OnRemoteOperationListener {
 
     PrepareResponseVoNew showVod(String mediaName, String vodType, int position);
 
-    PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail);
+    PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId);
 
     PrepareResponseVoNew showVideo(String videoPath, int position);
 
