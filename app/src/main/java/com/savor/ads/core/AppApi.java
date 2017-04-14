@@ -184,16 +184,16 @@ public class AppApi {
      */
     public static void heartbeat(Context context, ApiRequestListener handler) {
         final HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("mac", Session.get(context).getEthernetMac() + "");
-        params.put("period", Session.get(context).getAdvertMediaPeriod() + "");
-        params.put("demand", Session.get(context).getMulticastMediaPeriod() + "");
-        params.put("apk", Session.get(context).getVersionName() + "");
+        params.put("mac", Session.get(context).getEthernetMac());
+        params.put("period", Session.get(context).getAdvertMediaPeriod());
+        params.put("demand", Session.get(context).getMulticastMediaPeriod());
+        params.put("apk", Session.get(context).getVersionName());
         params.put("war", "");
-        params.put("logo ", Session.get(context).getSplashVersion() + "");
-        params.put("ip", AppUtils.getLocalIPAddress() + "");
-        params.put("hotelId", Session.get(context).getBoiteId() + "");
-        params.put("roomId", Session.get(context).getRoomId() + "");
-        params.put("signal", AppUtils.getInputType(Session.get(context).getTvInputSource()) + "");
+        params.put("logo", Session.get(context).getSplashVersion());
+        params.put("ip", AppUtils.getLocalIPAddress());
+        params.put("hotelId", Session.get(context).getBoiteId());
+        params.put("roomId", Session.get(context).getRoomId());
+        params.put("signal", AppUtils.getInputType(Session.get(context).getTvInputSource()));
         new AppServiceOk(context, Action.CP_GET_HEARTBEAT_PLAIN, handler, params).get();
     }
 
