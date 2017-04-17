@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.SaveFileData;
 
@@ -44,8 +45,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.TimeZone;
-
-import static com.savor.ads.core.Session.P_APP_VOLUME;
 
 /**
  * @author Administrator
@@ -71,8 +70,14 @@ public class Session {
     private String token;
 
     private ServerInfo serverInfo;
-    //音量
+    /** 轮播音量 */
     private int volume;
+    /** 投屏音量 */
+    private int projectVolume;
+    /** 点播音量 */
+    private int vodVolume;
+    /** 电视节目音量 */
+    private int tvVolume;
     //酒楼名称
     private String boiteName;
     //酒楼ID
@@ -175,7 +180,10 @@ public class Session {
     private void readSettings() {
 
         getApplicationInfo();
-        volume = mPreference.loadIntKey(P_APP_VOLUME, 50);
+        volume = mPreference.loadIntKey(P_APP_VOLUME, ConstantValues.DEFAULT_ADS_VOLUME);
+        projectVolume = mPreference.loadIntKey(P_APP_PROJECT_VOLUME, ConstantValues.DEFAULT_PROJECT_VOLUME);
+        vodVolume = mPreference.loadIntKey(P_APP_VOD_VOLUME, ConstantValues.DEFAULT_VOD_VOLUME);
+        tvVolume = mPreference.loadIntKey(P_APP_TV_VOLUME, ConstantValues.DEFAULT_TV_VOLUME);
         boiteName = mPreference.loadStringKey(P_APP_BOITENAME, null);
         boiteId = mPreference.loadStringKey(P_APP_BOITEID, null);
         roomName = mPreference.loadStringKey(P_APP_ROOMNAME, null);
@@ -274,6 +282,9 @@ public class Session {
                 || P_APP_LOADING_PATH.equals(key)) {
             mPreference.saveStringKey(key, (String) updateItem.second);
         } else if (P_APP_VOLUME.equals(key) ||
+                P_APP_PROJECT_VOLUME.equals(key) ||
+                P_APP_VOD_VOLUME.equals(key) ||
+                P_APP_TV_VOLUME.equals(key) ||
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
                 P_APP_SWITCHTIME.equals(key)) {
@@ -532,6 +543,30 @@ public class Session {
     public void setVolume(int volume) {
         this.volume = volume;
         writePreference(new Pair<String, Object>(P_APP_VOLUME, volume));
+    }
+    public int getProjectVolume() {
+        return projectVolume;
+    }
+
+    public void setProjectVolume(int volume) {
+        this.projectVolume = volume;
+        writePreference(new Pair<String, Object>(P_APP_PROJECT_VOLUME, volume));
+    }
+    public int getVodVolume() {
+        return vodVolume;
+    }
+
+    public void setVodVolume(int volume) {
+        this.vodVolume = volume;
+        writePreference(new Pair<String, Object>(P_APP_VOD_VOLUME, volume));
+    }
+    public int getTvVolume() {
+        return tvVolume;
+    }
+
+    public void setTvVolume(int volume) {
+        this.tvVolume = volume;
+        writePreference(new Pair<String, Object>(P_APP_TV_VOLUME, volume));
     }
 
     public String getBoiteName() {
@@ -802,8 +837,14 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_LOADING_PATH, loadingPath));
     }
 
-    //电视播放声音
+    //轮播播放声音
     public static final String P_APP_VOLUME = "com.savor.ads.volume";
+    //投屏播放声音
+    public static final String P_APP_PROJECT_VOLUME = "com.savor.ads.project_volume";
+    //点播播放声音
+    public static final String P_APP_VOD_VOLUME = "com.savor.ads.vod_volume";
+    //电视节目播放声音
+    public static final String P_APP_TV_VOLUME = "com.savor.ads.tv_volume";
     //酒楼名称
     public static final String P_APP_BOITENAME = "com.savor.ads.boiteName";
     //酒楼ID

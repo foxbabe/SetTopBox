@@ -195,6 +195,11 @@ public class ScreenProjectionActivity extends BaseActivity {
     }
 
     private void init() {
+        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
+            mCurrentVolume = mSession.getVodVolume();
+        } else {
+            mCurrentVolume = mSession.getProjectVolume();
+        }
         setVolume(mCurrentVolume);
     }
 

@@ -538,9 +538,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (boiteBean == null){
             return;
         }
-        if (!isProduceLog||boiteBean.getSwitch_time()!=session.getSwitchTime()){
+
+        // 应后端统计要求，只要某个音量改变，就产生4条音量的记录
+        if (!isProduceLog || boiteBean.getAds_volume() != session.getVolume() ||
+                boiteBean.getProject_volume() != session.getProjectVolume() ||
+                boiteBean.getDemand_volume() != session.getVodVolume() ||
+                boiteBean.getTv_volume() != session.getTvVolume()){
+            String volumeUUID = String.valueOf(System.currentTimeMillis());
             //生产电视播放音量日志
-            LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
+            LogReportUtil.get(context).sendAdsLog(volumeUUID,
                     session.getBoiteId(),
                     session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()),
@@ -551,13 +557,67 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     session.getVersionName(),
                     session.getAdvertMediaPeriod(),
                     session.getMulticastMediaPeriod(),
-                    String.valueOf(boiteBean.getSwitch_time()));
+                    String.valueOf(boiteBean.getAds_volume()));
+            LogReportUtil.get(context).sendAdsLog(volumeUUID,
+                    session.getBoiteId(),
+                    session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()),
+                    "project_volume",
+                    "system",
+                    "",
+                    "",
+                    session.getVersionName(),
+                    session.getAdvertMediaPeriod(),
+                    session.getMulticastMediaPeriod(),
+                    String.valueOf(boiteBean.getProject_volume()));
+            LogReportUtil.get(context).sendAdsLog(volumeUUID,
+                    session.getBoiteId(),
+                    session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()),
+                    "vod_volume",
+                    "system",
+                    "",
+                    "",
+                    session.getVersionName(),
+                    session.getAdvertMediaPeriod(),
+                    session.getMulticastMediaPeriod(),
+                    String.valueOf(boiteBean.getDemand_volume()));
+            LogReportUtil.get(context).sendAdsLog(volumeUUID,
+                    session.getBoiteId(),
+                    session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()),
+                    "tv_volume",
+                    "system",
+                    "",
+                    "",
+                    session.getVersionName(),
+                    session.getAdvertMediaPeriod(),
+                    session.getMulticastMediaPeriod(),
+                    String.valueOf(boiteBean.getTv_volume()));
+
+            if (boiteBean.getAds_volume() > 0) {
+                session.setVolume(boiteBean.getAds_volume());
+            } else {
+                session.setVolume(ConstantValues.DEFAULT_ADS_VOLUME);
+            }
+            if (boiteBean.getProject_volume() > 0) {
+                session.setProjectVolume(boiteBean.getProject_volume());
+            } else {
+                session.setProjectVolume(ConstantValues.DEFAULT_PROJECT_VOLUME);
+            }
+            if (boiteBean.getDemand_volume() > 0) {
+                session.setVodVolume(boiteBean.getDemand_volume());
+            } else {
+                session.setVodVolume(ConstantValues.DEFAULT_VOD_VOLUME);
+            }
+            if (boiteBean.getTv_volume() > 0) {
+                session.setTvVolume(boiteBean.getTv_volume());
+            } else {
+                session.setTvVolume(ConstantValues.DEFAULT_TV_VOLUME);
+            }
         }
 
-        if (boiteBean.getSwitch_time() > 0) {
-            session.setSwitchTime(boiteBean.getSwitch_time());
-        }
-        if (!isProduceLog||boiteBean.getVolume()!=session.getVolume()){
+        if (!isProduceLog || boiteBean.getSwitch_time() != session.getSwitchTime()){
             //生产电视切换时间日志
             LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                     session.getBoiteId(),
@@ -570,12 +630,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     session.getVersionName(),
                     session.getAdvertMediaPeriod(),
                     session.getMulticastMediaPeriod(),
-                    String.valueOf(boiteBean.getVolume()));
+                    String.valueOf(boiteBean.getSwitch_time()));
+
+            if (boiteBean.getSwitch_time() > 0) {
+                session.setSwitchTime(boiteBean.getSwitch_time());
+            } else {
+                session.setSwitchTime(ConstantValues.DEFAULT_SWITCH_TIME);
+            }
         }
 
-        if (boiteBean.getVolume() > 0) {
-            session.setVolume(boiteBean.getVolume());
-        }
         isProduceLog = true;
 //        if (!TextUtils.isEmpty(session.getBoiteId()) &&
 //                !session.getBoiteId().equals(boiteBean.getHotel_id())){

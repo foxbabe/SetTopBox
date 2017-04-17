@@ -47,4 +47,15 @@ public class ConstantValues {
     public static final int KEY_DOWN_LAG = 2000;
 
     public static final String SSDP_CONTENT_TYPE = "box";
+
+    /** 默认电视切换时间*/
+    public static final int DEFAULT_SWITCH_TIME = 30;
+    /** 默认轮播音量*/
+    public static final int DEFAULT_ADS_VOLUME = 20;
+    /** 默认投屏音量*/
+    public static final int DEFAULT_PROJECT_VOLUME = 65;
+    /** 默认点播音量*/
+    public static final int DEFAULT_VOD_VOLUME = 65;
+    /** 默认电视音量*/
+    public static final int DEFAULT_TV_VOLUME = 100;
 }

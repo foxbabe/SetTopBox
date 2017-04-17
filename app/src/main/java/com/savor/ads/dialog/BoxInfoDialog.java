@@ -40,6 +40,10 @@ public class BoxInfoDialog extends Dialog {
     private TextView mTvSwitchTimeTv;
     private TextView mVolumeTv;
 
+    private TextView mProjectVolumeTv;
+    private TextView mVodVolumeTv;
+    private TextView mTvVolumeTv;
+
     public BoxInfoDialog(Context context) {
         super(context, R.style.box_info_dialog_theme);
     }
@@ -68,6 +72,9 @@ public class BoxInfoDialog extends Dialog {
         mDownloadingVodIssueTv = (TextView) findViewById(R.id.tv_downloading_vod_issue);
         mServerIpTv = (TextView) findViewById(R.id.tv_server_ip);
         mLastPowerOnTimeTv = (TextView) findViewById(R.id.tv_last_power_on_time);
+        mProjectVolumeTv = (TextView) findViewById(R.id.tv_project_volume);
+        mVodVolumeTv = (TextView) findViewById(R.id.tv_vod_volume);
+        mTvVolumeTv = (TextView) findViewById(R.id.tv_tv_volume);
     }
 
 
@@ -129,5 +136,8 @@ public class BoxInfoDialog extends Dialog {
             mServerIpTv.setText("");
         }
         mLastPowerOnTimeTv.setText(TextUtils.isEmpty(session.getLastStartTime()) ? "初次开机" : session.getLastStartTime());
+        mProjectVolumeTv.setText(String.valueOf(session.getProjectVolume()));
+        mVodVolumeTv.setText(String.valueOf(session.getVodVolume()));
+        mTvVolumeTv.setText(String.valueOf(session.getTvVolume()));
     }
 }
