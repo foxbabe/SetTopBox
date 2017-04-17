@@ -860,8 +860,19 @@ public class SavorVideoView extends RelativeLayout {
 
 
     public interface PlayStateCallback {
+        /**
+         * 某个视频播放完毕
+         * @param index 当前视频序号
+         * @param isLast 是否是最后一个
+         * @return true: 播放源被设置新的； false: otherwise
+         */
         boolean onMediaComplete(int index, boolean isLast);
-
+        /**
+         * 某个视频播放出错
+         * @param index 当前视频序号
+         * @param isLast 是否是最后一个
+         * @return true: 播放源被设置新的； false: otherwise
+         */
         boolean onMediaError(int index, boolean isLast);
 
         void onMediaPrepared(int index);

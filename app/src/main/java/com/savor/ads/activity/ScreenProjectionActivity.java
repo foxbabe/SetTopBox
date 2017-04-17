@@ -90,13 +90,15 @@ public class ScreenProjectionActivity extends BaseActivity {
         }
     };
     /**
-     * 退出投屏Runnable
+     * 定时退出投屏Runnable
      */
     private Runnable mExitProjectionRunnable = new Runnable() {
         @Override
         public void run() {
             LogUtils.e("mExitProjectionRunnable " + ScreenProjectionActivity.this.hashCode());
             exitProjection();
+
+            resetGlobalFlag();
         }
     };
     /**
@@ -482,7 +484,14 @@ public class ScreenProjectionActivity extends BaseActivity {
     public void stop() {
         LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
         mIsBeenStopped = true;
-        mHandler.post(mExitProjectionRunnable);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                exitProjection();
+            }
+        });
+
+        resetGlobalFlag();
     }
 
     /**
@@ -752,8 +761,12 @@ public class ScreenProjectionActivity extends BaseActivity {
                 bitmapDrawable.getBitmap().recycle();
             }
         }
+    }
 
-        // 重置全局变量
+    /**
+     * 重置全局变量
+     */
+    private void resetGlobalFlag() {
         GlobalValues.LAST_PROJECT_DEVICE_ID = GlobalValues.CURRENT_PROJECT_DEVICE_ID;
         GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
@@ -766,6 +779,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         @Override
         public boolean onMediaComplete(int index, boolean isLast) {
             LogUtils.w("activity onMediaComplete " + this.hashCode());
+
+            resetGlobalFlag();
             exitProjection();
             return false;
         }
@@ -773,6 +788,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         @Override
         public boolean onMediaError(int index, boolean isLast) {
             LogUtils.w("activity onMediaError " + this.hashCode());
+
+            resetGlobalFlag();
             exitProjection();
             return false;
         }
