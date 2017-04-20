@@ -1,6 +1,7 @@
 package com.savor.ads.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,8 +29,8 @@ public class SetTopBoxBean implements Serializable{
     private RoomBean room;
     //所在酒楼信息
     private BoiteBean boite;
-    //媒体库
-    private List<MediaLibBean> media_lib;
+    /**媒体库*/
+    private ArrayList<PlayListCategoryItem> playbill_list;
     /** 发布时间*/
     private String pub_time;
 
@@ -113,19 +114,19 @@ public class SetTopBoxBean implements Serializable{
         this.boite = boite;
     }
 
-    public List<MediaLibBean> getMedia_lib() {
-        return media_lib;
-    }
-
-    public void setMedia_lib(List<MediaLibBean> media_lib) {
-        this.media_lib = media_lib;
-    }
-
     public String getPub_time() {
         return pub_time;
     }
 
     public void setPub_time(String pub_time) {
         this.pub_time = pub_time;
+    }
+
+    public ArrayList<PlayListCategoryItem> getPlaybill_list() {
+        return playbill_list;
+    }
+
+    public void setPlaybill_list(ArrayList<PlayListCategoryItem> playbill_list) {
+        this.playbill_list = playbill_list;
     }
 }

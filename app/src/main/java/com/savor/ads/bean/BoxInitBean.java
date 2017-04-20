@@ -1,5 +1,7 @@
 package com.savor.ads.bean;
 
+import java.util.ArrayList;
+
 /**
  * Created by zhanghq on 2017/2/7.
  */
@@ -44,6 +46,13 @@ public class BoxInitBean {
     private int demand_volume;
     /** 电视节目音量*/
     private int tv_volume;
+
+    private ArrayList<VersionInfo> playbill_version_list;
+    private ArrayList<VersionInfo> demand_version_list;
+    private ArrayList<VersionInfo> logo_version_list;
+    private ArrayList<VersionInfo> loading_version_list;
+    private ArrayList<VersionInfo> apk_version_list;
+    private ArrayList<VersionInfo> small_web_version_list;
 
     public void setSwitch_time(int switch_time) {
         this.switch_time = switch_time;
@@ -195,5 +204,53 @@ public class BoxInitBean {
 
     public void setTv_volume(int tv_volume) {
         this.tv_volume = tv_volume;
+    }
+
+    public ArrayList<VersionInfo> getPlaybill_version_list() {
+        return playbill_version_list;
+    }
+
+    public void setPlaybill_version_list(ArrayList<VersionInfo> playbill_version_list) {
+        this.playbill_version_list = playbill_version_list;
+    }
+
+    public ArrayList<VersionInfo> getDemand_version_list() {
+        return demand_version_list;
+    }
+
+    public void setDemand_version_list(ArrayList<VersionInfo> demand_version_list) {
+        this.demand_version_list = demand_version_list;
+    }
+
+    public ArrayList<VersionInfo> getLogo_version_list() {
+        return logo_version_list;
+    }
+
+    public void setLogo_version_list(ArrayList<VersionInfo> logo_version_list) {
+        this.logo_version_list = logo_version_list;
+    }
+
+    public ArrayList<VersionInfo> getLoading_version_list() {
+        return loading_version_list;
+    }
+
+    public void setLoading_version_list(ArrayList<VersionInfo> loading_version_list) {
+        this.loading_version_list = loading_version_list;
+    }
+
+    public ArrayList<VersionInfo> getApk_version_list() {
+        return apk_version_list;
+    }
+
+    public void setApk_version_list(ArrayList<VersionInfo> apk_version_list) {
+        this.apk_version_list = apk_version_list;
+    }
+
+    public ArrayList<VersionInfo> getSmall_web_version_list() {
+        return small_web_version_list;
+    }
+
+    public void setSmall_web_version_list(ArrayList<VersionInfo> small_web_version_list) {
+        this.small_web_version_list = small_web_version_list;
     }
 }

@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.Session;
 
 import org.apache.commons.io.FileUtils;
@@ -48,6 +49,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -1079,11 +1081,67 @@ public class AppUtils {
             reader = new BufferedReader(
                     new InputStreamReader(is));
             String line = reader.readLine();
-            result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                    .replaceAll(":", "");
+            if (!TextUtils.isEmpty(line)) {
+                result = line.substring(line.indexOf("HWaddr") + 6).trim()
+                        .replaceAll(":", "");
+            }
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                if (process != null) {
+                    process.destroy();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取以太网 IP
+     *
+     * @return
+     */
+    public static String getEthernetIP() {
+        String cmd = "busybox ifconfig eth0";
+        Process process = null;
+        InputStream is = null;
+        BufferedReader reader = null;
+        String result = "";
+        try {
+            process = Runtime.getRuntime().exec(cmd);
+            is = process.getInputStream();
+            reader = new BufferedReader(
+                    new InputStreamReader(is));
+            String line = reader.readLine();
+            while (line != null) {
+                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
+                    result = line.substring(line.indexOf("addr:") + 5);
+                    result = result.substring(0, result.indexOf(" ")).trim();
+                    break;
+                }
+                line = reader.readLine();
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (reader != null) {
@@ -1131,6 +1189,59 @@ public class AppUtils {
             if (!TextUtils.isEmpty(line)) {
                 result = line.substring(line.indexOf("HWaddr") + 6).trim()
                         .replaceAll(":", "");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                if (process != null) {
+                    process.destroy();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取Wlan IP
+     *
+     * @return
+     */
+    public static String getWlanIP() {
+        String cmd = "busybox ifconfig wlan0";
+        Process process = null;
+        InputStream is = null;
+        BufferedReader reader = null;
+        String result = "";
+        try {
+            process = Runtime.getRuntime().exec(cmd);
+            is = process.getInputStream();
+            reader = new BufferedReader(
+                    new InputStreamReader(is));
+            String line = reader.readLine();
+            while (line != null) {
+                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
+                    result = line.substring(line.indexOf("addr:") + 5);
+                    result = result.substring(0, result.indexOf(" ")).trim();
+                    break;
+                }
+                line = reader.readLine();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1402,12 +1513,12 @@ public class AppUtils {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 Date pubDate = format.parse(pubTime);
-                if (pubDate.getTime() < System.currentTimeMillis() && !TextUtils.isEmpty(session.getNextAdvertMediaPeriod())) {
+                if (pubDate.getTime() < System.currentTimeMillis()) {
                     LogUtils.d("checkPlayTime 已到达发布时间，将更新期号");
                     LogFileUtil.write("checkPlayTime 已到达发布时间，将更新期号");
                     canPlayNext = true;
-                    session.setAdvertMediaPeriod(session.getNextAdvertMediaPeriod());
-                    session.setNextAdvertMediaPeriod(null);
+                    session.setPlayListVersion(session.getNextPlayListVersion());
+                    session.setNextPlayListVersion(null);
                     session.setNextAdvertMediaPubTime(null);
                 }
             } catch (ParseException e) {
@@ -1424,5 +1535,19 @@ public class AppUtils {
             ssid = Session.get(context).getBoxName();
         }
         return ssid;
+    }
+
+    public static String findSpecifiedPeriodByType(ArrayList<VersionInfo> versionList, String type) {
+        String period = "";
+        if (versionList != null && type != null) {
+            for (VersionInfo versionInfo :
+                    versionList) {
+                if (type.equals(versionInfo.getType())) {
+                    period = versionInfo.getVersion();
+                    break;
+                }
+            }
+        }
+        return period;
     }
 }

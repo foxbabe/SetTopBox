@@ -12,6 +12,8 @@ import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.bean.SetTopBoxBean;
+import com.savor.ads.bean.VersionInfo;
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -93,9 +95,12 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     private static final int DB_VERSION = 13;
 
+    private Context mContext;
+
     private DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DB_VERSION);
 //        super(new SavorDatabaseContext(context), DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = context;
         open();
     }
 
@@ -559,45 +564,59 @@ public class DBHelper extends SQLiteOpenHelper {
 
     /**
      * 按顺序查询播放表
-     * @param period
      * @return
      */
-    public ArrayList<PlayListBean> getOrderedPlayList(String period) {
+    public ArrayList<PlayListBean> getOrderedPlayList() {
         ArrayList<PlayListBean> playList = null;
         Cursor cursor=null;
-        try{
-//            open();
-            cursor = db.query(MediaDBInfo.TableName.PLAYLIST, null, MediaDBInfo.FieldName.PERIOD + "='" + period+"'", null,null, null, MediaDBInfo.FieldName.ADS_ORDER);
-            if (cursor != null && cursor.moveToFirst()) {
-                playList = new ArrayList<>();
-                do {
-                    PlayListBean bean = new PlayListBean();
-                    bean.setVid(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.VID)));
-                    bean.setMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MD5)));
-                    bean.setMedia_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
-                    bean.setMedia_type(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIATYPE)));
-                    bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
-                    bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
-                    bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
-                    bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
-                    bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
-
-                    playList.add(bean);
-                } while (cursor.moveToNext());
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            try{
-                if (cursor!=null&& !cursor.isClosed()){
-                    cursor.close();
-
+        if (Session.get(mContext).getPlayListVersion() != null && !Session.get(mContext).getPlayListVersion().isEmpty()) {
+            try {
+                //            open();
+                // 拼接查询条件
+                String selection = "";
+                String[] args = new String[Session.get(mContext).getPlayListVersion().size() * 2];
+                ArrayList<VersionInfo> playListVersion = Session.get(mContext).getPlayListVersion();
+                for (int i = 0; i < playListVersion.size(); i++) {
+                    VersionInfo version = playListVersion.get(i);
+                    if (i != 0) {
+                        selection += " or ";
+                    }
+                    selection += "(" + MediaDBInfo.FieldName.PERIOD + "=? and " + MediaDBInfo.FieldName.MEDIATYPE + "=?)";
+                    args[i * 2] = version.getVersion();
+                    args[i * 2 + 1] = version.getType();
                 }
-            }catch (Exception e){
+
+                cursor = db.query(MediaDBInfo.TableName.PLAYLIST, null, selection, args, null, null, MediaDBInfo.FieldName.ADS_ORDER);
+                if (cursor != null && cursor.moveToFirst()) {
+                    playList = new ArrayList<>();
+                    do {
+                        PlayListBean bean = new PlayListBean();
+                        bean.setVid(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
+                        bean.setMd5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MD5)));
+                        bean.setMedia_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
+                        bean.setMedia_type(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIATYPE)));
+                        bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
+                        bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
+                        bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                        bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
+                        bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+
+                        playList.add(bean);
+                    } while (cursor.moveToNext());
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.close();
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
-
         return playList;
     }
 
@@ -639,13 +658,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /**
      * 复制数据
      * @param fromTable
-     * @param ToTable
+     * @param toTable
      */
-    public void copyPlaylist(String fromTable, String ToTable) {
+    public void copyPlaylist(String fromTable, String toTable) {
         try{
 //            open();
-            db.delete(ToTable, "1=1", null);
-            db.execSQL("insert into " + ToTable + " select * from  " + fromTable);
+            db.delete(toTable, "1=1", null);
+            db.execSQL("insert into " + toTable + " select * from  " + fromTable);
         }catch (Exception e){
            e.printStackTrace();
         }

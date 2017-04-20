@@ -31,6 +31,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.savor.ads.bean.ServerInfo;
+import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
@@ -44,6 +45,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
 /**
@@ -93,14 +95,24 @@ public class Session {
     private String roomType;
     /**广告期号*/
     private String advertMediaPeriod;
-    /**下一期要播放的广告的期号*/
-    private String nextAdvertMediaPeriod;
+//    /**下一期要播放的广告的期号*/
+//    private String nextAdvertMediaPeriod;
     /**下一期要播放的广告时间*/
     private String nextAdvertMediaPubTime;
     //广告下载中期号
-    private String advertDownloadingPeriod;
-    /** 启动图版本*/
-    private String splashVersion;
+//    private String advertDownloadingPeriod;
+
+    private ArrayList<VersionInfo> mPlayListVersion;
+    private ArrayList<VersionInfo> mDownloadingPlayListVersion;
+    private ArrayList<VersionInfo> mNextPlayListVersion;
+
+    private String adsPeriod;
+    private String advPeriod;
+    private String proPeriod;
+
+    private ArrayList<VersionInfo> mVodVersion;
+    private ArrayList<VersionInfo> mDownloadingVodVersion;
+
     //当从电视切换到广告播放以后，最后电视停留的频道号
     private String TVLastChannel;
     //log版本
@@ -108,7 +120,7 @@ public class Session {
     //点播视频期号
     private String multicastMediaPeriod;
     //点播视频用到的期号
-    private String multicastDownloadingPeriod;
+//    private String multicastDownloadingPeriod;
     //开机时间
     private String startTime;
     private String lastStartTime;
@@ -151,6 +163,13 @@ public class Session {
     private String mSplashPath;
     /** 加载图路径*/
     private String mLoadingPath;
+    /** 小平台中的所有版本号期号等信息*/
+    private ArrayList<VersionInfo> mSPVersionInfo;
+
+    /** 启动图版本*/
+    private String mSplashVersion;
+    /** 加载图版本*/
+    private String mLoadingVersion;
 
     private Session(Context context) {
 
@@ -191,13 +210,13 @@ public class Session {
         boxName = mPreference.loadStringKey(P_APP_BOXNAME, null);
         roomType = mPreference.loadStringKey(P_APP_ROOM_TYPE, null);
         advertMediaPeriod = mPreference.loadStringKey(P_APP_ADVERTMEDIAPERIOD, "");
-        nextAdvertMediaPeriod = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIAPERIOD, "");
+//        nextAdvertMediaPeriod = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIAPERIOD, "");
         nextAdvertMediaPubTime = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIA_PUBTIME, null);
-        advertDownloadingPeriod = mPreference.loadStringKey(P_APP_ADVERTDOWNLOADINGPERIOD, null);
+//        advertDownloadingPeriod = mPreference.loadStringKey(P_APP_ADVERTDOWNLOADINGPERIOD, null);
         TVLastChannel = mPreference.loadStringKey(P_APP_TVLASTCHANNEL, null);
         logVersionCode = mPreference.loadStringKey(P_APP_LOGVERSIONCODE, null);
         multicastMediaPeriod = mPreference.loadStringKey(P_APP_MULTICASTMEDIAPERIOD, "");
-        multicastDownloadingPeriod = mPreference.loadStringKey(P_APP_MULTICASTDOWNLOADINGPERIOD, null);
+//        multicastDownloadingPeriod = mPreference.loadStringKey(P_APP_MULTICASTDOWNLOADINGPERIOD, null);
         startTime = mPreference.loadStringKey(P_APP_STARTTIME, null);
         lastStartTime = mPreference.loadStringKey(P_APP_LASTSTARTTIME, null);
         switchTime = mPreference.loadIntKey(P_APP_SWITCHTIME, 30);
@@ -209,10 +228,17 @@ public class Session {
         mWlanMac = mPreference.loadStringKey(P_APP_WLAN_MAC, null);
         oss_bucket = mPreference.loadStringKey(P_APP_OSS_BUCKET,null);
         oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
-        splashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION,null);
         mAuthCode = mPreference.loadStringKey(P_APP_AUTH_CODE,null);
         mSplashPath = mPreference.loadStringKey(P_APP_SPLASH_PATH, "/Pictures/logo.jpg");
         mLoadingPath = mPreference.loadStringKey(P_APP_LOADING_PATH, "/Pictures/loading.jpg");
+        mSplashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION, "");
+        mLoadingVersion = mPreference.loadStringKey(P_APP_LOADING_VERSION, "");
+        mSPVersionInfo = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_SP_VERSION_INFO, ""));
+        setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
+        mDownloadingPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, ""));
+        mNextPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, ""));
+        mVodVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, ""));
+        mDownloadingVodVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, ""));
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -264,13 +290,13 @@ public class Session {
                 || P_APP_BOXNAME.equals(key)
                 || P_APP_ROOM_TYPE.equals(key)
                 || P_APP_ADVERTMEDIAPERIOD.equals(key)
-                || P_APP_NEXT_ADVERTMEDIAPERIOD.equals(key)
+//                || P_APP_NEXT_ADVERTMEDIAPERIOD.equals(key)
                 || P_APP_NEXT_ADVERTMEDIA_PUBTIME.equals(key)
-                || P_APP_ADVERTDOWNLOADINGPERIOD.equals(key)
+//                || P_APP_ADVERTDOWNLOADINGPERIOD.equals(key)
                 || P_APP_TVLASTCHANNEL.equals(key)
                 || P_APP_LOGVERSIONCODE.equals(key)
                 || P_APP_MULTICASTMEDIAPERIOD.equals(key)
-                || P_APP_MULTICASTDOWNLOADINGPERIOD.equals(key)
+//                || P_APP_MULTICASTDOWNLOADINGPERIOD.equals(key)
                 || P_APP_STARTTIME.equals(key)
                 || P_APP_LASTSTARTTIME.equals(key)
                 || P_APP_ETHERNET_MAC.equals(key)
@@ -279,7 +305,9 @@ public class Session {
                 || P_APP_OSS_BUCKET.equals(key)
                 || P_APP_AUTH_CODE.equals(key)
                 || P_APP_SPLASH_PATH.equals(key)
-                || P_APP_LOADING_PATH.equals(key)) {
+                || P_APP_LOADING_PATH.equals(key)
+                || P_APP_SPLASH_VERSION.equals(key)
+                || P_APP_LOADING_VERSION.equals(key)) {
             mPreference.saveStringKey(key, (String) updateItem.second);
         } else if (P_APP_VOLUME.equals(key) ||
                 P_APP_PROJECT_VOLUME.equals(key) ||
@@ -535,6 +563,15 @@ public class Session {
         }
     }
 
+    public ArrayList<VersionInfo> getSPVersionInfo() {
+        return mSPVersionInfo;
+    }
+
+    public void setSPVersionInfo(ArrayList<VersionInfo> SPVersionInfo) {
+        mSPVersionInfo = SPVersionInfo;
+        writePreference(new Pair<String, Object>(P_APP_SP_VERSION_INFO, mSPVersionInfo));
+    }
+
 
     public int getVolume() {
         return volume;
@@ -640,14 +677,14 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_ADVERTMEDIAPERIOD, advertMediaPeriod));
     }
 
-    public String getNextAdvertMediaPeriod() {
-        return nextAdvertMediaPeriod;
-    }
-
-    public void setNextAdvertMediaPeriod(String nextAdvertMediaPeriod) {
-        this.nextAdvertMediaPeriod = nextAdvertMediaPeriod;
-        writePreference(new Pair<String, Object>(P_APP_NEXT_ADVERTMEDIAPERIOD, nextAdvertMediaPeriod));
-    }
+//    public String getNextAdvertMediaPeriod() {
+//        return nextAdvertMediaPeriod;
+//    }
+//
+//    public void setNextAdvertMediaPeriod(String nextAdvertMediaPeriod) {
+//        this.nextAdvertMediaPeriod = nextAdvertMediaPeriod;
+//        writePreference(new Pair<String, Object>(P_APP_NEXT_ADVERTMEDIAPERIOD, nextAdvertMediaPeriod));
+//    }
 
     public String getNextAdvertMediaPubTime() {
         return nextAdvertMediaPubTime;
@@ -658,13 +695,63 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_NEXT_ADVERTMEDIA_PUBTIME, nextAdvertMediaPubTime));
     }
 
-    public String getAdvertDownloadingPeriod() {
-        return advertDownloadingPeriod;
+//    public String getAdvertDownloadingPeriod() {
+//        return advertDownloadingPeriod;
+//    }
+//
+//    public void setAdvertDownloadingPeriod(String advertDownloadingPeriod) {
+//        this.advertDownloadingPeriod = advertDownloadingPeriod;
+//        writePreference(new Pair<String, Object>(P_APP_ADVERTDOWNLOADINGPERIOD, advertDownloadingPeriod));
+//    }
+
+    public ArrayList<VersionInfo> getPlayListVersion() {
+        return mPlayListVersion;
     }
 
-    public void setAdvertDownloadingPeriod(String advertDownloadingPeriod) {
-        this.advertDownloadingPeriod = advertDownloadingPeriod;
-        writePreference(new Pair<String, Object>(P_APP_ADVERTDOWNLOADINGPERIOD, advertDownloadingPeriod));
+    public void setPlayListVersion(ArrayList<VersionInfo> playListVersion) {
+        mPlayListVersion = playListVersion;
+        if (mPlayListVersion != null) {
+            adsPeriod = AppUtils.findSpecifiedPeriodByType(mPlayListVersion, "ads");
+            advPeriod = AppUtils.findSpecifiedPeriodByType(mPlayListVersion, "adv");
+            proPeriod = AppUtils.findSpecifiedPeriodByType(mPlayListVersion, "pro");
+        }
+        writePreference(new Pair<String, Object>(P_APP_PLAY_LIST_VERSION, mPlayListVersion));
+    }
+
+    public ArrayList<VersionInfo> getDownloadingPlayListVersion() {
+        return mDownloadingPlayListVersion;
+    }
+
+    public void setDownloadingPlayListVersion(ArrayList<VersionInfo> downloadingPlayListVersion) {
+        mDownloadingPlayListVersion = downloadingPlayListVersion;
+        writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_PLAY_LIST_VERSION, mDownloadingPlayListVersion));
+    }
+
+    public ArrayList<VersionInfo> getNextPlayListVersion() {
+        return mNextPlayListVersion;
+    }
+
+    public void setNextPlayListVersion(ArrayList<VersionInfo> nextPlayListVersion) {
+        mNextPlayListVersion = nextPlayListVersion;
+        writePreference(new Pair<String, Object>(P_APP_NEXT_PLAY_LIST_VERSION, mNextPlayListVersion));
+    }
+
+    public ArrayList<VersionInfo> getVodVersion() {
+        return mVodVersion;
+    }
+
+    public void setVodVersion(ArrayList<VersionInfo> vodVersion) {
+        mVodVersion = vodVersion;
+        writePreference(new Pair<String, Object>(P_APP_VOD_VERSION, mVodVersion));
+    }
+
+    public ArrayList<VersionInfo> getDownloadingVodVersion() {
+        return mDownloadingVodVersion;
+    }
+
+    public void setDownloadingVodVersion(ArrayList<VersionInfo> downloadingVodVersion) {
+        mDownloadingVodVersion = downloadingVodVersion;
+        writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_VOD_VERSION, mDownloadingVodVersion));
     }
 
     public String getTVLastChannel() {
@@ -694,14 +781,14 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_MULTICASTMEDIAPERIOD, multicastMediaPeriod));
     }
 
-    public String getMulticastDownloadingPeriod() {
-        return multicastDownloadingPeriod;
-    }
-
-    public void setMulticastDownloadingPeriod(String multicastDownloadingPeriod) {
-        this.multicastDownloadingPeriod = multicastDownloadingPeriod;
-        writePreference(new Pair<String, Object>(P_APP_MULTICASTDOWNLOADINGPERIOD, multicastDownloadingPeriod));
-    }
+//    public String getMulticastDownloadingPeriod() {
+//        return multicastDownloadingPeriod;
+//    }
+//
+//    public void setMulticastDownloadingPeriod(String multicastDownloadingPeriod) {
+//        this.multicastDownloadingPeriod = multicastDownloadingPeriod;
+//        writePreference(new Pair<String, Object>(P_APP_MULTICASTDOWNLOADINGPERIOD, multicastDownloadingPeriod));
+//    }
 
     public String getStartTime() {
         return startTime;
@@ -799,15 +886,6 @@ public class Session {
         mIsConnectedToSP = connectedToSP;
     }
 
-    public String getSplashVersion() {
-        return splashVersion == null ? "" : splashVersion;
-    }
-
-    public void setSplashVersion(String splashVersion) {
-        this.splashVersion = splashVersion;
-        writePreference(new Pair<String, Object>(P_APP_SPLASH_VERSION, splashVersion));
-    }
-
     public String getAuthCode() {
         return mAuthCode;
     }
@@ -837,6 +915,24 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_LOADING_PATH, loadingPath));
     }
 
+    public String getSplashVersion() {
+        return mSplashVersion == null ? "" : mSplashVersion;
+    }
+
+    public void setSplashVersion(String splashVersion) {
+        mSplashVersion = splashVersion;
+        writePreference(new Pair<String, Object>(P_APP_SPLASH_VERSION, splashVersion));
+    }
+
+    public String getLoadingVersion() {
+        return mLoadingVersion == null ? "" : mLoadingVersion;
+    }
+
+    public void setLoadingVersion(String loadingVersion) {
+        mLoadingVersion = loadingVersion;
+        writePreference(new Pair<String, Object>(P_APP_LOADING_VERSION, loadingVersion));
+    }
+
     //轮播播放声音
     public static final String P_APP_VOLUME = "com.savor.ads.volume";
     //投屏播放声音
@@ -859,16 +955,26 @@ public class Session {
     public static final String P_APP_ROOM_TYPE = "com.savor.ads.roomType";
     //广告视频期号
     public static final String P_APP_ADVERTMEDIAPERIOD = "com.savor.ads.advertMediaPeriod";
-    public static final String P_APP_NEXT_ADVERTMEDIAPERIOD = "com.savor.ads.nextAdvertMediaPeriod";
+//    public static final String P_APP_NEXT_ADVERTMEDIAPERIOD = "com.savor.ads.nextAdvertMediaPeriod";
     public static final String P_APP_NEXT_ADVERTMEDIA_PUBTIME = "com.savor.ads.nextAdvertMediaPubTime";
-    public static final String P_APP_ADVERTDOWNLOADINGPERIOD = "com.savor.ads.advertMediaDownloadingPeriod";
+//    public static final String P_APP_ADVERTDOWNLOADINGPERIOD = "com.savor.ads.advertMediaDownloadingPeriod";
+    /** 当前节目单期号KEY*/
+    public static final String P_APP_PLAY_LIST_VERSION = "com.savor.ads.play_list_version";
+    /** 下载中节目单期号KEY*/
+    public static final String P_APP_DOWNLOADING_PLAY_LIST_VERSION = "com.savor.ads.downloading_play_list_version";
+    /** 下一个节目单期号KEY*/
+    public static final String P_APP_NEXT_PLAY_LIST_VERSION = "com.savor.ads.next_play_list_version";
+    /** 当前点播期号KEY*/
+    public static final String P_APP_VOD_VERSION = "com.savor.ads.vod_version";
+    /** 下载中点播期号KEY*/
+    public static final String P_APP_DOWNLOADING_VOD_VERSION = "com.savor.ads.downloading_vod_version";
     //当从电视切换到广告后，要记录一下最后停留的电视台频道号
     public static final String P_APP_TVLASTCHANNEL = "com.savor.ads.TVLastChannel";
     //记录日志版本
     public static final String P_APP_LOGVERSIONCODE = "com.savor.ads.logVersionCode";
     //点播视频期号
     public static final String P_APP_MULTICASTMEDIAPERIOD = "com.savor.ads.multicastMediaPeriod";
-    public static final String P_APP_MULTICASTDOWNLOADINGPERIOD = "com.savor.ads.multicastDownloadPeriod";
+//    public static final String P_APP_MULTICASTDOWNLOADINGPERIOD = "com.savor.ads.multicastDownloadPeriod";
     //开机时间
     public static final String P_APP_STARTTIME = "com.savor.ads.startTime";
     public static final String P_APP_LASTSTARTTIME = "com.savor.ads.laststartTime";
@@ -896,4 +1002,20 @@ public class Session {
     public static final String P_APP_SPLASH_PATH = "com.savor.ads.splashPath";
     //加载图路径key
     public static final String P_APP_LOADING_PATH = "com.savor.ads.loadingPath";
+    //加载图路径key
+    public static final String P_APP_LOADING_VERSION = "com.savor.ads.loadingVersion";
+    //小平台中的各种版本信息key
+    public static final String P_APP_SP_VERSION_INFO = "com.savor.ads.spVersionInfo";
+
+    public String getAdsPeriod() {
+        return adsPeriod == null ? "" : adsPeriod;
+    }
+
+    public String getAdvPeriod() {
+        return advPeriod == null ? "" : advPeriod;
+    }
+
+    public String getProPeriod() {
+        return proPeriod == null ? "" : proPeriod;
+    }
 }

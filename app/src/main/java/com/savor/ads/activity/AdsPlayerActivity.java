@@ -31,7 +31,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
 
-    private String mPeriod;
     private ArrayList<PlayListBean> mPlayList;
     private boolean mNeedPlayNewer;
     /** 日志用的播放记录标识*/
@@ -59,7 +58,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        mPeriod = mSession.getAdvertMediaPeriod();
         checkAndPlay();
     }
 
@@ -258,7 +256,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (TextUtils.isEmpty(mUUID)) {
             mUUID = String.valueOf(System.currentTimeMillis());
         }
-        if (mPlayList != null) {
+        if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
@@ -307,10 +305,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             }
             action = "resume";
         }
-        LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
-                "");
+        if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+            LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    "");
+        }
     }
 
     @Override
@@ -320,10 +320,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             mUUID = String.valueOf(System.currentTimeMillis());
         }
         try {
-            LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
-                    "");
+            if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+                LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                        "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        "");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -335,10 +337,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (TextUtils.isEmpty(mUUID)) {
             mUUID = String.valueOf(System.currentTimeMillis());
         }
-        LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
-                "");
+        if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+            LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    "");
+        }
     }
 
 

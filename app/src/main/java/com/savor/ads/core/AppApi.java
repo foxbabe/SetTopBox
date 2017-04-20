@@ -29,14 +29,14 @@ public class AppApi {
      */
 	public static String SP_BASE_URL = "http://192.168.1.2/";
 
-//    /**
-//     * 云平台测试环境
-//     **/
-//    public static final String BASE_URL = "http://devp.api.rerdian.com/";
     /**
-     * 云平台正式环境
+     * 云平台测试环境
      **/
-    public static final String BASE_URL = "https://mb.rerdian.com/";
+    public static final String BASE_URL = "http://devp.testapi.rerdian.com/";
+//    /**
+//     * 云平台正式环境
+//     **/
+//    public static final String BASE_URL = "https://mobile.rerdian.com/";
 
     public static void resetSmallPlatformInterface(Context context) {
         ServerInfo serverInfo = Session.get(context).getServerInfo();
@@ -87,9 +87,9 @@ public class AppApi {
             put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
             put(Action.SP_POST_UPLOAD_LOG_JSON,SP_BASE_URL+"small/log/upload-file");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
-            put(Action.CP_GET_HEARTBEAT_PLAIN, BASE_URL + "survival/api/2/survival");
+            put(Action.CP_GET_HEARTBEAT_PLAIN, BASE_URL + "Heartbeat/Report/index");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
-            put(Action.CP_GET_SP_IP_JSON, BASE_URL + "mobile/api/getIp");
+            put(Action.CP_GET_SP_IP_JSON, BASE_URL + "basedata/ipinfo/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
         }
     };
@@ -184,12 +184,18 @@ public class AppApi {
      */
     public static void heartbeat(Context context, ApiRequestListener handler) {
         final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("clientid", 2);
         params.put("mac", Session.get(context).getEthernetMac());
-        params.put("period", Session.get(context).getAdvertMediaPeriod());
+        if (Session.get(context).getPlayListVersion() != null && !Session.get(context).getPlayListVersion().isEmpty()) {
+            params.put("period", AppUtils.findSpecifiedPeriodByType(Session.get(context).getPlayListVersion(), "ads"));
+            params.put("adv_period", AppUtils.findSpecifiedPeriodByType(Session.get(context).getPlayListVersion(), "adv"));
+            params.put("pro_period", AppUtils.findSpecifiedPeriodByType(Session.get(context).getPlayListVersion(), "pro"));
+        }
         params.put("demand", Session.get(context).getMulticastMediaPeriod());
         params.put("apk", Session.get(context).getVersionName());
         params.put("war", "");
         params.put("logo", Session.get(context).getSplashVersion());
+        params.put("p_load_version", Session.get(context).getLoadingVersion());
         params.put("ip", AppUtils.getLocalIPAddress());
         params.put("hotelId", Session.get(context).getBoiteId());
         params.put("roomId", Session.get(context).getRoomId());

@@ -363,13 +363,17 @@ public class ScreenProjectionActivity extends BaseActivity {
      * @param bundle
      */
     public void setNewProjection(Bundle bundle) {
-        // mContentUUID不为空说明之前有一次互动，先记一次end
-        if (!TextUtils.isEmpty(mMediaId) && !TextUtils.isEmpty(mUUID) &&
-                (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail)) {
+        // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
+        if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId,
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(),
                     mSession.getMulticastMediaPeriod(), mInnerType);
+        }
+
+        // 如果上一次是点播，把UUID清空以便后面生成新的
+        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
+            mUUID = null;
         }
 
         handleBundleData(bundle);
@@ -385,17 +389,18 @@ public class ScreenProjectionActivity extends BaseActivity {
     }
 
     private void mappingLogType() {
-        if (TextUtils.isEmpty(mUUID)) {
+        // 每次点播都生成新的UUID，投屏生成子UUID当做mediaId作为后台数据统计标识
+        if (TextUtils.isEmpty(mUUID) || ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
             mUUID = String.valueOf(System.currentTimeMillis());
         }
         if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             mType = "projection";
+            if (mIsThumbnail) {
+                mMediaId = String.valueOf(System.currentTimeMillis());
+            }
             switch (mImageType) {
                 case 1:
                     mInnerType = "pic";
-                    if (mIsThumbnail) {
-                        mMediaId = String.valueOf(System.currentTimeMillis());
-                    }
                     break;
                 case 2:
                     mInnerType = "file";

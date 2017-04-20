@@ -155,43 +155,48 @@ public abstract class BaseActivity extends Activity {
     protected void fillPlayList() {
         LogUtils.d("开始fillPlayList");
         if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
-            if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod())) {
-                DBHelper dbHelper = DBHelper.get(mContext);
-                ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList(mSession.getAdvertMediaPeriod());
+            DBHelper dbHelper = DBHelper.get(mContext);
+            ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
 
-                if (playList != null) {
-                    for (int i = 0; i < playList.size(); i++) {
-                        PlayListBean bean = playList.get(i);
-                        File mediaFile = new File(bean.getMediaPath());
-                        if (TextUtils.isEmpty(bean.getMd5()) ||
-                                TextUtils.isEmpty(bean.getMediaPath()) ||
-                                !mediaFile.exists() ||
-                                !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
-                            LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
-                            // 媒体文件校验失败时删除
-                            playList.remove(i);
+            if (playList != null && !playList.isEmpty()) {
+                for (int i = 0; i < playList.size(); i++) {
+                    PlayListBean bean = playList.get(i);
+                    File mediaFile = new File(bean.getMediaPath());
+                    if (TextUtils.isEmpty(bean.getMd5()) ||
+                            TextUtils.isEmpty(bean.getMediaPath()) ||
+                            !mediaFile.exists() ||
+                            !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                        LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                        // 媒体文件校验失败时删除
+                        playList.remove(i);
 
-                            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
-                                    DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " + DBHelper.MediaDBInfo.FieldName.VID + "=?",
-                                    new String[]{bean.getPeriod(), bean.getVid()});
+                        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
+                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
+                                        DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
+                                        DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
+                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
+                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
+                                        DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
+                                        DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
+                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
 
-                            if (mediaFile.exists()) {
-                                mediaFile.delete();
-                            }
-
-                            TechnicalLogReporter.md5Failed(this, bean.getVid());
+                        if (mediaFile.exists()) {
+                            mediaFile.delete();
                         }
 
+                        TechnicalLogReporter.md5Failed(this, bean.getVid());
                     }
                 }
 
-//                dbHelper.close();
                 GlobalValues.PLAY_LIST = playList;
+
+//                dbHelper.close();
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {
                     File[] files = mediaDir.listFiles();
-                    ArrayList<PlayListBean> playList = new ArrayList<>();
+                    ArrayList<PlayListBean> filePlayList = new ArrayList<>();
                     if (files != null) {
                         for (File file : files) {
                             if (file.isFile()) {
@@ -202,12 +207,12 @@ public abstract class BaseActivity extends Activity {
                                 if (dotIndex > 0) {
                                     fileName = fileName.substring(0, dotIndex);
                                 }
-                                bean.setVid(fileName);
-                                playList.add(bean);
+//                                bean.setVid(fileName);
+                                filePlayList.add(bean);
                             }
                         }
                     }
-                    GlobalValues.PLAY_LIST = playList;
+                    GlobalValues.PLAY_LIST = filePlayList;
                 }
             }
         }

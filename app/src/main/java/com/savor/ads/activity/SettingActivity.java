@@ -23,6 +23,7 @@ import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.customview.IPEditText;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShellUtils;
 
@@ -226,7 +227,7 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void toAd() {
-        if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod()) && !TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
             Intent intent = new Intent();
             intent.setClass(this, AdsPlayerActivity.class);
             startActivity(intent);
