@@ -172,7 +172,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showVod(String mediaName, String vodType, int position) {
+    public PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         String vid = "";
         String url = "";
@@ -253,6 +253,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_VOD);
             data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
             data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
+            data.putBoolean(ScreenProjectionActivity.EXTRA_IS_FROM_WEB, isFromWeb);
 
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
             if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {

@@ -42,6 +42,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     public static final String EXTRA_IMAGE_ROTATION = "extra_image_rotation";
     public static final String EXTRA_IS_THUMBNAIL = "extra_is_thumbnail";
     public static final String EXTRA_IMAGE_TYPE = "extra_image_type";
+    public static final String EXTRA_IS_FROM_WEB = "extra_is_from_web";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
@@ -160,6 +161,8 @@ public class ScreenProjectionActivity extends BaseActivity {
     private String mType;
     private String mInnerType;
 
+    private boolean mIsFromWeb = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -234,6 +237,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         mVideoInitPosition = bundle.getInt(EXTRA_VIDEO_POSITION);
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
+        mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
     }
 
     private void exitProjection() {
@@ -419,7 +423,11 @@ public class ScreenProjectionActivity extends BaseActivity {
             mInnerType = "video";
             mMediaId = String.valueOf(System.currentTimeMillis());
         } else if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
-            mType = "vod";
+            if (mIsFromWeb) {
+                mType = "h5vod";
+            } else {
+                mType = "vod";
+            }
             mInnerType = "video";
         }
     }

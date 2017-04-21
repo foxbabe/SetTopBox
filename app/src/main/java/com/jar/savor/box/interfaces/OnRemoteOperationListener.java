@@ -18,7 +18,7 @@ import com.jar.savor.box.vo.VolumeResponseVo;
 public interface OnRemoteOperationListener {
     PrepareResponseVo prepare(PrepareRequestVo var1);
 
-    PrepareResponseVoNew showVod(String mediaName, String vodType, int position);
+    PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb);
 
     PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId);
 

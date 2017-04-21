@@ -297,7 +297,7 @@ public class RemoteService extends Service {
                                             deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID))) {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                BaseResponse object = RemoteService.listener.showVod(mediaName, type, position);
+                                BaseResponse object = RemoteService.listener.showVod(mediaName, type, position, isWebReq);
                                 if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
                                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
