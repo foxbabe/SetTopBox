@@ -32,6 +32,7 @@ public class BoxInfoDialog extends Dialog {
     private TextView mRomVersionTv;
     private TextView mAppVersionTv;
     private TextView mSystemTimeTv;
+    private TextView mRoomTypeTv;
     private TextView mRoomNameTv;
     private TextView mSignalSourceTv;
     private TextView mTvSwitchTimeTv;
@@ -43,6 +44,10 @@ public class BoxInfoDialog extends Dialog {
     private TextView mVodPeriodTv;
     private TextView mProPeriodTv;
     private TextView mAdvPeriodTv;
+    private TextView mAdsDownloadPeriodTv;
+    private TextView mVodDownloadPeriodTv;
+    private TextView mProDownloadPeriodTv;
+    private TextView mAdvDownloadPeriodTv;
     private TextView mLogoPeriodTv;
     private TextView mLoadingPeriodTv;
     private TextView mServerIpTv;
@@ -52,10 +57,6 @@ public class BoxInfoDialog extends Dialog {
     private TextView mProjectVolumeTv;
     private TextView mVodVolumeTv;
     private TextView mTvVolumeTv;
-
-    private LinearLayout mDownloadingPlaylistLl;
-    private LinearLayout mDownloadingVodLl;
-    private LinearLayout mPreparedPlaylistLl;
 
     public BoxInfoDialog(Context context) {
         super(context, R.style.box_info_dialog_theme);
@@ -91,10 +92,11 @@ public class BoxInfoDialog extends Dialog {
         mProjectVolumeTv = (TextView) findViewById(R.id.tv_project_volume);
         mVodVolumeTv = (TextView) findViewById(R.id.tv_vod_volume);
         mTvVolumeTv = (TextView) findViewById(R.id.tv_tv_volume);
-
-        mDownloadingPlaylistLl = (LinearLayout) findViewById(R.id.ll_downloading_playlist);
-        mDownloadingVodLl = (LinearLayout) findViewById(R.id.ll_downloading_vod);
-        mPreparedPlaylistLl = (LinearLayout) findViewById(R.id.ll_prepared_playlist);
+        mRoomTypeTv = (TextView) findViewById(R.id.tv_room_type);
+        mAdsDownloadPeriodTv = (TextView) findViewById(R.id.tv_ads_download_period);
+        mAdvDownloadPeriodTv = (TextView) findViewById(R.id.tv_adv_download_period);
+        mProDownloadPeriodTv = (TextView) findViewById(R.id.tv_pro_download_period);
+        mVodDownloadPeriodTv = (TextView) findViewById(R.id.tv_vod_download_period);
     }
 
 
@@ -119,16 +121,8 @@ public class BoxInfoDialog extends Dialog {
         mSystemTimeTv.setText(AppUtils.getCurTime());
         mSignalSourceTv.setText(AppUtils.getInputType(session.getTvInputSource()));
         mTvSwitchTimeTv.setText(String.valueOf(session.getSwitchTime()));
-        String roomName = "";
-        if (TextUtils.isEmpty(session.getRoomType())) {
-            roomName = session.getBoxName();
-        } else {
-            roomName = session.getRoomType();
-            if (!TextUtils.isEmpty(session.getBoxName())) {
-                roomName = roomName + "-" + session.getBoxName();
-            }
-        }
-        mRoomNameTv.setText(roomName);
+        mRoomNameTv.setText(session.getBoxName());
+        mRoomTypeTv.setText(session.getRoomType());
         mEthernetIpTv.setText(AppUtils.getEthernetIP());
         mWlanIpTv.setText(AppUtils.getWlanIP());
         mEthernetMacTv.setText(session.getEthernetMac());
@@ -139,6 +133,20 @@ public class BoxInfoDialog extends Dialog {
         mProPeriodTv.setText(session.getProPeriod());
         mLogoPeriodTv.setText(session.getSplashVersion());
         mLoadingPeriodTv.setText(session.getLoadingVersion());
+        mAdsDownloadPeriodTv.setText(session.getAdsDownloadPeriod());
+        mAdvDownloadPeriodTv.setText(session.getAdvDownloadPeriod());
+        mProDownloadPeriodTv.setText(session.getProDownloadPeriod());
+        mVodDownloadPeriodTv.setText(session.getVodDownloadPeriod());
+
+        if (!TextUtils.isEmpty(session.getNextAdvertMediaPubTime())) {
+            mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+            mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+            mProDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+        } else {
+            mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            mProDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
 
         if (session.getServerInfo() != null) {
             if (Session.get(getContext()).isConnectedToSP()) {
@@ -156,92 +164,6 @@ public class BoxInfoDialog extends Dialog {
         mVodVolumeTv.setText(String.valueOf(session.getVodVolume()));
         mTvVolumeTv.setText(String.valueOf(session.getTvVolume()));
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.weight = 1;
-        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params2.weight = 1;
-        params2.leftMargin = DensityUtil.dip2px(getContext(), 40);
-
-        mDownloadingPlaylistLl.removeAllViews();
-        if (session.getDownloadingPlayListVersion() != null && !session.getDownloadingPlayListVersion().isEmpty()) {
-            for (int i = 0; i < session.getDownloadingPlayListVersion().size(); i += 2) {
-                LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_row, null);
-
-                LinearLayout itemLl = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                TextView labelTv = (TextView) itemLl.findViewById(R.id.tv_label);
-                TextView contentTv = (TextView) itemLl.findViewById(R.id.tv_content);
-                labelTv.setText(session.getDownloadingPlayListVersion().get(i).getLabel());
-                contentTv.setText(session.getDownloadingPlayListVersion().get(i).getVersion());
-                linearLayout.addView(itemLl, params);
-
-                if (i + 1 < session.getDownloadingPlayListVersion().size()) {
-                    LinearLayout itemLl2 = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                    TextView labelTv2 = (TextView) itemLl2.findViewById(R.id.tv_label);
-                    TextView contentTv2 = (TextView) itemLl2.findViewById(R.id.tv_content);
-                    labelTv2.setText(session.getDownloadingPlayListVersion().get(i + 1).getLabel());
-                    contentTv2.setText(session.getDownloadingPlayListVersion().get(i + 1).getVersion());
-                    linearLayout.addView(itemLl2, params2);
-                } else {
-                    View view = new View(getContext());
-                    linearLayout.addView(view, params2);
-                }
-
-                mDownloadingPlaylistLl.addView(linearLayout);
-            }
-        }
-
-        mDownloadingVodLl.removeAllViews();
-        if (session.getDownloadingVodVersion() != null && !session.getDownloadingVodVersion().isEmpty()) {
-            for (int i = 0; i < session.getDownloadingVodVersion().size(); i += 2) {
-                LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_row, null);
-
-                LinearLayout itemLl = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                TextView labelTv = (TextView) itemLl.findViewById(R.id.tv_label);
-                TextView contentTv = (TextView) itemLl.findViewById(R.id.tv_content);
-                labelTv.setText(session.getDownloadingVodVersion().get(i).getLabel());
-                contentTv.setText(session.getDownloadingVodVersion().get(i).getVersion());
-                linearLayout.addView(itemLl, params);
-
-                if (i + 1 < session.getDownloadingVodVersion().size()) {
-                    LinearLayout itemLl2 = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                    TextView labelTv2 = (TextView) itemLl2.findViewById(R.id.tv_label);
-                    TextView contentTv2 = (TextView) itemLl2.findViewById(R.id.tv_content);
-                    labelTv2.setText(session.getDownloadingVodVersion().get(i + 1).getLabel());
-                    contentTv2.setText(session.getDownloadingVodVersion().get(i + 1).getVersion());
-                    linearLayout.addView(itemLl2);
-                } else {
-                    View view = new View(getContext());
-                    linearLayout.addView(view, params2);
-                }
-
-                mDownloadingVodLl.addView(linearLayout);
-            }
-        }
-
-        mPreparedPlaylistLl.removeAllViews();
-        if (session.getNextPlayListVersion() != null && !session.getNextPlayListVersion().isEmpty()) {
-            for (int i = 0; i < session.getNextPlayListVersion().size(); i += 2) {
-                LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_row, null);
-
-                LinearLayout itemLl = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                TextView labelTv = (TextView) itemLl.findViewById(R.id.tv_label);
-                TextView contentTv = (TextView) itemLl.findViewById(R.id.tv_content);
-                labelTv.setText(session.getNextPlayListVersion().get(i).getLabel());
-                contentTv.setText(session.getNextPlayListVersion().get(i).getVersion());
-                linearLayout.addView(itemLl, params);
-
-                if (i + 1 < session.getNextPlayListVersion().size()) {
-                    LinearLayout itemLl2 = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_item, null);
-                    TextView labelTv2 = (TextView) itemLl2.findViewById(R.id.tv_label);
-                    TextView contentTv2 = (TextView) itemLl2.findViewById(R.id.tv_content);
-                    labelTv2.setText(session.getNextPlayListVersion().get(i + 1).getLabel());
-                    contentTv2.setText(session.getNextPlayListVersion().get(i + 1).getVersion());
-                    linearLayout.addView(itemLl2, params2);
-                }
-
-                mPreparedPlaylistLl.addView(linearLayout);
-            }
-        }
     }
 
     @Override

@@ -125,7 +125,7 @@ public class RemoteService extends Service {
                     response.getWriter().println(resp);
                 } else {
                     String version = request.getHeader("version");
-                    boolean isWebReq = false;
+                    boolean isWebReq = false;   // 是否是h5来的请求
                     try {
                         String temp = request.getParameter("web");
                         if (!TextUtils.isEmpty(temp)) {
@@ -134,6 +134,7 @@ public class RemoteService extends Service {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    // 由于h5不支持改http header，故这里对isWebReq做特殊处理
                     if ("1.0".equals(version) || isWebReq) {
                         handleRequestV10(request, response, isWebReq);
                     } else {
