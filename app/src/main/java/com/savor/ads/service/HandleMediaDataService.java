@@ -191,13 +191,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                return;
 //            }
             for (File file : listFiles) {
-                String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
-                String[] selectionArgs = new String[]{file.getName()};
+                if (file.isFile()) {
+                    String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
+                    String[] selectionArgs = new String[]{file.getName()};
 
-                if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null
-                        && dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
+                    if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null
+                            && dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
+                        file.delete();
+                        LogUtils.d("删除文件===================" + file.getName());
+                    }
+                } else {
                     FileUtils.delDir(file);
-                    LogUtils.d("删除文件===================" + file.getName());
                 }
             }
         } catch (Exception e) {
@@ -470,7 +474,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                             String.valueOf(System.currentTimeMillis()), "update", versionInfo.getType(), "",
                             "", Session.get(context).getVersionName(), versionInfo.getVersion(),
-                            Session.get(context).getMulticastMediaPeriod(), "");
+                            Session.get(context).getVodPeriod(), "");
                 } else {
                     isAllCompleted = false;
                 }
@@ -626,8 +630,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "",
                     "",
                     session.getVersionName(),
-                    session.getAdvertMediaPeriod(),
-                    session.getMulticastMediaPeriod(),
+                    session.getAdsPeriod(),
+                    session.getVodPeriod(),
                     String.valueOf(boiteBean.getAds_volume()));
             LogReportUtil.get(context).sendAdsLog(volumeUUID,
                     session.getBoiteId(),
@@ -638,8 +642,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "",
                     "",
                     session.getVersionName(),
-                    session.getAdvertMediaPeriod(),
-                    session.getMulticastMediaPeriod(),
+                    session.getAdsPeriod(),
+                    session.getVodPeriod(),
                     String.valueOf(boiteBean.getProject_volume()));
             LogReportUtil.get(context).sendAdsLog(volumeUUID,
                     session.getBoiteId(),
@@ -650,8 +654,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "",
                     "",
                     session.getVersionName(),
-                    session.getAdvertMediaPeriod(),
-                    session.getMulticastMediaPeriod(),
+                    session.getAdsPeriod(),
+                    session.getVodPeriod(),
                     String.valueOf(boiteBean.getDemand_volume()));
             LogReportUtil.get(context).sendAdsLog(volumeUUID,
                     session.getBoiteId(),
@@ -662,8 +666,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "",
                     "",
                     session.getVersionName(),
-                    session.getAdvertMediaPeriod(),
-                    session.getMulticastMediaPeriod(),
+                    session.getAdsPeriod(),
+                    session.getVodPeriod(),
                     String.valueOf(boiteBean.getTv_volume()));
 
             if (boiteBean.getAds_volume() > 0) {
@@ -699,8 +703,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "",
                     "",
                     session.getVersionName(),
-                    session.getAdvertMediaPeriod(),
-                    session.getMulticastMediaPeriod(),
+                    session.getAdsPeriod(),
+                    session.getVodPeriod(),
                     String.valueOf(boiteBean.getSwitch_time()));
 
             if (boiteBean.getSwitch_time() > 0) {
@@ -1130,8 +1134,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                             Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                             String.valueOf(System.currentTimeMillis()), "update", versionInfo.getType(), "",
-                            "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                            Session.get(context).getMulticastMediaPeriod(), "");
+                            "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                            Session.get(context).getVodPeriod(), "");
                 } else {
                     isAllCompleted = false;
                 }
@@ -1220,6 +1224,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB, selection, selectionArgs);
                     }
                 }
+            } else {
+                FileUtils.delDir(file);
             }
         }
     }

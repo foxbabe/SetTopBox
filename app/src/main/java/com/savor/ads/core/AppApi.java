@@ -191,7 +191,7 @@ public class AppApi {
             params.put("adv_period", AppUtils.findSpecifiedPeriodByType(Session.get(context).getPlayListVersion(), "adv"));
             params.put("pro_period", AppUtils.findSpecifiedPeriodByType(Session.get(context).getPlayListVersion(), "pro"));
         }
-        params.put("demand", Session.get(context).getMulticastMediaPeriod());
+        params.put("demand", Session.get(context).getVodPeriod());
         params.put("apk", Session.get(context).getVersionName());
         params.put("war", "");
         params.put("logo", Session.get(context).getSplashVersion());

@@ -119,6 +119,7 @@ public class Session {
     private String logVersionCode;
     //点播视频期号
     private String multicastMediaPeriod;
+    private String vodPeriod;
     //点播视频用到的期号
 //    private String multicastDownloadingPeriod;
     //开机时间
@@ -237,7 +238,7 @@ public class Session {
         setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
         mDownloadingPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, ""));
         mNextPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, ""));
-        mVodVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, ""));
+        setVodVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, "")));
         mDownloadingVodVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, ""));
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
@@ -742,6 +743,9 @@ public class Session {
 
     public void setVodVersion(ArrayList<VersionInfo> vodVersion) {
         mVodVersion = vodVersion;
+        if (mVodVersion != null) {
+            vodPeriod = AppUtils.findSpecifiedPeriodByType(mVodVersion, "vod");
+        }
         writePreference(new Pair<String, Object>(P_APP_VOD_VERSION, mVodVersion));
     }
 
@@ -1017,5 +1021,9 @@ public class Session {
 
     public String getProPeriod() {
         return proPeriod == null ? "" : proPeriod;
+    }
+
+    public String getVodPeriod() {
+        return vodPeriod == null ? "" : vodPeriod;
     }
 }

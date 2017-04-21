@@ -134,7 +134,7 @@ public class BoxInfoDialog extends Dialog {
         mEthernetMacTv.setText(session.getEthernetMac());
         mWlanMacTv.setText(session.getWlanMac());
         mAdsPeriodTv.setText(session.getAdsPeriod());
-        mVodPeriodTv.setText(session.getMulticastMediaPeriod());
+        mVodPeriodTv.setText(session.getVodPeriod());
         mAdvPeriodTv.setText(session.getAdvPeriod());
         mProPeriodTv.setText(session.getProPeriod());
         mLogoPeriodTv.setText(session.getSplashVersion());
@@ -218,7 +218,7 @@ public class BoxInfoDialog extends Dialog {
             }
         }
 
-        mDownloadingPlaylistLl.removeAllViews();
+        mPreparedPlaylistLl.removeAllViews();
         if (session.getNextPlayListVersion() != null && !session.getNextPlayListVersion().isEmpty()) {
             for (int i = 0; i < session.getNextPlayListVersion().size(); i += 2) {
                 LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.layout_box_info_row, null);
@@ -239,7 +239,7 @@ public class BoxInfoDialog extends Dialog {
                     linearLayout.addView(itemLl2, params2);
                 }
 
-                mDownloadingPlaylistLl.addView(linearLayout);
+                mPreparedPlaylistLl.addView(linearLayout);
             }
         }
     }

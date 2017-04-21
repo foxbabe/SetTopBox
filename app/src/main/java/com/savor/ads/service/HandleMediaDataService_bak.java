@@ -440,7 +440,7 @@
 //            return;
 //        }
 //        if (session.getMulticastDownloadingPeriod().equals(onDemandList.getPeriod())){
-//            if(!session.getMulticastMediaPeriod().equals(onDemandList.getPeriod())){
+//            if(!session.getVodPeriod().equals(onDemandList.getPeriod())){
 //                monitorMutlicastDownloadThread(onDemandList.getPeriod());
 //            }
 //            return;

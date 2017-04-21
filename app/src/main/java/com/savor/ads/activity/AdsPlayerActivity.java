@@ -259,7 +259,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                     "");
         }
 
@@ -308,7 +308,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                     "");
         }
     }
@@ -323,7 +323,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
                 LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                        "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                         "");
             }
         } catch (Exception e) {
@@ -340,7 +340,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                     "");
         }
     }

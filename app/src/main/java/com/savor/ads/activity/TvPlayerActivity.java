@@ -151,7 +151,7 @@ public class TvPlayerActivity extends BaseActivity {
                     mUUID = String.valueOf(System.currentTimeMillis());
                     LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                             String.valueOf(System.currentTimeMillis()), "start", "tv", mLastAdsVid,
-                            "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                            "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                             "");
 //                    }
                 } catch (Exception e) {
@@ -173,7 +173,7 @@ public class TvPlayerActivity extends BaseActivity {
                 }
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "end", "tv", mLastAdsVid,
-                        "", mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                        "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                         "");
 
 //                mIsSurfaceDestroyed = true;

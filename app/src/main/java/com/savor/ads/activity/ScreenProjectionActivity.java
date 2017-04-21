@@ -227,10 +227,12 @@ public class ScreenProjectionActivity extends BaseActivity {
     private void handleBundleData(Bundle bundle) {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
-        mMediaId = bundle.getString(EXTRA_MEDIA_ID, "");
+        mIsThumbnail = bundle.getBoolean(EXTRA_IS_THUMBNAIL, true);
+        if (mIsThumbnail) {
+            mMediaId = bundle.getString(EXTRA_MEDIA_ID, "");
+        }
         mVideoInitPosition = bundle.getInt(EXTRA_VIDEO_POSITION);
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
-        mIsThumbnail = bundle.getBoolean(EXTRA_IS_THUMBNAIL, true);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
     }
 
@@ -340,7 +342,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "start", mType, mMediaId,
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(),
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
                     mInnerType);
         }
 
@@ -363,20 +365,23 @@ public class ScreenProjectionActivity extends BaseActivity {
      * @param bundle
      */
     public void setNewProjection(Bundle bundle) {
+        String lastProjectType = mProjectType;
+        String lastMediaId = mMediaId;
+
+        handleBundleData(bundle);
+
         // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
         if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId,
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdvertMediaPeriod(),
-                    mSession.getMulticastMediaPeriod(), mInnerType);
+                    String.valueOf(System.currentTimeMillis()), "end", mType, lastMediaId,
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(),
+                    mSession.getVodPeriod(), mInnerType);
         }
 
         // 如果上一次是点播，把UUID清空以便后面生成新的
-        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
+        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(lastProjectType)) {
             mUUID = null;
         }
-
-        handleBundleData(bundle);
 
         mappingLogType();
 
@@ -753,7 +758,6 @@ public class ScreenProjectionActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         LogUtils.e("onDestroy " + this.hashCode());
-        super.onDestroy();
 
         // 清空消息队列
         mHandler.removeCallbacksAndMessages(null);
@@ -761,7 +765,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         // 记录业务日志
         LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                mSession.getVersionName(), mSession.getAdvertMediaPeriod(), mSession.getMulticastMediaPeriod(), mInnerType);
+                mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(), mInnerType);
 
         // 释放资源
         mSavorVideoView.release();
@@ -771,6 +775,8 @@ public class ScreenProjectionActivity extends BaseActivity {
                 bitmapDrawable.getBitmap().recycle();
             }
         }
+
+        super.onDestroy();
     }
 
     /**

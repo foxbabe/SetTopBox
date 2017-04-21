@@ -20,8 +20,8 @@ public class TechnicalLogReporter {
     public static void sdcardRemoved(Context context) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "take_out", "sdcard", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -30,8 +30,8 @@ public class TechnicalLogReporter {
     public static void sdcardMounted(Context context) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "take_in", "sdcard", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -42,8 +42,8 @@ public class TechnicalLogReporter {
     public static void md5Failed(Context context, String vid) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "check_failed", "md5", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -55,7 +55,7 @@ public class TechnicalLogReporter {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "update", "ads", "",
                 "", Session.get(context).getVersionName(), newVersion,
-                Session.get(context).getMulticastMediaPeriod(), "");
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -66,8 +66,8 @@ public class TechnicalLogReporter {
     public static void vodUpdate(Context context, String newVersion) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "update", "vod", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -78,8 +78,8 @@ public class TechnicalLogReporter {
     public static void apkUpdate(Context context, String newVersion) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "update", "apk", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 
     /**
@@ -90,7 +90,7 @@ public class TechnicalLogReporter {
     public static void romUpdate(Context context, String newVersion) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "update", "rom", "",
-                "", Session.get(context).getVersionName(), Session.get(context).getAdvertMediaPeriod(),
-                Session.get(context).getMulticastMediaPeriod(), "");
+                "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
+                Session.get(context).getVodPeriod(), "");
     }
 }

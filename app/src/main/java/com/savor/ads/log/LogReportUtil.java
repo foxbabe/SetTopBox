@@ -57,8 +57,8 @@ public class LogReportUtil {
 		mLogEn.setMedia_id("");
 		mLogEn.setMobile_id("");
 		mLogEn.setApk_version(session.getVersionName());
-		mLogEn.setAdsPeriod(session.getAdvertMediaPeriod());
-		mLogEn.setVodPeriod(session.getMulticastMediaPeriod());
+		mLogEn.setAdsPeriod(session.getAdsPeriod());
+		mLogEn.setVodPeriod(session.getVodPeriod());
 		mLogEn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
 		mLogEn.setBoxId(session.getEthernetMac());
 		mLogEn.setLogHour("");
@@ -74,8 +74,8 @@ public class LogReportUtil {
 		mLogEn.setMedia_id("");
 		mLogEn.setMobile_id("");
 		mLogEn.setApk_version(session.getVersionName());
-		mLogEn.setAdsPeriod(session.getAdvertMediaPeriod());
-		mLogEn.setVodPeriod(session.getMulticastMediaPeriod());
+		mLogEn.setAdsPeriod(session.getAdsPeriod());
+		mLogEn.setVodPeriod(session.getVodPeriod());
 		mLogEn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
 		offer(mLogEn);
 	}

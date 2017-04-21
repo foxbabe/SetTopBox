@@ -256,6 +256,7 @@ public class RemoteService extends Service {
             String resJson = "";
             String path = request.getPathInfo();
             LogUtils.d("request:--" + request.toString());
+            boolean isWebReq = false;
             if (TextUtils.isEmpty(path)) {
                 BaseResponse baseResponse = new BaseResponse();
                 baseResponse.setInfo("错误的功能");
@@ -273,6 +274,14 @@ public class RemoteService extends Service {
                     String action = dirs[1];
                     String deviceId = request.getParameter("deviceId");
                     String deviceName = request.getParameter("deviceName");
+                    try {
+                        String temp = request.getParameter("web");
+                        if (!TextUtils.isEmpty(temp)) {
+                            isWebReq = Boolean.parseBoolean(temp);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     switch (action) {
                         case "vod":
                             String type = request.getParameter("type");
@@ -460,6 +469,11 @@ public class RemoteService extends Service {
                 baseResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 baseResponse.setInfo("操作失败");
                 resJson = new Gson().toJson(baseResponse);
+            }
+
+            if (isWebReq) {
+                // h5请求的响应需要包裹，否则h5取不到json
+                resJson = "h5turbine(" + isWebReq + ")";
             }
             LogUtils.d("返回结果:" + resJson);
             response.getWriter().println(resJson);
