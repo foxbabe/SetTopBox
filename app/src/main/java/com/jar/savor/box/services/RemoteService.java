@@ -125,8 +125,17 @@ public class RemoteService extends Service {
                     response.getWriter().println(resp);
                 } else {
                     String version = request.getHeader("version");
-                    if ("1.0".equals(version)) {
-                        handleRequestV10(request, response);
+                    boolean isWebReq = false;
+                    try {
+                        String temp = request.getParameter("web");
+                        if (!TextUtils.isEmpty(temp)) {
+                            isWebReq = Boolean.parseBoolean(temp);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if ("1.0".equals(version) || isWebReq) {
+                        handleRequestV10(request, response, isWebReq);
                     } else {
                         handleRequestOld(request, response);
                     }
@@ -252,11 +261,10 @@ public class RemoteService extends Service {
          * @throws IOException
          * @throws ServletException
          */
-        private void handleRequestV10(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        private void handleRequestV10(HttpServletRequest request, HttpServletResponse response, boolean isWebReq) throws IOException, ServletException {
             String resJson = "";
             String path = request.getPathInfo();
             LogUtils.d("request:--" + request.toString());
-            boolean isWebReq = false;
             if (TextUtils.isEmpty(path)) {
                 BaseResponse baseResponse = new BaseResponse();
                 baseResponse.setInfo("错误的功能");
@@ -274,14 +282,6 @@ public class RemoteService extends Service {
                     String action = dirs[1];
                     String deviceId = request.getParameter("deviceId");
                     String deviceName = request.getParameter("deviceName");
-                    try {
-                        String temp = request.getParameter("web");
-                        if (!TextUtils.isEmpty(temp)) {
-                            isWebReq = Boolean.parseBoolean(temp);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     switch (action) {
                         case "vod":
                             String type = request.getParameter("type");
@@ -473,7 +473,7 @@ public class RemoteService extends Service {
 
             if (isWebReq) {
                 // h5请求的响应需要包裹，否则h5取不到json
-                resJson = "h5turbine(" + isWebReq + ")";
+                resJson = "h5turbine(" + resJson + ")";
             }
             LogUtils.d("返回结果:" + resJson);
             response.getWriter().println(resJson);

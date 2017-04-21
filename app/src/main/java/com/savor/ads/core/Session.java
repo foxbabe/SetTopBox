@@ -109,6 +109,12 @@ public class Session {
     private String adsPeriod;
     private String advPeriod;
     private String proPeriod;
+    private String adsDownloadPeriod;
+    private String advDownloadPeriod;
+    private String proDownloadPeriod;
+    private String adsNextPeriod;
+    private String advNextPeriod;
+    private String proNextPeriod;
 
     private ArrayList<VersionInfo> mVodVersion;
     private ArrayList<VersionInfo> mDownloadingVodVersion;
@@ -120,6 +126,7 @@ public class Session {
     //点播视频期号
     private String multicastMediaPeriod;
     private String vodPeriod;
+    private String vodDownloadPeriod;
     //点播视频用到的期号
 //    private String multicastDownloadingPeriod;
     //开机时间
@@ -236,10 +243,10 @@ public class Session {
         mLoadingVersion = mPreference.loadStringKey(P_APP_LOADING_VERSION, "");
         mSPVersionInfo = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_SP_VERSION_INFO, ""));
         setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
-        mDownloadingPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, ""));
-        mNextPlayListVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, ""));
+        setDownloadingPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, "")));
+        setNextPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, "")));
         setVodVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, "")));
-        mDownloadingVodVersion = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, ""));
+        setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -725,6 +732,11 @@ public class Session {
 
     public void setDownloadingPlayListVersion(ArrayList<VersionInfo> downloadingPlayListVersion) {
         mDownloadingPlayListVersion = downloadingPlayListVersion;
+        if (mDownloadingPlayListVersion != null) {
+            adsDownloadPeriod = AppUtils.findSpecifiedPeriodByType(mDownloadingPlayListVersion, "ads");
+            advDownloadPeriod = AppUtils.findSpecifiedPeriodByType(mDownloadingPlayListVersion, "adv");
+            proDownloadPeriod = AppUtils.findSpecifiedPeriodByType(mDownloadingPlayListVersion, "pro");
+        }
         writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_PLAY_LIST_VERSION, mDownloadingPlayListVersion));
     }
 
@@ -734,6 +746,11 @@ public class Session {
 
     public void setNextPlayListVersion(ArrayList<VersionInfo> nextPlayListVersion) {
         mNextPlayListVersion = nextPlayListVersion;
+        if (mNextPlayListVersion != null) {
+            adsNextPeriod = AppUtils.findSpecifiedPeriodByType(mNextPlayListVersion, "ads");
+            advNextPeriod = AppUtils.findSpecifiedPeriodByType(mNextPlayListVersion, "adv");
+            proNextPeriod = AppUtils.findSpecifiedPeriodByType(mNextPlayListVersion, "pro");
+        }
         writePreference(new Pair<String, Object>(P_APP_NEXT_PLAY_LIST_VERSION, mNextPlayListVersion));
     }
 
@@ -755,6 +772,9 @@ public class Session {
 
     public void setDownloadingVodVersion(ArrayList<VersionInfo> downloadingVodVersion) {
         mDownloadingVodVersion = downloadingVodVersion;
+        if (mDownloadingVodVersion != null) {
+            vodDownloadPeriod = AppUtils.findSpecifiedPeriodByType(mDownloadingVodVersion, "vod");
+        }
         writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_VOD_VERSION, mDownloadingVodVersion));
     }
 
@@ -1025,5 +1045,33 @@ public class Session {
 
     public String getVodPeriod() {
         return vodPeriod == null ? "" : vodPeriod;
+    }
+
+    public String getAdsDownloadPeriod() {
+        return adsDownloadPeriod == null ? "" : adsDownloadPeriod;
+    }
+
+    public String getAdvDownloadPeriod() {
+        return advDownloadPeriod == null ? "" : advDownloadPeriod;
+    }
+
+    public String getProDownloadPeriod() {
+        return proDownloadPeriod == null ? "" : proDownloadPeriod;
+    }
+
+    public String getAdsNextPeriod() {
+        return adsNextPeriod == null ? "" : adsNextPeriod;
+    }
+
+    public String getAdvNextPeriod() {
+        return advNextPeriod == null ? "" : advNextPeriod;
+    }
+
+    public String getProNextPeriod() {
+        return proNextPeriod == null ? "" : proNextPeriod;
+    }
+
+    public String getVodDownloadPeriod() {
+        return vodDownloadPeriod == null ? "" : vodDownloadPeriod;
     }
 }
