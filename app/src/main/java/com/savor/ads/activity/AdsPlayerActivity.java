@@ -85,10 +85,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         } else {
             doPlay();
         }
-//        if ( || TextUtils.isEmpty(mPeriod)) {
-//
-//            return;
-//        }
     }
 
     private void doPlay() {
@@ -264,12 +260,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
 
         // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (/*isLast && */mNeedPlayNewer) {
             mNeedPlayNewer = false;
-            mSavorVideoView.stop();
-            checkAndPlay();
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+                mSavorVideoView.stop();
+                checkAndPlay();
 
-            return true;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -278,12 +278,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     @Override
     public boolean onMediaError(int index, boolean isLast) {
         // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (/*isLast && */mNeedPlayNewer) {
             mNeedPlayNewer = false;
-            mSavorVideoView.stop();
-            checkAndPlay();
+            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+                mSavorVideoView.stop();
+                checkAndPlay();
 
-            return true;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }

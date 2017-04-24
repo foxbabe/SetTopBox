@@ -138,10 +138,22 @@ public class BoxInfoDialog extends Dialog {
         mProDownloadPeriodTv.setText(session.getProDownloadPeriod());
         mVodDownloadPeriodTv.setText(session.getVodDownloadPeriod());
 
-        if (!TextUtils.isEmpty(session.getNextAdvertMediaPubTime())) {
-            mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
-            mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
-            mProDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+        if (!TextUtils.isEmpty(session.getNextAdvertMediaPubTime()) && session.getNextPlayListVersion() != null) {
+            if (!TextUtils.isEmpty(session.getAdsNextPeriod()) && session.getAdsNextPeriod().equals(session.getAdsDownloadPeriod())) {
+                mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+            } else {
+                mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            }
+            if (!TextUtils.isEmpty(session.getAdvNextPeriod()) && session.getAdvNextPeriod().equals(session.getAdvDownloadPeriod())) {
+                mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+            } else {
+                mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            }
+            if (!TextUtils.isEmpty(session.getProNextPeriod()) && session.getProNextPeriod().equals(session.getProDownloadPeriod())) {
+                mProDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
+            } else {
+                mProDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            }
         } else {
             mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
             mAdvDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);

@@ -166,7 +166,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogUtils.e("onCreate " + this.hashCode());
+        LogUtils.d("onCreate " + this.hashCode());
         setContentView(R.layout.activity_screen_projection);
 
         findView();
@@ -404,12 +404,13 @@ public class ScreenProjectionActivity extends BaseActivity {
         }
         if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             mType = "projection";
-            if (mIsThumbnail) {
-                mMediaId = String.valueOf(System.currentTimeMillis());
-            }
             switch (mImageType) {
                 case 1:
                     mInnerType = "pic";
+                    // 只有单张投屏才生成mediaId，幻灯片和文件投屏会由手机端传来一个id标识同一系列图片
+                    if (mIsThumbnail) {
+                        mMediaId = String.valueOf(System.currentTimeMillis());
+                    }
                     break;
                 case 2:
                     mInnerType = "file";
