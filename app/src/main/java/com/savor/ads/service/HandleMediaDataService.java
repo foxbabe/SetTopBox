@@ -727,10 +727,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         session.setRoomName(boiteBean.getRoom_name());
         session.setRoomType(boiteBean.getRoom_type());
         session.setBoxName(boiteBean.getBox_name());
-        /**桶名称*/
-        if (!TextUtils.isEmpty(boiteBean.getOssBucketName())) {
-            session.setOss_bucket(boiteBean.getOssBucketName());
-        }
+//        /**桶名称*/
+//        if (!TextUtils.isEmpty(boiteBean.getOssBucketName())) {
+//            session.setOss_bucket(boiteBean.getOssBucketName());
+//        }
         /**桶地址*/
         if (!TextUtils.isEmpty(boiteBean.getAreaId())) {
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");

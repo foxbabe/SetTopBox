@@ -9,6 +9,7 @@ import com.alibaba.sdk.android.oss.OSSClient;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
@@ -111,8 +112,8 @@ public class LogUploadService{
 					}
 					final String archive = path + ".zip";
 
-					if (!TextUtils.isEmpty(session.getOss_bucket())
-							&&!TextUtils.isEmpty(session.getOss_file_path())) {
+					if (/*!TextUtils.isEmpty(session.getOss_bucket())
+							&&*/!TextUtils.isEmpty(session.getOss_file_path())) {
 
 						try {
 							AppUtils.zipFile(new File(path), new File(archive), name+".zip");
@@ -123,7 +124,7 @@ public class LogUploadService{
 							final String object_key = archive.substring(1,archive.length());
 							String oss_file_path = session.getOss_file_path()+name+".zip";
 							new ResuambleUpload(oss,
-									session.getOss_bucket(),
+									BuildConfig.OSS_BUCKET_NAME,
 									oss_file_path,
 									object_key,
 									new LogUploadService.UploadResult() {

@@ -97,9 +97,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         @Override
         public void run() {
             LogUtils.e("mExitProjectionRunnable " + ScreenProjectionActivity.this.hashCode());
-            exitProjection();
-
             resetGlobalFlag();
+            exitProjection();
         }
     };
     /**
@@ -773,7 +772,7 @@ public class ScreenProjectionActivity extends BaseActivity {
 
         // 记录业务日志
         LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.LAST_PROJECT_DEVICE_ID,
                 mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(), mInnerType);
 
         // 释放资源

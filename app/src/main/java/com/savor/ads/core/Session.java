@@ -155,10 +155,10 @@ public class Session {
      * 无线网卡MAC地址
      */
     private String mWlanMac;
-    /**
-     * oss上传桶名称
-     */
-    private String oss_bucket;
+//    /**
+//     * oss上传桶名称
+//     */
+//    private String oss_bucket;
     /**
      * oss上传路径
      */
@@ -234,7 +234,7 @@ public class Session {
         serverInfo = (ServerInfo) StringToObject(mPreference.loadStringKey(P_APP_SERVER_INFO, null));
         mEthernetMac = mPreference.loadStringKey(P_APP_ETHERNET_MAC, null);
         mWlanMac = mPreference.loadStringKey(P_APP_WLAN_MAC, null);
-        oss_bucket = mPreference.loadStringKey(P_APP_OSS_BUCKET,null);
+//        oss_bucket = mPreference.loadStringKey(P_APP_OSS_BUCKET,null);
         oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
         mAuthCode = mPreference.loadStringKey(P_APP_AUTH_CODE,null);
         mSplashPath = mPreference.loadStringKey(P_APP_SPLASH_PATH, "/Pictures/logo.jpg");
@@ -884,14 +884,14 @@ public class Session {
         return mWlanMac;
     }
 
-    public String getOss_bucket() {
-        return oss_bucket;
-    }
-
-    public void setOss_bucket(String oss_bucket) {
-        this.oss_bucket = oss_bucket;
-        writePreference(new Pair<String, Object>(P_APP_OSS_BUCKET, oss_bucket));
-    }
+//    public String getOss_bucket() {
+//        return oss_bucket;
+//    }
+//
+//    public void setOss_bucket(String oss_bucket) {
+//        this.oss_bucket = oss_bucket;
+//        writePreference(new Pair<String, Object>(P_APP_OSS_BUCKET, oss_bucket));
+//    }
 
     public String getOss_file_path() {
         return oss_file_path;

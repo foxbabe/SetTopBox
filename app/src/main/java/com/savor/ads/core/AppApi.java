@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.AtvProgramRequestBean;
 import com.savor.ads.bean.ServerInfo;
@@ -29,14 +30,15 @@ public class AppApi {
      */
 	public static String SP_BASE_URL = "http://192.168.1.2/";
 
+
 //    /**
 //     * 云平台测试环境
 //     **/
 //    public static final String BASE_URL = "http://devp.testapi.rerdian.com/";
-    /**
-     * 云平台正式环境
-     **/
-    public static final String BASE_URL = "https://mobile.rerdian.com/";
+//    /**
+//     * 云平台正式环境
+//     **/
+//    public static final String BASE_URL = "https://mobile.rerdian.com/";
 
     public static void resetSmallPlatformInterface(Context context) {
         ServerInfo serverInfo = Session.get(context).getServerInfo();
@@ -87,9 +89,9 @@ public class AppApi {
             put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
             put(Action.SP_POST_UPLOAD_LOG_JSON,SP_BASE_URL+"small/log/upload-file");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
-            put(Action.CP_GET_HEARTBEAT_PLAIN, BASE_URL + "Heartbeat/Report/index");
+            put(Action.CP_GET_HEARTBEAT_PLAIN, BuildConfig.BASE_URL + "Heartbeat/Report/index");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
-            put(Action.CP_GET_SP_IP_JSON, BASE_URL + "basedata/ipinfo/getIp");
+            put(Action.CP_GET_SP_IP_JSON, BuildConfig.BASE_URL + "basedata/ipinfo/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
         }
     };

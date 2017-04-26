@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/tv_hotel_name"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="40dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -100,7 +100,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -160,7 +160,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -220,7 +220,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -280,7 +280,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -340,7 +340,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -399,7 +399,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -459,7 +459,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -518,7 +518,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 

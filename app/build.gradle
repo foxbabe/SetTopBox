@@ -15,8 +15,8 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017042402
-        versionName "1.0.25"
+        versionCode 2017042601
+        versionName "1.1.0"
 
         multiDexEnabled true
     }
@@ -43,11 +43,22 @@ android {
         }
     }
 
+    productFlavors {
+        staging {
+            buildConfigField("String", "BASE_URL", "\"http://devp.testapi.rerdian.com/\"")
+            buildConfigField("String", "OSS_BUCKET_NAME", "\"redian-development\"")
+        }
+        production {
+            buildConfigField("String", "BASE_URL", "\"https://mobile.rerdian.com/\"")
+            buildConfigField("String", "OSS_BUCKET_NAME", "\"redian-produce\"")
+        }
+    }
+
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
-                def fileName = "SavorBox_v${variant.versionName}_${variant.versionCode}.apk"
+                def fileName = "SavorBox_v${variant.versionName}_${variant.versionCode}_${variant.flavorName}.apk"
                 def filePath = "${outputFile.parent}\\${releaseDate()}"
                 output.outputFile = new File(filePath, fileName)
             }
