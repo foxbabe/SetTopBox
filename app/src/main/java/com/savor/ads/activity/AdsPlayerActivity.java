@@ -32,6 +32,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private SavorVideoView mSavorVideoView;
 
     private ArrayList<PlayListBean> mPlayList;
+    private String mListPeriod;
     private boolean mNeedPlayNewer;
     /** 日志用的播放记录标识*/
     private String mUUID;
@@ -78,6 +79,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity checkAndPlay");
         // 未发现SD卡时跳到TV
         mPlayList = GlobalValues.PLAY_LIST;
+        mListPeriod = mSession.getAdsPeriod();
         if (mPlayList == null || mPlayList.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
             Intent intent = new Intent(this, TvPlayerActivity.class);
             startActivity(intent);
@@ -255,7 +257,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
 
@@ -312,7 +314,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
     }
@@ -327,7 +329,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
                 LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                        "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                        "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                         "");
             }
         } catch (Exception e) {
@@ -344,7 +346,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
     }

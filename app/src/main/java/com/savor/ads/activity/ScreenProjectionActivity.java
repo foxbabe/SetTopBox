@@ -318,7 +318,7 @@ public class ScreenProjectionActivity extends BaseActivity {
                 if (mImageView.getDrawable() != null) {
                     if (mImageView.getDrawable() instanceof BitmapDrawable) {
                         BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
-                        if (bitmapDrawable.getBitmap() != GlobalValues.CURRENT_PROJECT_BITMAP) {
+                        if (bitmapDrawable.getBitmap() != null && bitmapDrawable.getBitmap() != GlobalValues.CURRENT_PROJECT_BITMAP) {
                             bitmapDrawable.getBitmap().recycle();
                         }
                     }
@@ -729,7 +729,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         boolean handled = false;
         switch (keyCode) {
             case KeyCodeConstant.KEY_CODE_BACK:
-                finish();
+                resetGlobalFlag();
+                exitProjection();
                 handled = true;
                 break;
             // 呼出二维码

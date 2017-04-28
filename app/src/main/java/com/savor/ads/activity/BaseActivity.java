@@ -202,11 +202,11 @@ public abstract class BaseActivity extends Activity {
                             if (file.isFile()) {
                                 PlayListBean bean = new PlayListBean();
                                 bean.setMediaPath(file.getPath());
-                                String fileName = file.getName();
-                                int dotIndex = fileName.indexOf(".");
-                                if (dotIndex > 0) {
-                                    fileName = fileName.substring(0, dotIndex);
-                                }
+//                                String fileName = file.getName();
+//                                int dotIndex = fileName.indexOf(".");
+//                                if (dotIndex > 0) {
+//                                    fileName = fileName.substring(0, dotIndex);
+//                                }
 //                                bean.setVid(fileName);
                                 filePlayList.add(bean);
                             }

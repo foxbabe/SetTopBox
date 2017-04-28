@@ -539,7 +539,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     VersionInfo versionInfo = playListCategory.getVersion();
                     if (versionInfo != null && !TextUtils.isEmpty(versionInfo.getType()) &&
                             !AppUtils.findSpecifiedPeriodByType(versionList, versionInfo.getType()).equals(versionInfo.getVersion())) {
-                        break;
+                        return false;
                     }
                 }
                 match = true;

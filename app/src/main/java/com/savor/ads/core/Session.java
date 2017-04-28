@@ -216,6 +216,7 @@ public class Session {
         roomName = mPreference.loadStringKey(P_APP_ROOMNAME, null);
         roomId = mPreference.loadStringKey(P_APP_ROOMID, null);
         boxName = mPreference.loadStringKey(P_APP_BOXNAME, null);
+        boxId = mPreference.loadStringKey(P_APP_BOXID, null);
         roomType = mPreference.loadStringKey(P_APP_ROOM_TYPE, null);
         advertMediaPeriod = mPreference.loadStringKey(P_APP_ADVERTMEDIAPERIOD, "");
 //        nextAdvertMediaPeriod = mPreference.loadStringKey(P_APP_NEXT_ADVERTMEDIAPERIOD, "");
@@ -296,6 +297,7 @@ public class Session {
                 || P_APP_ROOMNAME.equals(key)
                 || P_APP_ROOMID.equals(key)
                 || P_APP_BOXNAME.equals(key)
+                || P_APP_BOXID.equals(key)
                 || P_APP_ROOM_TYPE.equals(key)
                 || P_APP_ADVERTMEDIAPERIOD.equals(key)
 //                || P_APP_NEXT_ADVERTMEDIAPERIOD.equals(key)
@@ -656,6 +658,7 @@ public class Session {
 
     public void setBoxId(String boxId) {
         this.boxId = boxId;
+        writePreference(new Pair<String, Object>(P_APP_BOXID, this.boxId));
     }
 
     public String getBoxName() {
@@ -975,6 +978,8 @@ public class Session {
     public static final String P_APP_ROOMID = "com.savor.ads.roomId";
     // 机顶盒名称
     public static final String P_APP_BOXNAME = "com.savor.ads.boxName";
+    // 机顶盒ID
+    public static final String P_APP_BOXID = "com.savor.ads.boxId";
     // 包间类型
     public static final String P_APP_ROOM_TYPE = "com.savor.ads.roomType";
     //广告视频期号
