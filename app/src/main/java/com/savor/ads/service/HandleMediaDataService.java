@@ -2,6 +2,7 @@ package com.savor.ads.service;
 
 import android.app.DownloadManager;
 import android.app.Service;
+import android.app.backup.IFullBackupRestoreObserver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -131,13 +132,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     // 同步获取机顶盒基本信息，包括logo、loading图
                     getBoxInfo();
 
-                    // 如果是第一次循环，检测并删除多余的视频
-                    if (isFirstRun) {
-                        deleteOldMedia();
-                    }
-
-                    // 检测预约发布的播放时间是否已到达
-                    if (AppUtils.checkPlayTime(context)) {
+                    // 检测预约发布的播放时间是否已到达，启动时不检测因为已经在Application中检测过了
+                    if (!isFirstRun && AppUtils.checkPlayTime(context)) {
                         notifyToPlay();
                     }
 
@@ -168,18 +164,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     }
 
     /**
-     * 盒子下载之前删除旧的媒体文件
+     * 盒子下载之前删除旧的媒体文件（删除视频的操作移到AdsPlayer中进行）
      */
     private void deleteOldMedia() {
 
         LogUtils.d("删除多余视频");
 
-        // AdvertMediaPeriod为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
+        // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
         if (session.getPlayListVersion() == null || session.getPlayListVersion().isEmpty()) {
             return;
         }
 
-        //排除当前已经完整下载的文件夹和正在下载的文件夹，其他删除
+        //排除当前已经完整下载的文件和正在下载的文件，其他删除
         String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media);
         File[] listFiles = new File(path).listFiles();
         if (listFiles == null || listFiles.length == 0) {
@@ -484,26 +480,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (isAllCompleted) {
             isFirstRun = false;
 
-            boolean mFillCurrentBill = false;
-            if (session.getPlayListVersion() == null || session.getPlayListVersion().isEmpty()) {
-                mFillCurrentBill = true;
-            } else {
-                try {
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date pubDate = format.parse(setTopBoxBean.getPub_time());
-                    if (pubDate.getTime() < System.currentTimeMillis()) {
-                        mFillCurrentBill = true;
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+            boolean fillCurrentBill = true;
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date pubDate = format.parse(setTopBoxBean.getPub_time());
+                fillCurrentBill = pubDate.getTime() <= System.currentTimeMillis();
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
 
-            if (mFillCurrentBill) {
+            if (fillCurrentBill) {
                 session.setPlayListVersion(newVersions);
                 session.setAdvertMediaPeriod(versionStr);
-
-                notifyToPlay();
             } else {
                 session.setNextPlayListVersion(newVersions);
                 session.setNextAdvertMediaPubTime(setTopBoxBean.getPub_time());
@@ -528,6 +516,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             // 将下载表中的内容拷贝到播放表
             dbHelper.copyPlaylist(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, DBHelper.MediaDBInfo.TableName.PLAYLIST);
+
+            if (fillCurrentBill) {
+                notifyToPlay();
+            }
         }
     }
 

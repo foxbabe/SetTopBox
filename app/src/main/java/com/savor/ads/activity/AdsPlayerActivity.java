@@ -12,15 +12,18 @@ import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.customview.SavorVideoView;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -248,6 +251,51 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         mNeedPlayNewer = true;
     }
 
+    private void deleteOldMedia() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                LogUtils.d("删除多余视频");
+
+                // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
+                if (mSession.getPlayListVersion() == null || mSession.getPlayListVersion().isEmpty()) {
+                    return;
+                }
+
+                //排除当前已经完整下载的文件和正在下载的文件，其他删除
+                String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media);
+                File[] listFiles = new File(path).listFiles();
+                if (listFiles == null || listFiles.length == 0) {
+                    return;
+                }
+                try {
+//            if (dbHelper.findPlayListByWhere(null, null)==null
+//                    &&dbHelper.findNewPlayListByWhere(null, null)==null){
+//                return;
+//            }
+                    for (File file : listFiles) {
+                        if (file.isFile()) {
+                            String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
+                            String[] selectionArgs = new String[]{file.getName()};
+
+                            DBHelper dbHelper = DBHelper.get(mContext);
+                            if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null
+                                    && dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
+                                file.delete();
+                                LogUtils.d("删除文件===================" + file.getName());
+                            }
+                        } else {
+                            FileUtils.delDir(file);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     @Override
     public boolean onMediaComplete(int index, boolean isLast) {
         // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在onMediaPrepared()中赋值
@@ -267,7 +315,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
                 checkAndPlay();
-
+                deleteOldMedia();
                 return true;
             } else {
                 return false;
@@ -285,7 +333,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
                 checkAndPlay();
-
+                deleteOldMedia();
                 return true;
             } else {
                 return false;

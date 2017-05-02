@@ -40,44 +40,46 @@ public class LogReportUtil {
 		String boiteId = "";
 		String roomId = "";
 
-		LogReportParam mLogEn = new LogReportParam();
-		mLogEn.setUUid(time);
+		LogReportParam mLogPowerOn = new LogReportParam();
+		mLogPowerOn.setUUid(time);
 		if (!TextUtils.isEmpty(session.getBoiteId())){
 			boiteId = session.getBoiteId();
 		}
 		if (!TextUtils.isEmpty(session.getRoomId())){
 			roomId = session.getRoomId();
 		}
-		mLogEn.setUUid(String.valueOf(System.currentTimeMillis()));
-		mLogEn.setHotel_id(boiteId);
-		mLogEn.setRoom_id(roomId);
-		mLogEn.setTime(time);
-		mLogEn.setAction("poweron");
-		mLogEn.setType("");
-		mLogEn.setMedia_id("");
-		mLogEn.setMobile_id("");
-		mLogEn.setApk_version(session.getVersionName());
-		mLogEn.setAdsPeriod(session.getAdsPeriod());
-		mLogEn.setVodPeriod(session.getVodPeriod());
-		mLogEn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
-		mLogEn.setBoxId(session.getEthernetMac());
-		mLogEn.setLogHour("");
-		offer(mLogEn);
+		mLogPowerOn.setUUid(time);
+		mLogPowerOn.setHotel_id(boiteId);
+		mLogPowerOn.setRoom_id(roomId);
+		mLogPowerOn.setTime(time);
+		mLogPowerOn.setAction("poweron");
+		mLogPowerOn.setType("");
+		mLogPowerOn.setMedia_id("");
+		mLogPowerOn.setMobile_id("");
+		mLogPowerOn.setApk_version(session.getVersionName());
+		mLogPowerOn.setAdsPeriod(session.getAdsPeriod());
+		mLogPowerOn.setVodPeriod(session.getVodPeriod());
+		mLogPowerOn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
+		mLogPowerOn.setBoxId(session.getEthernetMac());
+		mLogPowerOn.setLogHour("");
+		offer(mLogPowerOn);
+
 		/*******开机即生成一条信号源日志*******/
+		LogReportParam mLogSignal = new LogReportParam();
 		time = String.valueOf(System.currentTimeMillis());
-		mLogEn.setUUid(String.valueOf(System.currentTimeMillis()));
-		mLogEn.setHotel_id(boiteId);
-		mLogEn.setRoom_id(roomId);
-		mLogEn.setTime(time);
-		mLogEn.setAction("Signal");
-		mLogEn.setType("system");
-		mLogEn.setMedia_id("");
-		mLogEn.setMobile_id("");
-		mLogEn.setApk_version(session.getVersionName());
-		mLogEn.setAdsPeriod(session.getAdsPeriod());
-		mLogEn.setVodPeriod(session.getVodPeriod());
-		mLogEn.setCustom(AppUtils.getInputType(session.getTvInputSource()));
-		offer(mLogEn);
+		mLogSignal.setUUid(time);
+		mLogSignal.setHotel_id(boiteId);
+		mLogSignal.setRoom_id(roomId);
+		mLogSignal.setTime(time);
+		mLogSignal.setAction("Signal");
+		mLogSignal.setType("system");
+		mLogSignal.setMedia_id("");
+		mLogSignal.setMobile_id("");
+		mLogSignal.setApk_version(session.getVersionName());
+		mLogSignal.setAdsPeriod(session.getAdsPeriod());
+		mLogSignal.setVodPeriod(session.getVodPeriod());
+		mLogSignal.setCustom(AppUtils.getInputType(session.getTvInputSource()));
+		offer(mLogSignal);
 	}
 
 
