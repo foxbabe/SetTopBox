@@ -473,13 +473,13 @@ public class TvPlayerActivity extends BaseActivity {
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty()) {
             // 尝试填充播放列表
             fillPlayList();
-
         }
+
         if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
             Intent intent = new Intent(this, AdsPlayerActivity.class);
             startActivity(intent);
         } else {
-            ShowMessage.showToast(this, "未发现可播放视频内容");
+            ShowMessage.showToast(this, "未发现可播放轮播内容，无法跳转");
         }
     }
 

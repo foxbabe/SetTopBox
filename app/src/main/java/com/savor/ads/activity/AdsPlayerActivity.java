@@ -81,13 +81,13 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private void checkAndPlay() {
         LogFileUtil.write("AdsPlayerActivity checkAndPlay");
         // 未发现SD卡时跳到TV
-        mPlayList = GlobalValues.PLAY_LIST;
-        mListPeriod = mSession.getAdsPeriod();
-        if (mPlayList == null || mPlayList.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
             Intent intent = new Intent(this, TvPlayerActivity.class);
             startActivity(intent);
             finish();
         } else {
+            mPlayList = GlobalValues.PLAY_LIST;
+            mListPeriod = mSession.getAdsPeriod();
             doPlay();
         }
     }
@@ -270,18 +270,18 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     return;
                 }
                 try {
-//            if (dbHelper.findPlayListByWhere(null, null)==null
-//                    &&dbHelper.findNewPlayListByWhere(null, null)==null){
-//                return;
-//            }
+                    DBHelper dbHelper = DBHelper.get(mContext);
+                    if (dbHelper.findPlayListByWhere(null, null) == null &&
+                            dbHelper.findNewPlayListByWhere(null, null) == null){
+                        return;
+                    }
                     for (File file : listFiles) {
                         if (file.isFile()) {
                             String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
                             String[] selectionArgs = new String[]{file.getName()};
 
-                            DBHelper dbHelper = DBHelper.get(mContext);
-                            if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null
-                                    && dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
+                            if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
                                 file.delete();
                                 LogUtils.d("删除文件===================" + file.getName());
                             }

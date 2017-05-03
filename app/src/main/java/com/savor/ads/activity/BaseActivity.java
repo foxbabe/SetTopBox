@@ -143,10 +143,9 @@ public abstract class BaseActivity extends Activity {
 
     private void handleMediaMounted() {
         TechnicalLogReporter.sdcardMounted(this);
-        fillPlayList();
+//        fillPlayList();
 
 //        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-//            LogFileUtil.write("handleMediaMounted, will goto AdsPlayerActivity");
 //            Intent intent = new Intent(this, AdsPlayerActivity.class);
 //            startActivity(intent);
 //        }
@@ -189,9 +188,11 @@ public abstract class BaseActivity extends Activity {
                     }
                 }
 
-                GlobalValues.PLAY_LIST = playList;
-
 //                dbHelper.close();
+            }
+
+            if (playList != null && !playList.isEmpty()) {
+                GlobalValues.PLAY_LIST = playList;
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {
@@ -202,12 +203,6 @@ public abstract class BaseActivity extends Activity {
                             if (file.isFile()) {
                                 PlayListBean bean = new PlayListBean();
                                 bean.setMediaPath(file.getPath());
-//                                String fileName = file.getName();
-//                                int dotIndex = fileName.indexOf(".");
-//                                if (dotIndex > 0) {
-//                                    fileName = fileName.substring(0, dotIndex);
-//                                }
-//                                bean.setVid(fileName);
                                 filePlayList.add(bean);
                             }
                         }
@@ -215,6 +210,9 @@ public abstract class BaseActivity extends Activity {
                     GlobalValues.PLAY_LIST = filePlayList;
                 }
             }
+        } else {
+            LogFileUtil.writeApInfo("跳转轮播，未找到SD卡！");
+            ShowMessage.showToast(mContext, "未发现SD卡");
         }
     }
 

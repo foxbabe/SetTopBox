@@ -32,6 +32,7 @@ import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.ShowMessage;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -72,14 +73,10 @@ public class MainActivity extends BaseActivity {
     }
 
     private void gotoAdsActivity() {
-        String SDCardPath = AppUtils.getExternalSDCardPath();
-        if (!TextUtils.isEmpty(SDCardPath)) {
-            fillPlayList();
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-                Intent intent = new Intent(mContext, AdsPlayerActivity.class);
-                startActivity(intent);
-            }
-        }
+        fillPlayList();
+
+        Intent intent = new Intent(mContext, AdsPlayerActivity.class);
+        startActivity(intent);
     }
 
     private void registerDownloadReceiver() {
@@ -289,7 +286,6 @@ public class MainActivity extends BaseActivity {
         }
 
     }
-
 
 
     @Override
