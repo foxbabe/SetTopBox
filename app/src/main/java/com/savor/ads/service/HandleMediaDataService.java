@@ -403,12 +403,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 continue;
             }
 
-            // 找出该类型的当前期号
-            String periodExist = AppUtils.findSpecifiedPeriodByType(session.getPlayListVersion(), versionInfo.getType());
+//            // 找出该类型的当前期号
+//            String periodExist = AppUtils.findSpecifiedPeriodByType(session.getPlayListVersion(), versionInfo.getType());
 
             // 先从下载表中删除该期的记录
             String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
-            String[] selectionArgs = new String[]{periodExist, versionInfo.getType()};
+            String[] selectionArgs = new String[]{versionInfo.getVersion(), versionInfo.getType()};
             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
             List<MediaLibBean> mediaLibList = item.getMedia_lib();
