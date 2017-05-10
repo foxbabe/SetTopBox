@@ -23,6 +23,12 @@ android {
 
     // 签名配置
     signingConfigs {
+        debug {
+            storeFile file("/savor-box.jks")
+            storePassword "savor123456"
+            keyAlias "savor-box"
+            keyPassword "savor123456"
+        }
         release {
             storeFile file("/savor-box.jks")
             storePassword "savor123456"
@@ -70,11 +76,12 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "com.android.support:support-v4:$SUPPORT_LIB_VERSION"
     compile "com.android.support:appcompat-v7:$SUPPORT_LIB_VERSION"
+    //  rxjava 本例中线程切换要用到，代替handler
     compile 'com.squareup.okhttp3:okhttp:3.4.2'
     compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
-    //  rxjava 本例中线程切换要用到，代替handler
     compile 'io.reactivex:rxjava:1.1.6'
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }

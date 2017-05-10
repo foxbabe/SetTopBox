@@ -126,6 +126,9 @@
             android:name=".service.SSDPMulticastService"
             android:exported="false">
         </service>
+
+        <activity android:name=".activity.LotteryActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package com.jar.savor.box.interfaces;
 
 import com.jar.savor.box.vo.CodeVerifyBean;
+import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
@@ -23,6 +24,10 @@ public interface OnRemoteOperationListener {
     PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId);
 
     PrepareResponseVoNew showVideo(String videoPath, int position);
+
+    PrepareResponseVoNew showEgg();
+
+    HitEggResponseVo hitEgg(String projectId);
 
     SeekResponseVo seek(int position);
 

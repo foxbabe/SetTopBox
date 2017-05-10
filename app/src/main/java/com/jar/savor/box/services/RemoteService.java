@@ -307,7 +307,11 @@ public class RemoteService extends Service {
                             } else {
                                 PrepareResponseVo vo = new PrepareResponseVo();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                if (GlobalValues.IS_LOTTERY) {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                } else {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                }
                                 resJson = new Gson().toJson(vo);
                             }
                             break;
@@ -335,7 +339,11 @@ public class RemoteService extends Service {
                             } else {
                                 PrepareResponseVo vo = new PrepareResponseVo();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                if (GlobalValues.IS_LOTTERY) {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                } else {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                }
                                 resJson = new Gson().toJson(vo);
                             }
                             break;
@@ -381,7 +389,7 @@ public class RemoteService extends Service {
                             }
                             break;
                         case "resume":
-                            LogUtils.d("enter method listener.play");
+                            LogUtils.d("enter method listener.resume");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                                 String projectId = request.getParameter("projectId");
                                 PlayResponseVo object = RemoteService.listener.play(1, projectId);
@@ -389,7 +397,7 @@ public class RemoteService extends Service {
                             }
                             break;
                         case "pause":
-                            LogUtils.d("enter method listener.play");
+                            LogUtils.d("enter method listener.pause");
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                                 String projectId = request.getParameter("projectId");
                                 PlayResponseVo object = RemoteService.listener.play(0, projectId);
@@ -397,7 +405,7 @@ public class RemoteService extends Service {
                             }
                             break;
                         case "seek":
-                            LogUtils.d("enter method listener.play");
+                            LogUtils.d("enter method listener.seek");
                             int positionSeek = Integer.parseInt(request.getParameter("position"));
                             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                                 String projectId = request.getParameter("projectId");
@@ -452,6 +460,42 @@ public class RemoteService extends Service {
                                 ResponseT vo = new ResponseT();
                                 vo.setCode(10001);
                                 resJson = new Gson().toJson(vo);
+                            }
+                            break;
+                        case "egg":
+                            LogUtils.e("enter method listener.egg");
+                            if (!TextUtils.isEmpty(deviceId) &&
+                                    (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID))) {
+                                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                GlobalValues.IS_LOTTERY = true;
+                                BaseResponse object = RemoteService.listener.showEgg();
+                                if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
+                                    GlobalValues.IS_LOTTERY = false;
+                                }
+                                resJson = new Gson().toJson(object);
+                            } else {
+                                PrepareResponseVo vo = new PrepareResponseVo();
+                                vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                if (GlobalValues.IS_LOTTERY) {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                } else {
+                                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                }
+                                resJson = new Gson().toJson(vo);
+                            }
+                            break;
+                        case "hitEgg":
+                            LogUtils.e("enter method listener.hitEgg");
+                            if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                                String projectId = request.getParameter("projectId");
+                                BaseResponse object = RemoteService.listener.hitEgg(projectId);
+                                resJson = new Gson().toJson(object);
+
+                                GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
                             }
                             break;
                         default:
@@ -625,7 +669,11 @@ public class RemoteService extends Service {
             } else {
                 BaseResponse vo = new BaseResponse();
                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                if (GlobalValues.IS_LOTTERY) {
+                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                } else {
+                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                }
                 respJson = new Gson().toJson(vo);
             }
             return respJson;

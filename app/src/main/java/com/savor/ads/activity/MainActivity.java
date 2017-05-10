@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.savor.ads.R;
+import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
@@ -47,6 +48,7 @@ public class MainActivity extends BaseActivity {
     Handler mHandler = new Handler();
     private ImageView main_imgIv;
 
+    /**标识5秒延时是否已过*/
     private boolean mIsLagElapse;
 
     @Override
@@ -267,6 +269,30 @@ public class MainActivity extends BaseActivity {
         LogFileUtil.write("MainActivity will start LogUploadService");
         LogUploadService logUploadService = new LogUploadService(mContext);
         logUploadService.start();
+    }
+
+    private void getPrizeInfo() {
+        LogFileUtil.write("MainActivity will start getPrizeInfo");
+        LogUtils.d("MainActivity will start getPrizeInfo");
+        AppApi.getPrize(mContext, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+                if (obj instanceof PrizeInfo) {
+                    PrizeInfo newPrize = (PrizeInfo) obj;
+                    mSession.setPrizeInfo(newPrize);
+                }
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+                mSession.setPrizeInfo(null);
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+
+            }
+        });
     }
 
     void initDisplay() {

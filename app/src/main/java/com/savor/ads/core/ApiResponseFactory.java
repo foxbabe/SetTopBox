@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.OnDemandListBean;
+import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.bean.TvProgramResponse;
@@ -182,6 +183,10 @@ public class ApiResponseFactory {
                 break;
             case SP_GET_TV_MATCH_DATA_FROM_JSON:
                 result = gson.fromJson(info, new TypeToken<TvProgramResponse>() {
+                }.getType());
+                break;
+            case CP_GET_PRIZE_JSON:
+                result = gson.fromJson(info, new TypeToken<PrizeInfo>() {
                 }.getType());
                 break;
             default:

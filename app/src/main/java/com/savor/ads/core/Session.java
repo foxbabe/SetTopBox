@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.utils.AppUtils;
@@ -179,6 +180,9 @@ public class Session {
     /** 加载图版本*/
     private String mLoadingVersion;
 
+    /** 抽奖奖项信息*/
+    private PrizeInfo mPrizeInfo;
+
     private Session(Context context) {
 
         mContext = context;
@@ -248,6 +252,7 @@ public class Session {
         setNextPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, "")));
         setVodVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, "")));
         setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
+        mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -1031,10 +1036,12 @@ public class Session {
     public static final String P_APP_SPLASH_PATH = "com.savor.ads.splashPath";
     //加载图路径key
     public static final String P_APP_LOADING_PATH = "com.savor.ads.loadingPath";
-    //加载图路径key
+    //加载图版本key
     public static final String P_APP_LOADING_VERSION = "com.savor.ads.loadingVersion";
     //小平台中的各种版本信息key
     public static final String P_APP_SP_VERSION_INFO = "com.savor.ads.spVersionInfo";
+    // 奖项设置key
+    public static final String P_APP_PRIZE_INFO = "com.savor.ads.prizeInfo";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;
@@ -1078,5 +1085,14 @@ public class Session {
 
     public String getVodDownloadPeriod() {
         return vodDownloadPeriod == null ? "" : vodDownloadPeriod;
+    }
+
+    public PrizeInfo getPrizeInfo() {
+        return mPrizeInfo;
+    }
+
+    public void setPrizeInfo(PrizeInfo prizeInfo) {
+        mPrizeInfo = prizeInfo;
+        writePreference(new Pair<String, Object>(P_APP_PRIZE_INFO, mPrizeInfo));
     }
 }

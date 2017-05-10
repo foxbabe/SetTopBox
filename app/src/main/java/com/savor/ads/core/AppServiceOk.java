@@ -182,7 +182,7 @@ public class AppServiceOk {
                 @Override
                 public void onError(Call call, Exception e) {
                     // TODO Auto-generated method stub
-                    handler.onError(action, AppApi.ERROR_TIMEOUT);
+                    handler.onNetworkFailed(action);
                 }
 
                 @Override
@@ -244,7 +244,7 @@ public class AppServiceOk {
             @Override
             public void onError(Call call, Exception e) {
                 // TODO Auto-generated method stub
-                handler.onError(action, AppApi.ERROR_TIMEOUT);
+                handler.onNetworkFailed(action);
             }
 
             @Override

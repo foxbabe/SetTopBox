@@ -8,6 +8,7 @@ import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.CodeVerifyBean;
+import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVo;
@@ -19,6 +20,7 @@ import com.jar.savor.box.vo.SeekResponseVo;
 import com.jar.savor.box.vo.StopResponseVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.SavorApplication;
+import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
@@ -467,6 +469,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
+        } else if (activity instanceof LotteryActivity) {
+            ((LotteryActivity) activity).stop();
+            StopResponseVo stopResponseVo = new StopResponseVo();
+            stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+            return stopResponseVo;
         } else {
             if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                 // 播放正在准备，还没来得及跳到投屏页
@@ -638,5 +646,46 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             responseT.setMsg("输入有误，请重新输入");
         }
         return responseT;
+    }
+
+    @Override
+    public PrepareResponseVoNew showEgg() {
+        PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+        localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+        localResult.setInfo("加载成功！");
+
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity == null) {
+            LogUtils.d("Listener will startActivity in new task");
+            Intent intent = new Intent(mContext, LotteryActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        } else {
+            LogUtils.d("Listener will startActivity in " + activity);
+            Intent intent = new Intent(activity, LotteryActivity.class);
+            activity.startActivity(intent);
+        }
+        return localResult;
+    }
+
+    @Override
+    public HitEggResponseVo hitEgg(String projectId) {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof LotteryActivity) {
+            if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                return ((LotteryActivity) activity).hitEgg();
+            } else {
+                HitEggResponseVo responseVo = new HitEggResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+        } else {
+            HitEggResponseVo responseVo = new HitEggResponseVo();
+            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            responseVo.setInfo("操作失败");
+            return responseVo;
+        }
     }
 }

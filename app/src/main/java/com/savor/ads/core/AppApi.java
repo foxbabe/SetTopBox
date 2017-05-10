@@ -74,6 +74,8 @@ public class AppApi {
         SP_POST_UPLOAD_PROGRAM_JSON,
         CP_GET_SP_IP_JSON,
         SP_GET_BOX_INIT_JSON,
+        CP_GET_PRIZE_JSON,
+        CP_REPORT_LOTTERY_JSON,
     }
 
 
@@ -93,6 +95,8 @@ public class AppApi {
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
             put(Action.CP_GET_SP_IP_JSON, BuildConfig.BASE_URL + "basedata/ipinfo/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
+            put(Action.CP_GET_PRIZE_JSON, BuildConfig.BASE_URL + "Award/Award/getAwardInfo");
+            put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
         }
     };
 
@@ -223,6 +227,31 @@ public class AppApi {
         params.put("data", programInfo);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
     }
+
+    /**
+     * 获取奖项设置
+     * @param context
+     * @param handler
+     */
+    public static void getPrize(Context context, ApiRequestListener handler) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("mac", Session.get(context).getEthernetMac());
+        new AppServiceOk(context, Action.CP_GET_PRIZE_JSON, handler, params).post();
+    }
+
+    /**
+     * 上报抽奖信息
+     * @param context
+     * @param handler
+     */
+    public static void reportLottery(Context context, ApiRequestListener handler) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("mac", Session.get(context).getEthernetMac());
+        params.put("date", AppUtils.getCurTime("yyyy-MM-dd"));
+        new AppServiceOk(context, Action.CP_REPORT_LOTTERY_JSON, handler, params).post();
+    }
+
+
 
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";

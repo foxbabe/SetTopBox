@@ -34,6 +34,8 @@ public class GlobalValues {
     public volatile static String CURRENT_PROJECT_ID;
     /** 上次投屏ID*/
     public volatile static String LAST_PROJECT_ID;
+    /** 是否是抽奖*/
+    public volatile static boolean IS_LOTTERY;
 
 //    /**
 //     * 测试环境手机端APP下载页面
