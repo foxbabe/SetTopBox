@@ -79,7 +79,7 @@ public class LogUploadService{
 						}
 					}
 				}
-
+				uploadLotteryRecordFile();
 				while (true){
 					uploadFile();
 					try {
@@ -95,8 +95,50 @@ public class LogUploadService{
 
 	}
 
+	private void uploadLotteryRecordFile(){
+		File[] files = getAllLogInfo(AppUtils.StorageFile.lottery);
+		if (files!=null&&files.length>0){
+			for (final File file:files){
+				final String name = file.getName();
+				final String path = file.getPath();
+				if (file.isFile()) {
+
+					if (name.contains(AppUtils.getTime("date"))){
+						continue;
+					}
+					final String archive = path + ".zip";
+					try {
+						AppUtils.zipFile(new File(path), new File(archive), name+".zip");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if(new File(archive).exists()){
+						final String object_key = archive.substring(1,archive.length());
+						String oss_file_path = OSSValues.uploadLotteryPath + name + ".zip";
+						new ResuambleUpload(oss,
+								BuildConfig.OSS_BUCKET_NAME,
+								oss_file_path,
+								object_key,
+								new LogUploadService.UploadResult() {
+									@Override
+									public void isSuccessOSSUpload(boolean flag) {
+										if (flag){
+											file.delete();
+										}
+										if (new File(archive).exists()){
+											new File(archive).delete();
+										}
+									}
+								}).resumableUpload();
+					}
+				}
+			}
+		}
+
+	}
+
 	private void uploadFile(){
-		File[] files = getAllLogInfo();
+		File[] files = getAllLogInfo(AppUtils.StorageFile.log);
 		if (files!=null&&files.length>0){
 			for (File file:files){
 				final String name = file.getName();
@@ -151,8 +193,8 @@ public class LogUploadService{
 	/**
 	 * 获取log目录下所有日志
 	 */
-	private File[] getAllLogInfo(){
-		String path = AppUtils.getFilePath(context, AppUtils.StorageFile.log);
+	private File[] getAllLogInfo(AppUtils.StorageFile storage){
+		String path = AppUtils.getFilePath(context, storage);
 		File[] files = new File(path).listFiles();
 		if (files == null || files.length <= 0)
 			return null;

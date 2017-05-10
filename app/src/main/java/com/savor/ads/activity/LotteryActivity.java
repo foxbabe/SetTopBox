@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.savor.ads.R;
+
+import com.savor.ads.core.Session;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeItem;
 import com.savor.ads.utils.AppUtils;
@@ -23,6 +25,8 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +44,7 @@ public class LotteryActivity extends BaseActivity {
     private SoundPool mSoundPool;
 
     private int mCurrentFrame;
+    private FileWriter mwriter = null;
     private Handler mHandler = new Handler();
 
     private Runnable mExitLotteryRunnable = new Runnable() {
@@ -239,6 +244,7 @@ public class LotteryActivity extends BaseActivity {
                 mPrizeTime = new Date();
                 checkIfWin();
                 mHandler.post(mBrokenEggEffectRunnable);
+                writeLotteryRecord(0);
             } else {
                 mHandler.post(mHitEggEffectRunnable);
             }
@@ -390,5 +396,44 @@ public class LotteryActivity extends BaseActivity {
     private void exitLottery() {
         LogUtils.e("will exitLottery " + this.hashCode());
         finish();
+    }
+
+    private void writeLotteryRecord(int prize){
+        if (mwriter==null){
+            createLotteryRecordFile();
+            if (mwriter!=null){
+                try {
+                    mwriter.write("");
+                    closeWriter();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+    }
+
+    private void createLotteryRecordFile(){
+        String time = AppUtils.getTime("date");
+        String recordFileName = time + ".blog";
+        String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.lottery);
+        try {
+            mwriter = new FileWriter(path+recordFileName,true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeWriter() {
+        if (mwriter != null) {
+            try {
+                mwriter.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            mwriter = null;
+        }
     }
 }
