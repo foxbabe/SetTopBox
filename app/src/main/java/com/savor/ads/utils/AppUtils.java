@@ -101,6 +101,7 @@ public class AppUtils {
     public static final String BoxlogedDir = "loged/";
     public static final String BoxMediaDir = "media/";
     public static final String BoxMulticast = "multicast/";
+    public static final String BoxLotteryDir= "lottery/";
     // UTF-8 encoding
     private static final String ENCODING_UTF8 = "UTF-8";
 
@@ -146,7 +147,11 @@ public class AppUtils {
         /**
          * SDCard根目录配置文件
          */
-        config;
+        config,
+        /**
+         * 抽奖记录
+         */
+        lottery;
 
     }
 
@@ -279,6 +284,10 @@ public class AppUtils {
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
+        File targetLotteryFile = new File(path + File.separator,BoxLotteryDir);
+        if (!targetLotteryFile.exists()){
+            targetLotteryFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -291,6 +300,8 @@ public class AppUtils {
         } else if (mode == StorageFile.config) {
             path = targetConfigTxtFile.getAbsolutePath();
         } else if (mode == StorageFile.cache) {
+            path = targetCacheFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.lottery) {
             path = targetCacheFile.getAbsolutePath() + File.separator;
         }
         return path;

@@ -9,10 +9,14 @@ import android.widget.RelativeLayout;
 
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.savor.ads.R;
+import com.savor.ads.core.Session;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 public class LotteryActivity extends BaseActivity {
@@ -24,6 +28,7 @@ public class LotteryActivity extends BaseActivity {
     private SoundPool mSoundPool;
 
     private int mCurrentFrame;
+    private FileWriter mwriter = null;
     private Handler mHandler = new Handler();
 
     private Runnable mExitLotteryRunnable = new Runnable() {
@@ -194,5 +199,45 @@ public class LotteryActivity extends BaseActivity {
     private void exitLottery() {
         LogUtils.e("will exitLottery " + this.hashCode());
         finish();
+    }
+
+    private void writeLotteryRecord(String record){
+        if (mwriter==null){
+            createLotteryRecordFile();
+            if (mwriter!=null){
+                try {
+                    mwriter.write(record);
+                    closeWriter();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+    }
+
+    private void createLotteryRecordFile(){
+        Session session = Session.get(mContext);
+        String time = AppUtils.getTime("date");
+        String recordFileName = session.getEthernetMac()+"_"+time+".blog";
+        String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.lottery);
+        try {
+            mwriter = new FileWriter(path+recordFileName,true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeWriter() {
+        if (mwriter != null) {
+            try {
+                mwriter.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            mwriter = null;
+        }
     }
 }
