@@ -8,9 +8,10 @@ import java.io.Serializable;
 
 public class PrizeItem implements Serializable {
     private int prize_id;
-    private int prize_name;
+    private String prize_name;
     private int prize_num;
     private int prize_pos;
+    private int prize_level;
 
     public int getPrize_id() {
         return prize_id;
@@ -20,11 +21,11 @@ public class PrizeItem implements Serializable {
         this.prize_id = prize_id;
     }
 
-    public int getPrize_name() {
+    public String getPrize_name() {
         return prize_name;
     }
 
-    public void setPrize_name(int prize_name) {
+    public void setPrize_name(String prize_name) {
         this.prize_name = prize_name;
     }
 
@@ -42,5 +43,13 @@ public class PrizeItem implements Serializable {
 
     public void setPrize_pos(int prize_pos) {
         this.prize_pos = prize_pos;
+    }
+
+    public int getPrize_level() {
+        return prize_level;
+    }
+
+    public void setPrize_level(int prize_level) {
+        this.prize_level = prize_level;
     }
 }

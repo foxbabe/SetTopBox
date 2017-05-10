@@ -25,7 +25,7 @@ public interface OnRemoteOperationListener {
 
     PrepareResponseVoNew showVideo(String videoPath, int position);
 
-    PrepareResponseVoNew showEgg();
+    PrepareResponseVoNew showEgg(String date, int hunger);
 
     HitEggResponseVo hitEgg(String projectId);
 

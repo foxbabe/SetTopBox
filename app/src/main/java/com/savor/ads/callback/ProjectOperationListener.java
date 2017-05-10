@@ -22,6 +22,7 @@ import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
+import com.savor.ads.bean.AwardTime;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.Session;
@@ -33,6 +34,9 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -649,22 +653,63 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showEgg() {
+    public PrepareResponseVoNew showEgg(String date, int hunger) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+
+        // 检测抽奖时间
+        if (Session.get(mContext).getPrizeInfo() != null) {
+            boolean checkPass = false;
+            for (AwardTime awardTime : Session.get(mContext).getPrizeInfo().getAward_time()) {
+                if (awardTime != null) {
+                    Date now = new Date();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    try {
+                        Date startDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getStart_time());
+                        Date endDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getEnd_time());
+                        if (now.compareTo(startDate) >= 0 && now.compareTo(endDate) < 0) {
+                            checkPass = true;
+                            break;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (!checkPass) {
+                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                localResult.setInfo("当前时间不可抽奖");
+                return localResult;
+            }
+        }
+
         localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
+
+        // 校验日期，不一致不让中
+        String boxDate = AppUtils.getCurTime("yyyyMMdd");
+        if (!boxDate.equals(date)) {
+            LogUtils.e("手机日期与机顶盒日期不一致！机顶盒日期为" + boxDate + " 手机日期为" + date);
+            hunger = 0;
+        }
 
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity == null) {
             LogUtils.d("Listener will startActivity in new task");
             Intent intent = new Intent(mContext, LotteryActivity.class);
+            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         } else {
             LogUtils.d("Listener will startActivity in " + activity);
             Intent intent = new Intent(activity, LotteryActivity.class);
+            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
             activity.startActivity(intent);
+
+            if (activity instanceof LotteryActivity) {
+                ((LotteryActivity) activity).exitImmediately();
+            }
         }
         return localResult;
     }
