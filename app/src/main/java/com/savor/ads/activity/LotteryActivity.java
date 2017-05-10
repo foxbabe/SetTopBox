@@ -244,7 +244,7 @@ public class LotteryActivity extends BaseActivity {
                 mPrizeTime = new Date();
                 checkIfWin();
                 mHandler.post(mBrokenEggEffectRunnable);
-                writeLotteryRecord(0);
+                writeLotteryRecord();
             } else {
                 mHandler.post(mHitEggEffectRunnable);
             }
@@ -301,8 +301,10 @@ public class LotteryActivity extends BaseActivity {
 
                 if (denominator > 0) {
                     int hit = random.nextInt(denominator);
-                    for (int i = prizeList.size() - 1; i > 0; i--) {
+                    LogUtils.d("计算是否中奖 denominator=" + denominator + " hit=" + hit);
+                    for (int i = prizeList.size() - 1; i >= 0; i--) {
                         PrizeItem item = prizeList.get(i);
+                        LogUtils.d("计算是否中奖 start position=" + mStartPosList.get(i));
                         if (hit >= mStartPosList.get(i)) {
                             mPrizeHit = item;
                             break;
@@ -398,19 +400,26 @@ public class LotteryActivity extends BaseActivity {
         finish();
     }
 
-    private void writeLotteryRecord(int prize){
-        if (mwriter==null){
+    private void writeLotteryRecord(){
+        if (mwriter == null){
             createLotteryRecordFile();
-            if (mwriter!=null){
+
+            if (mwriter != null){
                 try {
-                    mwriter.write("");
+                    String lotteryLog = System.currentTimeMillis() + "," + mSession.getBoiteId() + "," + mSession.getRoomId() + "," +
+                            mSession.getBoxId() + "," + GlobalValues.CURRENT_PROJECT_DEVICE_ID + "," + GlobalValues.CURRENT_PROJECT_DEVICE_NAME;
+                    if (mPrizeHit == null) {
+                        lotteryLog += ",,";
+                    } else {
+                        lotteryLog += "," + mPrizeHit.getPrize_id() + "," + mPrizeHit.getPrize_name();
+                    }
+                    mwriter.write(lotteryLog);
                     closeWriter();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
             }
-
         }
     }
 
@@ -430,7 +439,6 @@ public class LotteryActivity extends BaseActivity {
             try {
                 mwriter.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             mwriter = null;

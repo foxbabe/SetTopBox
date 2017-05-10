@@ -452,15 +452,15 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
     @Override
     public StopResponseVo stop(String projectId) {
-        if (TextUtils.isEmpty(projectId)) {
-            StopResponseVo responseVo = new StopResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
-        }
-
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (!GlobalValues.IS_LOTTERY) {
+            if (TextUtils.isEmpty(projectId)) {
+                StopResponseVo responseVo = new StopResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                responseVo.setInfo("操作失败");
+                return responseVo;
+            }
+
             if (activity instanceof ScreenProjectionActivity) {
                 if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                     ((ScreenProjectionActivity) activity).stop();
@@ -496,18 +496,18 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         } else {
 
             if (activity instanceof LotteryActivity) {
-                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+//                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
                     ((LotteryActivity) activity).stop();
                     StopResponseVo stopResponseVo = new StopResponseVo();
                     stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
                     return stopResponseVo;
-                } else {
-                    StopResponseVo responseVo = new StopResponseVo();
-                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
-                    responseVo.setInfo("操作失败");
-                    return responseVo;
-                }
+//                } else {
+//                    StopResponseVo responseVo = new StopResponseVo();
+//                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+//                    responseVo.setInfo("操作失败");
+//                    return responseVo;
+//                }
             } else {
                 StopResponseVo responseVo = new StopResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
