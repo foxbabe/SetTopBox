@@ -127,7 +127,8 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".activity.LotteryActivity">
+        <activity android:name=".activity.LotteryActivity"
+                  android:launchMode="singleTask">
         </activity>
     </application>
 

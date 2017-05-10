@@ -1,5 +1,6 @@
 package com.savor.ads.activity;
 
+import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -127,6 +128,24 @@ public class LotteryActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        rescheduleToExit(true);
+
+        mHunger = intent.getIntExtra(EXTRA_HUNGER, 0);
+        mPrizeHit = null;
+        mPrizeTime = null;
+        mCurrentFrame = 0;
+        mLastFrameCount = -1;
+        mRootLayout.setBackgroundResource(R.mipmap.bg_egg);
+        mEggIv.setImageResource(R.mipmap.egg1);
+        mEggIv.setVisibility(View.VISIBLE);
+        mWinDialogRl.setVisibility(View.GONE);
+        mLoseDialogIv.setVisibility(View.GONE);
+    }
+
     private void playBrokenSound() {
         if (mSoundPool != null && mBrokenSoundId > 0) {
             mSoundPool.play(mBrokenSoundId, 1, 1, 0, 0, 1);
@@ -195,11 +214,13 @@ public class LotteryActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
+
         if (mSoundPool != null) {
             mSoundPool.release();
         }
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     public HitEggResponseVo hitEgg() {

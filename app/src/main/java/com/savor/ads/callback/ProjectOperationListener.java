@@ -460,40 +460,57 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         }
 
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                ((ScreenProjectionActivity) activity).stop();
-                StopResponseVo stopResponseVo = new StopResponseVo();
-                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+        if (!GlobalValues.IS_LOTTERY) {
+            if (activity instanceof ScreenProjectionActivity) {
+                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                    ((ScreenProjectionActivity) activity).stop();
+                    StopResponseVo stopResponseVo = new StopResponseVo();
+                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
-                return stopResponseVo;
+                    return stopResponseVo;
+                } else {
+                    StopResponseVo responseVo = new StopResponseVo();
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                    responseVo.setInfo("操作失败");
+                    return responseVo;
+                }
+            } else {
+                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                    // 播放正在准备，还没来得及跳到投屏页
+                    StopResponseVo stopResponseVo = new StopResponseVo();
+                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    stopResponseVo.setInfo("正在准备投屏，请稍候再试");
+                    return stopResponseVo;
+                } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
+                    // 播放已结束
+                    StopResponseVo stopResponseVo = new StopResponseVo();
+                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                    return stopResponseVo;
+                } else {
+                    StopResponseVo responseVo = new StopResponseVo();
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    responseVo.setInfo("操作失败");
+                    return responseVo;
+                }
+            }
+        } else {
+
+            if (activity instanceof LotteryActivity) {
+                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+                    ((LotteryActivity) activity).stop();
+                    StopResponseVo stopResponseVo = new StopResponseVo();
+                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                    return stopResponseVo;
+                } else {
+                    StopResponseVo responseVo = new StopResponseVo();
+                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+                    responseVo.setInfo("操作失败");
+                    return responseVo;
+                }
             } else {
                 StopResponseVo responseVo = new StopResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
-                responseVo.setInfo("操作失败");
-                return responseVo;
-            }
-        } else if (activity instanceof LotteryActivity) {
-            ((LotteryActivity) activity).stop();
-            StopResponseVo stopResponseVo = new StopResponseVo();
-            stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-
-            return stopResponseVo;
-        } else {
-            if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                // 播放正在准备，还没来得及跳到投屏页
-                StopResponseVo stopResponseVo = new StopResponseVo();
-                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                stopResponseVo.setInfo("正在准备投屏，请稍候再试");
-                return stopResponseVo;
-            } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
-                // 播放已结束
-                StopResponseVo stopResponseVo = new StopResponseVo();
-                stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                return stopResponseVo;
-            } else {
-                StopResponseVo responseVo = new StopResponseVo();
-                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
@@ -706,10 +723,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             Intent intent = new Intent(activity, LotteryActivity.class);
             intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
             activity.startActivity(intent);
-
-            if (activity instanceof LotteryActivity) {
-                ((LotteryActivity) activity).exitImmediately();
-            }
         }
         return localResult;
     }
