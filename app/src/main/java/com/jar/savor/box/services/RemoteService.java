@@ -470,7 +470,15 @@ public class RemoteService extends Service {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                                 GlobalValues.IS_LOTTERY = true;
-                                BaseResponse object = RemoteService.listener.showEgg();
+
+                                String date = request.getParameter("date");
+                                int hunger = 0;
+                                try {
+                                    hunger = Integer.parseInt(request.getParameter("hunger"));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                BaseResponse object = RemoteService.listener.showEgg(date, hunger);
                                 if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
                                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;

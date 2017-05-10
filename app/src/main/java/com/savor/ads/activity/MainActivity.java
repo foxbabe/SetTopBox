@@ -151,6 +151,8 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
+
+        getPrizeInfo();
     }
 
     /**
@@ -278,13 +280,17 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onSuccess(AppApi.Action method, Object obj) {
                 if (obj instanceof PrizeInfo) {
+                    LogUtils.d("Got new prize info, will update local prize config!");
                     PrizeInfo newPrize = (PrizeInfo) obj;
-                    mSession.setPrizeInfo(newPrize);
+                    if (mSession.getPrizeInfo() == null || !mSession.getPrizeInfo().getDate_time().equals(newPrize.getDate_time())) {
+                        mSession.setPrizeInfo(newPrize);
+                    }
                 }
             }
 
             @Override
             public void onError(AppApi.Action method, Object obj) {
+                LogUtils.d("Got non prize info, will clear local prize config!");
                 mSession.setPrizeInfo(null);
             }
 
