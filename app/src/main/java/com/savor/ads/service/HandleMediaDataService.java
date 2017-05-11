@@ -22,6 +22,7 @@ import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.bean.PlayListCategoryItem;
+import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.bean.SetTopBoxBean;
@@ -32,6 +33,7 @@ import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.utils.AppUtils;
@@ -128,6 +130,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     // 异步更新apk、rom
                     new UpdateUtil(context);
 
+                    getPrizeInfo();
+
                     LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
                     // 同步获取机顶盒基本信息，包括logo、loading图
                     getBoxInfo();
@@ -161,6 +165,39 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }).start();
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+
+    private void getPrizeInfo() {
+        LogFileUtil.write("will start getPrizeInfo");
+        LogUtils.d("will start getPrizeInfo");
+        AppApi.getPrize(this, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+                if (obj instanceof PrizeInfo) {
+                    LogUtils.d("Got new prize info, will update local prize config!");
+                    LogFileUtil.write("Got new prize info, will update local prize config!");
+                    PrizeInfo newPrize = (PrizeInfo) obj;
+                    if (session.getPrizeInfo() == null || !session.getPrizeInfo().getDate_time().equals(newPrize.getDate_time())) {
+                        session.setPrizeInfo(newPrize);
+                        LotteryLogUtil.getInstance(context).writeLotteryUpdate();
+                    }
+                }
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+                LogUtils.d("Got non prize info, will clear local prize config!");
+                LogFileUtil.write("Got non prize info, will clear local prize config!");
+                session.setPrizeInfo(null);
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+                LogUtils.d("Got prize info timeout!");
+                LogFileUtil.write("Got prize info timeout!");
+            }
+        });
     }
 
     /**

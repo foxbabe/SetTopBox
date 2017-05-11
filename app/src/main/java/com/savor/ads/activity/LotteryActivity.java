@@ -375,21 +375,21 @@ public class LotteryActivity extends BaseActivity {
                     }
                     if (mPrizeHit != null) {
                         // 中奖了
-                        LogUtils.d("中奖了");
+                        LogUtils.w("----win----");
                     } else {
-                        LogUtils.e("概率计算出错，没找到命中的奖项！！！");
+                        LogUtils.e("----lose----, cause calculate exception");
                     }
                 } else {
                     // 未中奖，因为剩余奖项数量为0
-                    LogUtils.d("未中奖，因为剩余奖项数量为0");
+                    LogUtils.w("----lose----, cause no prize number");
                 }
             } else {
                 // 未中奖，因为没有奖项配置信息
-                LogUtils.d("未中奖，因为没有奖项配置信息");
+                LogUtils.w("----lose----, cause no prize info");
             }
         } else {
             // 未中奖，因为hunger=0
-            LogUtils.d("未中奖，因为hunger=0");
+            LogUtils.w("----lose----, cause hunger=0");
         }
     }
 
