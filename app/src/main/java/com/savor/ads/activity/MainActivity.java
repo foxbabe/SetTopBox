@@ -21,6 +21,7 @@ import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.log.LogProduceService;
 import com.savor.ads.log.LogUploadService;
+import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.service.HandleMediaDataService;
 import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
@@ -284,6 +285,7 @@ public class MainActivity extends BaseActivity {
                     PrizeInfo newPrize = (PrizeInfo) obj;
                     if (mSession.getPrizeInfo() == null || !mSession.getPrizeInfo().getDate_time().equals(newPrize.getDate_time())) {
                         mSession.setPrizeInfo(newPrize);
+                        LotteryLogUtil.getInstance(mContext).writeLotteryUpdate();
                     }
                 }
             }

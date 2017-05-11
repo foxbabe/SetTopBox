@@ -19,6 +19,7 @@ import com.savor.ads.R;
 import com.savor.ads.core.Session;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeItem;
+import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
@@ -39,12 +40,13 @@ public class LotteryActivity extends BaseActivity {
     public static final String EXTRA_HUNGER = "extra_hunger";
 
     private static final int MAX_STAY_DURATION = 2 * 60 * 1000;
+    private static final int WIN_STAY_SECONDS = 60;
+    private static final int LOSE_STAY_SECONDS = 30;
 
     private int mBrokenSoundId;
     private SoundPool mSoundPool;
 
     private int mCurrentFrame;
-    private FileWriter mwriter = null;
     private Handler mHandler = new Handler();
 
     private Runnable mExitLotteryRunnable = new Runnable() {
@@ -72,6 +74,36 @@ public class LotteryActivity extends BaseActivity {
         }
     };
 
+    private int mCurrentCountDown;
+    private Runnable mWinExitCountDownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mWinTimeTv != null) {
+                if (mCurrentCountDown > 0) {
+                    mWinTimeTv.setText(--mCurrentCountDown + "秒");
+                    mHandler.postDelayed(mWinExitCountDownRunnable, 1000);
+                } else {
+                    resetGlobalFlag();
+                    exitLottery();
+                }
+            }
+        }
+    };
+    private Runnable mLoseExitCountDownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mLoseTimeTv != null) {
+                if (mCurrentCountDown > 0) {
+                    mLoseTimeTv.setText(mCurrentCountDown-- + "秒");
+                    mHandler.postDelayed(mLoseExitCountDownRunnable, 1000);
+                } else {
+                    resetGlobalFlag();
+                    exitLottery();
+                }
+            }
+        }
+    };
+
     private int mLastFrameCount = -1;
     private int mHunger;
 
@@ -82,7 +114,10 @@ public class LotteryActivity extends BaseActivity {
     private ImageView mPrizeNameIv;
     private TextView mPrizeTimeTv;
     private TextView mEndTimeTv;
-    private ImageView mLoseDialogIv;
+    private RelativeLayout mLoseDialogRl;
+    private TextView mWinTimeTv;
+    private TextView mLoseTimeTv;
+    private ImageView mLostTipIv;
 
     private int[] EGG_FRAMES = new int[]{
             R.mipmap.egg1,
@@ -92,6 +127,14 @@ public class LotteryActivity extends BaseActivity {
             R.mipmap.egg5,
             R.mipmap.egg6,
     };
+
+    private int[] FAIL_TIPS = new int[]{
+            R.mipmap.ic_egg_fail_tip1,
+            R.mipmap.ic_egg_fail_tip2,
+            R.mipmap.ic_egg_fail_tip3,
+            R.mipmap.ic_egg_fail_tip4,
+    };
+
     private PrizeItem mPrizeHit;
     private Date mPrizeTime;
 
@@ -116,7 +159,10 @@ public class LotteryActivity extends BaseActivity {
         mWinDialogRl = (RelativeLayout) findViewById(R.id.rl_win_dialog);
         mPrizeTimeTv = (TextView) findViewById(R.id.tv_prize_time);
         mEndTimeTv = (TextView) findViewById(R.id.tv_prize_end_time);
-        mLoseDialogIv = (ImageView) findViewById(R.id.iv_lose_dialog);
+        mLoseDialogRl = (RelativeLayout) findViewById(R.id.rl_lose_dialog);
+        mWinTimeTv = (TextView) findViewById(R.id.tv_win_exit_time);
+        mLoseTimeTv = (TextView) findViewById(R.id.tv_lose_exit_time);
+        mLostTipIv = (ImageView) findViewById(R.id.iv_fail_tips);
     }
 
     private void loadSound() {
@@ -148,7 +194,7 @@ public class LotteryActivity extends BaseActivity {
         mEggIv.setImageResource(R.mipmap.egg1);
         mEggIv.setVisibility(View.VISIBLE);
         mWinDialogRl.setVisibility(View.GONE);
-        mLoseDialogIv.setVisibility(View.GONE);
+        mLoseDialogRl.setVisibility(View.GONE);
     }
 
     private void playBrokenSound() {
@@ -192,6 +238,9 @@ public class LotteryActivity extends BaseActivity {
                     mEndTimeTv.setText("有效领奖时间至" + hour + ":" + mPrizeTime.getMinutes());
 
                     mRootLayout.setBackgroundResource(R.mipmap.bg_egg_win_prize);
+
+                    mCurrentCountDown = WIN_STAY_SECONDS;
+                    mHandler.post(mWinExitCountDownRunnable);
                 }
             }, 400);
         } else {
@@ -201,8 +250,15 @@ public class LotteryActivity extends BaseActivity {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mLoseDialogIv.setVisibility(View.VISIBLE);
+                    mLoseDialogRl.setVisibility(View.VISIBLE);
                     mRootLayout.setBackgroundResource(R.mipmap.bg_egg_broken_lose);
+
+                    Random random = new Random();
+                    int index = random.nextInt(FAIL_TIPS.length);
+                    mLostTipIv.setImageResource(FAIL_TIPS[index]);
+
+                    mCurrentCountDown = LOSE_STAY_SECONDS;
+                    mHandler.post(mLoseExitCountDownRunnable);
                 }
             }, 400);
         }
@@ -244,7 +300,12 @@ public class LotteryActivity extends BaseActivity {
                 mPrizeTime = new Date();
                 checkIfWin();
                 mHandler.post(mBrokenEggEffectRunnable);
-                writeLotteryRecord();
+
+                if (mPrizeHit != null) {
+                    LotteryLogUtil.getInstance(mContext).writeLotteryRecord(mPrizeHit.getPrize_id(), mPrizeHit.getPrize_name(), String.valueOf(mPrizeTime.getTime()));
+                } else {
+                    LotteryLogUtil.getInstance(mContext).writeLotteryRecord(0, "", String.valueOf(mPrizeTime.getTime()));
+                }
             } else {
                 mHandler.post(mHitEggEffectRunnable);
             }
@@ -296,8 +357,10 @@ public class LotteryActivity extends BaseActivity {
                         mStartPosList.add(startPos);
                     }
                 }
-                mStartPosList.remove(mStartPosList.size() - 1);
-                mStartPosList.add(0, 0);
+                if (!mStartPosList.isEmpty()) {
+                    mStartPosList.remove(mStartPosList.size() - 1);
+                    mStartPosList.add(0, 0);
+                }
 
                 if (denominator > 0) {
                     int hit = random.nextInt(denominator);
@@ -400,48 +463,5 @@ public class LotteryActivity extends BaseActivity {
         finish();
     }
 
-    private void writeLotteryRecord(){
-        if (mwriter == null){
-            createLotteryRecordFile();
 
-            if (mwriter != null){
-                try {
-                    String lotteryLog = System.currentTimeMillis() + "," + mSession.getBoiteId() + "," + mSession.getRoomId() + "," +
-                            mSession.getBoxId() + "," + GlobalValues.CURRENT_PROJECT_DEVICE_ID + "," + GlobalValues.CURRENT_PROJECT_DEVICE_NAME;
-                    if (mPrizeHit == null) {
-                        lotteryLog += ",,";
-                    } else {
-                        lotteryLog += "," + mPrizeHit.getPrize_id() + "," + mPrizeHit.getPrize_name();
-                    }
-                    mwriter.write(lotteryLog);
-                    closeWriter();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-    }
-
-    private void createLotteryRecordFile(){
-        String time = AppUtils.getTime("date");
-        String recordFileName = time + ".blog";
-        String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.lottery);
-        try {
-            mwriter = new FileWriter(path+recordFileName,true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void closeWriter() {
-        if (mwriter != null) {
-            try {
-                mwriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            mwriter = null;
-        }
-    }
 }
