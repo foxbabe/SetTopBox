@@ -675,9 +675,11 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
         // 检测抽奖时间
         if (Session.get(mContext).getPrizeInfo() != null) {
+            String tips = "";
             boolean checkPass = false;
             for (AwardTime awardTime : Session.get(mContext).getPrizeInfo().getAward_time()) {
                 if (awardTime != null) {
+                    tips += awardTime.getStart_time() + "-" + awardTime.getEnd_time() + "；";
                     Date now = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     try {
@@ -695,7 +697,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
             if (!checkPass) {
                 localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                localResult.setInfo("当前时间不可抽奖");
+                localResult.setInfo("游戏时间为" + tips + "准备好姿势来砸吧！");
                 return localResult;
             }
         }

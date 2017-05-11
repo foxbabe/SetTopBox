@@ -87,7 +87,7 @@ public class LotteryLogUtil {
 
     private void createLotteryRecordFile(){
         String time = AppUtils.getTime("date");
-        String recordFileName = time + ".blog";
+        String recordFileName = time + "_" + mSession.getEthernetMac() + ".blog";
         String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.lottery);
         try {
             mWriter = new FileWriter(path+recordFileName,true);

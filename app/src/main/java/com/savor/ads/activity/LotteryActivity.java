@@ -316,7 +316,7 @@ public class LotteryActivity extends BaseActivity {
             responseVo.setDone(0);
         } else {
             responseVo.setDone(1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH;mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             responseVo.setPrize_time(simpleDateFormat.format(mPrizeTime));
             if (mPrizeHit != null) {
                 responseVo.setWin(1);
