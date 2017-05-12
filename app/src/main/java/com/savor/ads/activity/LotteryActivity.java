@@ -105,6 +105,7 @@ public class LotteryActivity extends BaseActivity {
     };
 
     private int mLastFrameCount = -1;
+    /** 手机传过来的标识，表示是否到达应中奖的次数*/
     private int mHunger;
 
     private RelativeLayout mRootLayout;
@@ -119,6 +120,7 @@ public class LotteryActivity extends BaseActivity {
     private TextView mLoseTimeTv;
     private ImageView mLostTipIv;
 
+    /**蛋列图组*/
     private int[] EGG_FRAMES = new int[]{
             R.mipmap.egg1,
             R.mipmap.egg2,
@@ -128,6 +130,7 @@ public class LotteryActivity extends BaseActivity {
             R.mipmap.egg6,
     };
 
+    /**未中奖提示语*/
     private int[] FAIL_TIPS = new int[]{
             R.mipmap.ic_egg_fail_tip1,
             R.mipmap.ic_egg_fail_tip2,
@@ -183,6 +186,7 @@ public class LotteryActivity extends BaseActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        mHandler.removeCallbacksAndMessages(null);
         rescheduleToExit(true);
 
         mHunger = intent.getIntExtra(EXTRA_HUNGER, 0);
@@ -316,8 +320,9 @@ public class LotteryActivity extends BaseActivity {
             responseVo.setDone(0);
         } else {
             responseVo.setDone(1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            responseVo.setPrize_time(simpleDateFormat.format(mPrizeTime));
+//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            responseVo.setPrize_time(simpleDateFormat.format(mPrizeTime));
+            responseVo.setPrize_time("" + mPrizeTime.getTime());
             if (mPrizeHit != null) {
                 responseVo.setWin(1);
                 responseVo.setPrize_id(mPrizeHit.getPrize_id());

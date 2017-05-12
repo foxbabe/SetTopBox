@@ -504,7 +504,7 @@ public class ScreenProjectionActivity extends BaseActivity {
      *
      * @return
      */
-    public void stop() {
+    public void stop(boolean resetFlag) {
         LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
         mIsBeenStopped = true;
         mHandler.post(new Runnable() {
@@ -514,7 +514,9 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
         });
 
-        resetGlobalFlag();
+        if (resetFlag) {
+            resetGlobalFlag();
+        }
     }
 
     /**

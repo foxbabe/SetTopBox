@@ -44,8 +44,9 @@ public class LotteryLogUtil {
                         if (mWriter != null){
                             try {
                                 String lotteryLog = System.currentTimeMillis() + "," + mSession.getBoiteId() + "," + mSession.getRoomId() + "," +
-                                        mSession.getBoxId() + ",update," + ",,," ;
+                                        mSession.getBoxId() + ",update," + ",,,"  + "\r\n";
                                 mWriter.write(lotteryLog);
+                                mWriter.flush();
                                 closeWriter();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -70,8 +71,9 @@ public class LotteryLogUtil {
                             try {
                                 String lotteryLog = System.currentTimeMillis() + "," + mSession.getBoiteId() + "," + mSession.getRoomId() + "," +
                                         mSession.getBoxId() + ",lottery," + GlobalValues.CURRENT_PROJECT_DEVICE_ID + "," + GlobalValues.CURRENT_PROJECT_DEVICE_NAME +
-                                        "," + prizeId + "," + prizeName + "," + prize_time;
+                                        "," + prizeId + "," + prizeName + "," + prize_time + "\r\n";
                                 mWriter.write(lotteryLog);
+                                mWriter.flush();
                                 closeWriter();
                             } catch (IOException e) {
                                 e.printStackTrace();

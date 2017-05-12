@@ -439,7 +439,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public StopResponseVo stop() {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity) {
-            ((ScreenProjectionActivity) activity).stop();
+            ((ScreenProjectionActivity) activity).stop(true);
 
             StopResponseVo stopResponseVo = new StopResponseVo();
             stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
@@ -463,7 +463,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
             if (activity instanceof ScreenProjectionActivity) {
                 if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                    ((ScreenProjectionActivity) activity).stop();
+                    ((ScreenProjectionActivity) activity).stop(true);
                     StopResponseVo stopResponseVo = new StopResponseVo();
                     stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
@@ -721,6 +721,10 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         } else {
+            if (activity instanceof ScreenProjectionActivity) {
+                ((ScreenProjectionActivity) activity).stop(false);
+            }
+
             LogUtils.d("Listener will startActivity in " + activity);
             Intent intent = new Intent(activity, LotteryActivity.class);
             intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
@@ -738,13 +742,13 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             } else {
                 HitEggResponseVo responseVo = new HitEggResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
-                responseVo.setInfo("操作失败");
+                responseVo.setInfo("砸蛋操作失败");
                 return responseVo;
             }
         } else {
             HitEggResponseVo responseVo = new HitEggResponseVo();
             responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
+            responseVo.setInfo("游戏超时啦，请重新启动");
             return responseVo;
         }
     }

@@ -302,7 +302,7 @@ public class AppUtils {
         } else if (mode == StorageFile.cache) {
             path = targetCacheFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.lottery) {
-            path = targetCacheFile.getAbsolutePath() + File.separator;
+            path = targetLotteryFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
