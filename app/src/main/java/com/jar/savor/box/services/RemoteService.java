@@ -498,7 +498,8 @@ public class RemoteService extends Service {
                             break;
                         case "hitEgg":
                             LogUtils.e("enter method listener.hitEgg");
-                            if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                            if (!TextUtils.isEmpty(deviceId) && (deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                    deviceId.equals(GlobalValues.LAST_PROJECT_DEVICE_ID))) {
                                 String projectId = request.getParameter("projectId");
                                 BaseResponse object = RemoteService.listener.hitEgg(projectId);
                                 resJson = new Gson().toJson(object);
