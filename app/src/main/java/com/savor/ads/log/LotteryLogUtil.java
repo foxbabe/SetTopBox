@@ -44,7 +44,7 @@ public class LotteryLogUtil {
                         if (mWriter != null){
                             try {
                                 String lotteryLog = System.currentTimeMillis() + "," + mSession.getBoiteId() + "," + mSession.getRoomId() + "," +
-                                        mSession.getBoxId() + ",update," + ",,,"  + "\r\n";
+                                        mSession.getBoxId() + ",update," + ",,,,"  + "\r\n";
                                 mWriter.write(lotteryLog);
                                 mWriter.flush();
                                 closeWriter();
