@@ -270,7 +270,7 @@ public class LotteryActivity extends BaseActivity {
 
     private void randomFrameCount() {
         Random random = new Random();
-        mLastFrameCount = random.nextInt(3);
+        mLastFrameCount = random.nextInt(4);
         if (mLastFrameCount == 0) {
             mLastFrameCount++;
         }
@@ -291,12 +291,12 @@ public class LotteryActivity extends BaseActivity {
         responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         responseVo.setInfo("成功");
 
-        if (mCurrentFrame <= EGG_FRAMES.length) {
+        if (mCurrentFrame < EGG_FRAMES.length) {
             rescheduleToExit(true);
             randomFrameCount();
 
             mCurrentFrame += mLastFrameCount;
-            if (mCurrentFrame > EGG_FRAMES.length) {
+            if (mCurrentFrame >= EGG_FRAMES.length) {
 //                mCurrentFrame = MAX_FRAME;
 
                 mPrizeTime = new Date();
@@ -314,7 +314,7 @@ public class LotteryActivity extends BaseActivity {
         }
 
         responseVo.setProgress(mCurrentFrame);
-        if (mCurrentFrame <= EGG_FRAMES.length) {
+        if (mCurrentFrame < EGG_FRAMES.length) {
             responseVo.setDone(0);
         } else {
             responseVo.setDone(1);

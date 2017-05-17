@@ -91,7 +91,7 @@
                 android:text="快 拿 手 机 找 服 务 员 领 取 奖 品 吧"
                 android:textStyle="bold"
                 android:textColor="#e61f19"
-                android:textSize="26sp"/>
+                android:textSize="27sp"/>
 
 
             <TextView
@@ -103,7 +103,7 @@
                 android:layout_marginTop="4dp"
                 android:text="中奖时间：2017年5月10日 10:00"
                 android:textColor="#e61f19"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 />
 
             <TextView
@@ -115,7 +115,7 @@
                 android:layout_marginTop="4dp"
                 android:text="有效领奖时间至11:00"
                 android:textColor="#e61f19"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 />
 
             <LinearLayout
@@ -131,7 +131,7 @@
                     android:layout_height="wrap_content"
                     android:text="友情提示: 电视"
                     android:textColor="#222222"
-                    android:textSize="14sp"/>
+                    android:textSize="18sp"/>
 
                 <TextView
                     android:id="@+id/tv_win_exit_time"
@@ -141,14 +141,14 @@
                     android:layout_marginRight="4dp"
                     android:text="60秒"
                     android:textColor="#e61f19"
-                    android:textSize="16sp"/>
+                    android:textSize="22sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="后自动退出，请看手机中奖结果"
                     android:textColor="#222222"
-                    android:textSize="14sp"/>
+                    android:textSize="18sp"/>
             </LinearLayout>
 
         </RelativeLayout>
