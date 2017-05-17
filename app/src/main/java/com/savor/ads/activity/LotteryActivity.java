@@ -270,11 +270,9 @@ public class LotteryActivity extends BaseActivity {
 
     private void randomFrameCount() {
         Random random = new Random();
-        int temp = random.nextInt(3);
-        if ((mLastFrameCount == 0 && temp == 0) || (mLastFrameCount == 2 && temp == 2)) {
-            mLastFrameCount = 1;
-        } else {
-            mLastFrameCount = temp;
+        mLastFrameCount = random.nextInt(3);
+        if (mLastFrameCount == 0) {
+            mLastFrameCount++;
         }
     }
 
