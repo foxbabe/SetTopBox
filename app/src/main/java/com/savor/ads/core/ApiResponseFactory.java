@@ -189,6 +189,9 @@ public class ApiResponseFactory {
                 result = gson.fromJson(info, new TypeToken<PrizeInfo>() {
                 }.getType());
                 break;
+            case PH_NOTIFY_STOP_JSON:
+                result = info;
+                break;
             default:
                 break;
         }

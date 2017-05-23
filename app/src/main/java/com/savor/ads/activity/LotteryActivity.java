@@ -20,6 +20,8 @@ import com.savor.ads.core.Session;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeItem;
 import com.savor.ads.log.LotteryLogUtil;
+import com.savor.ads.projection.action.ShowEggAction;
+import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
@@ -38,6 +40,7 @@ import java.util.Random;
 public class LotteryActivity extends BaseActivity {
 
     public static final String EXTRA_HUNGER = "extra_hunger";
+    public static final String EXTRA_ACTION = "extra_action";
 
     private static final int MAX_STAY_DURATION = 2 * 60 * 1000;
     private static final int WIN_STAY_SECONDS = 60;
@@ -141,12 +144,19 @@ public class LotteryActivity extends BaseActivity {
     private PrizeItem mPrizeHit;
     private Date mPrizeTime;
 
+    private ShowEggAction mShowEggAction;
+    private StopAction mStopAction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lottery);
 
         mHunger = getIntent().getIntExtra(EXTRA_HUNGER, 0);
+        mShowEggAction = (ShowEggAction) getIntent().getSerializableExtra(EXTRA_ACTION);
+        if (mShowEggAction != null) {
+            mShowEggAction.onActionEnd();
+        }
         findViews();
         loadSound();
         setViews();
@@ -190,6 +200,10 @@ public class LotteryActivity extends BaseActivity {
         rescheduleToExit(true);
 
         mHunger = intent.getIntExtra(EXTRA_HUNGER, 0);
+        mShowEggAction = (ShowEggAction) intent.getSerializableExtra(EXTRA_ACTION);
+        if (mShowEggAction != null) {
+            mShowEggAction.onActionEnd();
+        }
         mPrizeHit = null;
         mPrizeTime = null;
         mCurrentFrame = 0;
@@ -284,6 +298,9 @@ public class LotteryActivity extends BaseActivity {
             mSoundPool.release();
         }
         mHandler.removeCallbacksAndMessages(null);
+        if (mStopAction != null) {
+            mStopAction.onActionEnd();
+        }
     }
 
     public HitEggResponseVo hitEgg() {
@@ -418,8 +435,9 @@ public class LotteryActivity extends BaseActivity {
      *
      * @return
      */
-    public void stop() {
+    public void stop(StopAction stopAction) {
         LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
+        mStopAction = stopAction;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -455,6 +473,7 @@ public class LotteryActivity extends BaseActivity {
         GlobalValues.LAST_PROJECT_DEVICE_ID = GlobalValues.CURRENT_PROJECT_DEVICE_ID;
         GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+        GlobalValues.CURRENT_PROJECT_DEVICE_IP = null;
         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
         GlobalValues.IS_LOTTERY = false;
         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;

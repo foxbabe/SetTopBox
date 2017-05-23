@@ -22,6 +22,8 @@ public class GlobalValues {
 
     /** 当前投屏设备ID*/
     public volatile static String CURRENT_PROJECT_DEVICE_ID;
+    /** 当前投屏设备IP*/
+    public volatile static String CURRENT_PROJECT_DEVICE_IP;
     /** 上次投屏设备ID*/
     public volatile static String LAST_PROJECT_DEVICE_ID;
     /** 当前投屏设备名称*/

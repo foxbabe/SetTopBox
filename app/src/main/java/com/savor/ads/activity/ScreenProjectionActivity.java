@@ -22,9 +22,14 @@ import com.jar.savor.box.vo.SeekResponseVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.projection.ProjectionManager;
+import com.savor.ads.projection.action.ProjectionActionBase;
+import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
@@ -33,7 +38,7 @@ import com.savor.ads.utils.LogUtils;
 
 import java.util.ArrayList;
 
-public class ScreenProjectionActivity extends BaseActivity {
+public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener {
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
@@ -43,6 +48,7 @@ public class ScreenProjectionActivity extends BaseActivity {
     public static final String EXTRA_IS_THUMBNAIL = "extra_is_thumbnail";
     public static final String EXTRA_IMAGE_TYPE = "extra_image_type";
     public static final String EXTRA_IS_FROM_WEB = "extra_is_from_web";
+    public static final String EXTRA_PROJECT_ACTION = "extra_project_action";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
@@ -97,6 +103,8 @@ public class ScreenProjectionActivity extends BaseActivity {
         @Override
         public void run() {
             LogUtils.e("mExitProjectionRunnable " + ScreenProjectionActivity.this.hashCode());
+
+            AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
             resetGlobalFlag();
             exitProjection();
         }
@@ -161,6 +169,8 @@ public class ScreenProjectionActivity extends BaseActivity {
     private String mInnerType;
 
     private boolean mIsFromWeb = false;
+    private StopAction mStopAction;
+    private ProjectionActionBase mProjectAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,6 +247,10 @@ public class ScreenProjectionActivity extends BaseActivity {
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
+        mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
+        if (mProjectAction != null) {
+            mProjectAction.onActionEnd();
+        }
     }
 
     private void exitProjection() {
@@ -504,8 +518,9 @@ public class ScreenProjectionActivity extends BaseActivity {
      *
      * @return
      */
-    public void stop(boolean resetFlag) {
+    public void stop(boolean resetFlag, StopAction stopAction) {
         LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
+        mStopAction = stopAction;
         mIsBeenStopped = true;
         mHandler.post(new Runnable() {
             @Override
@@ -787,6 +802,10 @@ public class ScreenProjectionActivity extends BaseActivity {
             }
         }
 
+        if (mStopAction != null) {
+            mStopAction.onActionEnd();
+        }
+
         super.onDestroy();
     }
 
@@ -797,6 +816,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         GlobalValues.LAST_PROJECT_DEVICE_ID = GlobalValues.CURRENT_PROJECT_DEVICE_ID;
         GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
         GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
+        GlobalValues.CURRENT_PROJECT_DEVICE_IP = null;
         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
         GlobalValues.CURRENT_PROJECT_ID = null;
@@ -807,6 +827,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         public boolean onMediaComplete(int index, boolean isLast) {
             LogUtils.w("activity onMediaComplete " + this.hashCode());
 
+            AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
             resetGlobalFlag();
             exitProjection();
             return false;
@@ -816,6 +837,7 @@ public class ScreenProjectionActivity extends BaseActivity {
         public boolean onMediaError(int index, boolean isLast) {
             LogUtils.w("activity onMediaError " + this.hashCode());
 
+            AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
             resetGlobalFlag();
             exitProjection();
             return false;
@@ -834,4 +856,20 @@ public class ScreenProjectionActivity extends BaseActivity {
         public void onMediaResume(int index) {
         }
     };
+
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        ProjectionManager.log("Notify stop success");
+        LogUtils.d("Notify stop response: "+obj);
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+        ProjectionManager.log("Notify stop error");
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+        ProjectionManager.log("Notify stop network failed");
+    }
 }

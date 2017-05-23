@@ -3,8 +3,6 @@ package com.jar.savor.box.interfaces;
 import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
-import com.jar.savor.box.vo.PrepareRequestVo;
-import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateResponseVo;
@@ -17,7 +15,7 @@ import com.jar.savor.box.vo.VolumeResponseVo;
  */
 
 public interface OnRemoteOperationListener {
-    PrepareResponseVo prepare(PrepareRequestVo var1);
+//    PrepareResponseVo prepare(PrepareRequestVo var1);
 
     PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb);
 
@@ -29,7 +27,7 @@ public interface OnRemoteOperationListener {
 
     HitEggResponseVo hitEgg(String projectId);
 
-    SeekResponseVo seek(int position);
+//    SeekResponseVo seek(int position);
 
     SeekResponseVo seek(int position, String projectId);
 
@@ -39,13 +37,13 @@ public interface OnRemoteOperationListener {
      *               1：播放
      * @return
      */
-    PlayResponseVo play(int action);
+//    PlayResponseVo play(int action);
     PlayResponseVo play(int action, String projectId);
 
-    StopResponseVo stop();
+//    StopResponseVo stop();
     StopResponseVo stop(String projectId);
 
-    RotateResponseVo rotate(int rotateDegree);
+//    RotateResponseVo rotate(int rotateDegree);
     RotateResponseVo rotate(int rotateDegree, String projectId);
 
     /**
@@ -57,10 +55,10 @@ public interface OnRemoteOperationListener {
      * 4：音量加
      * @return
      */
-    VolumeResponseVo volume(int action);
+//    VolumeResponseVo volume(int action);
     VolumeResponseVo volume(int action, String projectId);
 
-    Object query();
+//    Object query();
     Object query(String projectId);
 
     void showCode();

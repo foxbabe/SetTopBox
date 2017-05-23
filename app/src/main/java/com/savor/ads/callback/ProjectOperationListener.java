@@ -2,16 +2,12 @@ package com.savor.ads.callback;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Intent;
-import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
-import com.jar.savor.box.vo.PrepareRequestVo;
-import com.jar.savor.box.vo.PrepareResponseVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.ResponseT;
@@ -27,6 +23,16 @@ import com.savor.ads.bean.OnDemandBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
+import com.savor.ads.projection.ProjectionManager;
+import com.savor.ads.projection.action.ImageAction;
+import com.savor.ads.projection.action.PlayAction;
+import com.savor.ads.projection.action.RotateAction;
+import com.savor.ads.projection.action.SeekAction;
+import com.savor.ads.projection.action.ShowEggAction;
+import com.savor.ads.projection.action.StopAction;
+import com.savor.ads.projection.action.VideoAction;
+import com.savor.ads.projection.action.VodAction;
+import com.savor.ads.projection.action.VolumeAction;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -52,130 +58,130 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         mContext = context;
     }
 
-    @Override
-    public PrepareResponseVo prepare(PrepareRequestVo prepareRequestVo) {
-        PrepareResponseVo localResult = new PrepareResponseVo();
-
-        if (prepareRequestVo == null) {
-            localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            localResult.setInfo("参数为空！");
-        } else {
-
-            String url = prepareRequestVo.getAsseturl();
-            String assetType = prepareRequestVo.getAssettype();
-            String type = assetType;
-            String vid = "";
-
-            boolean vodCheckPass = true;
-
-            if (assetType.equals(ConstantValues.PROJECT_TYPE_VIDEO)) {
-                if (prepareRequestVo.getAction().equals(ConstantValues.PROJECT_TYPE_VIDEO_VOD)) {
-                    type = ConstantValues.PROJECT_TYPE_VIDEO_VOD;
-                    // 视频标题
-                    url = prepareRequestVo.getAssetname();
-                    DBHelper dbHelper = DBHelper.get(mContext);
-                    if (prepareRequestVo.getVodType() == 2) {
-                        // 酒楼宣传片点播
-                        List<PlayListBean> list = dbHelper.findPlayListByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{url});
-
-                        if (list != null && !list.isEmpty()) {
-                            PlayListBean bean = list.get(0);
-                            String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media) + bean.getMedia_name();
-                            String md5 = bean.getMd5();
-                            File file = new File(filePath);
-                            if (file.exists()) {
-                                String vodMd5 = AppUtils.getMD5Method(file);
-                                if (!vodMd5.equals(md5)) {
+//    @Override
+//    public PrepareResponseVo prepare(PrepareRequestVo prepareRequestVo) {
+//        PrepareResponseVo localResult = new PrepareResponseVo();
+//
+//        if (prepareRequestVo == null) {
+//            localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            localResult.setInfo("参数为空！");
+//        } else {
+//
+//            String url = prepareRequestVo.getAsseturl();
+//            String assetType = prepareRequestVo.getAssettype();
+//            String type = assetType;
+//            String vid = "";
+//
+//            boolean vodCheckPass = true;
+//
+//            if (assetType.equals(ConstantValues.PROJECT_TYPE_VIDEO)) {
+//                if (prepareRequestVo.getAction().equals(ConstantValues.PROJECT_TYPE_VIDEO_VOD)) {
+//                    type = ConstantValues.PROJECT_TYPE_VIDEO_VOD;
+//                    // 视频标题
+//                    url = prepareRequestVo.getAssetname();
+//                    DBHelper dbHelper = DBHelper.get(mContext);
+//                    if (prepareRequestVo.getVodType() == 2) {
+//                        // 酒楼宣传片点播
+//                        List<PlayListBean> list = dbHelper.findPlayListByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{url});
+//
+//                        if (list != null && !list.isEmpty()) {
+//                            PlayListBean bean = list.get(0);
+//                            String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media) + bean.getMedia_name();
+//                            String md5 = bean.getMd5();
+//                            File file = new File(filePath);
+//                            if (file.exists()) {
+//                                String vodMd5 = AppUtils.getMD5Method(file);
+//                                if (!vodMd5.equals(md5)) {
+////                                    file.delete();
+////                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
+////                                            DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{url});
+//
+//                                    localResult.setInfo("该点播视频无法播放，请稍后再试");
+//                                    vodCheckPass = false;
+//                                }
+//                            } else {
+//                                localResult.setInfo("没有找到点播视频！");
+//                                vodCheckPass = false;
+//                            }
+//
+//                            url = filePath;
+//                            vid = bean.getVid();
+//                        } else {
+//                            localResult.setInfo("没有找到点播视频！");
+//                            vodCheckPass = false;
+//                        }
+//                    } else {
+//                        // 普通点播视频点播
+//                        List<OnDemandBean> list = dbHelper.findMutlicastMediaLibByWhere(DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{url});
+//
+//                        if (list != null && !list.isEmpty()) {
+//                            OnDemandBean bean = list.get(0);
+//                            String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getTitle();
+//                            String md5 = bean.getMd5();
+//                            File file = new File(filePath);
+//                            if (file.exists()) {
+//                                String vodMd5 = AppUtils.getMD5Method(file);
+//                                if (!vodMd5.equals(md5)) {
 //                                    file.delete();
-//                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
-//                                            DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{url});
-
-                                    localResult.setInfo("该点播视频无法播放，请稍后再试");
-                                    vodCheckPass = false;
-                                }
-                            } else {
-                                localResult.setInfo("没有找到点播视频！");
-                                vodCheckPass = false;
-                            }
-
-                            url = filePath;
-                            vid = bean.getVid();
-                        } else {
-                            localResult.setInfo("没有找到点播视频！");
-                            vodCheckPass = false;
-                        }
-                    } else {
-                        // 普通点播视频点播
-                        List<OnDemandBean> list = dbHelper.findMutlicastMediaLibByWhere(DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{url});
-
-                        if (list != null && !list.isEmpty()) {
-                            OnDemandBean bean = list.get(0);
-                            String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getTitle();
-                            String md5 = bean.getMd5();
-                            File file = new File(filePath);
-                            if (file.exists()) {
-                                String vodMd5 = AppUtils.getMD5Method(file);
-                                if (!vodMd5.equals(md5)) {
-                                    file.delete();
-                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,
-                                            DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{url});
-
-                                    localResult.setInfo("该点播视频无法播放，请稍后再试");
-                                    vodCheckPass = false;
-                                }
-                            } else {
-                                localResult.setInfo("没有找到点播视频！");
-                                vodCheckPass = false;
-                            }
-
-                            url = filePath;
-                            vid = bean.getVodId();
-                        } else {
-                            localResult.setInfo("没有找到点播视频！");
-                            vodCheckPass = false;
-                        }
-                    }
-
-
-//                    dbHelper.close();
-                } else {
-                    type = ConstantValues.PROJECT_TYPE_VIDEO;
-                }
-            }
-
-            if (vodCheckPass) {
-                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                localResult.setInfo("加载成功！");
-
-                // 跳转或将参数设置到ScreenProjectionActivity
-                Bundle data = new Bundle();
-                data.putString(ScreenProjectionActivity.EXTRA_URL, url);
-                data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
-                data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
-                Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-                if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-                    LogUtils.d("Listener will setNewProjection");
-                    ((ScreenProjectionActivity) activity).setNewProjection(data);
-                } else {
-                    if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-                        LogUtils.d("Listener will startActivity in new task");
-                        Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
-                        intent.putExtras(data);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(intent);
-                    } else {
-                        LogUtils.d("Listener will startActivity in " + activity);
-                        Intent intent = new Intent(activity, ScreenProjectionActivity.class);
-                        intent.putExtras(data);
-                        activity.startActivity(intent);
-                    }
-                }
-            } else {
-                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            }
-        }
-        return localResult;
-    }
+//                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,
+//                                            DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{url});
+//
+//                                    localResult.setInfo("该点播视频无法播放，请稍后再试");
+//                                    vodCheckPass = false;
+//                                }
+//                            } else {
+//                                localResult.setInfo("没有找到点播视频！");
+//                                vodCheckPass = false;
+//                            }
+//
+//                            url = filePath;
+//                            vid = bean.getVodId();
+//                        } else {
+//                            localResult.setInfo("没有找到点播视频！");
+//                            vodCheckPass = false;
+//                        }
+//                    }
+//
+//
+////                    dbHelper.close();
+//                } else {
+//                    type = ConstantValues.PROJECT_TYPE_VIDEO;
+//                }
+//            }
+//
+//            if (vodCheckPass) {
+//                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+//                localResult.setInfo("加载成功！");
+//
+//                // 跳转或将参数设置到ScreenProjectionActivity
+//                Bundle data = new Bundle();
+//                data.putString(ScreenProjectionActivity.EXTRA_URL, url);
+//                data.putString(ScreenProjectionActivity.EXTRA_TYPE, type);
+//                data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
+//                Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//                if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
+//                    LogUtils.d("Listener will setNewProjection");
+//                    ((ScreenProjectionActivity) activity).setNewProjection(data);
+//                } else {
+//                    if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
+//                        LogUtils.d("Listener will startActivity in new task");
+//                        Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
+//                        intent.putExtras(data);
+//                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        mContext.startActivity(intent);
+//                    } else {
+//                        LogUtils.d("Listener will startActivity in " + activity);
+//                        Intent intent = new Intent(activity, ScreenProjectionActivity.class);
+//                        intent.putExtras(data);
+//                        activity.startActivity(intent);
+//                    }
+//                }
+//            } else {
+//                localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            }
+//        }
+//        return localResult;
+//    }
 
     @Override
     public PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb) {
@@ -249,36 +255,42 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
 //        dbHelper.close();
         if (vodCheckPass) {
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
+                GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
+            }
+
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
             localResult.setInfo("加载成功！");
 
-            // 跳转或将参数设置到ScreenProjectionActivity
-            Bundle data = new Bundle();
-            data.putString(ScreenProjectionActivity.EXTRA_URL, url);
-            data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_VOD);
-            data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
-            data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
-            data.putBoolean(ScreenProjectionActivity.EXTRA_IS_FROM_WEB, isFromWeb);
-
-            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-            if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-                LogUtils.e("Listener will setNewProjection");
-                ((ScreenProjectionActivity) activity).setNewProjection(data);
-            } else {
-                if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-                    LogUtils.e("Listener will startActivity in new task");
-                    Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
-                    intent.putExtras(data);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                } else {
-                    LogUtils.e("Listener will startActivity in " + activity.toString());
-                    Intent intent = new Intent(activity, ScreenProjectionActivity.class);
-                    intent.putExtras(data);
-                    activity.startActivity(intent);
-                }
-            }
+//            // 跳转或将参数设置到ScreenProjectionActivity
+//            Bundle data = new Bundle();
+//            data.putString(ScreenProjectionActivity.EXTRA_URL, url);
+//            data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_VOD);
+//            data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
+//            data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
+//            data.putBoolean(ScreenProjectionActivity.EXTRA_IS_FROM_WEB, isFromWeb);
+//
+//            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//            if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
+//                LogUtils.e("Listener will setNewProjection");
+//                ((ScreenProjectionActivity) activity).setNewProjection(data);
+//            } else {
+//                if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
+//                    LogUtils.e("Listener will startActivity in new task");
+//                    Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
+//                    intent.putExtras(data);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    mContext.startActivity(intent);
+//                } else {
+//                    LogUtils.e("Listener will startActivity in " + activity.toString());
+//                    Intent intent = new Intent(activity, ScreenProjectionActivity.class);
+//                    intent.putExtras(data);
+//                    activity.startActivity(intent);
+//                }
+//            }
+            VodAction vodAction = new VodAction(mContext, vid, url, position, isFromWeb);
+            ProjectionManager.getInstance().enqueueAction(vodAction);
         } else {
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
         }
@@ -290,6 +302,10 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (isThumbnail) {
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
+                GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
+            }
+
             localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         } else {
             // 大图的时候不生成新的ProjectId
@@ -298,161 +314,196 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
-        // 跳转或将参数设置到ScreenProjectionActivity
-        Bundle data = new Bundle();
-        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
-        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
-        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
-        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
-        data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, seriesId);
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-            LogUtils.d("Listener will setNewProjection");
-            ((ScreenProjectionActivity) activity).setNewProjection(data);
-        } else {
-            if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-                LogUtils.d("Listener will startActivity in new task");
-                Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
-                intent.putExtras(data);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-            } else {
-                LogUtils.d("Listener will startActivity in " + activity);
-                Intent intent = new Intent(activity, ScreenProjectionActivity.class);
-                intent.putExtras(data);
-                activity.startActivity(intent);
-            }
-        }
+//        // 跳转或将参数设置到ScreenProjectionActivity
+//        Bundle data = new Bundle();
+//        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
+//        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
+//        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
+//        data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
+//        data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, seriesId);
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
+//            LogUtils.d("Listener will setNewProjection");
+//            ((ScreenProjectionActivity) activity).setNewProjection(data);
+//        } else {
+//            if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
+//                LogUtils.d("Listener will startActivity in new task");
+//                Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
+//                intent.putExtras(data);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                mContext.startActivity(intent);
+//            } else {
+//                LogUtils.d("Listener will startActivity in " + activity);
+//                Intent intent = new Intent(activity, ScreenProjectionActivity.class);
+//                intent.putExtras(data);
+//                activity.startActivity(intent);
+//            }
+//        }
+
+        ImageAction imageAction = new ImageAction(mContext, imageType, rotation, isThumbnail,seriesId);
+        ProjectionManager.getInstance().enqueueAction(imageAction);
+
         return localResult;
     }
 
     @Override
     public PrepareResponseVoNew showVideo(String videoPath, int position) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
+            GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
+        }
+
         localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
-        // 跳转或将参数设置到ScreenProjectionActivity
-        Bundle data = new Bundle();
-        data.putString(ScreenProjectionActivity.EXTRA_URL, videoPath);
-        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO);
-        data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-            LogUtils.d("Listener will setNewProjection");
-            ((ScreenProjectionActivity) activity).setNewProjection(data);
-        } else {
-            if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-                LogUtils.d("Listener will startActivity in new task");
-                Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
-                intent.putExtras(data);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-            } else {
-                LogUtils.d("Listener will startActivity in " + activity);
-                Intent intent = new Intent(activity, ScreenProjectionActivity.class);
-                intent.putExtras(data);
-                activity.startActivity(intent);
-            }
-        }
+//        // 跳转或将参数设置到ScreenProjectionActivity
+//        Bundle data = new Bundle();
+//        data.putString(ScreenProjectionActivity.EXTRA_URL, videoPath);
+//        data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO);
+//        data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
+//            LogUtils.d("Listener will setNewProjection");
+//            ((ScreenProjectionActivity) activity).setNewProjection(data);
+//        } else {
+//            if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
+//                LogUtils.d("Listener will startActivity in new task");
+//                Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
+//                intent.putExtras(data);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                mContext.startActivity(intent);
+//            } else {
+//                LogUtils.d("Listener will startActivity in " + activity);
+//                Intent intent = new Intent(activity, ScreenProjectionActivity.class);
+//                intent.putExtras(data);
+//                activity.startActivity(intent);
+//            }
+//        }
+
+        VideoAction videoAction = new VideoAction(mContext, videoPath, position);
+        ProjectionManager.getInstance().enqueueAction(videoAction);
+
         return localResult;
     }
 
-    /**
-     * 调整播放进度
-     *
-     * @param position
-     * @return
-     */
-    @Override
-    public SeekResponseVo seek(int position) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).seekTo(position);
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * 调整播放进度
+//     *
+//     * @param position
+//     * @return
+//     */
+//    @Override
+//    public SeekResponseVo seek(int position) {
+////        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+////        if (activity instanceof ScreenProjectionActivity) {
+////            return ((ScreenProjectionActivity) activity).seekTo(position);
+////        } else {
+////            return null;
+////        }
+//
+//        SeekAction seekAction = new SeekAction(position);
+//        ProjectionManager.getInstance().enqueueAction(seekAction);
+//
+//        SeekResponseVo responseVo = new SeekResponseVo();
+//        responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+//        responseVo.setInfo("成功");
+//        return responseVo;
+//    }
 
     @Override
     public SeekResponseVo seek(int position, String projectId) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
             if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                return ((ScreenProjectionActivity) activity).seekTo(position);
+//                return ((ScreenProjectionActivity) activity).seekTo(position);
+                SeekAction seekAction = new SeekAction(position);
+                ProjectionManager.getInstance().enqueueAction(seekAction);
+
+                SeekResponseVo responseVo = new SeekResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                responseVo.setInfo("成功");
+                return responseVo;
             } else {
                 SeekResponseVo responseVo = new SeekResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
-        } else {
-            SeekResponseVo responseVo = new SeekResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
-        }
+//        } else {
+//            SeekResponseVo responseVo = new SeekResponseVo();
+//            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            responseVo.setInfo("操作失败");
+//            return responseVo;
+//        }
     }
 
-    /**
-     * 暂停、恢复播放
-     *
-     * @return
-     */
-    @Override
-    public PlayResponseVo play(int action) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).togglePlay(action);
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * 暂停、恢复播放
+//     *
+//     * @return
+//     */
+//    @Override
+//    public PlayResponseVo play(int action) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
+//            return ((ScreenProjectionActivity) activity).togglePlay(action);
+//        } else {
+//            return null;
+//        }
+//    }
 
     @Override
     public PlayResponseVo play(int action, String projectId) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
             if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                return ((ScreenProjectionActivity) activity).togglePlay(action);
+//                return ((ScreenProjectionActivity) activity).togglePlay(action);
+
+                PlayAction playAction = new PlayAction(action, projectId);
+                ProjectionManager.getInstance().enqueueAction(playAction);
+
+                PlayResponseVo responseVo = new PlayResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                return responseVo;
             } else {
                 PlayResponseVo responseVo = new PlayResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
-        } else {
-            PlayResponseVo responseVo = new PlayResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
-        }
+//        } else {
+//            PlayResponseVo responseVo = new PlayResponseVo();
+//            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            responseVo.setInfo("操作失败");
+//            return responseVo;
+//        }
     }
 
-    /**
-     * 停止投屏
-     *
-     * @return
-     */
-    @Override
-    public StopResponseVo stop() {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            ((ScreenProjectionActivity) activity).stop(true);
-
-            StopResponseVo stopResponseVo = new StopResponseVo();
-            stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-
-            return stopResponseVo;
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * 停止投屏
+//     *
+//     * @return
+//     */
+//    @Override
+//    public StopResponseVo stop() {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
+//            ((ScreenProjectionActivity) activity).stop(true);
+//
+//            StopResponseVo stopResponseVo = new StopResponseVo();
+//            stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+//
+//            return stopResponseVo;
+//        } else {
+//            return null;
+//        }
+//    }
 
     @Override
     public StopResponseVo stop(String projectId) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (!GlobalValues.IS_LOTTERY) {
             if (TextUtils.isEmpty(projectId)) {
                 StopResponseVo responseVo = new StopResponseVo();
@@ -461,9 +512,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 return responseVo;
             }
 
-            if (activity instanceof ScreenProjectionActivity) {
+//            if (activity instanceof ScreenProjectionActivity) {
                 if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                    ((ScreenProjectionActivity) activity).stop(true);
+//                    ((ScreenProjectionActivity) activity).stop(true);
+                    StopAction stopAction = new StopAction(projectId, false);
+                    ProjectionManager.getInstance().enqueueAction(stopAction);
+
                     StopResponseVo stopResponseVo = new StopResponseVo();
                     stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
@@ -474,30 +528,33 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                     responseVo.setInfo("操作失败");
                     return responseVo;
                 }
-            } else {
-                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                    // 播放正在准备，还没来得及跳到投屏页
-                    StopResponseVo stopResponseVo = new StopResponseVo();
-                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    stopResponseVo.setInfo("正在准备投屏，请稍候再试");
-                    return stopResponseVo;
-                } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
-                    // 播放已结束
-                    StopResponseVo stopResponseVo = new StopResponseVo();
-                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                    return stopResponseVo;
-                } else {
-                    StopResponseVo responseVo = new StopResponseVo();
-                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    responseVo.setInfo("操作失败");
-                    return responseVo;
-                }
-            }
+//            } else {
+//                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
+//                    // 播放正在准备，还没来得及跳到投屏页
+//                    StopResponseVo stopResponseVo = new StopResponseVo();
+//                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//                    stopResponseVo.setInfo("正在准备投屏，请稍候再试");
+//                    return stopResponseVo;
+//                } else if (projectId.equals(GlobalValues.LAST_PROJECT_ID)) {
+//                    // 播放已结束
+//                    StopResponseVo stopResponseVo = new StopResponseVo();
+//                    stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+//                    return stopResponseVo;
+//                } else {
+//                    StopResponseVo responseVo = new StopResponseVo();
+//                    responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//                    responseVo.setInfo("操作失败");
+//                    return responseVo;
+//                }
+//            }
         } else {
 
-            if (activity instanceof LotteryActivity) {
+//            if (activity instanceof LotteryActivity) {
 //                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                    ((LotteryActivity) activity).stop();
+//                    ((LotteryActivity) activity).stop();
+            StopAction stopAction = new StopAction(projectId, true);
+            ProjectionManager.getInstance().enqueueAction(stopAction);
+
                     StopResponseVo stopResponseVo = new StopResponseVo();
                     stopResponseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
@@ -508,12 +565,13 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //                    responseVo.setInfo("操作失败");
 //                    return responseVo;
 //                }
-            } else {
-                StopResponseVo responseVo = new StopResponseVo();
-                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
-                responseVo.setInfo("操作失败");
-                return responseVo;
-            }
+
+//            } else {
+//                StopResponseVo responseVo = new StopResponseVo();
+//                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
+//                responseVo.setInfo("操作失败");
+//                return responseVo;
+//            }
         }
     }
 
@@ -523,67 +581,83 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
      * @param rotateDegree
      * @return
      */
-    @Override
-    public RotateResponseVo rotate(int rotateDegree) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
-        } else {
-            return null;
-        }
-    }
+//    @Override
+//    public RotateResponseVo rotate(int rotateDegree) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
+//            return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
+//        } else {
+//            return null;
+//        }
+//    }
 
     @Override
     public RotateResponseVo rotate(int rotateDegree, String projectId) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
             if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
+//                return ((ScreenProjectionActivity) activity).rotate(rotateDegree);
+
+                RotateAction rotateAction = new RotateAction(rotateDegree, projectId);
+                ProjectionManager.getInstance().enqueueAction(rotateAction);
+
+                RotateResponseVo responseVo = new RotateResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                responseVo.setInfo("成功");
+                responseVo.setRotateValue(rotateDegree);
+                return responseVo;
             } else {
                 RotateResponseVo responseVo = new RotateResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
-        } else {
-            RotateResponseVo responseVo = new RotateResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
-        }
+//        } else {
+//            RotateResponseVo responseVo = new RotateResponseVo();
+//            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            responseVo.setInfo("操作失败");
+//            return responseVo;
+//        }
     }
 
-    @Override
-    public VolumeResponseVo volume(int action) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).volume(action);
-        } else {
-            // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
-            VolumeResponseVo responseVo = new VolumeResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            return responseVo;
-        }
-    }
+//    @Override
+//    public VolumeResponseVo volume(int action) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
+//            return ((ScreenProjectionActivity) activity).volume(action);
+//        } else {
+//            // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
+//            VolumeResponseVo responseVo = new VolumeResponseVo();
+//            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            return responseVo;
+//        }
+//    }
 
     @Override
     public VolumeResponseVo volume(int action, String projectId) {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
             if (!TextUtils.isEmpty(projectId) && projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
-                return ((ScreenProjectionActivity) activity).volume(action);
+//                return ((ScreenProjectionActivity) activity).volume(action);
+
+                VolumeAction volumeAction = new VolumeAction(action, projectId);
+                ProjectionManager.getInstance().enqueueAction(volumeAction);
+
+                VolumeResponseVo responseVo = new VolumeResponseVo();
+                responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                return responseVo;
             } else {
                 VolumeResponseVo responseVo = new VolumeResponseVo();
                 responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED);
                 responseVo.setInfo("操作失败");
                 return responseVo;
             }
-        } else {
-            VolumeResponseVo responseVo = new VolumeResponseVo();
-            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-            responseVo.setInfo("操作失败");
-            return responseVo;
-        }
+//        } else {
+//            VolumeResponseVo responseVo = new VolumeResponseVo();
+//            responseVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//            responseVo.setInfo("操作失败");
+//            return responseVo;
+//        }
     }
 
     /**
@@ -591,18 +665,18 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
      *
      * @return
      */
-    @Override
-    public Object query() {
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity instanceof ScreenProjectionActivity) {
-            return ((ScreenProjectionActivity) activity).query();
-        } else {
-            // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
-            QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
-            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
-            return queryResponse;
-        }
-    }
+//    @Override
+//    public Object query() {
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity instanceof ScreenProjectionActivity) {
+//            return ((ScreenProjectionActivity) activity).query();
+//        } else {
+//            // 不在ScreenProjectionActivity页面时认为已经播放完毕结束ScreenProjectionActivity了
+//            QueryPosBySessionIdResponseVo queryResponse = new QueryPosBySessionIdResponseVo();
+//            queryResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_VIDEO_COMPLETE);
+//            return queryResponse;
+//        }
+//    }
 
     @Override
     public Object query(String projectId) {
@@ -702,6 +776,10 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             }
         }
 
+        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
+            GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
+        }
+
         localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
@@ -713,23 +791,27 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             hunger = 0;
         }
 
-        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-        if (activity == null) {
-            LogUtils.d("Listener will startActivity in new task");
-            Intent intent = new Intent(mContext, LotteryActivity.class);
-            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
-        } else {
-            if (activity instanceof ScreenProjectionActivity) {
-                ((ScreenProjectionActivity) activity).stop(false);
-            }
+//        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//        if (activity == null) {
+//            LogUtils.d("Listener will startActivity in new task");
+//            Intent intent = new Intent(mContext, LotteryActivity.class);
+//            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            mContext.startActivity(intent);
+//        } else {
+//            if (activity instanceof ScreenProjectionActivity) {
+//                ((ScreenProjectionActivity) activity).stop(false);
+//            }
+//
+//            LogUtils.d("Listener will startActivity in " + activity);
+//            Intent intent = new Intent(activity, LotteryActivity.class);
+//            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
+//            activity.startActivity(intent);
+//        }
 
-            LogUtils.d("Listener will startActivity in " + activity);
-            Intent intent = new Intent(activity, LotteryActivity.class);
-            intent.putExtra(LotteryActivity.EXTRA_HUNGER, hunger);
-            activity.startActivity(intent);
-        }
+        ShowEggAction showEggAction = new ShowEggAction(mContext, hunger);
+        ProjectionManager.getInstance().enqueueAction(showEggAction);
+
         return localResult;
     }
 
