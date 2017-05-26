@@ -357,7 +357,7 @@ public class RemoteService extends Service {
                                 }
                                 resJson = new Gson().toJson(object);
 
-                            } else if (forceProject == -1){
+                            } else if (forceProject == -1) {
                                 BaseResponse vo = new BaseResponse();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                                 if (GlobalValues.IS_LOTTERY) {
@@ -437,7 +437,7 @@ public class RemoteService extends Service {
                                     vo.setInfo("缺少视频路径");
                                     resJson = new Gson().toJson(vo);
                                 }
-                            } else if (forceProject == -1){
+                            } else if (forceProject == -1) {
                                 BaseResponse vo = new BaseResponse();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                                 if (GlobalValues.IS_LOTTERY) {
@@ -635,7 +635,7 @@ public class RemoteService extends Service {
                                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                                 }
                                 resJson = new Gson().toJson(object);
-                            } else if (forceProject == -1){
+                            } else if (forceProject == -1) {
                                 BaseResponse vo = new BaseResponse();
                                 vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                                 if (GlobalValues.IS_LOTTERY) {
@@ -892,7 +892,7 @@ public class RemoteService extends Service {
                         }
 
                         respJson = new Gson().toJson(object);
-                    } else if (forceProject == -1){
+                    } else if (forceProject == -1) {
                         BaseResponse vo = new BaseResponse();
                         vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         if (GlobalValues.IS_LOTTERY) {
@@ -916,7 +916,7 @@ public class RemoteService extends Service {
         @Override
         public void onSuccess(AppApi.Action method, Object obj) {
             ProjectionManager.log("Notify stop success");
-            LogUtils.d("Notify stop response: "+obj);
+            LogUtils.d("Notify stop response: " + obj);
         }
 
         @Override
