@@ -746,6 +746,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         boolean handled = false;
         switch (keyCode) {
             case KeyCodeConstant.KEY_CODE_BACK:
+                AppApi.notifyStop(this, this, 2, "");
                 resetGlobalFlag();
                 exitProjection();
                 handled = true;

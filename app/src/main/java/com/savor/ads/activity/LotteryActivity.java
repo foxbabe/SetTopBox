@@ -17,7 +17,10 @@ import com.jar.savor.box.vo.HitEggResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeItem;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.log.LotteryLogUtil;
+import com.savor.ads.projection.ProjectionManager;
 import com.savor.ads.projection.action.ShowEggAction;
 import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.utils.ConstantValues;
@@ -31,7 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class LotteryActivity extends BaseActivity {
+public class LotteryActivity extends BaseActivity implements ApiRequestListener {
 
     public static final String EXTRA_HUNGER = "extra_hunger";
     public static final String EXTRA_ACTION = "extra_action";
@@ -50,6 +53,7 @@ public class LotteryActivity extends BaseActivity {
         @Override
         public void run() {
             LogUtils.e("mExitProjectionRunnable " + LotteryActivity.this.hashCode());
+            AppApi.notifyStop(mContext, LotteryActivity.this, 2, "");
             resetGlobalFlag();
             exitLottery();
         }
@@ -447,6 +451,7 @@ public class LotteryActivity extends BaseActivity {
         boolean handled = false;
         switch (keyCode) {
             case KeyCodeConstant.KEY_CODE_BACK:
+                AppApi.notifyStop(this, this, 2, "");
                 resetGlobalFlag();
                 exitLottery();
                 handled = true;
@@ -480,4 +485,19 @@ public class LotteryActivity extends BaseActivity {
     }
 
 
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        ProjectionManager.log("Notify stop success");
+        LogUtils.d("Notify stop response: "+obj);
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+        ProjectionManager.log("Notify stop error");
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+        ProjectionManager.log("Notify stop network failed");
+    }
 }
