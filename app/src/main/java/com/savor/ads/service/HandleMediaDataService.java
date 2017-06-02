@@ -796,7 +796,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         session.setSPVersionInfo(spVersionInfo);
 
         /**下载启动图*/
-        if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5())) {
+        if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5()) &&
+                boxInitBean.getLogo_version_list() != null && !boxInitBean.getLogo_version_list().isEmpty()) {
             File logoFile = new File(Environment.getExternalStorageDirectory(), session.getSplashPath());
             String md5 = null;
             try {
@@ -823,10 +824,14 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         AppApi.downloadLOGO(url, context, this, path);
                     }
                 }
+            } else {
+                // 做容错，当md5比对一致时设置一次期号
+                session.setSplashVersion(boxInitBean.getLogo_version_list().get(0).getVersion());
             }
         }
         /**下载视频投屏加载图*/
-        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url()) && !TextUtils.isEmpty(boiteBean.getLoading_img_md5())) {
+        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url()) && !TextUtils.isEmpty(boiteBean.getLoading_img_md5()) &&
+                boxInitBean.getLoading_version_list() != null && !boxInitBean.getLoading_version_list().isEmpty()) {
             File loadingFile = new File(Environment.getExternalStorageDirectory(), session.getLoadingPath());
             String md5 = null;
             try {
@@ -853,6 +858,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         AppApi.downloadLoadingImg(url, context, this, path);
                     }
                 }
+            } else {
+                // 做容错，当md5比对一致时设置一次期号
+                session.setLoadingVersion(boxInitBean.getLoading_version_list().get(0).getVersion());
             }
         }
     }

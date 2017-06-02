@@ -5,7 +5,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.savor.ads.projection.action.ProjectionActionBase;
-import com.savor.ads.utils.LogUtils;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,6 +14,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 
 public class ProjectionManager {
+    /**
+     * 单任务最大等待时长
+     */
+    private static final int MAX_WAIT_TIME = 1000 * 5;
 
     private static ProjectionManager mInstance;
 
@@ -38,6 +41,11 @@ public class ProjectionManager {
     private ProjectionActionBase mCurrentAction;
 
     private BlockingQueue<ProjectionActionBase> mWaitingActions;
+
+    /**
+     * 单任务等待时长
+     */
+    private int mCurrentElapseTime;
 
     public void enqueueAction(ProjectionActionBase action) {
         log("enqueueAction " + action.toString());
@@ -65,6 +73,7 @@ public class ProjectionManager {
             log("setSuspend to " + suspend);
             if (!suspend) {
                 synchronized (mLocker) {
+                    log("notify locker to release");
                     mLocker.notifyAll();
                 }
             }
@@ -75,27 +84,36 @@ public class ProjectionManager {
         @Override
         public void run() {
             while (true) {
-                synchronized (mLocker) {
-                    if (isSuspend) {
+                try {
+                    log("wait for locker");
+                    synchronized (mLocker) {
+                        if (isSuspend) {
+                            try {
+                                mLocker.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    log("got the locker");
+
+                    popAndExecute();
+
+                    mCurrentElapseTime = 0;
+
+                    while (!mIsActionDone && mCurrentElapseTime < MAX_WAIT_TIME) {
                         try {
-                            mLocker.wait();
+                            Thread.sleep(50);
+                            mCurrentElapseTime += 50;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
+
+                    isSuspend = mWaitingActions.isEmpty();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                popAndExecute();
-
-                if (!mIsActionDone) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                isSuspend = mWaitingActions.isEmpty();
             }
         }
 
@@ -114,6 +132,8 @@ public class ProjectionManager {
                             mCurrentAction.execute();
                         }
                     });
+                } else {
+                    mIsActionDone = true;
                 }
             }
         }
@@ -131,6 +151,7 @@ public class ProjectionManager {
 
 
     private static final boolean SHOW_LOG = true;
+
     public static void log(String msg) {
         if (SHOW_LOG) {
             Log.d("ProjectionManager", msg);

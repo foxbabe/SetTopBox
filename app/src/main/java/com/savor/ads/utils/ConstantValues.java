@@ -16,7 +16,7 @@ public class ConstantValues {
     public static final int SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED = 2;
     /** 投屏ID不匹配*/
     public static final int SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED = 3;
-    /** 他人正在投屏*/
+    /** 他人正在投屏，供抢投方判断弹窗*/
     public static final int SERVER_RESPONSE_CODE_ANOTHER_PROJECT = 4;
 
 

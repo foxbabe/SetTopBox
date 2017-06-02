@@ -15,25 +15,19 @@ import android.widget.TextView;
 
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.savor.ads.R;
-
-import com.savor.ads.core.Session;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeItem;
 import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.projection.action.ShowEggAction;
 import com.savor.ads.projection.action.StopAction;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 

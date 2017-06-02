@@ -952,8 +952,10 @@ public class Session {
     }
 
     public void setSplashVersion(String splashVersion) {
-        mSplashVersion = splashVersion;
-        writePreference(new Pair<String, Object>(P_APP_SPLASH_VERSION, splashVersion));
+        if (TextUtils.isEmpty(mSplashVersion) || !mSplashVersion.equals(splashVersion)) {
+            mSplashVersion = splashVersion;
+            writePreference(new Pair<String, Object>(P_APP_SPLASH_VERSION, splashVersion));
+        }
     }
 
     public String getLoadingVersion() {
@@ -961,8 +963,10 @@ public class Session {
     }
 
     public void setLoadingVersion(String loadingVersion) {
-        mLoadingVersion = loadingVersion;
-        writePreference(new Pair<String, Object>(P_APP_LOADING_VERSION, loadingVersion));
+        if (TextUtils.isEmpty(mLoadingVersion) || !mLoadingVersion.equals(loadingVersion)) {
+            mLoadingVersion = loadingVersion;
+            writePreference(new Pair<String, Object>(P_APP_LOADING_VERSION, loadingVersion));
+        }
     }
 
     //轮播播放声音
