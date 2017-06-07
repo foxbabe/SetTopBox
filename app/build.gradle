@@ -15,7 +15,7 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017060201
+        versionCode 2017060601
         versionName "1.1.2"
 
         multiDexEnabled true
@@ -51,12 +51,14 @@ android {
 
     productFlavors {
         staging {
-            buildConfigField("String", "BASE_URL", "\"http://devp.testapi.rerdian.com/\"")
+            buildConfigField("String", "BASE_URL", "\"http://devp.mobile.littlehotspot.com/\"")
             buildConfigField("String", "OSS_BUCKET_NAME", "\"redian-development\"")
+            buildConfigField("String", "OSS_ENDPOINT", "\"http://devp.oss.littlehotspot.com/\"")
         }
         production {
-            buildConfigField("String", "BASE_URL", "\"https://mobile.rerdian.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://mobile.littlehotspot.com\"")
             buildConfigField("String", "OSS_BUCKET_NAME", "\"redian-produce\"")
+            buildConfigField("String", "OSS_ENDPOINT", "\"http://oss.littlehotspot.com/\"")
         }
     }
 

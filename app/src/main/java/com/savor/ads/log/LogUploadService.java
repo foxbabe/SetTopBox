@@ -42,7 +42,7 @@ public class LogUploadService{
 		conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
 		conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
 		OSSLog.enableLog();
-		oss = new OSSClient(context, OSSValues.endpoint, credentialProvider, conf);
+		oss = new OSSClient(context, BuildConfig.OSS_ENDPOINT, credentialProvider, conf);
 	}
 	public void start() {
 
