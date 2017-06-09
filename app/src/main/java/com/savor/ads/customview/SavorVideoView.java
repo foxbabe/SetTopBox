@@ -665,13 +665,18 @@ public class SavorVideoView extends RelativeLayout {
     public void release() {
         LogUtils.w(TAG + "release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        if (mMediaPlayer != null) {
-            stopInner();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (mMediaPlayer != null) {
+                    stopInner();
 
-            mMediaPlayer.release();
-            mPlayState = MediaPlayerState.END;
-            mMediaPlayer = null;
-        }
+                    mMediaPlayer.release();
+                    mPlayState = MediaPlayerState.END;
+                    mMediaPlayer = null;
+                }
+            }
+        }).start();
 
         if (mIfShowPauseBtn) {
             if (Looper.myLooper() == Looper.getMainLooper()) {
