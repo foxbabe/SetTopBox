@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -16,12 +17,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jar.savor.box.vo.PlayResponseVo;
+import com.jar.savor.box.vo.PptRequestVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekResponseVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
+import com.savor.ads.adapter.PptVpAdapter;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.CircleProgressBar;
@@ -49,6 +52,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_IMAGE_TYPE = "extra_image_type";
     public static final String EXTRA_IS_FROM_WEB = "extra_is_from_web";
     public static final String EXTRA_PROJECT_ACTION = "extra_project_action";
+    public static final String EXTRA_PPT_CONFIG = "extra_ppt_config";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
@@ -138,6 +142,36 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         }
     };
 
+    private Runnable mPPTPlayNextRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mPptVp != null && mPptVp.getChildCount() > 0 && mPptConfig != null) {
+                int newIndex = mPptVp.getCurrentItem() + 1;
+                if (newIndex >= mPptConfig.getImages().size()) {
+                    newIndex = 0;
+                }
+
+                if (mPptConfig.getDuration() <= 0 && newIndex == 0) {
+                    mHandler.post(mPPTPlayFinishRunnable);
+                } else {
+                    mPptVp.setCurrentItem(newIndex, true);
+
+                    mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+                }
+            }
+        }
+    };
+
+    private Runnable mPPTPlayFinishRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+
+            resetGlobalFlag();
+            exitProjection();
+        }
+    };
+
     private SavorVideoView mSavorVideoView;
     private RelativeLayout mImageArea;
     private ImageView mImageView;
@@ -149,6 +183,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private RelativeLayout mVolumeRl;
     private TextView mVolumeTv;
     private ProgressBar mVolumePb;
+    private ViewPager mPptVp;
     /**
      * 图片旋转角度
      */
@@ -171,6 +206,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private boolean mIsFromWeb = false;
     private StopAction mStopAction;
     private ProjectionActionBase mProjectAction;
+    private PptRequestVo mPptConfig;
+    private PptVpAdapter mPptAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,6 +234,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mVolumeRl = (RelativeLayout) findViewById(R.id.rl_volume_view);
         mVolumeTv = (TextView) findViewById(R.id.tv_volume);
         mVolumePb = (ProgressBar) findViewById(R.id.pb_volume);
+        mPptVp = (ViewPager) findViewById(R.id.vp_images);
     }
 
     private void setView() {
@@ -204,6 +242,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSavorVideoView.setIfShowLoading(true);
         mSavorVideoView.setLooping(false);
         mSavorVideoView.setPlayStateCallback(mPlayStateCallback);
+
+        mPptAdapter = new PptVpAdapter(this, null);
+        mPptVp.setAdapter(mPptAdapter);
     }
 
     private void init() {
@@ -247,6 +288,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
+        mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
             mProjectAction.onActionEnd();
@@ -307,6 +349,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             // 点播
             mSavorVideoView.setVisibility(View.VISIBLE);
             mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -316,6 +361,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
             mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -326,6 +374,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.setVisibility(View.GONE);
             mSavorVideoView.release();
             mImageArea.setVisibility(View.VISIBLE);
+            mPptVp.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
             // 展示图片
             if (GlobalValues.CURRENT_PROJECT_BITMAP != null) {
@@ -353,6 +404,18 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageView.setScaleX(1);
                 mImageView.setScaleY(1);
                 rotatePicture();
+            }
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
+            // 餐厅端幻灯片
+            mSavorVideoView.setVisibility(View.GONE);
+            mSavorVideoView.release();
+            mImageArea.setVisibility(View.GONE);
+
+            mPptVp.setVisibility(View.VISIBLE);
+            mPptAdapter.setDataSource(mPptConfig.getImages());
+            mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+            if (mPptConfig.getDuration() > 0) {
+                mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
             }
         }
 
@@ -443,6 +506,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mType = "vod";
             }
             mInnerType = "video";
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
+            mType = "rstr-projection";
+            mInnerType = "ppt";
         }
     }
 

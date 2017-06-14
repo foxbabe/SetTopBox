@@ -3,6 +3,8 @@ package com.savor.ads.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -11,7 +13,7 @@ import java.io.InputStream;
 
 public class FileUtils {
 
-    public static void delDir(File file){
+    public static void deleteFile(File file){
         try{
             if (file.exists()){
                 if (file.isDirectory()){
@@ -20,7 +22,7 @@ public class FileUtils {
                         if(f.isFile()){
                             f.delete();
                         }else{
-                            delDir(f);
+                            deleteFile(f);
                         }
                     }
                 }
@@ -74,5 +76,39 @@ public class FileUtils {
             }
         }
 
+    }
+
+    public static void write(String filePath, String content) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(content);
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String read(String filePath) {
+        String content = null;
+        File file = new File(filePath);
+        if (file.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                int length = fileInputStream.available();
+
+                byte[] buffer = new byte[length];
+                fileInputStream.read(buffer);
+
+                content = new String(buffer, "utf-8");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return content;
     }
 }

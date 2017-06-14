@@ -16,7 +16,6 @@ import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -151,8 +150,9 @@ public class AppUtils {
         /**
          * 抽奖记录
          */
-        lottery;
-
+        lottery,
+        /**幻灯片所用图片*/
+        ppt,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -288,6 +288,10 @@ public class AppUtils {
         if (!targetLotteryFile.exists()){
             targetLotteryFile.mkdir();
         }
+        File targetPptFile = new File(path + File.separator, "ppt");
+        if (!targetPptFile.exists()) {
+            targetPptFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -303,6 +307,8 @@ public class AppUtils {
             path = targetCacheFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.lottery) {
             path = targetLotteryFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.ppt) {
+            path = targetPptFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
@@ -570,6 +576,19 @@ public class AppUtils {
         return dfTemp.format(new Date());// new Date()为获取当前系统时间
     }
 
+    public static Date parseDate(String dateStr) throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat(DATEFORMAT_YYMMDD_HHMMSS);//设置日期格式
+        return df.parse(dateStr);
+    }
+
+    /**
+     * 根据日期格式解析日期
+     */
+    public static Date parseDate(String dateStr, String format) throws ParseException {
+        SimpleDateFormat dfTemp = new SimpleDateFormat(format);//设置日期格式
+        return dfTemp.parse(dateStr);
+    }
+
     /**
      * 根据日期格式获取当前日期
      */
@@ -583,21 +602,29 @@ public class AppUtils {
         Thread clearTask = new Thread() {
             @Override
             public void run() {
-                String path = getFilePath(context, StorageFile.cache);
-
-                File cacheDirectory = new File(path);
+                String cachePath = getFilePath(context, StorageFile.cache);
+                File cacheDirectory = new File(cachePath);
                 if (cacheDirectory.exists()) {
-                    String[] files = cacheDirectory.list();
+                    File[] files = cacheDirectory.listFiles();
 
-                    if (files == null || files.length == 0) {
-//                    	notify.message("亲~，没有需要删除的缓存~");
-                        return;
-                    }
-                    for (String file : files) {
-                        new File(cacheDirectory, file).delete();
+                    if (files != null) {
+                        for (File file : files) {
+                            com.savor.ads.utils.FileUtils.deleteFile(file);
+                        }
                     }
                 }
-//                notify.message("亲~,恭喜,缓存已清除");
+
+                String pptPath = getFilePath(context, StorageFile.ppt);
+                File pptDirectory = new File(pptPath);
+                if (pptDirectory.exists()) {
+                    File[] files = pptDirectory.listFiles();
+
+                    if (files != null) {
+                        for (File file : files) {
+                            com.savor.ads.utils.FileUtils.deleteFile(file);
+                        }
+                    }
+                }
             }
         };
         clearTask.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);

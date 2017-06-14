@@ -17,13 +17,15 @@ public class StopAction extends ProjectionActionBase {
 
     private String projectId;
     private boolean isLottery;
+    private boolean isRstr;
 
-    public StopAction(String projectId, boolean isLottery) {
+    public StopAction(String projectId, boolean isLottery, boolean isRstr) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         this.projectId = projectId;
         this.isLottery = isLottery;
+        this.isRstr = isRstr;
     }
 
     @Override
@@ -33,6 +35,10 @@ public class StopAction extends ProjectionActionBase {
         if (isLottery) {
             if (activity instanceof LotteryActivity) {
                 ((LotteryActivity) activity).stop(this);
+            }
+        } else if (isRstr) {
+            if (activity instanceof ScreenProjectionActivity) {
+                ((ScreenProjectionActivity) activity).stop(true, this);
             }
         } else {
             if (activity instanceof ScreenProjectionActivity &&

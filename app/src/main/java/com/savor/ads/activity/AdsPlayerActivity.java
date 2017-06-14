@@ -286,7 +286,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                                 LogUtils.d("删除文件===================" + file.getName());
                             }
                         } else {
-                            FileUtils.delDir(file);
+                            FileUtils.deleteFile(file);
                         }
                     }
                 } catch (Exception e) {

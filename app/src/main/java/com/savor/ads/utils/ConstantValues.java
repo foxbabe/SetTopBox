@@ -30,6 +30,10 @@ public class ConstantValues {
      */
     public static final String PROJECT_TYPE_PICTURE = "pic";
     /**
+     * 投屏类型:餐厅端，幻灯片
+     */
+    public static final String PROJECT_TYPE_RSTR_PPT = "rstr_ppt";
+    /**
      * 投屏类型:视频
      */
     public static final String PROJECT_TYPE_VIDEO = "video";

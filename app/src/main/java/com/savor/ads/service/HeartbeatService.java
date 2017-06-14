@@ -29,9 +29,9 @@ public class HeartbeatService extends IntentService {
     private static final int SERVER_INFO_CHECK_DURATION = 1000 * 60 * 1;
     /**
      * 单次循环等待时长。
-     * 由于要在关键时间点上报技术日志，这里须>30sec <1min
+     * 由于要在关键时间点上做检测，这里须>30sec <1min
      */
-    private static final int ONE_CYCLE_TIME = 1000 * 30;
+    private static final int ONE_CYCLE_TIME = 1000 * 40;
 
     /**
      * 上一个心跳过去的时长
@@ -70,6 +70,12 @@ public class HeartbeatService extends IntentService {
                 mHeartbeatElapsedTime = 0;
 
                 doHeartbeat();
+            }
+
+            // 检测时间是否到达凌晨2点整，去删除存本地的投屏文件
+            String time = AppUtils.getCurTime("hh:MM");
+            if ("02:00".equals(time)) {
+                AppUtils.clearAllCache(this);
             }
 
             try {

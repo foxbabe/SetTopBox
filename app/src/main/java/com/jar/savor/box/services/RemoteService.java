@@ -13,6 +13,8 @@ import com.google.gson.Gson;
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.BaseResponse;
 import com.jar.savor.box.vo.PlayResponseVo;
+import com.jar.savor.box.vo.PptRequestVo;
+import com.jar.savor.box.vo.PptResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.ResponseT;
@@ -21,11 +23,13 @@ import com.jar.savor.box.vo.SeekResponseVo;
 import com.jar.savor.box.vo.StopResponseVo;
 import com.jar.savor.box.vo.VideoPrepareRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
+import com.savor.ads.bean.PptImage;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.projection.ProjectionManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.StringUtils;
@@ -35,7 +39,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -269,21 +275,21 @@ public class RemoteService extends Service {
                 baseResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 resJson = new Gson().toJson(baseResponse);
             } else {
-                String[] dirs = path.split("/");
-                if (dirs.length <= 1) {
-                    BaseResponse baseResponse = new BaseResponse();
-                    baseResponse.setInfo("错误的功能");
-                    baseResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    resJson = new Gson().toJson(baseResponse);
-                } else {
+//                String[] dirs = path.split("/");
+//                if (dirs.length <= 1) {
+//                    BaseResponse baseResponse = new BaseResponse();
+//                    baseResponse.setInfo("错误的功能");
+//                    baseResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+//                    resJson = new Gson().toJson(baseResponse);
+//                } else {
 
-                    String action = dirs[1];
-                    String deviceId = request.getParameter("deviceId");
-                    String deviceName = request.getParameter("deviceName");
-                    if (!TextUtils.isEmpty(deviceId)) {
-                        resJson = distributeRequest(request, isWebReq, resJson, action, deviceId, deviceName);
-                    }
+//                    String action = dirs[1];
+                String deviceId = request.getParameter("deviceId");
+                String deviceName = request.getParameter("deviceName");
+                if (!TextUtils.isEmpty(deviceId)) {
+                    resJson = distributeRequest(request, isWebReq, resJson, path, deviceId, deviceName);
                 }
+//                }
             }
 
             if (TextUtils.isEmpty(resJson)) {
@@ -306,7 +312,7 @@ public class RemoteService extends Service {
             // forceProject等于0表示不是强制抢投，等于1表示强制投，等于-1表示是老版移动端调用
             int forceProject = -1;
             switch (action) {
-                case "vod":
+                case "/vod":
                     String type = request.getParameter("type");
                     String mediaName = request.getParameter("name");
                     int position = 0;
@@ -376,7 +382,7 @@ public class RemoteService extends Service {
                         }
                     }
                     break;
-                case "video":
+                case "/video":
                     try {
                         forceProject = Integer.parseInt(request.getParameter("force"));
                     } catch (NumberFormatException e) {
@@ -456,7 +462,7 @@ public class RemoteService extends Service {
                         }
                     }
                     break;
-                case "pic":
+                case "/pic":
                     String isThumbnail = request.getParameter("isThumbnail");
                     String imageId = request.getParameter("imageId");
                     String seriesId = request.getParameter("seriesId");
@@ -484,7 +490,7 @@ public class RemoteService extends Service {
                                 isThumbnail, imageId, rotation, seriesId, forceProject, isWebReq);
                     }
                     break;
-                case "stop":
+                case "/stop":
                     LogUtils.e("enter method listener.stop");
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                         String projectId = request.getParameter("projectId");
@@ -494,7 +500,7 @@ public class RemoteService extends Service {
                         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
                     }
                     break;
-                case "rotate":
+                case "/rotate":
                     LogUtils.d("enter method listener.rotate");
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                         String projectId = request.getParameter("projectId");
@@ -502,7 +508,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     }
                     break;
-                case "resume":
+                case "/resume":
                     LogUtils.d("enter method listener.resume");
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                         String projectId = request.getParameter("projectId");
@@ -510,7 +516,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     }
                     break;
-                case "pause":
+                case "/pause":
                     LogUtils.d("enter method listener.pause");
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                         String projectId = request.getParameter("projectId");
@@ -518,7 +524,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     }
                     break;
-                case "seek":
+                case "/seek":
                     LogUtils.d("enter method listener.seek");
                     int positionSeek = Integer.parseInt(request.getParameter("position"));
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
@@ -527,7 +533,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     }
                     break;
-                case "volume":
+                case "/volume":
                     LogUtils.d("enter method listener.volume");
                     int volumeAction = Integer.parseInt(request.getParameter("action"));
                     if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
@@ -536,7 +542,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(object);
                     }
                     break;
-                case "query":
+                case "/query":
                     LogUtils.d("enter method listener.query");
                     if (!TextUtils.isEmpty(deviceId) &&
                             (deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
@@ -550,7 +556,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(vo);
                     }
                     break;
-                case "showCode":
+                case "/showCode":
                     LogUtils.d("enter method listener.showCode");
                     if (!TextUtils.isEmpty(deviceId)) {
                         RemoteService.listener.showCode();
@@ -564,7 +570,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(vo);
                     }
                     break;
-                case "verify":
+                case "/verify":
                     LogUtils.d("enter method listener.verify");
                     if (!TextUtils.isEmpty(deviceId)) {
                         String code = request.getParameter("code");
@@ -576,7 +582,7 @@ public class RemoteService extends Service {
                         resJson = new Gson().toJson(vo);
                     }
                     break;
-                case "egg":
+                case "/egg":
                     LogUtils.e("enter method listener.egg");
                     try {
                         forceProject = Integer.parseInt(request.getParameter("force"));
@@ -654,7 +660,7 @@ public class RemoteService extends Service {
                         }
                     }
                     break;
-                case "hitEgg":
+                case "/hitEgg":
                     LogUtils.e("enter method listener.hitEgg");
                     if (!TextUtils.isEmpty(deviceId) && (deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                             deviceId.equals(GlobalValues.LAST_PROJECT_DEVICE_ID))) {
@@ -664,6 +670,152 @@ public class RemoteService extends Service {
 
                         GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
                     }
+                    break;
+                case "/restaurant/ppt":
+                    LogUtils.e("enter method listener.restaurant/ppt");
+                    String reqJson = getBodyString(request);
+                    PptRequestVo req = (new Gson()).fromJson(reqJson, PptRequestVo.class);
+                    GlobalValues.CURRENT_PPT_REQUEST = req;
+                    String path = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
+                    File deviceIdDir = new File(path);
+                    PptResponseVo pptResponse = new PptResponseVo();
+                    pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                    pptResponse.setImages(req.getImages());
+
+                    boolean isAllExist = true;
+                    if (!deviceIdDir.exists()) {
+                        deviceIdDir.mkdirs();
+                    } else {
+                        if (pptResponse.getImages() != null) {
+                            for (PptImage pptImage :
+                                    pptResponse.getImages()) {
+                                File imgFile = new File(path + pptImage.getName());
+                                if (imgFile.exists()) {
+                                    pptImage.setExist(1);
+                                } else {
+                                    pptImage.setExist(0);
+                                    isAllExist = false;
+                                }
+                            }
+                        }
+                    }
+
+                    // 将配置信息存文件
+                    FileUtils.write(path + req.getName() + ".cfg", reqJson);
+
+                    if (isAllExist) {
+                        RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST);
+
+                        // 通知上一个投屏者已被抢投
+                        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                            AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                        }
+
+                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                        GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                        AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+                    }
+
+                    resJson = new Gson().toJson(pptResponse);
+                    break;
+                case "/restaurant/picUpload":
+                    LogUtils.e("enter method listener.restaurant/picUpload");
+                    MultipartConfigElement multipartConfigElement = new MultipartConfigElement((String) null);
+                    request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, multipartConfigElement);
+                    BaseResponse object = null;
+                    if (request.getParts() != null) {
+                        Bitmap bitmap = null;
+                        String fileName = null, pptName = null;
+                        for (Part part : request.getParts()) {
+                            switch (part.getName()) {
+                                case "fileUpload":
+                                    bitmap = BitmapFactory.decodeStream(part.getInputStream());
+                                    break;
+                                case "fileName":
+                                    fileName = StringUtils.inputStreamToString(part.getInputStream());
+                                    break;
+                                case "pptName":
+                                    pptName = StringUtils.inputStreamToString(part.getInputStream());
+                                    break;
+                            }
+                            part.delete();
+                        }
+
+                        if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName) && bitmap != null) {
+                            boolean foundConfig = false;
+                            String deviceIdDirPath = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
+                            if (GlobalValues.CURRENT_PPT_REQUEST == null || !GlobalValues.CURRENT_PPT_REQUEST.getName().equals(pptName)) {
+                                String configJson = FileUtils.read(deviceIdDirPath + pptName + ".cfg");
+                                if (!TextUtils.isEmpty(configJson)) {
+                                    GlobalValues.CURRENT_PPT_REQUEST = new Gson().fromJson(configJson, PptRequestVo.class);
+                                    foundConfig = true;
+                                } else {
+                                    foundConfig = false;
+                                }
+                            } else {
+                                foundConfig = true;
+                            }
+
+                            if (foundConfig) {
+                                boolean isAllExist1 = true;
+                                for (PptImage pptImage : GlobalValues.CURRENT_PPT_REQUEST.getImages()) {
+                                    if (fileName.equals(pptImage.getName())) {
+                                        pptImage.setExist(1);
+                                        FileUtils.write(deviceIdDirPath + pptName + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
+                                    }
+
+                                    if (pptImage.getExist() != 1) {
+                                        isAllExist1 = false;
+                                    }
+                                }
+
+                                FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + fileName);
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+
+                                if (isAllExist1) {
+                                    RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST);
+
+                                    // 通知上一个投屏者已被抢投
+                                    if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                            !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                                        AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                                    }
+
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+                                }
+
+                                object = new BaseResponse();
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                            } else {
+                                object = new BaseResponse();
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                            }
+                        }
+                    }
+                    if (object == null) {
+                        // 请求格式错误
+                        object = new BaseResponse();
+                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    }
+                    resJson = new Gson().toJson(object);
+                    break;
+                case "/restaurant/stop":
+                    LogUtils.e("enter method listener.restaurant/stop");
+                    BaseResponse stopResponse = new BaseResponse();
+                    if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                        RemoteService.listener.rstrStop();
+                        stopResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                        GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
+                    } else {
+                        stopResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    }
+                    resJson = new Gson().toJson(stopResponse);
                     break;
                 default:
                     LogUtils.d(" not enter any method");
@@ -947,7 +1099,7 @@ public class RemoteService extends Service {
             super.run();
             if (RemoteService.this.server != null) {
                 try {
-                    RemoteService.this.server.setHandler(RemoteService.this.new ControllHandler());
+                    RemoteService.this.server.setHandler(new ControllHandler());
                     RemoteService.this.server.start();
                     RemoteService.this.server.join();
                 } catch (Exception var2) {

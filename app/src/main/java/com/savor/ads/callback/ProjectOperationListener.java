@@ -8,6 +8,7 @@ import com.jar.savor.box.interfaces.OnRemoteOperationListener;
 import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
+import com.jar.savor.box.vo.PptRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.ResponseT;
@@ -26,6 +27,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectionManager;
 import com.savor.ads.projection.action.ImageAction;
 import com.savor.ads.projection.action.PlayAction;
+import com.savor.ads.projection.action.PptAction;
 import com.savor.ads.projection.action.RotateAction;
 import com.savor.ads.projection.action.SeekAction;
 import com.savor.ads.projection.action.ShowEggAction;
@@ -347,6 +349,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
+    public void showPpt(String deviceId, PptRequestVo currentPptRequest) {
+        PptAction imageAction = new PptAction(mContext, currentPptRequest);
+        ProjectionManager.getInstance().enqueueAction(imageAction);
+    }
+
+    @Override
     public PrepareResponseVoNew showVideo(String videoPath, int position) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
@@ -515,7 +523,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //            if (activity instanceof ScreenProjectionActivity) {
                 if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
 //                    ((ScreenProjectionActivity) activity).stop(true);
-                    StopAction stopAction = new StopAction(projectId, false);
+                    StopAction stopAction = new StopAction(projectId, false, false);
                     ProjectionManager.getInstance().enqueueAction(stopAction);
 
                     StopResponseVo stopResponseVo = new StopResponseVo();
@@ -552,7 +560,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //            if (activity instanceof LotteryActivity) {
 //                if (projectId.equals(GlobalValues.CURRENT_PROJECT_ID)) {
 //                    ((LotteryActivity) activity).stop();
-            StopAction stopAction = new StopAction(projectId, true);
+            StopAction stopAction = new StopAction(projectId, true, false);
             ProjectionManager.getInstance().enqueueAction(stopAction);
 
                     StopResponseVo stopResponseVo = new StopResponseVo();
@@ -573,6 +581,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //                return responseVo;
 //            }
         }
+    }
+
+    @Override
+    public void rstrStop() {
+        StopAction stopAction = new StopAction(null, false, true);
+        ProjectionManager.getInstance().enqueueAction(stopAction);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.savor.ads.utils;
 
 import android.graphics.Bitmap;
 
+import com.jar.savor.box.vo.PptRequestVo;
 import com.savor.ads.bean.PlayListBean;
 
 import java.util.ArrayList;
@@ -39,14 +40,8 @@ public class GlobalValues {
     /** 是否是抽奖*/
     public volatile static boolean IS_LOTTERY;
 
-//    /**
-//     * 测试环境手机端APP下载页面
-//     */
-//    public static final String APP_DOWN_LINK = "http://devp.savorx.cn/d";
-    /**
-     * 正式环境手机端APP下载页面
-     */
-    public static final String APP_DOWN_LINK = "http://rerdian.com/d";
 
     public static volatile boolean IS_BOX_BUSY = false;
+
+    public volatile static PptRequestVo CURRENT_PPT_REQUEST;
 }

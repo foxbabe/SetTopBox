@@ -2,11 +2,8 @@ package com.savor.ads.service;
 
 import android.app.DownloadManager;
 import android.app.Service;
-import android.app.backup.IFullBackupRestoreObserver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -15,7 +12,6 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.savor.ads.bean.BoiteBean;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
 import com.savor.ads.bean.MediaLibBean;
@@ -234,7 +230,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         LogUtils.d("删除文件===================" + file.getName());
                     }
                 } else {
-                    FileUtils.delDir(file);
+                    FileUtils.deleteFile(file);
                 }
             }
         } catch (Exception e) {
@@ -887,7 +883,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                    selectionArgs = new String[]{file.getName(), session.getAdvertMediaPeriod()};
 //                    list = dbHelper.findPlayListByWhere(selection, selectionArgs);
 //                    if (list != null && list.size() > 0) {
-//                        FileUtils.delDir(file);
+//                        FileUtils.deleteFile(file);
 //                        LogUtils.d("删除文件===================" + file.getName());
 //                    }
 //                    continue;
@@ -895,7 +891,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                    selectionArgs = new String[]{file.getName(), session.getAdvertDownloadingPeriod()};
 //                    list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
 //                    if (list != null && list.size() > 0) {
-//                        FileUtils.delDir(file);
+//                        FileUtils.deleteFile(file);
 //                        LogUtils.d("删除文件===================" + file.getName());
 //                    }
 //                    continue;
@@ -903,7 +899,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                    selectionArgs = new String[]{file.getName(), session.getNextAdvertMediaPeriod()};
 //                    list = dbHelper.findPlayListByWhere(selection, selectionArgs);
 //                    if (list != null && list.size() > 0) {
-//                        FileUtils.delDir(file);
+//                        FileUtils.deleteFile(file);
 //                        LogUtils.d("删除文件===================" + file.getName());
 //                    }
 //                    continue;
@@ -1266,7 +1262,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                 }
             } else {
-                FileUtils.delDir(file);
+                FileUtils.deleteFile(file);
             }
         }
     }

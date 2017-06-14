@@ -3,6 +3,7 @@ package com.jar.savor.box.interfaces;
 import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
+import com.jar.savor.box.vo.PptRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateResponseVo;
@@ -43,6 +44,8 @@ public interface OnRemoteOperationListener {
 //    StopResponseVo stop();
     StopResponseVo stop(String projectId);
 
+    void rstrStop();
+
 //    RotateResponseVo rotate(int rotateDegree);
     RotateResponseVo rotate(int rotateDegree, String projectId);
 
@@ -64,4 +67,6 @@ public interface OnRemoteOperationListener {
     void showCode();
 
     ResponseT<CodeVerifyBean> verify(String code);
+
+    void showPpt(String deviceId, PptRequestVo currentPptRequest);
 }
