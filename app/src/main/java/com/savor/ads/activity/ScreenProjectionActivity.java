@@ -413,6 +413,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             mPptVp.setVisibility(View.VISIBLE);
             mPptAdapter.setDataSource(mPptConfig.getImages());
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
             if (mPptConfig.getDuration() > 0) {
                 mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
