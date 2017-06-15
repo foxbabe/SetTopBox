@@ -18,11 +18,11 @@ import com.jar.savor.box.vo.VolumeResponseVo;
 public interface OnRemoteOperationListener {
 //    PrepareResponseVo prepare(PrepareRequestVo var1);
 
-    PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb);
+    PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb, boolean isNewDevice);
 
-    PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId);
+    PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice);
 
-    PrepareResponseVoNew showVideo(String videoPath, int position);
+    PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice);
 
     PrepareResponseVoNew showEgg(String date, int hunger);
 
@@ -68,5 +68,5 @@ public interface OnRemoteOperationListener {
 
     ResponseT<CodeVerifyBean> verify(String code);
 
-    void showPpt(String deviceId, PptRequestVo currentPptRequest);
+    void showPpt(String deviceId, PptRequestVo currentPptRequest, boolean isNewDevice);
 }

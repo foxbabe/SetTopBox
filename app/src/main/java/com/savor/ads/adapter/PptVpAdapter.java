@@ -60,6 +60,11 @@ public class PptVpAdapter extends PagerAdapter {
         return arg0 == arg1;
     }
 
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
+    }
+
     public void setDataSource(ArrayList<PptImage> pptImages) {
         this.pptImages = pptImages;
         notifyDataSetChanged();

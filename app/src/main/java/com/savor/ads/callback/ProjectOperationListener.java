@@ -186,7 +186,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //    }
 
     @Override
-    public PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb) {
+    public PrepareResponseVoNew showVod(String mediaName, String vodType, int position, boolean isFromWeb, boolean isNewDevice) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         String vid = "";
         String url = "";
@@ -291,7 +291,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //                    activity.startActivity(intent);
 //                }
 //            }
-            VodAction vodAction = new VodAction(mContext, vid, url, position, isFromWeb);
+            VodAction vodAction = new VodAction(mContext, vid, url, position, isFromWeb, isNewDevice);
             ProjectionManager.getInstance().enqueueAction(vodAction);
         } else {
             localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -301,7 +301,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId) {
+    public PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (isThumbnail) {
             if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
@@ -342,20 +342,20 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //            }
 //        }
 
-        ImageAction imageAction = new ImageAction(mContext, imageType, rotation, isThumbnail,seriesId);
+        ImageAction imageAction = new ImageAction(mContext, imageType, rotation, isThumbnail,seriesId, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(imageAction);
 
         return localResult;
     }
 
     @Override
-    public void showPpt(String deviceId, PptRequestVo currentPptRequest) {
-        PptAction imageAction = new PptAction(mContext, currentPptRequest);
+    public void showPpt(String deviceId, PptRequestVo currentPptRequest, boolean isNewDevice) {
+        PptAction imageAction = new PptAction(mContext, currentPptRequest, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(imageAction);
     }
 
     @Override
-    public PrepareResponseVoNew showVideo(String videoPath, int position) {
+    public PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
             GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
@@ -389,7 +389,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //            }
 //        }
 
-        VideoAction videoAction = new VideoAction(mContext, videoPath, position);
+        VideoAction videoAction = new VideoAction(mContext, videoPath, position, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(videoAction);
 
         return localResult;

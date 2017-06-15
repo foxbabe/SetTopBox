@@ -14,13 +14,10 @@ import java.io.IOException;
  * 生产日志任务
  */
 public class LogProduceService {
-	private boolean running = false;
-	private boolean producing = false;
-	private FileWriter mwriter = null;
-	private LogReportParam mparam = null;
+	private FileWriter mLogWriter = null;
+	private FileWriter mRstrLogWriter = null;
 	private Context mContext=null;
 	private String logTime=null;
-	private String logFileName = null;
 	private LogReportUtil logReportUtil = null;
 	private Session session;
 	public LogProduceService (Context context){
@@ -35,48 +32,64 @@ public class LogProduceService {
 	 */
 
 	public void run() {
-		LogUtils.i("run");
-		running = true;
 		new Thread() {
 			@Override
 			public void run() {
-				while (running) {
+				while (true) {
 					// 生成日志文件
-					// 更新id
-					createfile();
-					producing = true;
-					while (producing){
-						if (mwriter==null){
-							break;
-						}
-						if (!logTime.equals(AppUtils.getTime("hour"))){
-							break;
-						}
-						int num = LogReportUtil.getNum();
-						LogUtils.i("num:" + num);
-						if (num > 0) {
-							try {
-								mparam = logReportUtil.take();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							if (mparam != null) {
-								String log = makeLog();
-								LogUtils.i("log:" + log);
-								try {
-									mwriter.write(log);
-									mwriter.flush();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-						}
+					createFile();
+
+					while (true) {
+                        if (!logTime.equals(AppUtils.getTime("hour"))){
+                            break;
+                        }
+                        if (mLogWriter != null) {
+                            if (LogReportUtil.getLogNum() > 0) {
+                                try {
+                                    LogReportParam mparam = logReportUtil.take();
+                                    if (mparam != null) {
+                                        String log = makeLog(mparam);
+                                        LogUtils.i("log:" + log);
+                                        try {
+                                            mLogWriter.write(log);
+                                            mLogWriter.flush();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        if (mRstrLogWriter != null) {
+                            if (LogReportUtil.getRstrLogNum() > 0) {
+                                try {
+                                    RestaurantLogBean mparam = logReportUtil.takeRstrLog();
+                                    if (mparam != null) {
+                                        String log = makeRstrLog(mparam);
+                                        LogUtils.i("log:" + log);
+                                        try {
+                                            mRstrLogWriter.write(log);
+                                            mRstrLogWriter.flush();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
 						try {
 							Thread.sleep(5*1000);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
+
 					closeWriter();
 					try {
 						Thread.sleep(1000);
@@ -89,21 +102,29 @@ public class LogProduceService {
 	}
 
 	private void closeWriter() {
-		if (mwriter != null) {
+		if (mLogWriter != null) {
 			try {
-				mwriter.close();
+				mLogWriter.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			mwriter = null;
+			mLogWriter = null;
+		}
+
+		if (mRstrLogWriter != null) {
+			try {
+                mRstrLogWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            mRstrLogWriter = null;
 		}
 	}
 
 	/**
 	 * 获取日志内容
 	 */
-	private String makeLog(){
+	private String makeLog(LogReportParam mparam){
 		String boxId="";
 		String logHour = "";
 		if ("poweron".equals(mparam.getAction())){
@@ -128,13 +149,37 @@ public class LogProduceService {
 					+ boxId + ","
 					+ logHour
 					+ "\r\n";
-        LogUtils.d("makeLog=="+ret);
+		return ret;
+	}
+
+	/**
+	 * 生成餐厅端日志内容
+	 */
+	private String makeRstrLog(RestaurantLogBean mparam){
+		String ret = mparam.getUUid() + ","
+					+ mparam.getHotel_id() + ","
+					+ mparam.getRoom_id() + ","
+					+ mparam.getTime() + ","
+					+ mparam.getAction() + ","
+					+ mparam.getType()+ ","
+					+ mparam.getMobile_id() + ","
+					+ mparam.getApk_version() + ","
+					+ mparam.getDuration() + ","
+					+ mparam.getPptSize() + ","
+					+ mparam.getPptInterval() + ","
+					+ mparam.getInnerType() + ","
+					+ mparam.getCustom1() + ","
+					+ mparam.getCustom2() + ","
+					+ mparam.getCustom3() + ","
+					+ mparam.getBoxId() + ","
+					+ logTime
+					+ "\r\n";
 		return ret;
 	}
 	/**
 	 * 创建日志
 	 */
-	private void createfile() {
+	private void createFile() {
 		try {
 			String roomId = session.getRoomId();
 			String boiteid = session.getBoiteId();
@@ -142,29 +187,16 @@ public class LogProduceService {
 			if (TextUtils.isEmpty(roomId)
 					||TextUtils.isEmpty(boiteid)
 					||TextUtils.isEmpty(boxId)){
-				producing = false;
 					return;
 			}
 			String time = AppUtils.getTime("hour");
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
-			logFileName = boxId + "_" + time + ".blog";
 			logTime = time;
-			mwriter = new FileWriter(path + logFileName,true);
+			mLogWriter = new FileWriter(path + boxId + "_" + time + ".blog",true);
+			mRstrLogWriter = new FileWriter(path + boxId + "_" + time + "-RSTR.blog",true);
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		if (mwriter!=null){
-			producing = true;
-		}else {
-			producing = false;
-		}
-	}
-	
-	public void stop() {
-		LogUtils.i("stop");
-		producing = false;
-
 	}
 
 

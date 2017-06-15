@@ -53,6 +53,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_IS_FROM_WEB = "extra_is_from_web";
     public static final String EXTRA_PROJECT_ACTION = "extra_project_action";
     public static final String EXTRA_PPT_CONFIG = "extra_ppt_config";
+    public static final String EXTRA_IS_NEW_DEVICE = "extra_is_new_device";
 
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
@@ -88,6 +89,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      * 3：幻灯片图片；
      */
     private int mImageType;
+    private boolean mIsNewDevice;
 
     private Handler mHandler = new Handler();
 
@@ -288,6 +290,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
+        mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
@@ -412,20 +415,30 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
 
             mPptVp.setVisibility(View.VISIBLE);
-            mPptAdapter.setDataSource(mPptConfig.getImages());
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mPptAdapter.setDataSource(mPptConfig.getImages());
+            if (mPptVp.getChildCount() > 0) {
+                mPptVp.setCurrentItem(0);
+            }
             mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
             if (mPptConfig.getDuration() > 0) {
                 mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
             }
         }
 
-        if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
-            LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", mType, mMediaId,
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
-                    mInnerType);
+        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
+                    mPptConfig.getInterval(), mInnerType, "", "", "");
+        } else {
+            if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
+                LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "start", mType, mMediaId,
+                        GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                        mInnerType);
+            }
         }
 
         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
@@ -449,15 +462,28 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public void setNewProjection(Bundle bundle) {
         String lastProjectType = mProjectType;
         String lastMediaId = mMediaId;
+        PptRequestVo lastPptConfig =  mPptConfig;
 
         handleBundleData(bundle);
 
-        // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
-        if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
-            LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mType, lastMediaId,
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(),
-                    mSession.getVodPeriod(), mInnerType);
+        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && lastPptConfig != null) {
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "break", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(lastPptConfig.getDuration()), lastPptConfig.getImages().size(),
+                    lastPptConfig.getInterval(), mInnerType, "", "", "");
+        } else {
+            // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
+            if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
+                LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "end", mType, lastMediaId,
+                        GlobalValues.CURRENT_PROJECT_DEVICE_ID, mSession.getVersionName(), mSession.getAdsPeriod(),
+                        mSession.getVodPeriod(), mInnerType);
+            }
+        }
+
+        if (mIsNewDevice) {
+            projectTipAnimateIn();
+            mUUID = null;
         }
 
         // 如果上一次是点播，把UUID清空以便后面生成新的
@@ -509,7 +535,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             }
             mInnerType = "video";
         } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
-            mType = "rstr-projection";
+            mType = "projection";
             mInnerType = "ppt";
         }
     }
@@ -858,10 +884,16 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mHandler.removeCallbacksAndMessages(null);
 
         // 记录业务日志
-        LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.LAST_PROJECT_DEVICE_ID,
-                mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(), mInnerType);
-
+        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", mType, GlobalValues.LAST_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
+                    mPptConfig.getInterval(), mInnerType, "", "", "");
+        } else {
+            LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.LAST_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(), mInnerType);
+        }
         // 释放资源
         mSavorVideoView.release();
         if (mImageView.getDrawable() != null) {

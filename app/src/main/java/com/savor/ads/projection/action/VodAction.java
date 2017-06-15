@@ -24,8 +24,9 @@ public class VodAction extends ProjectionActionBase implements Serializable {
     private String url;
     private int position;
     private boolean isFromWeb;
+    private boolean isNewDevice;
 
-    public VodAction(Context context, String vid, String url, int position, boolean isFromWeb) {
+    public VodAction(Context context, String vid, String url, int position, boolean isFromWeb, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
@@ -34,6 +35,7 @@ public class VodAction extends ProjectionActionBase implements Serializable {
         this.url = url;
         this.position = position;
         this.isFromWeb = isFromWeb;
+        this.isNewDevice = isNewDevice;
     }
 
     @Override
@@ -47,6 +49,7 @@ public class VodAction extends ProjectionActionBase implements Serializable {
         data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
         data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_FROM_WEB, isFromWeb);
+        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, isNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
 
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();

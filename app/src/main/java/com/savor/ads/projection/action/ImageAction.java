@@ -23,8 +23,9 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
     private int rotation;
     private boolean isThumbnail;
     private String seriesId;
+    private boolean isNewDevice;
 
-    public ImageAction(Context context, int imageType, int rotation, boolean isThumbnail, String seriesId) {
+    public ImageAction(Context context, int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
@@ -33,6 +34,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.rotation = rotation;
         this.isThumbnail = isThumbnail;
         this.seriesId = seriesId;
+        this.isNewDevice = isNewDevice;
     }
 
     @Override
@@ -46,6 +48,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
         data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, seriesId);
+        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, isNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {

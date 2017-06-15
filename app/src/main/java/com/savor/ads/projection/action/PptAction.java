@@ -22,13 +22,15 @@ public class PptAction extends ProjectionActionBase implements Serializable {
 
     private transient Context mContext;
     private PptRequestVo pptRequestVo;
+    private boolean isNewDevice;
 
-    public PptAction(Context mContext, PptRequestVo pptRequestVo) {
+    public PptAction(Context mContext, PptRequestVo pptRequestVo, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         this.mContext = mContext;
         this.pptRequestVo = pptRequestVo;
+        this.isNewDevice = isNewDevice;
     }
 
     @Override
@@ -39,6 +41,7 @@ public class PptAction extends ProjectionActionBase implements Serializable {
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_RSTR_PPT);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PPT_CONFIG, pptRequestVo);
+        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, isNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {

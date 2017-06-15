@@ -1,7 +1,7 @@
 package com.savor.ads.log;
 
 
-public class LogReportParam {
+public class RestaurantLogBean {
     /**
      * 视频UUID
      */
@@ -23,21 +23,17 @@ public class LogReportParam {
      */
     private String room_id;
     /**
-     * 媒体文件ID
-     */
-    private String media_id = "";
-    /**
      * 日志时间
      */
     private String time = "";
     /**
      * 动作
      */
-    private String action = "";//"poweron","start","pause","resume","end"
+    private String action = "";
     /**
      * 视频类型
      */
-    private String type = "";//"Ads","TV","Phone"
+    private String type = "";
     /**
      * 手机ID
      */
@@ -47,19 +43,33 @@ public class LogReportParam {
      */
     private String apk_version;
     /**
-     * 广告视频期号
+     * 预留参数一
      */
-    private String adsPeriod;
+    private String custom1;
     /**
-     * 点播视频期号
+     * 预留参数二
      */
-    private String vodPeriod;
+    private String custom2;
     /**
-     * 通用参数
+     * 预留参数三
      */
-    private String custom;
+    private String custom3;
+    /**
+     * 媒体时长
+     */
+    private String duration;
+    /**
+     * 幻灯片间隔
+     */
+    private int pptInterval;
+    /**
+     * 幻灯片图片数
+     */
+    private int pptSize;
 
-    public LogReportParam() {
+    private String innerType;
+
+    public RestaurantLogBean() {
         time = System.currentTimeMillis() + "";
     }
 
@@ -85,14 +95,6 @@ public class LogReportParam {
 
     public void setUUid(String UUid) {
         this.UUid = UUid;
-    }
-
-    public String getMedia_id() {
-        return media_id == null ? "" : media_id;
-    }
-
-    public void setMedia_id(String media_id) {
-        this.media_id = media_id;
     }
 
     public String getTime() {
@@ -135,28 +137,12 @@ public class LogReportParam {
         this.apk_version = apk_version;
     }
 
-    public String getAdsPeriod() {
-        return adsPeriod == null ? "" : adsPeriod;
+    public String getCustom1() {
+        return custom1 == null ? "" : custom1;
     }
 
-    public void setAdsPeriod(String adsPeriod) {
-        this.adsPeriod = adsPeriod;
-    }
-
-    public String getVodPeriod() {
-        return vodPeriod == null ? "" : vodPeriod;
-    }
-
-    public void setVodPeriod(String vodPeriod) {
-        this.vodPeriod = vodPeriod;
-    }
-
-    public String getCustom() {
-        return custom == null ? "" : custom;
-    }
-
-    public void setCustom(String custom) {
-        this.custom = custom;
+    public void setCustom1(String custom1) {
+        this.custom1 = custom1;
     }
 
     public String getBoxId() {
@@ -173,5 +159,53 @@ public class LogReportParam {
 
     public void setLogHour(String logHour) {
         this.logHour = logHour;
+    }
+
+    public String getCustom2() {
+        return custom2;
+    }
+
+    public void setCustom2(String custom2) {
+        this.custom2 = custom2;
+    }
+
+    public String getCustom3() {
+        return custom3;
+    }
+
+    public void setCustom3(String custom3) {
+        this.custom3 = custom3;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public int getPptInterval() {
+        return pptInterval;
+    }
+
+    public void setPptInterval(int pptInterval) {
+        this.pptInterval = pptInterval;
+    }
+
+    public int getPptSize() {
+        return pptSize;
+    }
+
+    public void setPptSize(int pptSize) {
+        this.pptSize = pptSize;
+    }
+
+    public String getInnerType() {
+        return innerType;
+    }
+
+    public void setInnerType(String innerType) {
+        this.innerType = innerType;
     }
 }

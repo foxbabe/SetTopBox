@@ -22,14 +22,16 @@ public class VideoAction extends ProjectionActionBase implements Serializable {
     private transient Context mContext;
     private String videoPath;
     private int position;
+    private boolean isNewDevice;
 
-    public VideoAction(Context context, String videoPath, int position) {
+    public VideoAction(Context context, String videoPath, int position, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         mContext = context;
         this.videoPath = videoPath;
         this.position = position;
+        this.isNewDevice = isNewDevice;
     }
 
     @Override
@@ -41,6 +43,7 @@ public class VideoAction extends ProjectionActionBase implements Serializable {
         data.putString(ScreenProjectionActivity.EXTRA_URL, videoPath);
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO);
         data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
+        data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, isNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {

@@ -73,7 +73,7 @@ public class HeartbeatService extends IntentService {
             }
 
             // 检测时间是否到达凌晨2点整，去删除存本地的投屏文件
-            String time = AppUtils.getCurTime("hh:MM");
+            String time = AppUtils.getCurTime("hh:mm");
             if ("02:00".equals(time)) {
                 AppUtils.clearAllCache(this);
             }

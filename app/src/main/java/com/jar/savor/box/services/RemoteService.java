@@ -329,7 +329,7 @@ public class RemoteService extends Service {
                     if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                             deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
 
-                        BaseResponse object = RemoteService.listener.showVod(mediaName, type, position, isWebReq);
+                        BaseResponse object = RemoteService.listener.showVod(mediaName, type, position, isWebReq, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
                         if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                             GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                             GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
@@ -349,7 +349,7 @@ public class RemoteService extends Service {
                             resJson = new Gson().toJson(vo);
                         } else {
                             if (forceProject == 1) {
-                                BaseResponse object = RemoteService.listener.showVod(mediaName, type, position, isWebReq);
+                                BaseResponse object = RemoteService.listener.showVod(mediaName, type, position, isWebReq, true);
                                 if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                     // 通知上一个投屏者已被抢投
                                     if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP)) {
@@ -394,7 +394,7 @@ public class RemoteService extends Service {
                         VideoPrepareRequestVo req = (new Gson()).fromJson(reqJson, VideoPrepareRequestVo.class);
                         if (!TextUtils.isEmpty(req.getMediaPath())) {
 
-                            BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition());
+                            BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition(), TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
                             if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
@@ -424,7 +424,7 @@ public class RemoteService extends Service {
                                 VideoPrepareRequestVo req = (new Gson()).fromJson(reqJson, VideoPrepareRequestVo.class);
                                 if (!TextUtils.isEmpty(req.getMediaPath())) {
 
-                                    BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition());
+                                    BaseResponse object = RemoteService.listener.showVideo(req.getMediaPath(), req.getPosition(), true);
                                     if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                                         // 通知上一个投屏者已被抢投
                                         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP)) {
@@ -704,18 +704,63 @@ public class RemoteService extends Service {
                     FileUtils.write(path + req.getName() + ".cfg", reqJson);
 
                     if (isAllExist) {
-                        RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST);
 
-                        // 通知上一个投屏者已被抢投
-                        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
-                                !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
-                            AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                        try {
+                            forceProject = Integer.parseInt(request.getParameter("force"));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                         }
+                        if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
 
-                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                        GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
-                        AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+                            RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
+
+                            // 通知上一个投屏者已被抢投
+                            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                    !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                                AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                            }
+
+                            GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                            GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                            GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                            AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+                        } else {
+                            if (isWebReq || GlobalValues.IS_LOTTERY) {
+                                pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                if (GlobalValues.IS_LOTTERY) {
+                                    pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                } else {
+                                    pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                }
+                            } else {
+                                if (forceProject == 1) {
+                                    RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, true);
+
+                                    // 通知上一个投屏者已被抢投
+                                    if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                            !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                                        AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                                    }
+
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                                } else if (forceProject == -1) {
+                                    pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                    if (GlobalValues.IS_LOTTERY) {
+                                        pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                    } else {
+                                        pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                    }
+                                } else {
+                                    pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
+                                    pptResponse.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                }
+                            }
+                        }
                     }
 
                     resJson = new Gson().toJson(pptResponse);
@@ -745,6 +790,7 @@ public class RemoteService extends Service {
 
                         if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName) && bitmap != null) {
                             boolean foundConfig = false;
+                            // 查找、读取幻灯片配置
                             String deviceIdDirPath = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
                             if (GlobalValues.CURRENT_PPT_REQUEST == null || !GlobalValues.CURRENT_PPT_REQUEST.getName().equals(pptName)) {
                                 String configJson = FileUtils.read(deviceIdDirPath + pptName + ".cfg");
@@ -774,29 +820,47 @@ public class RemoteService extends Service {
                                 FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + fileName);
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
-                                if (isAllExist1) {
-                                    RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST);
-
-                                    // 通知上一个投屏者已被抢投
-                                    if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
-                                            !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
-                                        AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
-                                    }
-
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
-                                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
-                                }
-
                                 object = new BaseResponse();
                                 object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                                if (isAllExist1) {
+                                    if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                                        RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
+
+                                        // 通知上一个投屏者已被抢投
+                                        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                                !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                                            AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                                        }
+
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                                        AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                                    } else {
+                                        if (isWebReq || GlobalValues.IS_LOTTERY) {
+                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                            if (GlobalValues.IS_LOTTERY) {
+                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                            } else {
+                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                            }
+                                        } else {
+                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
+                                            object.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                        }
+                                    }
+                                }
                             } else {
                                 object = new BaseResponse();
                                 object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                             }
                         }
                     }
+
                     if (object == null) {
                         // 请求格式错误
                         object = new BaseResponse();
@@ -826,85 +890,6 @@ public class RemoteService extends Service {
                     break;
             }
             return resJson;
-        }
-
-        private void handleStreamImageProjection(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-            String responseJson = "";
-
-            MultipartConfigElement multipartConfigElement = new MultipartConfigElement((String) null);
-            request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, multipartConfigElement);
-            if (request.getParts() != null) {
-                PrepareRequestVo prepareRequest = new PrepareRequestVo();
-                Bitmap bitmap = null;
-                for (Part part : request.getParts()) {
-                    switch (part.getName()) {
-                        case "fileUpload":
-                            bitmap = BitmapFactory.decodeStream(part.getInputStream());
-                            break;
-                        case "deviceId":
-                            prepareRequest.setDeviceId(StringUtils.inputStreamToString(part.getInputStream()));
-                            break;
-                        case "deviceName":
-                            prepareRequest.setDeviceName(StringUtils.inputStreamToString(part.getInputStream()));
-                            break;
-                        case "isThumbnail":
-                            int isThumbnail = Integer.parseInt(StringUtils.inputStreamToString(part.getInputStream()));
-                            prepareRequest.setIsThumbnail(isThumbnail);
-                            break;
-                        case "imageId":
-                            prepareRequest.setImageId(StringUtils.inputStreamToString(part.getInputStream()));
-                            break;
-                    }
-                    part.delete();
-                }
-
-                if (!TextUtils.isEmpty(prepareRequest.getDeviceId()) &&
-                        (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                                prepareRequest.getDeviceId().equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID))) {
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = prepareRequest.getDeviceId();
-                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = prepareRequest.getDeviceName();
-                    BaseResponse object = null;
-                    if (bitmap != null) {
-                        boolean showImage = false;
-                        if (prepareRequest.getIsThumbnail() == 1) {
-                            // 缩略图
-                            GlobalValues.CURRENT_PROJECT_IMAGE_ID = prepareRequest.getImageId();
-                            showImage = true;
-                        } else {
-                            // 大图
-                            if (!TextUtils.isEmpty(prepareRequest.getImageId()) &&
-                                    prepareRequest.getImageId().equals(GlobalValues.CURRENT_PROJECT_IMAGE_ID)) {
-                                showImage = true;
-                            }
-                        }
-                        FileOutputStream outputStream = new FileOutputStream(AppUtils.getSDCardPath() + System.currentTimeMillis() + ".jpg");
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-
-                        if (showImage) {
-                            // 显示图片
-                            GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
-                            object = RemoteService.listener.showImage(1, 0, prepareRequest.getIsThumbnail() == 1, "");
-                            if (object.getResult() != ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
-                                GlobalValues.CURRENT_PROJECT_DEVICE_ID = null;
-                                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = null;
-                            }
-                        } else {
-                            // 图片被忽略
-                            object = new BaseResponse();
-                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_IMAGE_ID_CHECK_FAILED);
-                        }
-                    }
-                    responseJson = new Gson().toJson(object);
-                } else {
-                    BaseResponse vo = new BaseResponse();
-                    vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    vo.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                    responseJson = new Gson().toJson(vo);
-                }
-            }
-
-            LogUtils.d("返回结果:" + responseJson);
-            response.getWriter().println(responseJson);
         }
 
         private String handleStreamImageProjection(HttpServletRequest request, int imageType,
@@ -952,7 +937,7 @@ public class RemoteService extends Service {
 //                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                         // 显示图片
                         GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
-                        object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail), seriesId);
+                        object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail), seriesId, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
                     } else {
                         // 请求格式错误
                         object = new BaseResponse();
@@ -1020,7 +1005,7 @@ public class RemoteService extends Service {
 //                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                                 // 显示图片
                                 GlobalValues.CURRENT_PROJECT_BITMAP = bitmap;
-                                object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail), seriesId);
+                                object = RemoteService.listener.showImage(imageType, rotation, "1".equals(isThumbnail), seriesId, true);
                             } else {
                                 // 请求格式错误
                                 object = new BaseResponse();
