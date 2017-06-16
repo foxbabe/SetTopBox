@@ -64,13 +64,17 @@ public class IPEditText extends LinearLayout {
 						} else {
 							mText1 = s.toString().trim();
 							LogUtils.i("第一个edittext为"+mText1);
-							if (Integer.parseInt(mText1) > 255) {
-								Toast.makeText(context, "每一段IP不能大于255",
-										Toast.LENGTH_SHORT).show();
-								return;
+							try {
+								if (Integer.parseInt(mText1) > 255) {
+                                    Toast.makeText(context, "每一段IP不能大于255",
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+								mSecondIP.setFocusable(true);
+								mSecondIP.requestFocus();
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							mSecondIP.setFocusable(true);
-							mSecondIP.requestFocus();
 						}
 //						Editor editor = mPreferences.edit();
 //						editor.putInt("IP_FIRST", mText1.length());
@@ -111,13 +115,17 @@ public class IPEditText extends LinearLayout {
 							mText2 = s.toString().trim();
 						} else {
 							mText2 = s.toString().trim();
-							if (Integer.parseInt(mText2) > 255) {
-								Toast.makeText(context, "每一段IP不能大于255",
-										Toast.LENGTH_SHORT).show();
-								return;
+							try {
+								if (Integer.parseInt(mText2) > 255) {
+                                    Toast.makeText(context, "每一段IP不能大于255",
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+								mThirdIP.setFocusable(true);
+								mThirdIP.requestFocus();
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							mThirdIP.setFocusable(true);
-							mThirdIP.requestFocus();
 						}
 //						Editor editor = mPreferences.edit();
 //						editor.putInt("IP_SECOND", mText2.length());
@@ -171,13 +179,17 @@ public class IPEditText extends LinearLayout {
 							mText3 = s.toString().trim();
 						} else {
 							mText3 = s.toString().trim();
-							if (Integer.parseInt(mText3) > 255) {
-								Toast.makeText(context, "每一段IP不能大于255",
-										Toast.LENGTH_SHORT).show();
-								return;
+							try {
+								if (Integer.parseInt(mText3) > 255) {
+                                    Toast.makeText(context, "每一段IP不能大于255",
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+								mFourthIP.setFocusable(true);
+								mFourthIP.requestFocus();
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							mFourthIP.setFocusable(true);
-							mFourthIP.requestFocus();
 						}
 //						Editor editor = mPreferences.edit();
 //						editor.putInt("IP_THIRD", mText3.length());
@@ -226,10 +238,14 @@ public class IPEditText extends LinearLayout {
 				 */
 				if (s != null && s.length() > 0) {
 					mText4 = s.toString().trim();
-					if (Integer.parseInt(mText4) > 255) {
-						Toast.makeText(context, "每一段IP不能大于255", Toast.LENGTH_SHORT)
-						.show();
-						return;
+					try {
+						if (Integer.parseInt(mText4) > 255) {
+                            Toast.makeText(context, "每一段IP不能大于255", Toast.LENGTH_SHORT)
+                            .show();
+                            return;
+                        }
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
 					}
 //					Editor editor = mPreferences.edit();
 //					editor.putInt("IP_FOURTH", mText4.length());

@@ -12,7 +12,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:background="@null"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:textSize="35sp"
         android:text="">
         <requestFocus />
@@ -32,7 +32,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:background="@null"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:textSize="35sp"
         android:text="">
         <requestFocus />
@@ -52,7 +52,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:background="@null"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:textSize="35sp"
         android:text="">
     <requestFocus />
@@ -72,7 +72,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:background="@null"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:textSize="35sp"
         android:text="">
     <requestFocus />

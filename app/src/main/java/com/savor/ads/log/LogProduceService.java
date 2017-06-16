@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.FileWriter;
@@ -40,7 +41,7 @@ public class LogProduceService {
 					createFile();
 
 					while (true) {
-                        if (!logTime.equals(AppUtils.getTime("hour"))){
+                        if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getTime("hour"))){
                             break;
                         }
                         if (mLogWriter != null) {
@@ -181,19 +182,19 @@ public class LogProduceService {
 	 */
 	private void createFile() {
 		try {
-			String roomId = session.getRoomId();
-			String boiteid = session.getBoiteId();
-			String boxId = session.getEthernetMac();
-			if (TextUtils.isEmpty(roomId)
-					||TextUtils.isEmpty(boiteid)
-					||TextUtils.isEmpty(boxId)){
-					return;
-			}
+//			String roomId = session.getRoomId();
+//			String boiteid = session.getBoiteId();
+			String boxMac = session.getEthernetMac();
+//			if (TextUtils.isEmpty(roomId)
+//					||TextUtils.isEmpty(boiteid)
+//					||TextUtils.isEmpty(boxId)){
+//					return;
+//			}
 			String time = AppUtils.getTime("hour");
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
 			logTime = time;
-			mLogWriter = new FileWriter(path + boxId + "_" + time + ".blog",true);
-			mRstrLogWriter = new FileWriter(path + boxId + "_" + time + "-RSTR.blog",true);
+			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
+			mRstrLogWriter = new FileWriter(path + boxMac + "_" + time + ConstantValues.RSTR_LOG_SUFFIX + ".blog",true);
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}

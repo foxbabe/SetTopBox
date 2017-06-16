@@ -35,16 +35,27 @@ public class PptVpAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return pptImages == null ? 0 : pptImages.size();
+        if (pptImages == null) {
+            return 0;
+        } else {
+//            if (pptImages.size() == 1) {
+//                return 1;
+//            } else {
+//                return Integer.MAX_VALUE;
+//            }
+            return pptImages.size();
+        }
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
+//        position = position % pptImages.size();
         container.removeView(mViewList.get(position));
     }
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+//        position = position % pptImages.size();
         final View view = View.inflate(mContext, R.layout.view_image_item,
                 null);
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
@@ -67,6 +78,7 @@ public class PptVpAdapter extends PagerAdapter {
 
     public void setDataSource(ArrayList<PptImage> pptImages) {
         this.pptImages = pptImages;
+        mViewList.clear();
         notifyDataSetChanged();
     }
 }

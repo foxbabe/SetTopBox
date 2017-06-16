@@ -209,6 +209,6 @@ public class LogReportUtil {
         mLogEn.setCustom1(custom1);
         mLogEn.setCustom2(custom2);
         mLogEn.setCustom3(custom3);
-        offerRstr(mLogEn);
+//        offerRstr(mLogEn);
     }
 }

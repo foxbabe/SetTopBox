@@ -612,7 +612,7 @@ public class SavorVideoView extends RelativeLayout {
     private void stopInner() {
         LogUtils.w(TAG + "stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        if (isInPlaybackState()) {
+        if (isInPlaybackState() && mMediaPlayer != null) {
             mMediaPlayer.stop();
             mPlayState = MediaPlayerState.STOPPED;
         }
@@ -623,8 +623,12 @@ public class SavorVideoView extends RelativeLayout {
      */
     public void onPause() {
         if (mMediaPlayer != null) {
-            // 记录播放进度
-            mAssignedPlayPosition = mMediaPlayer.getCurrentPosition();
+            try {
+                // 记录播放进度
+                mAssignedPlayPosition = mMediaPlayer.getCurrentPosition();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -671,7 +675,9 @@ public class SavorVideoView extends RelativeLayout {
                 if (mMediaPlayer != null) {
                     stopInner();
 
-                    mMediaPlayer.release();
+                    if (mMediaPlayer != null) {
+                        mMediaPlayer.release();
+                    }
                     mPlayState = MediaPlayerState.END;
                     mMediaPlayer = null;
                 }

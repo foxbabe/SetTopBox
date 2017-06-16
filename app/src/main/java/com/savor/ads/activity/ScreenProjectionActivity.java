@@ -147,16 +147,16 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private Runnable mPPTPlayNextRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mPptVp != null && mPptVp.getChildCount() > 0 && mPptConfig != null) {
+            if (mPptVp != null && mPptAdapter.getCount() > 0 && mPptConfig != null) {
                 int newIndex = mPptVp.getCurrentItem() + 1;
-                if (newIndex >= mPptConfig.getImages().size()) {
+                if (newIndex >= mPptAdapter.getCount()) {
                     newIndex = 0;
                 }
 
                 if (mPptConfig.getDuration() <= 0 && newIndex == 0) {
                     mHandler.post(mPPTPlayFinishRunnable);
                 } else {
-                    mPptVp.setCurrentItem(newIndex, true);
+                    mPptVp.setCurrentItem(newIndex, newIndex != 0);
 
                     mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
                 }

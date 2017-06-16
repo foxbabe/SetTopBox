@@ -14,6 +14,7 @@ import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
@@ -150,6 +151,11 @@ public class LogUploadService {
         File[] files = getAllLogInfo(AppUtils.StorageFile.log);
         if (files != null && files.length > 0) {
             for (File file : files) {
+                if (file.isFile() && file.length() <= 0) {
+                    file.delete();
+                    continue;
+                }
+
                 final String name = file.getName();
                 final String path = file.getPath();
                 if (file.isFile()) {
@@ -157,23 +163,31 @@ public class LogUploadService {
                     if (split.length != 2) {
                         continue;
                     }
-                    final String time = split[1].substring(0, split[1].length() - 5);
+                    final String time = split[1].substring(0, 10);
                     if (time.equals(AppUtils.getTime("hour"))) {
                         continue;
                     }
                     final String archive = path + ".zip";
 
-                    if (/*!TextUtils.isEmpty(session.getOss_bucket())
-                            &&*/!TextUtils.isEmpty(session.getOss_file_path())) {
+                    if (!TextUtils.isEmpty(session.getOss_file_path())) {
 
+                        File sourceFile = new File(path);
+                        final File zipFile = new File(archive);
                         try {
-                            AppUtils.zipFile(new File(path), new File(archive), name + ".zip");
+                            AppUtils.zipFile(sourceFile, zipFile, name + ".zip");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        if (new File(archive).exists()) {
+                        if (zipFile.exists()) {
                             final String object_key = archive.substring(1, archive.length());
-                            String oss_file_path = session.getOss_file_path() + name + ".zip";
+                            String oss_file_path = null;
+                            if (name.contains(ConstantValues.RSTR_LOG_SUFFIX)) {
+                                oss_file_path =  session.getOss_file_path() + "restaurant" + File.separator +
+                                        name.replace(ConstantValues.RSTR_LOG_SUFFIX, "") + ".zip";
+                            } else {
+                                oss_file_path = session.getOss_file_path() + name + ".zip";
+                            }
+
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
                                     oss_file_path,
@@ -184,13 +198,12 @@ public class LogUploadService {
                                             if (flag) {
                                                 afterOSSUpload(name, time);
                                             }
-                                            if (new File(archive).exists()) {
-                                                new File(archive).delete();
+                                            if (zipFile.exists()) {
+                                                zipFile.delete();
                                             }
                                         }
                                     }).resumableUpload();
                         }
-
                     }
                 }
             }
