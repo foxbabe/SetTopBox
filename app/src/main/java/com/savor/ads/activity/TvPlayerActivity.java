@@ -283,6 +283,8 @@ public class TvPlayerActivity extends BaseActivity {
             } else {
                 initCurrentProgram();
             }
+
+            GlobalValues.IS_BOX_BUSY = false;
         }
     };
 
@@ -327,6 +329,7 @@ public class TvPlayerActivity extends BaseActivity {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
                     LogUtils.d("mChannelSearchingDialog onDismiss");
+                    GlobalValues.IS_BOX_BUSY = false;
                     mTvOperate.interruptTuning();
                 }
             });
@@ -591,8 +594,11 @@ public class TvPlayerActivity extends BaseActivity {
                         e.printStackTrace();
                     }
 
+                    boolean delayReleaseBusy = mIsAutoTurning;
                     init();
-                    GlobalValues.IS_BOX_BUSY = false;
+                    if (!delayReleaseBusy) {
+                        GlobalValues.IS_BOX_BUSY = false;
+                    }
                 }
             }).start();
 //            mHandler.postDelayed(new Runnable() {

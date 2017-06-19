@@ -5,9 +5,13 @@ import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.savor.ads.R;
 import com.savor.ads.bean.PptImage;
+import com.savor.ads.customview.CircleProgressBar;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
@@ -17,9 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
+ * 幻灯片投屏ViewPager Adapter
  * Created by zhang.haiqiang on 2017/6/13.
  */
-
 public class PptVpAdapter extends PagerAdapter {
 
     private Context mContext;
@@ -27,10 +31,13 @@ public class PptVpAdapter extends PagerAdapter {
 
     private HashMap<Integer, View> mViewList;
 
-    public PptVpAdapter(Context mContext, ArrayList<PptImage> pptImages) {
+    private ImageLoadCallback imageLoadCallback;
+
+    public PptVpAdapter(Context mContext, ArrayList<PptImage> pptImages, ImageLoadCallback imageLoadCallback) {
         this.mContext = mContext;
         this.pptImages = pptImages;
         mViewList = new HashMap<Integer, View>();
+        this.imageLoadCallback = imageLoadCallback;
     }
 
     @Override
@@ -54,13 +61,29 @@ public class PptVpAdapter extends PagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(ViewGroup container, final int position) {
 //        position = position % pptImages.size();
         final View view = View.inflate(mContext, R.layout.view_image_item,
                 null);
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
+        final RelativeLayout loadingRl = (RelativeLayout) view.findViewById(R.id.rl_loading_tip);
         String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID + File.separator + pptImages.get(position).getName();
-        GlideImageLoader.loadImage(mContext, path, imageView, 0, 0);
+        loadingRl.setVisibility(View.VISIBLE);
+        GlideImageLoader.loadImage(mContext, path, imageView, 0, 0, new RequestListener() {
+            @Override
+            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+                loadingRl.setVisibility(View.GONE);
+                imageLoadCallback.onLoadDone(position, false);
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                loadingRl.setVisibility(View.GONE);
+                imageLoadCallback.onLoadDone(position, true);
+                return false;
+            }
+        });
         mViewList.put(position, view);
         container.addView(view);
         return view;
@@ -80,5 +103,9 @@ public class PptVpAdapter extends PagerAdapter {
         this.pptImages = pptImages;
         mViewList.clear();
         notifyDataSetChanged();
+    }
+
+    public interface ImageLoadCallback {
+        void onLoadDone(int position, boolean success);
     }
 }

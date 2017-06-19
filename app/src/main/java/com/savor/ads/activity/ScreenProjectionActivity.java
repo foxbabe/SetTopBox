@@ -38,10 +38,11 @@ import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.ShowMessage;
 
 import java.util.ArrayList;
 
-public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener {
+public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener, PptVpAdapter.ImageLoadCallback, ViewPager.OnPageChangeListener {
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
@@ -157,8 +158,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                     mHandler.post(mPPTPlayFinishRunnable);
                 } else {
                     mPptVp.setCurrentItem(newIndex, newIndex != 0);
-
-                    mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
                 }
             }
         }
@@ -210,6 +209,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private ProjectionActionBase mProjectAction;
     private PptRequestVo mPptConfig;
     private PptVpAdapter mPptAdapter;
+    private int[] mPptImgStates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,8 +245,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSavorVideoView.setLooping(false);
         mSavorVideoView.setPlayStateCallback(mPlayStateCallback);
 
-        mPptAdapter = new PptVpAdapter(this, null);
+        mPptAdapter = new PptVpAdapter(this, null, this);
         mPptVp.setAdapter(mPptAdapter);
+        mPptVp.addOnPageChangeListener(this);
     }
 
     private void init() {
@@ -421,7 +422,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             if (mPptVp.getChildCount() > 0) {
                 mPptVp.setCurrentItem(0);
             }
-            mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+            mPptImgStates = new int[mPptConfig.getImages().size()];
+
             if (mPptConfig.getDuration() > 0) {
                 mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
             }
@@ -462,7 +464,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public void setNewProjection(Bundle bundle) {
         String lastProjectType = mProjectType;
         String lastMediaId = mMediaId;
-        PptRequestVo lastPptConfig =  mPptConfig;
+        PptRequestVo lastPptConfig = mPptConfig;
 
         handleBundleData(bundle);
 
@@ -961,7 +963,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     public void onSuccess(AppApi.Action method, Object obj) {
         ProjectionManager.log("Notify stop success");
-        LogUtils.d("Notify stop response: "+obj);
+        LogUtils.d("Notify stop response: " + obj);
     }
 
     @Override
@@ -972,5 +974,47 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     public void onNetworkFailed(AppApi.Action method) {
         ProjectionManager.log("Notify stop network failed");
+    }
+
+    @Override
+    public void onLoadDone(int position, boolean success) {
+        if (mPptConfig == null) {
+            return;
+        }
+
+        if (mPptImgStates != null && mPptImgStates.length > position) {
+            mPptImgStates[position] = success ? 1 : -1;
+        }
+
+        if (mPptVp.getCurrentItem() == position) {
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+        }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        if (mPptImgStates != null && mPptImgStates.length > position) {
+            if (mPptImgStates[position] != 0) {
+                // 图片加载结束
+                mHandler.removeCallbacks(mPPTPlayNextRunnable);
+                mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+            } else if (mPptImgStates[position] == -1) {
+                // 图片加载失败
+                ShowMessage.showToast(mContext, "图片加载失败，自动播放下一张");
+                mHandler.removeCallbacks(mPPTPlayNextRunnable);
+                mHandler.post(mPPTPlayNextRunnable);
+            }
+        }
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

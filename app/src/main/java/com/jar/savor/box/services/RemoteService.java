@@ -685,17 +685,17 @@ public class RemoteService extends Service {
                     boolean isAllExist = true;
                     if (!deviceIdDir.exists()) {
                         deviceIdDir.mkdirs();
-                    } else {
-                        if (pptResponse.getImages() != null) {
-                            for (PptImage pptImage :
-                                    pptResponse.getImages()) {
-                                File imgFile = new File(path + pptImage.getName());
-                                if (imgFile.exists()) {
-                                    pptImage.setExist(1);
-                                } else {
-                                    pptImage.setExist(0);
-                                    isAllExist = false;
-                                }
+                    }
+
+                    if (pptResponse.getImages() != null) {
+                        for (PptImage pptImage :
+                                pptResponse.getImages()) {
+                            File imgFile = new File(path + pptImage.getName());
+                            if (imgFile.exists()) {
+                                pptImage.setExist(1);
+                            } else {
+                                pptImage.setExist(0);
+                                isAllExist = false;
                             }
                         }
                     }
@@ -712,8 +712,7 @@ public class RemoteService extends Service {
                         }
                         if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                                 deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
-
-                            RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
+                            boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                             // 通知上一个投屏者已被抢投
                             if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
@@ -725,6 +724,8 @@ public class RemoteService extends Service {
                             GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                             GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                             AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                            RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, isNewDevice);
                         } else {
                             if (isWebReq || GlobalValues.IS_LOTTERY) {
                                 pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -735,7 +736,6 @@ public class RemoteService extends Service {
                                 }
                             } else {
                                 if (forceProject == 1) {
-                                    RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, true);
 
                                     // 通知上一个投屏者已被抢投
                                     if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
@@ -748,6 +748,7 @@ public class RemoteService extends Service {
                                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
+                                    RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, true);
                                 } else if (forceProject == -1) {
                                     pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                                     if (GlobalValues.IS_LOTTERY) {
@@ -826,7 +827,7 @@ public class RemoteService extends Service {
                                 if (isAllExist1) {
                                     if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                                             deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                        RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID));
+                                        boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                                         // 通知上一个投屏者已被抢投
                                         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
@@ -838,6 +839,8 @@ public class RemoteService extends Service {
                                         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                                        RemoteService.listener.showPpt(deviceId, GlobalValues.CURRENT_PPT_REQUEST, isNewDevice);
 
                                         object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                                     } else {
