@@ -283,6 +283,8 @@ public class MainActivity extends BaseActivity {
         if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
             dateStr = lastStartStr.split(" ")[0];
         }
+        LogFileUtil.write("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
+        LogUtils.d("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
         if (!curTimeStr.equals(dateStr)) {
             AppUtils.clearAllCache(this);
         }

@@ -359,7 +359,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
-            mSavorVideoView.release();
+//            mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list, 0, mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType)) {
             // 视频投屏
@@ -371,7 +371,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
-            mSavorVideoView.release();
+//            mSavorVideoView.release();
             mSavorVideoView.setMediaFiles(list, 0, mVideoInitPosition * 1000);
         } else if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType)) {
             // 图片投屏

@@ -701,7 +701,7 @@ public class RemoteService extends Service {
                     }
 
                     // 将配置信息存文件
-                    FileUtils.write(path + req.getName() + ".cfg", reqJson);
+                    FileUtils.write(path + req.getName() + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
 
                     if (isAllExist) {
 
