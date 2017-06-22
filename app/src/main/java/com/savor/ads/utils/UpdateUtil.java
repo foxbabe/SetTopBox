@@ -80,6 +80,13 @@ public class UpdateUtil implements ApiRequestListener {
     }
 
     private static boolean updateApk() {
+        File downloadedFile = new File("/mnt/sdcard/updateapksamples.apk");
+        if (downloadedFile.length() <= 0) {
+            downloadedFile.delete();
+            LogFileUtil.writeException(new Throwable("apk update fatal, updateapksamples.apk length is 0"));
+            return false;
+        }
+
         boolean isflag = false;
         try {
             Process proc = Runtime.getRuntime().exec("su");
@@ -90,13 +97,19 @@ public class UpdateUtil implements ApiRequestListener {
                     dos.flush();
                     dos.writeBytes("cat /mnt/sdcard/updateapksamples.apk > /system/app/1.apk\n");
                     dos.flush();
-                    dos.writeBytes("rm -r /mnt/sdcard/updateapksamples.apk\n");
-                    dos.flush();
-                    dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
-                    dos.flush();
-                    dos.writeBytes("reboot\n");
-                    dos.flush();
-                    isflag = true;
+                    File file1 = new File("/system/app/1.apk");
+                    if (file1.length() > 0) {
+                        dos.writeBytes("rm -r /mnt/sdcard/updateapksamples.apk\n");
+                        dos.flush();
+                        dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
+                        dos.flush();
+                        dos.writeBytes("reboot\n");
+                        dos.flush();
+                        isflag = true;
+                    } else {
+                        file1.delete();
+                        LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {

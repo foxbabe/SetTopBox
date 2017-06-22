@@ -988,7 +988,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
         if (mPptVp.getCurrentItem() == position) {
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
-            mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+            if (success) {
+                mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+            } else {
+                ShowMessage.showToast(mContext, "图片加载失败，自动播放下一张");
+                mHandler.post(mPPTPlayNextRunnable);
+            }
         }
     }
 
@@ -1000,7 +1005,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     public void onPageSelected(int position) {
         if (mPptImgStates != null && mPptImgStates.length > position) {
-            if (mPptImgStates[position] != 0) {
+            if (mPptImgStates[position] == 1) {
                 // 图片加载结束
                 mHandler.removeCallbacks(mPPTPlayNextRunnable);
                 mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
@@ -1012,6 +1017,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             }
         }
     }
+
 
     @Override
     public void onPageScrollStateChanged(int state) {

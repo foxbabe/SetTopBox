@@ -68,7 +68,7 @@ public class PptVpAdapter extends PagerAdapter {
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
         final RelativeLayout loadingRl = (RelativeLayout) view.findViewById(R.id.rl_loading_tip);
         String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID +
-                File.separator + AppUtils.getMD5(pptImages.get(position).getName());
+                File.separator + pptImages.get(position).getName();
         loadingRl.setVisibility(View.VISIBLE);
         GlideImageLoader.loadImage(mContext, path, imageView, 0, 0, new RequestListener() {
             @Override

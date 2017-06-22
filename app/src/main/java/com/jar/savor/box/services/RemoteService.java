@@ -690,7 +690,7 @@ public class RemoteService extends Service {
                     if (pptResponse.getImages() != null) {
                         for (PptImage pptImage :
                                 pptResponse.getImages()) {
-                            File imgFile = new File(path + AppUtils.getMD5(pptImage.getName()));
+                            File imgFile = new File(path + pptImage.getName());
                             if (imgFile.exists()) {
                                 pptImage.setExist(1);
                             } else {
@@ -818,7 +818,7 @@ public class RemoteService extends Service {
                                     }
                                 }
 
-                                FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + AppUtils.getMD5(fileName));
+                                FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + fileName);
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
                                 object = new BaseResponse();
