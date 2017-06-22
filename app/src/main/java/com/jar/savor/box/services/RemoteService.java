@@ -690,7 +690,7 @@ public class RemoteService extends Service {
                     if (pptResponse.getImages() != null) {
                         for (PptImage pptImage :
                                 pptResponse.getImages()) {
-                            File imgFile = new File(path + pptImage.getName());
+                            File imgFile = new File(path + AppUtils.getMD5(pptImage.getName()));
                             if (imgFile.exists()) {
                                 pptImage.setExist(1);
                             } else {
@@ -701,7 +701,7 @@ public class RemoteService extends Service {
                     }
 
                     // 将配置信息存文件
-                    FileUtils.write(path + req.getName() + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
+                    FileUtils.write(path + AppUtils.getMD5(req.getName()) + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
 
                     if (isAllExist) {
 
@@ -794,7 +794,7 @@ public class RemoteService extends Service {
                             // 查找、读取幻灯片配置
                             String deviceIdDirPath = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
                             if (GlobalValues.CURRENT_PPT_REQUEST == null || !GlobalValues.CURRENT_PPT_REQUEST.getName().equals(pptName)) {
-                                String configJson = FileUtils.read(deviceIdDirPath + pptName + ".cfg");
+                                String configJson = FileUtils.read(deviceIdDirPath + AppUtils.getMD5(pptName) + ".cfg");
                                 if (!TextUtils.isEmpty(configJson)) {
                                     GlobalValues.CURRENT_PPT_REQUEST = new Gson().fromJson(configJson, PptRequestVo.class);
                                     foundConfig = true;
@@ -810,7 +810,7 @@ public class RemoteService extends Service {
                                 for (PptImage pptImage : GlobalValues.CURRENT_PPT_REQUEST.getImages()) {
                                     if (fileName.equals(pptImage.getName())) {
                                         pptImage.setExist(1);
-                                        FileUtils.write(deviceIdDirPath + pptName + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
+                                        FileUtils.write(deviceIdDirPath + AppUtils.getMD5(pptName) + ".cfg", new Gson().toJson(GlobalValues.CURRENT_PPT_REQUEST));
                                     }
 
                                     if (pptImage.getExist() != 1) {
@@ -818,7 +818,7 @@ public class RemoteService extends Service {
                                     }
                                 }
 
-                                FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + fileName);
+                                FileOutputStream outputStream = new FileOutputStream(deviceIdDirPath + AppUtils.getMD5(fileName));
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
                                 object = new BaseResponse();

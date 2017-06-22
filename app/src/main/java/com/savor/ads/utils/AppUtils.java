@@ -614,6 +614,7 @@ public class AppUtils {
                     }
                 }
 
+                // 删除幻灯片文件
                 String pptPath = getFilePath(context, StorageFile.ppt);
                 File pptDirectory = new File(pptPath);
                 if (pptDirectory.exists()) {
@@ -625,6 +626,22 @@ public class AppUtils {
                         }
                     }
                 }
+
+                // 删除sdcard中form表单处理可能遗留的临时文件
+                String sdcardPath = getExternalSDCardPath();
+                File sdcardDirectory = new File(sdcardPath);
+                if (sdcardDirectory.exists()) {
+                    File[] files = sdcardDirectory.listFiles();
+
+                    if (files != null) {
+                        for (File file : files) {
+                            if (file.isFile() && file.getName().startsWith("MultiPart")) {
+                                com.savor.ads.utils.FileUtils.deleteFile(file);
+                            }
+                        }
+                    }
+                }
+
             }
         };
         clearTask.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
