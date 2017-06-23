@@ -281,11 +281,12 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
     }
 
     private void randomFrameCount() {
-        Random random = new Random();
-        mLastFrameCount = random.nextInt(4);
-        if (mLastFrameCount == 0) {
-            mLastFrameCount++;
-        }
+//        Random random = new Random();
+//        mLastFrameCount = random.nextInt(4);
+//        if (mLastFrameCount == 0) {
+//            mLastFrameCount++;
+//        }
+        mLastFrameCount = EGG_FRAMES.length;
     }
 
     @Override
@@ -312,7 +313,6 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
 
             mCurrentFrame += mLastFrameCount;
             if (mCurrentFrame >= EGG_FRAMES.length) {
-//                mCurrentFrame = MAX_FRAME;
 
                 mPrizeTime = new Date();
                 checkIfWin();
@@ -333,8 +333,6 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
             responseVo.setDone(0);
         } else {
             responseVo.setDone(1);
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            responseVo.setPrize_time(simpleDateFormat.format(mPrizeTime));
             responseVo.setPrize_time("" + mPrizeTime.getTime());
             if (mPrizeHit != null) {
                 responseVo.setWin(1);

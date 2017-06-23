@@ -195,7 +195,7 @@ public class LogProduceService {
 			logTime = time;
 			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
 			mRstrLogWriter = new FileWriter(path + boxMac + "_" + time + ConstantValues.RSTR_LOG_SUFFIX + ".blog",true);
-		} catch (IOException e2) {
+		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
 	}
