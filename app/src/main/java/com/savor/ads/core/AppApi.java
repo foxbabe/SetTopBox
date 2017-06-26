@@ -11,6 +11,7 @@ import com.savor.ads.bean.AtvProgramRequestBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.FileUtils;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 import org.json.JSONArray;
@@ -178,12 +179,17 @@ public class AppApi {
      */
     public static void downVersion(String url,Context context, ApiRequestListener handler,int type){
         try{
-            String target= AppUtils.getSDCardPath();
+            String target= AppUtils.getExternalSDCardPath();//AppUtils.getSDCardPath();
+            if (TextUtils.isEmpty(target)) {
+                LogFileUtil.write("External SD is not exist, download canceled");
+                return;
+            }
+
             String targetApk = null;
             if (type==1){
-                targetApk=target+ROM_DOWNLOAD_FILENAME;
+                targetApk=target + File.separator + ROM_DOWNLOAD_FILENAME;
             }else{
-                targetApk=target+APK_DOWNLOAD_FILENAME;
+                targetApk=target + File.separator + APK_DOWNLOAD_FILENAME;
             }
 
             File tarFile =new File(targetApk);

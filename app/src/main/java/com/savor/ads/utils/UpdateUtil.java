@@ -45,26 +45,27 @@ public class UpdateUtil implements ApiRequestListener {
         }
     }
 
-    private static boolean updateRom() {
+    private static boolean updateRom(File file) {
 
         boolean isflag = false;
         try {
+            String sourcePath = file.getPath();
             Process proc = Runtime.getRuntime().exec("su");
             DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
-            if (dos != null) {
-                try {
+            try {
 
-                    dos.writeBytes("cat /mnt/sdcard/update_signed.zip > /cache/download/update_signed.zip\n");
-                    dos.flush();
-                    dos.writeBytes("exit\n");
-                    dos.flush();
-                    isflag = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    dos.close();
-                }
+                String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
+                dos.writeBytes(catCommand);
+                dos.flush();
+                dos.writeBytes("exit\n");
+                dos.flush();
+                isflag = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                dos.close();
             }
+
             try {
                 proc.waitFor();
             } catch (InterruptedException e) {
@@ -79,43 +80,48 @@ public class UpdateUtil implements ApiRequestListener {
 
     }
 
-    private static boolean updateApk() {
-        File downloadedFile = new File("/mnt/sdcard/updateapksamples.apk");
-        if (downloadedFile.length() <= 0) {
-            downloadedFile.delete();
+    private static void updateApk(File file) {
+        if (file.length() <= 0) {
+            file.delete();
             LogFileUtil.writeException(new Throwable("apk update fatal, updateapksamples.apk length is 0"));
-            return false;
+            return;
         }
 
         boolean isflag = false;
         try {
             Process proc = Runtime.getRuntime().exec("su");
             DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
-            if (dos != null) {
-                try {
-                    dos.writeBytes("mount -o remount rw /system\n");
+            try {
+                dos.writeBytes("mount -o remount rw /system\n");
+                dos.flush();
+                String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
+                dos.writeBytes(catCommand);
+                dos.flush();
+
+                Thread.sleep(5000);
+                File file1 = new File("/system/app/1.apk");
+                if (file1.length() > 0) {
+                    dos.writeBytes("rm -r " + file.getPath() +"\n");
                     dos.flush();
-                    dos.writeBytes("cat /mnt/sdcard/updateapksamples.apk > /system/app/1.apk\n");
+                    dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
                     dos.flush();
-                    File file1 = new File("/system/app/1.apk");
-                    if (file1.length() > 0) {
-                        dos.writeBytes("rm -r /mnt/sdcard/updateapksamples.apk\n");
-                        dos.flush();
-                        dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
-                        dos.flush();
-                        dos.writeBytes("reboot\n");
-                        dos.flush();
-                        isflag = true;
-                    } else {
-                        file1.delete();
-                        LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    dos.close();
+                    Thread.sleep(1000);
+//                        dos.writeBytes("reboot\n");
+//                        dos.flush();
+                    isflag = true;
+                } else {
+                    file.delete();
+                    file1.delete();
+                    LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                dos.close();
             }
+
             try {
                 proc.waitFor();
             } catch (InterruptedException e) {
@@ -124,11 +130,13 @@ public class UpdateUtil implements ApiRequestListener {
 
             proc.destroy();
 
+            if (isflag) {
+                ShellUtils.reboot();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return isflag;
-
     }
 
     @Override
@@ -141,12 +149,7 @@ public class UpdateUtil implements ApiRequestListener {
                 }
                 break;
             case SP_GET_UPGRADEDOWN:
-                if (obj instanceof FileDownProgress) {
-                    FileDownProgress fs = (FileDownProgress) obj;
-                    long now = fs.getNow();
-                    long total = fs.getTotal();
-
-                } else if (obj instanceof File) {
+                if (obj instanceof File) {
                     File f = (File) obj;
                     byte[] fRead;
                     String md5Value = null;
@@ -154,43 +157,23 @@ public class UpdateUtil implements ApiRequestListener {
                         fRead = FileUtils.readFileToByteArray(f);
                         md5Value = AppUtils.getMD5(fRead);
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
+                    //比较本地文件MD5是否与服务器文件一致，如果一致则启动安装
                     String fileName = f.getName();
-                    String filePath = f.getPath();
-                    if (fileName.equals(AppApi.ROM_DOWNLOAD_FILENAME)) {
+                    if (AppApi.ROM_DOWNLOAD_FILENAME.equals(fileName)) {
                         if (md5Value != null && md5Value.equals(upgradeInfo.getRomMd5())) {
                             //升级ROM
-                            updateRom();
+                            updateRom(f);
                         }
-                    } else if (fileName.equals(AppApi.APK_DOWNLOAD_FILENAME)) {
+                    } else if (AppApi.APK_DOWNLOAD_FILENAME.equals(fileName)) {
                         if (md5Value != null && md5Value.equals(upgradeInfo.getApkMd5())) {
                             //升级APK
-                            updateApk();
+                            updateApk(f);
                         }
                     }
-
-
                 }
                 break;
-//				case SP_GET_LOGO_DOWN:
-//					if (obj instanceof FileDownProgress){
-//						FileDownProgress fs = (FileDownProgress) obj;
-//						long now = fs.getNow();
-//						long total = fs.getTotal();
-//
-//					}else if (obj instanceof File) {
-//						File f = (File) obj;
-//						byte[] fRead;
-//						String md5Value = AppUtils.getMD5Method(f);
-//						//比较本地文件版本是否与服务器文件一致，如果一致则启动安装
-//						if (md5Value!=null&&md5Value.equals(upgradeInfo.getLogo_md5())){
-//							ShellUtils.updateLogoPic(f.getAbsolutePath());
-//						}
-//					}
-//					break;
         }
     }
 
