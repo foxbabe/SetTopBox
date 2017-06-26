@@ -597,15 +597,16 @@ public class AppUtils {
         return mTime;// new Date()为获取当前系统时间
     }
 
-    public static void clearAllCache(final Context context) {
-
-        Thread clearTask = new Thread() {
+    public static void clearPptTmpFiles(final Context context) {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                String cachePath = getFilePath(context, StorageFile.cache);
-                File cacheDirectory = new File(cachePath);
-                if (cacheDirectory.exists()) {
-                    File[] files = cacheDirectory.listFiles();
+                // 删除幻灯片文件
+                String pptPath = getFilePath(context, StorageFile.ppt);
+                File pptDirectory = new File(pptPath);
+                if (pptDirectory.exists()) {
+                    LogFileUtil.write("clearAllCache will clear ppt dir");
+                    File[] files = pptDirectory.listFiles();
 
                     if (files != null) {
                         for (File file : files) {
@@ -613,12 +614,20 @@ public class AppUtils {
                         }
                     }
                 }
+            }
+        }).start();
+    }
 
-                // 删除幻灯片文件
-                String pptPath = getFilePath(context, StorageFile.ppt);
-                File pptDirectory = new File(pptPath);
-                if (pptDirectory.exists()) {
-                    File[] files = pptDirectory.listFiles();
+    public static void clearAllCache(final Context context) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String cachePath = getFilePath(context, StorageFile.cache);
+                File cacheDirectory = new File(cachePath);
+                if (cacheDirectory.exists()) {
+                    LogFileUtil.write("clearAllCache will clear cache dir");
+                    File[] files = cacheDirectory.listFiles();
 
                     if (files != null) {
                         for (File file : files) {
@@ -632,6 +641,7 @@ public class AppUtils {
                 if (!TextUtils.isEmpty(sdcardPath)) {
                     File sdcardDirectory = new File(sdcardPath);
                     if (sdcardDirectory.exists()) {
+                        LogFileUtil.write("clearAllCache will clear MultiPart files");
                         File[] files = sdcardDirectory.listFiles();
 
                         if (files != null) {
@@ -643,11 +653,8 @@ public class AppUtils {
                         }
                     }
                 }
-
             }
-        };
-        clearTask.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        clearTask.start();
+        }).start();
     }
 
     public static void clearAllFile(final Context context) {

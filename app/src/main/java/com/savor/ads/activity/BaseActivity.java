@@ -101,38 +101,15 @@ public abstract class BaseActivity extends Activity {
                 //U盘拔出
                 removeUSB(usbPath.split("file://")[1]);
             }
+
             String action = intent.getAction();
             String path = intent.getData().getPath();
-            if (Intent.ACTION_MEDIA_SCANNER_FINISHED.equals(action)) {
-                LogUtils.v("ACTION_MEDIA_SCANNER_FINISHED path:::::" + path);
-                if (path.contains("/mnt/usb/")) {
-                    // u 盘挂载成功
-                    //	mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDREMOVED);
-                    return;
-                } else if (path.contains("/mnt/extsd")) {
-
-//                    if (mHandler.hasMessages(AppUtils.MSG_WHAT_TO_SDMOUNTED))
-//                        mHandler.removeMessages(AppUtils.MSG_WHAT_TO_SDMOUNTED);
-//
-//                    mHandler.sendEmptyMessageDelayed(
-//                            AppUtils.MSG_WHAT_TO_SDMOUNTED, 5 * 1000);
-                } else {
-//                    if (isSDInfo) {
-//                        //	isSDInfo = true;
-//                        mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDCARDSTATUS);
-//                    }
-                }
-            } else if (Intent.ACTION_MEDIA_REMOVED.equals(action)
+            if (Intent.ACTION_MEDIA_REMOVED.equals(action)
                     || Intent.ACTION_MEDIA_UNMOUNTED.equals(action)
                     || Intent.ACTION_MEDIA_BAD_REMOVAL.equals(action)) {
                 if (path.contains("/mnt/extsd")) {//sd 卡拔除
-//                    AlarmUtil.SdRemove();、、、、、通过接口上传日志
-//                    mHandler.sendEmptyMessage(AppUtils.MSG_WHAT_TO_SDREMOVED);
                     handleSDCardRemoved();
-                    return;
                 }
-                return;
-            } else if (action.equals("android.net.conn.CONNECTIVITY_CHANGE")) {
             } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
                 if (path.contains("/mnt/extsd")) {
                     handleMediaMounted();
@@ -143,12 +120,29 @@ public abstract class BaseActivity extends Activity {
 
     private void handleMediaMounted() {
         TechnicalLogReporter.sdcardMounted(this);
+        checkAndClearCache();
+
 //        fillPlayList();
 
 //        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
 //            Intent intent = new Intent(this, AdsPlayerActivity.class);
 //            startActivity(intent);
 //        }
+    }
+
+    private void checkAndClearCache() {
+        AppUtils.clearAllCache(this);
+
+        String lastStartStr = mSession.getLastStartTime();
+        String curTimeStr = AppUtils.getCurTime(AppUtils.DATEFORMAT_YYMMDD);
+        String dateStr = null;
+        if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
+            dateStr = lastStartStr.split(" ")[0];
+        }
+        LogFileUtil.write("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
+        if (!curTimeStr.equals(dateStr)) {
+            AppUtils.clearPptTmpFiles(this);
+        }
     }
 
     protected void fillPlayList() {

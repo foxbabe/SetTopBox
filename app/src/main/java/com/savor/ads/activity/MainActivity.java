@@ -154,8 +154,6 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
-
-        checkAndClearCache();
     }
 
     /**
@@ -274,20 +272,6 @@ public class MainActivity extends BaseActivity {
         LogFileUtil.write("MainActivity will start LogUploadService");
         LogUploadService logUploadService = new LogUploadService(mContext);
         logUploadService.start();
-    }
-
-    private void checkAndClearCache() {
-        String lastStartStr = mSession.getLastStartTime();
-        String curTimeStr = AppUtils.getCurTime(AppUtils.DATEFORMAT_YYMMDD);
-        String dateStr = null;
-        if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
-            dateStr = lastStartStr.split(" ")[0];
-        }
-        LogFileUtil.write("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
-        LogUtils.d("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
-        if (!curTimeStr.equals(dateStr)) {
-            AppUtils.clearAllCache(this);
-        }
     }
 
     void initDisplay() {
