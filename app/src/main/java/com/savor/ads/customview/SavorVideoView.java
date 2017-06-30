@@ -23,6 +23,7 @@ import com.savor.ads.utils.LogUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
 /**
  * 公用的播放器类
  * Created by zhanghq on 2016/12/8.
@@ -33,7 +34,7 @@ public class SavorVideoView extends RelativeLayout {
     /**
      * MediaPlayer最大Prepare时间
      */
-    private static final int MAX_PREPARE_TIME = 1000 * 60 * 3;
+    private static final int MAX_PREPARE_TIME = 1000 * 20;
 
     private SurfaceView mSurfaceTv;
     private SurfaceHolder mSurfaceHolder;
@@ -80,6 +81,22 @@ public class SavorVideoView extends RelativeLayout {
      * Surface是否创建好了
      */
     private boolean mIsSurfaceCreated;
+
+    /**最大缓冲加载时间*/
+    private static final int MAX_BUFFER_TIME = 1000 * 10;
+    private Runnable mBufferTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mPlayStateCallback != null) {
+                boolean isLast = false;
+                if (mMediaFiles != null && mMediaFiles.size() > 0) {
+                    isLast = mCurrentFileIndex == mMediaFiles.size() - 1;
+                }
+                // 回调某个视频播放出错
+                mPlayStateCallback.onMediaError(mCurrentFileIndex, isLast);
+            }
+        }
+    };
 
     private PlayStateCallback mPlayStateCallback;
 
@@ -318,6 +335,20 @@ public class SavorVideoView extends RelativeLayout {
                     }
                 }
             });
+            mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                @Override
+                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                    LogUtils.w(TAG + "MediaPlayer setOnInfoListener" + " what=" + what + " extra=" + extra + " " + SavorVideoView.this.hashCode());
+                    LogFileUtil.write(TAG + "MediaPlayer setOnInfoListener" + " what=" + what + " extra=" + extra + " " + SavorVideoView.this.hashCode());
+                    if (MediaPlayer.MEDIA_INFO_BUFFERING_START == what) {
+                        mRootRl.removeCallbacks(mBufferTimeoutRunnable);
+                        mRootRl.postDelayed(mBufferTimeoutRunnable, MAX_BUFFER_TIME);
+                    } else if (MediaPlayer.MEDIA_INFO_BUFFERING_END == what) {
+                        mRootRl.removeCallbacks(mBufferTimeoutRunnable);
+                    }
+                    return false;
+                }
+            });
             mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -464,7 +495,7 @@ public class SavorVideoView extends RelativeLayout {
                 mProgressBar.setVisibility(VISIBLE);
             }
 
-            if (mIfHandlePrepareTimeout && mIsLooping) {
+            if (mIfHandlePrepareTimeout) {
                 removeCallbacks(mPrepareTimeoutRunnable);
                 postDelayed(mPrepareTimeoutRunnable, MAX_PREPARE_TIME);
             }
@@ -477,7 +508,18 @@ public class SavorVideoView extends RelativeLayout {
     private Runnable mPrepareTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            playNext();
+            if (mIsLooping) {
+                playNext();
+            } else {
+                if (mPlayStateCallback != null) {
+                    boolean isLast = false;
+                    if (mMediaFiles != null && mMediaFiles.size() > 0) {
+                        isLast = mCurrentFileIndex == mMediaFiles.size() - 1;
+                    }
+                    // 回调某个视频播放出错
+                    mPlayStateCallback.onMediaError(mCurrentFileIndex, isLast);
+                }
+            }
         }
     };
 

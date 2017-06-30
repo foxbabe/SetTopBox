@@ -244,6 +244,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSavorVideoView.setIfShowPauseBtn(true);
         mSavorVideoView.setIfShowLoading(true);
         mSavorVideoView.setLooping(false);
+        mSavorVideoView.setIfHandlePrepareTimeout(true);
         mSavorVideoView.setPlayStateCallback(mPlayStateCallback);
 
         mPptAdapter = new PptVpAdapter(this, null, this);
@@ -944,6 +945,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         public boolean onMediaError(int index, boolean isLast) {
             LogUtils.w("activity onMediaError " + this.hashCode());
 
+            ShowMessage.showToast(mContext, "视频播放失败");
             AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
             resetGlobalFlag();
             exitProjection();
