@@ -34,7 +34,7 @@ public class StopAction extends ProjectionActionBase {
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
         if (isLottery) {
             if (activity instanceof LotteryActivity) {
-                ((LotteryActivity) activity).stop(this);
+                ((LotteryActivity) activity).stop(true, this);
             }
         } else if (isRstr) {
             if (activity instanceof ScreenProjectionActivity) {

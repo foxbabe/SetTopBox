@@ -431,7 +431,7 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
      *
      * @return
      */
-    public void stop(StopAction stopAction) {
+    public void stop(boolean resetFlag, StopAction stopAction) {
         LogUtils.e("StopResponseVo will exitProjection " + this.hashCode());
         mStopAction = stopAction;
         mHandler.post(new Runnable() {
@@ -441,7 +441,10 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
             }
         });
 
-        resetGlobalFlag();
+        GlobalValues.IS_LOTTERY = false;
+        if (resetFlag) {
+            resetGlobalFlag();
+        }
     }
 
     @Override

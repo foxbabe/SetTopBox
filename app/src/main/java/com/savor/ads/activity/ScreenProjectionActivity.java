@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -859,11 +860,14 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mIsFirstResume &&
-                (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) || ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType))) {
-            mSavorVideoView.onResume();
+        if (mIsFirstResume) {
+            init();
+            mIsFirstResume = false;
+        } else {
+            if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) || ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType)) {
+                mSavorVideoView.onResume();
+            }
         }
-        mIsFirstResume = false;
     }
 
     @Override

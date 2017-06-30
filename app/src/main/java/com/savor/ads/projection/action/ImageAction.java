@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
 import com.savor.ads.projection.ProjectPriority;
 import com.savor.ads.utils.ActivitiesManager;
@@ -55,13 +56,17 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
             LogUtils.d("Listener will setNewProjection");
             ((ScreenProjectionActivity) activity).setNewProjection(data);
         } else {
-            if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
+            if (activity == null) {
                 LogUtils.d("Listener will startActivity in new task");
                 Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
                 intent.putExtras(data);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(intent);
             } else {
+                if (activity instanceof LotteryActivity) {
+                    ((LotteryActivity) activity).stop(false, null);
+                }
+
                 LogUtils.d("Listener will startActivity in " + activity);
                 Intent intent = new Intent(activity, ScreenProjectionActivity.class);
                 intent.putExtras(data);
