@@ -277,6 +277,12 @@ public class SavorVideoView extends RelativeLayout {
                             " mIsPauseByOut:" + mIsPauseByOut +" mAssignedPlayPosition:" + mAssignedPlayPosition
                             + " " + SavorVideoView.this.hashCode());
                     mPlayState = MediaPlayerState.PREPARED;
+
+                    // 回调准备完毕
+                    if (mPlayStateCallback != null) {
+                        mPlayStateCallback.onMediaPrepared(mCurrentFileIndex);
+                    }
+
                     if (mIfShowLoading) {
                         mLoadingIv.setVisibility(GONE);
                         mProgressBar.setVisibility(GONE);
@@ -291,11 +297,6 @@ public class SavorVideoView extends RelativeLayout {
                             mAssignedPlayPosition = -1;
                         } else {
                             playInner();
-                        }
-
-                        // 回调准备完毕
-                        if (mPlayStateCallback != null) {
-                            mPlayStateCallback.onMediaPrepared(mCurrentFileIndex);
                         }
                     }
 
@@ -782,6 +783,8 @@ public class SavorVideoView extends RelativeLayout {
                 mMediaPlayer.reset();
                 mPlayState = MediaPlayerState.IDLE;
             }
+            mPlayVideoIv.setVisibility(GONE);
+
             setMediaPlayerSource();
             prepareMediaPlayer();
         }

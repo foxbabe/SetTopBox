@@ -11,7 +11,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -38,6 +37,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 
@@ -200,6 +200,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private String mUUID;
 
     private boolean mIsFirstResume = true;
+    private boolean mHasInitializedVolume;
 
     private int mCurrentVolume = 60;
     private String mType;
@@ -220,7 +221,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
         findView();
         setView();
-        init();
 
         handleIntent();
     }
@@ -252,13 +252,16 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mPptVp.addOnPageChangeListener(this);
     }
 
-    private void init() {
-        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
-            mCurrentVolume = mSession.getVodVolume();
-        } else {
-            mCurrentVolume = mSession.getProjectVolume();
+    private void initVolume() {
+        if (!mHasInitializedVolume) {
+            if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
+                mCurrentVolume = mSession.getVodVolume();
+            } else {
+                mCurrentVolume = mSession.getProjectVolume();
+            }
+            setVolume(mCurrentVolume);
+            mHasInitializedVolume = true;
         }
-        setVolume(mCurrentVolume);
     }
 
     private void handleIntent() {
@@ -862,7 +865,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     protected void onResume() {
         super.onResume();
         if (mIsFirstResume) {
-            init();
             mIsFirstResume = false;
         } else {
             if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) || ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType)) {
@@ -946,6 +948,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             LogUtils.w("activity onMediaError " + this.hashCode());
 
             ShowMessage.showToast(mContext, "视频播放失败");
+            LogFileUtil.write("视频播放失败:" + mMediaPath);
             AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
             resetGlobalFlag();
             exitProjection();
@@ -954,6 +957,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
         @Override
         public void onMediaPrepared(int index) {
+            initVolume();
             rescheduleToExit(false);
         }
 
