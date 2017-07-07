@@ -7,8 +7,8 @@ public class OSSValues {
     //OSS访问域名
 //    public static final String endpoint = "http://oss.littlehotspot.com/";
     //用阿里云提供的AccessKeyId， AccessKeySecret构造一个凭证提供器
-    public static final String accessKeyId = "tnDh4AQqRYbV9mq8";
-    public static final String accessKeySecret = "sv8aZCKEJhQ0nwKHj8uEnw3ADwcM24";
+    public static final String accessKeyId = "LTAIsKCXU4aSpATx";
+    public static final String accessKeySecret = "u6E8Pnuda4JIvzm3iwHg77GcCBgTc8";
     //日志上传路径
     public static final String uploadFilePath = "log/box/";
     //抽奖结果上传路径
