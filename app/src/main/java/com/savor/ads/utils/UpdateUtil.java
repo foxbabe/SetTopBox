@@ -50,13 +50,15 @@ public class UpdateUtil implements ApiRequestListener {
         boolean isflag = false;
         try {
             String sourcePath = file.getPath();
-            Process proc = Runtime.getRuntime().exec("su");
+            String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
+            Process proc = Runtime.getRuntime().exec(catCommand);
+//            Process proc = Runtime.getRuntime().exec("su");
             DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
             try {
 
-                String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
-                dos.writeBytes(catCommand);
-                dos.flush();
+//                String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
+//                dos.writeBytes(catCommand);
+//                dos.flush();
                 dos.writeBytes("exit\n");
                 dos.flush();
                 isflag = true;
@@ -89,11 +91,12 @@ public class UpdateUtil implements ApiRequestListener {
 
         boolean isflag = false;
         try {
-            Process proc = Runtime.getRuntime().exec("su");
+            Process proc = Runtime.getRuntime().exec("mount -o remount rw /system");
+//            Process proc = Runtime.getRuntime().exec("su");
             DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
             try {
-                dos.writeBytes("mount -o remount rw /system\n");
-                dos.flush();
+//                dos.writeBytes("mount -o remount rw /system\n");
+//                dos.flush();
                 String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
                 dos.writeBytes(catCommand);
                 dos.flush();

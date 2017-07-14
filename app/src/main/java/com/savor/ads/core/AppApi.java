@@ -179,7 +179,7 @@ public class AppApi {
      */
     public static void downVersion(String url,Context context, ApiRequestListener handler,int type){
         try{
-            String target= AppUtils.getExternalSDCardPath();//AppUtils.getSDCardPath();
+            String target= AppUtils.getSDCardPath();
             if (TextUtils.isEmpty(target)) {
                 LogFileUtil.write("External SD is not exist, download canceled");
                 return;

@@ -147,7 +147,7 @@ public abstract class BaseActivity extends Activity {
 
     protected void fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (!TextUtils.isEmpty(AppUtils.getSDCardPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
             ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
 

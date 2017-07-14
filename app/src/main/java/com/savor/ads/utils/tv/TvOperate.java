@@ -54,53 +54,53 @@ public class TvOperate {
     }
 
     public void autoTuning(final AutoTurningCallback turningCallback) {
-        makeSourceATV();
-
-        AtvManager.getAtvPlayerManager().setOnAtvPlayerEventListener(new AtvPlayer.OnAtvPlayerEventListener() {
-
-            @Override
-            public boolean onSignalUnLock(int arg0) {
-                return false;
-            }
-
-            @Override
-            public boolean onSignalLock(int arg0) {
-                return false;
-            }
-
-            @Override
-            public boolean onAtvProgramInfoReady(int arg0) {
-                return false;
-            }
-
-            @Override
-            public boolean onAtvManualTuningScanInfo(int arg0, AtvEventScan arg1) {
-                return false;
-            }
-
-            @Override
-            public boolean onAtvAutoTuningScanInfo(int what, AtvEventScan extra) {
-                if (turningCallback != null) {
-                    turningCallback.onProgressUpdate(extra.percent);
-                }
-                if ((extra.percent >= 100) || (extra.frequencyKHz > ATV_MAX_FREQ)) {
-                    interruptTuning();
-                    if (turningCallback != null) {
-                        turningCallback.onComplete();
-                    }
-                }
-
-                return false;
-            }
-        });
-
-        AtvScanManager asm = AtvManager.getAtvScanManager();
-        try {
-            asm.setAutoTuningStart(ATV_EVENT_INTERVAL, ATV_MIN_FREQ,
-                    ATV_MAX_FREQ, AtvScanManager.EnumAutoScanState.E_NONE_NTSC_AUTO_SCAN);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
+//        makeSourceATV();
+//
+//        AtvManager.getAtvPlayerManager().setOnAtvPlayerEventListener(new AtvPlayer.OnAtvPlayerEventListener() {
+//
+//            @Override
+//            public boolean onSignalUnLock(int arg0) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onSignalLock(int arg0) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onAtvProgramInfoReady(int arg0) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onAtvManualTuningScanInfo(int arg0, AtvEventScan arg1) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onAtvAutoTuningScanInfo(int what, AtvEventScan extra) {
+//                if (turningCallback != null) {
+//                    turningCallback.onProgressUpdate(extra.percent);
+//                }
+//                if ((extra.percent >= 100) || (extra.frequencyKHz > ATV_MAX_FREQ)) {
+//                    interruptTuning();
+//                    if (turningCallback != null) {
+//                        turningCallback.onComplete();
+//                    }
+//                }
+//
+//                return false;
+//            }
+//        });
+//
+//        AtvScanManager asm = AtvManager.getAtvScanManager();
+//        try {
+//            asm.setAutoTuningStart(ATV_EVENT_INTERVAL, ATV_MIN_FREQ,
+//                    ATV_MAX_FREQ, AtvScanManager.EnumAutoScanState.E_NONE_NTSC_AUTO_SCAN);
+//        } catch (TvCommonException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void makeSourceATV() {
@@ -140,34 +140,35 @@ public class TvOperate {
     }
 
     public AtvProgramInfo[] getAllProgramInfo() {
-        int count = getAtvProgramCount();
-        AtvProgramInfo[] progList = new AtvProgramInfo[count];
-
-        ChannelManager cm = TvManager.getChannelManager();
-        AtvScanManager asm = AtvManager.getAtvScanManager();
-        for (int i = 0; i < count; i++) {
-            AtvProgramInfo pi = new AtvProgramInfo();
-            pi.setChennalNum(i);
-
-            ProgramInfoQueryCriteria qc = new ProgramInfoQueryCriteria();
-            qc.queryIndex = i;
-            try {
-                ProgramInfo info = cm.getProgramInfo(qc, TvOsType.EnumProgramInfoType.E_INFO_DATABASE_INDEX);
-                pi.setChannelName(info.serviceName);
-
-                pi.setFreq(pllToFreqKHz(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_PROGRAM_PLL_DATA, i)));
-//                int soundindx = AtvManager.getAtvScanManager().getAtvProgramInfo(
-//                        AtvScanManager.EnumGetProgramInfo.E_GET_AUDIO_STANDARD, i);
-//                pi.audioStandard = AudioManager.EnumAtvSystemStandard.getOrdinalThroughValue(soundindx);
-                pi.setAudioStandard(AtvManager.getAtvScanManager().getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_AUDIO_STANDARD, i));
-                pi.setVideoStandard(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_VIDEO_STANDARD_OF_PROGRAM, i));
-            } catch (TvCommonException e) {
-                e.printStackTrace();
-            }
-            progList[i] = pi;
-        }
-
-        return progList;
+//        int count = getAtvProgramCount();
+//        AtvProgramInfo[] progList = new AtvProgramInfo[count];
+//
+//        ChannelManager cm = TvManager.getChannelManager();
+//        AtvScanManager asm = AtvManager.getAtvScanManager();
+//        for (int i = 0; i < count; i++) {
+//            AtvProgramInfo pi = new AtvProgramInfo();
+//            pi.setChennalNum(i);
+//
+//            ProgramInfoQueryCriteria qc = new ProgramInfoQueryCriteria();
+//            qc.queryIndex = i;
+//            try {
+//                ProgramInfo info = cm.getProgramInfo(qc, TvOsType.EnumProgramInfoType.E_INFO_DATABASE_INDEX);
+//                pi.setChannelName(info.serviceName);
+//
+//                pi.setFreq(pllToFreqKHz(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_PROGRAM_PLL_DATA, i)));
+////                int soundindx = AtvManager.getAtvScanManager().getAtvProgramInfo(
+////                        AtvScanManager.EnumGetProgramInfo.E_GET_AUDIO_STANDARD, i);
+////                pi.audioStandard = AudioManager.EnumAtvSystemStandard.getOrdinalThroughValue(soundindx);
+//                pi.setAudioStandard(AtvManager.getAtvScanManager().getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_AUDIO_STANDARD, i));
+//                pi.setVideoStandard(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_VIDEO_STANDARD_OF_PROGRAM, i));
+//            } catch (TvCommonException e) {
+//                e.printStackTrace();
+//            }
+//            progList[i] = pi;
+//        }
+//
+//        return progList;
+        return new AtvProgramInfo[0];
     }
 
     private static int freqKHzToPLL(int freq) {
@@ -293,58 +294,11 @@ public class TvOperate {
     }
 
     public void updateProgram(Context context, TvProgramResponse programResponse) {
-//        JSONArray roomList = null;
-//        JSONObject jsonObj = null;
-//        LogUtils.i("tx", "list " + list);
-//
-//
-//        JSONObject jsonObject = null;
-//
-//
-//        try {
-//            jsonObject = new JSONObject(list);
-//        } catch (JSONException e2) {
-//            e2.printStackTrace();
-//        }
-//
-//
-//        try {
-//            roomList = jsonObject.getJSONArray("channelInfo");
-//            // roomList = new JSONArray(list1);
-//            LogUtils.i("tx", "roomList size " + roomList.length());
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        if (roomList.length() <= 0)
+//        if (programResponse == null || programResponse.getTvChannelList() == null || programResponse.getTvChannelList().isEmpty())
 //            return;
-        if (programResponse == null || programResponse.getTvChannelList() == null || programResponse.getTvChannelList().isEmpty())
-            return;
-//        ArrayList<AtvProgramInfo> newlist = new ArrayList<AtvProgramInfo>();
-//        for (int i = 0; i < roomList.length(); i++) {
 //
-//            try {
-//                jsonObj = roomList.getJSONObject(i);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//            AtvProgramInfo p = new AtvProgramInfo();//getProgramInfo(0);
-//            String chennalNum = jsonObj.optString("chennalNum");
-//            String freq = jsonObj.optString("freq");
-//            String audioStandard = jsonObj.optString("audioStandard");
-//            String videoStandard = jsonObj.optString("videoStandard");
-//            p.setChennalNum(Integer.parseInt(chennalNum) - 1);
-//            p.setFreq(Integer.parseInt(freq));
-//            p.setChannelName(jsonObj.optString("channelName"));
-//            p.setAudioStandard(Integer.parseInt(audioStandard));
-//            p.setVideoStandard(Integer.parseInt(videoStandard));
-//
-//            newlist.add(p);
-//        }
-//        writeToDatabase(newlist.toArray(new AtvProgramInfo[newlist.size()]));
-//        String defNum = jsonObject.optString("defaultNum");
-
-        writeToDatabase(programResponse.getTvChannelList().toArray(new AtvProgramInfo[programResponse.getTvChannelList().size()]));
-        Session.get(context).setTvDefaultChannelNumber(programResponse.getLockingChannelNum());
+//        writeToDatabase(programResponse.getTvChannelList().toArray(new AtvProgramInfo[programResponse.getTvChannelList().size()]));
+//        Session.get(context).setTvDefaultChannelNumber(programResponse.getLockingChannelNum());
     }
 
     public TvOsType.EnumInputSource getCurrentInputSource() {

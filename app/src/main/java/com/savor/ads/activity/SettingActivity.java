@@ -227,7 +227,7 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void toAd() {
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (!TextUtils.isEmpty(AppUtils.getSDCardPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
             Intent intent = new Intent();
             intent.setClass(this, AdsPlayerActivity.class);
             startActivity(intent);

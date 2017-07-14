@@ -79,9 +79,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getExternalSDCardPath());
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getSDCardPath());
         // 未发现SD卡时跳到TV
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getSDCardPath())) {
             Intent intent = new Intent(this, TvPlayerActivity.class);
             startActivity(intent);
             finish();
@@ -199,7 +199,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 handled = true;
                 break;
             // 切换到电视模式
-            case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
+            case KeyCodeConstant.KEY_CODE_SWITCH_ADS_TV:
                 switchToTvPlayer();
                 handled = true;
                 break;

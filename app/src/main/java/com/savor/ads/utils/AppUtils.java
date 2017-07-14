@@ -158,8 +158,6 @@ public class AppUtils {
     private static TrustManager[] trustAllCerts;
     private static StorageMode storageMode;
 
-    /** SDCard是否可用 **/
-
     /**
      * SDCard的根路径
      **/
@@ -168,12 +166,13 @@ public class AppUtils {
     public static final int NOCONNECTION = 0;
     public static final int WIFI = 1;
     public static final int MOBILE = 2;
+    public static final int ETHERNET = 3;
 
     /**
      * 返回手机连接网络类型
      *
      * @param context
-     * @return 0： 无连接  1：wifi  2： mobile
+     * @return 0： 无连接  1：wifi  2： mobile   3: ethernet
      */
     public static int getNetworkType(Context context) {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -181,7 +180,17 @@ public class AppUtils {
         int networkType = NOCONNECTION;
         if (networkInfo != null) {
             int type = networkInfo.getType();
-            networkType = type == ConnectivityManager.TYPE_WIFI ? WIFI : MOBILE;
+            switch (type) {
+                case ConnectivityManager.TYPE_WIFI:
+                    networkType = WIFI;
+                    break;
+                case ConnectivityManager.TYPE_ETHERNET:
+                    networkType = ETHERNET;
+                    break;
+                default:
+                    networkType = MOBILE;
+                    break;
+            }
         }
         return networkType;
     }
@@ -207,54 +216,54 @@ public class AppUtils {
         return SDCardPath;
     }
 
-    //获取外部存储卡地址
-    public static String getExternalSDCardPath() {
-        if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)){
-            return EXTERNAL_SDCARD_PATH;
-        }
-        String sdcard_path = null;
-        String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
-        LogUtils.d(sd_default);
-        if (sd_default.endsWith("/")) {
-            sd_default = sd_default.substring(0, sd_default.length() - 1);
-        }
-        // 得到路径
-        try {
-            Runtime runtime = Runtime.getRuntime();
-            Process proc = runtime.exec("mount");
-            InputStream is = proc.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            String line;
-            BufferedReader br = new BufferedReader(isr);
-            while ((line = br.readLine()) != null) {
-                if (line.contains("secure"))
-                    continue;
-                if (line.contains("asec"))
-                    continue;
-                if (line.contains("fat") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
-                        }
-                        sdcard_path = columns[1];
-                    }
-                } else if (line.contains("fuse") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
-                        }
-                        sdcard_path = columns[1];
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        EXTERNAL_SDCARD_PATH = sdcard_path;
-        return sdcard_path;
-    }
+//    //获取外部存储卡地址
+//    public static String getExternalSDCardPath() {
+//        if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)){
+//            return EXTERNAL_SDCARD_PATH;
+//        }
+//        String sdcard_path = null;
+//        String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
+//        LogUtils.d(sd_default);
+//        if (sd_default.endsWith("/")) {
+//            sd_default = sd_default.substring(0, sd_default.length() - 1);
+//        }
+//        // 得到路径
+//        try {
+//            Runtime runtime = Runtime.getRuntime();
+//            Process proc = runtime.exec("mount");
+//            InputStream is = proc.getInputStream();
+//            InputStreamReader isr = new InputStreamReader(is);
+//            String line;
+//            BufferedReader br = new BufferedReader(isr);
+//            while ((line = br.readLine()) != null) {
+//                if (line.contains("secure"))
+//                    continue;
+//                if (line.contains("asec"))
+//                    continue;
+//                if (line.contains("fat") && line.contains("/mnt/")) {
+//                    String columns[] = line.split(" ");
+//                    if (columns != null && columns.length > 1) {
+//                        if (sd_default.trim().equals(columns[1].trim())) {
+//                            continue;
+//                        }
+//                        sdcard_path = columns[1];
+//                    }
+//                } else if (line.contains("fuse") && line.contains("/mnt/")) {
+//                    String columns[] = line.split(" ");
+//                    if (columns != null && columns.length > 1) {
+//                        if (sd_default.trim().equals(columns[1].trim())) {
+//                            continue;
+//                        }
+//                        sdcard_path = columns[1];
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        EXTERNAL_SDCARD_PATH = sdcard_path;
+//        return sdcard_path;
+//    }
 
     /**
      * @param context
@@ -262,7 +271,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getExternalSDCardPath();
+        String path = getSDCardPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {
@@ -381,8 +390,6 @@ public class AppUtils {
 
     public static String getMD5Method(File f) {
         //下面生成图片的md5加密
-//        StringBuilder allTex = new StringBuilder();
-        InputStream in = null;
         byte[] frontb = null;
         byte[] backb = null;
         byte[] newb1 = null;
@@ -413,19 +420,12 @@ public class AppUtils {
             System.arraycopy(frontb, 0, newb1, 0, frontb.length);
             newb2 = new byte[backb.length];
             System.arraycopy(backb, 0, newb2, 0, backb.length);
-//            newb = new byte[frontb.length + backb.length];
-//            System.arraycopy(frontb, 0, newb, 0, frontb.length);
-//            System.arraycopy(backb, 0, newb, frontb.length, backb.length);
+
+            stream.close();
         } catch (Exception e1) {
             e1.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e1) {
-                }
-            }
         }
+
         // 调取md5方法，生成一个md5串
         String md5Vod1 = MD5(newb1);
         String md5Vod2 = MD5(newb2);
@@ -1594,8 +1594,11 @@ public class AppUtils {
     }
 
     public static String getShowingSSID(Context context) {
-        String ssid = AppUtils.getWifiName(context);
-        if (TextUtils.isEmpty(ssid)) {
+        int connectionType = AppUtils.getNetworkType(context);
+        String ssid = null;
+        if (AppUtils.WIFI == connectionType) {
+            ssid = AppUtils.getWifiName(context);
+        } else if (AppUtils.ETHERNET == connectionType) {
             ssid = Session.get(context).getBoxName();
         }
         return ssid;
