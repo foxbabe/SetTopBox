@@ -91,35 +91,33 @@ public class UpdateUtil implements ApiRequestListener {
 
         boolean isflag = false;
         try {
-            Process proc = Runtime.getRuntime().exec("mount -o remount rw /system");
+            Process proc = Runtime.getRuntime().exec("mount -o remount rw /system/");
 //            Process proc = Runtime.getRuntime().exec("su");
             DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
             try {
 //                dos.writeBytes("mount -o remount rw /system\n");
 //                dos.flush();
-                String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
-                dos.writeBytes(catCommand);
-                dos.flush();
-
-                Thread.sleep(5000);
-                File file1 = new File("/system/app/1.apk");
-                if (file1.length() > 0) {
-                    dos.writeBytes("rm -r " + file.getPath() +"\n");
+//                String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
+//                dos.writeBytes(catCommand);
+//                dos.flush();
+//
+//                Thread.sleep(5000);
+//                File file1 = new File("/system/app/1.apk");
+//                if (file1.length() > 0) {
+//                    dos.writeBytes("rm -r " + file.getPath() +"\n");
+//                    dos.flush();
+                    dos.writeBytes("cat " + file.getPath() + " > /system/app/savormedia/savormedia.apk\n");
                     dos.flush();
-                    dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
-                    dos.flush();
-                    Thread.sleep(1000);
+                    Thread.sleep(3000);
 //                        dos.writeBytes("reboot\n");
 //                        dos.flush();
                     isflag = true;
-                } else {
+//                } else {
                     file.delete();
-                    file1.delete();
-                    LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+//                    file1.delete();
+//                    LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
+//                }
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
                 dos.close();
