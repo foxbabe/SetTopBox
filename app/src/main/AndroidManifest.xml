@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.savor.ads">
+    package="com.savor.ads">
 
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
-    <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"/>
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
-    <uses-permission android:name="android.permission.DELETE_PACKAGES"/>
-    <uses-permission android:name="android.permission.CLEAR_APP_CACHE"/>
-    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.RESTART_PACKAGES"/>
-    <uses-permission android:name="android.permission.GET_TASKS"/>
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.REBOOT"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
+    <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.REBOOT" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".SavorApplication"
@@ -33,17 +34,17 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="58576b54677baa3b41000809"/>
+            android:value="58576b54677baa3b41000809" />
         <meta-data
             android:name="UMENG_CHANNEL"
-            android:value="official"/>
+            android:value="official" />
         <meta-data
             android:name="com.savor.ads.core.SavorGlideModule"
-            android:value="GlideModule"/>
+            android:value="GlideModule" />
 
         <receiver android:name=".receiver.NetworkBroadcastReceiver">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
@@ -51,63 +52,55 @@
             android:name=".activity.MainActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
 
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.HOME"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <!-- 启动Netty服务的Service -->
         <service
             android:name=".service.MessageService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
         <!-- 启动SSDP的服务 -->
         <service
             android:name=".service.ServerDiscoveryService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
         <!-- 处理媒体文件更新的服务 -->
         <service
             android:name=".service.HandleMediaDataService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
 
         <!-- 点播类处理和转发指令的Service， 实现在savorbox.jar包中 -->
         <service
             android:name="com.jar.savor.box.services.RemoteService"
             android:permission="oem.permission.SENDMAIL">
             <intent-filter>
-                <action android:name="com.jar.savor.box.REMOTE1"/>
+                <action android:name="com.jar.savor.box.REMOTE1" />
             </intent-filter>
         </service>
 
         <!-- 广告播放页面 -->
         <activity
             android:name=".activity.AdsPlayerActivity"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask"></activity>
         <!-- 电视播放页面 -->
         <activity
             android:name=".activity.TvPlayerActivity"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask"></activity>
         <!-- 投屏类播放页面 -->
-        <activity android:name=".activity.ScreenProjectionActivity">
-        </activity>
+        <activity android:name=".activity.ScreenProjectionActivity"></activity>
         <!-- 应用设置页面 -->
         <activity
             android:name=".activity.SettingActivity"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask"></activity>
 
         <service
             android:name=".service.HeartbeatService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
 
         <!--
         <receiver
@@ -119,17 +112,19 @@
             </intent-filter>
         </receiver>
         -->
-        <activity android:name=".activity.UsbImageViewerActivity">
-        </activity>
+        <activity android:name=".activity.UsbImageViewerActivity"></activity>
 
         <service
             android:name=".service.SSDPMulticastService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
 
-        <activity android:name=".activity.LotteryActivity"
-                  android:launchMode="singleTask">
-        </activity>
+        <activity
+            android:name=".activity.LotteryActivity"
+            android:launchMode="singleTask"></activity>
+
+        <service
+            android:name=".service.FaceDetectService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

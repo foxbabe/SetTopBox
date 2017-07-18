@@ -22,6 +22,7 @@ import com.savor.ads.core.AppApi;
 import com.savor.ads.log.LogProduceService;
 import com.savor.ads.log.LogUploadService;
 import com.savor.ads.log.LotteryLogUtil;
+import com.savor.ads.service.FaceDetectService;
 import com.savor.ads.service.HandleMediaDataService;
 import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
@@ -154,6 +155,8 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
+
+        startFaceDetectService();
     }
 
     /**
@@ -272,6 +275,15 @@ public class MainActivity extends BaseActivity {
         LogFileUtil.write("MainActivity will start LogUploadService");
         LogUploadService logUploadService = new LogUploadService(mContext);
         logUploadService.start();
+    }
+
+    /**
+     * 启动人脸检测service
+     */
+    private void startFaceDetectService() {
+        LogFileUtil.write("MainActivity will start FaceDetectService");
+        Intent intent = new Intent(this, FaceDetectService.class);
+        startService(intent);
     }
 
     void initDisplay() {
