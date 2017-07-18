@@ -14,6 +14,7 @@ import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.service.FaceDetectService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
@@ -65,6 +66,24 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         checkAndPlay();
     }
 
+    /**
+     * 启动人脸检测service
+     */
+    private void startFaceDetectService() {
+        LogFileUtil.write("will start FaceDetectService");
+        Intent intent = new Intent(this, FaceDetectService.class);
+        startService(intent);
+    }
+
+    /**
+     * 停止人脸检测service
+     */
+    private void stopFaceDetectService() {
+        LogFileUtil.write("will stop FaceDetectService");
+        Intent intent = new Intent(this, FaceDetectService.class);
+        stopService(intent);
+    }
+
     private void registerDownloadReceiver() {
         IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION);
         registerReceiver(mDownloadCompleteReceiver, intentFilter);
@@ -114,6 +133,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
         LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
         mActivityResumeTime = System.currentTimeMillis();
+        startFaceDetectService();
         if (!mIsGoneToTv) {
             setVolume(mSession.getVolume());
             mSavorVideoView.onResume();
@@ -164,6 +184,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     protected void onStop() {
         LogFileUtil.write("AdsPlayerActivity onStop " + this.hashCode());
         mSavorVideoView.onStop();
+        stopFaceDetectService();
         super.onStop();
     }
 

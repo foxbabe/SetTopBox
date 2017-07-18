@@ -155,8 +155,6 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
-
-        startFaceDetectService();
     }
 
     /**
@@ -275,15 +273,6 @@ public class MainActivity extends BaseActivity {
         LogFileUtil.write("MainActivity will start LogUploadService");
         LogUploadService logUploadService = new LogUploadService(mContext);
         logUploadService.start();
-    }
-
-    /**
-     * 启动人脸检测service
-     */
-    private void startFaceDetectService() {
-        LogFileUtil.write("MainActivity will start FaceDetectService");
-        Intent intent = new Intent(this, FaceDetectService.class);
-        startService(intent);
     }
 
     void initDisplay() {
