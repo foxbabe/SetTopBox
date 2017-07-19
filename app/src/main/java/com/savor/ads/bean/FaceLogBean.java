@@ -14,7 +14,7 @@ public class FaceLogBean {
     private long newestFrameIndex;
     private long startTime;
     private long endTime;
-    private long totalSeconds;
+    private float totalSeconds;
     private int trackId;
 
     public String getUuid() {
@@ -40,7 +40,7 @@ public class FaceLogBean {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
-        this.totalSeconds = (this.endTime - this.startTime) / 1000;
+        this.totalSeconds = (this.endTime - this.startTime) / 1000.0f;
     }
 
     public long getNewestFrameIndex() {
@@ -71,7 +71,7 @@ public class FaceLogBean {
                 '}';
     }
 
-    public long getTotalSeconds() {
+    public float getTotalSeconds() {
         return totalSeconds;
     }
 }

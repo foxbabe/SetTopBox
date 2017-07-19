@@ -95,8 +95,12 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        requireLicense();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                requireLicense();
+            }
+        });
         return super.onStartCommand(intent, flags, startId);
     }
 
