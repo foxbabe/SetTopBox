@@ -23,6 +23,7 @@ import com.megvii.facepp.sdk.Facepp;
 import com.megvii.licensemanager.sdk.LicenseManager;
 import com.savor.ads.R;
 import com.savor.ads.bean.FaceLogBean;
+import com.savor.ads.log.FaceDetectLogUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -392,6 +393,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     }
 
     long mFrameIndex = 0;
+
     @Override
     public void onPreviewFrame(final byte[] data, Camera camera) {
         if (isSuccess)
@@ -479,7 +481,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                             FaceLogBean faceLogBean = mWatchingMap.get(trackId);
                             if (faceLogBean.getNewestFrameIndex() != mFrameIndex) {
                                 faceLogBean.setEndTime(System.currentTimeMillis());
-                                LogFileUtil.writeFaceLog(faceLogBean);
+                                FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(faceLogBean);
 
                                 mWatchingMap.remove(trackId);
                             }

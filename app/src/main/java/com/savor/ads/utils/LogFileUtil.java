@@ -17,17 +17,17 @@ public class LogFileUtil {
     private static final String LOG_FILE_NAME = "savor_log.txt";
     private static final String EXCEPTION_FILE_NAME = "savor_exception.txt";
     private static final String AP_FILE_NAME = "savor_ap.txt";
-    private static final String FACE_FILE_NAME = "savor_face.txt";
+//    private static final String FACE_FILE_NAME = "savor_face.txt";
     private static String mLogFilePath;
     private static String mExceptionFilePath;
     private static String mApFilePath;
-    private static String mFaceFilePath;
+//    private static String mFaceFilePath;
 
     public static void init() {
         mLogFilePath = AppUtils.getSDCardPath() + File.separator + LOG_FILE_NAME;
         mExceptionFilePath = AppUtils.getSDCardPath() + File.separator + EXCEPTION_FILE_NAME;
         mApFilePath = AppUtils.getSDCardPath() + File.separator + AP_FILE_NAME;
-        mFaceFilePath = AppUtils.getSDCardPath() + File.separator + FACE_FILE_NAME;
+//        mFaceFilePath = AppUtils.getSDCardPath() + File.separator + FACE_FILE_NAME;
         File file = new File(mLogFilePath);
         if (file.exists()) {
             file.delete();
@@ -56,14 +56,14 @@ public class LogFileUtil {
             }
         }
 
-        File faceFile = new File(mFaceFilePath);
-        if (!faceFile.exists()) {
-            try {
-                faceFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        File faceFile = new File(mFaceFilePath);
+//        if (!faceFile.exists()) {
+//            try {
+//                faceFile.createNewFile();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public static void write(String msg) {
@@ -142,26 +142,26 @@ public class LogFileUtil {
         }
     }
 
-    public static void writeFaceLog(FaceLogBean faceLogBean) {
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(mFaceFilePath, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (fileWriter != null) {
-            try {
-                fileWriter.write(AppUtils.getCurTime() + " " + faceLogBean.toString() + "\r\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    fileWriter.flush();
-                    fileWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+//    public static void writeFaceLog(FaceLogBean faceLogBean) {
+//        FileWriter fileWriter = null;
+//        try {
+//            fileWriter = new FileWriter(mFaceFilePath, true);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        if (fileWriter != null) {
+//            try {
+//                fileWriter.write(AppUtils.getCurTime() + " " + faceLogBean.toString() + "\r\n");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                try {
+//                    fileWriter.flush();
+//                    fileWriter.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 }

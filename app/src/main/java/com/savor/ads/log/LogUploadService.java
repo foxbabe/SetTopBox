@@ -90,6 +90,7 @@ public class LogUploadService {
                 }
 
                 uploadLotteryRecordFile();
+                uploadFaceRecordFile();
 
                 while (true) {
                     uploadFile();
@@ -125,6 +126,48 @@ public class LogUploadService {
                     if (new File(archive).exists()) {
                         final String object_key = archive.substring(1, archive.length());
                         String oss_file_path = OSSValues.uploadLotteryPath + name + ".zip";
+                        new ResuambleUpload(oss,
+                                BuildConfig.OSS_BUCKET_NAME,
+                                oss_file_path,
+                                object_key,
+                                new LogUploadService.UploadResult() {
+                                    @Override
+                                    public void isSuccessOSSUpload(boolean flag) {
+                                        if (flag) {
+                                            file.delete();
+                                        }
+                                        if (new File(archive).exists()) {
+                                            new File(archive).delete();
+                                        }
+                                    }
+                                }).resumableUpload();
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void uploadFaceRecordFile() {
+        File[] files = getAllLogInfo(AppUtils.StorageFile.face);
+        if (files != null && files.length > 0) {
+            for (final File file : files) {
+                final String name = file.getName();
+                final String path = file.getPath();
+                if (file.isFile() && file.length() > 0) {
+
+                    if (name.contains(AppUtils.getTime("date"))) {
+                        continue;
+                    }
+                    final String archive = path + ".zip";
+                    try {
+                        AppUtils.zipFile(new File(path), new File(archive), name + ".zip");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (new File(archive).exists()) {
+                        final String object_key = archive.substring(1, archive.length());
+                        String oss_file_path = OSSValues.uploadFacePath + name + ".zip";
                         new ResuambleUpload(oss,
                                 BuildConfig.OSS_BUCKET_NAME,
                                 oss_file_path,

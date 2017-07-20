@@ -151,6 +151,10 @@ public class AppUtils {
          * 抽奖记录
          */
         lottery,
+        /**
+         * 人脸识别记录
+         */
+        face,
         /**幻灯片所用图片*/
         ppt,
     }
@@ -292,6 +296,10 @@ public class AppUtils {
         if (!targetPptFile.exists()) {
             targetPptFile.mkdir();
         }
+        File targetFaceFile = new File(path + File.separator, "face");
+        if (!targetFaceFile.exists()) {
+            targetFaceFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -309,6 +317,8 @@ public class AppUtils {
             path = targetLotteryFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.ppt) {
             path = targetPptFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.face) {
+            path = targetFaceFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
