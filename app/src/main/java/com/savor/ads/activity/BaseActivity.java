@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
-import com.mstar.tv.service.skin.AudioSkin;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -47,7 +46,6 @@ public abstract class BaseActivity extends Activity {
     private Handler mHandler = new Handler();
 
     protected boolean mIsGoneToSystemSetting;
-    private AudioSkin mAudioSkin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +55,6 @@ public abstract class BaseActivity extends Activity {
         mSession = Session.get(mContext);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         LogFileUtil.write("BaseActivity onCreate this is " + this.toString());
-
-        mAudioSkin = new AudioSkin(this);
-        mAudioSkin.connect(null);
     }
 
 
@@ -227,10 +222,6 @@ public abstract class BaseActivity extends Activity {
         if (mBoxInfoDialog != null && mBoxInfoDialog.isShowing()) {
             mBoxInfoDialog.dismiss();
         }
-        if (mAudioSkin != null) {
-            mAudioSkin.disconnect();
-            mAudioSkin = null;
-        }
     }
 
 
@@ -363,18 +354,22 @@ public abstract class BaseActivity extends Activity {
     }
 
     protected void setVolume(int volume) {
-        if (mAudioSkin != null) {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            LogUtils.d("Music volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) +
+            "System volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM));
             if (volume > 100)
                 volume = 100;
             else if (volume < 0)
                 volume = 0;
-            mAudioSkin.setVolume(volume);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
         }
     }
 
     protected int getVolume() {
-        if (mAudioSkin != null) {
-            return mAudioSkin.getVolume();
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            return audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         }
         return -1;
     }

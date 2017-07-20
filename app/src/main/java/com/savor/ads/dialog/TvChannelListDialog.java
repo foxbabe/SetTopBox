@@ -15,7 +15,7 @@ import android.widget.ListView;
 
 import com.savor.ads.R;
 import com.savor.ads.adapter.ChannelListAdapter;
-import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.tvlibrary.AtvChannel;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.KeyCodeConstant;
 
@@ -29,7 +29,7 @@ public class TvChannelListDialog extends Dialog {
 
     private ListView mChannelsLv;
     private ChannelSelectCallback mChannelSelectCallback;
-    private ArrayList<AtvProgramInfo> mChannels;
+    private ArrayList<AtvChannel> mChannels;
     private ChannelListAdapter mAdapter;
 
     private Handler mHandler = new Handler();
@@ -43,7 +43,7 @@ public class TvChannelListDialog extends Dialog {
         }
     };
 
-    public TvChannelListDialog(Context context, ArrayList<AtvProgramInfo> channels, ChannelSelectCallback callback) {
+    public TvChannelListDialog(Context context, ArrayList<AtvChannel> channels, ChannelSelectCallback callback) {
         super(context, R.style.channel_list_dialog_theme);
         mChannels = channels;
         mChannelSelectCallback = callback;
@@ -80,7 +80,7 @@ public class TvChannelListDialog extends Dialog {
         window.setAttributes(wl);
     }
 
-    public void setChannels(ArrayList<AtvProgramInfo> channels) {
+    public void setChannels(ArrayList<AtvChannel> channels) {
         mChannels = channels;
         mAdapter.notifyDataSetChanged();
     }
@@ -92,7 +92,7 @@ public class TvChannelListDialog extends Dialog {
 
             super.show();
             for (int i = 0; i < mChannels.size(); i++) {
-                AtvProgramInfo program = mChannels.get(i);
+                AtvChannel program = mChannels.get(i);
                 if (program.getChennalNum() == Session.get(getContext()).getTvCurrentChannelNumber()) {
                     mChannelsLv.setSelection(i);
                     break;

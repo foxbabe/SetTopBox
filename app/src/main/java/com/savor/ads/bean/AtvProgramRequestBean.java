@@ -1,5 +1,7 @@
 package com.savor.ads.bean;
 
+import com.savor.tvlibrary.AtvChannel;
+
 import java.util.List;
 
 /**
@@ -8,13 +10,13 @@ import java.util.List;
 
 public class AtvProgramRequestBean {
 
-    private List<AtvProgramInfo> data;
+    private List<AtvChannel> data;
 
-    public List<AtvProgramInfo> getData() {
+    public List<AtvChannel> getData() {
         return data;
     }
 
-    public void setData(List<AtvProgramInfo> data) {
+    public void setData(List<AtvChannel> data) {
         this.data = data;
     }
 }

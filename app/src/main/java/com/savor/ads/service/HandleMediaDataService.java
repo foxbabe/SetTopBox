@@ -40,9 +40,6 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.UpdateUtil;
-import com.savor.ads.utils.tv.TvOperate;
-import com.tvos.common.TvManager;
-import com.tvos.common.exception.TvCommonException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -319,8 +316,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             case SP_GET_TV_MATCH_DATA_FROM_JSON:
                 if (obj instanceof TvProgramResponse) {
                     TvProgramResponse response = (TvProgramResponse) obj;
-                    TvOperate mtv = new TvOperate();
-                    mtv.updateProgram(context, response);
+//                    ITVOperator tvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.V600);
+//                    tvOperate.setAtvChannels();
                 }
                 break;
             case SP_GET_LOGO_DOWN:
@@ -383,15 +380,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                 }
                 break;
-        }
-    }
-
-    //机顶盒监听电视屏,控制是否当电视屏没有通电的时候关机,false不关机,true关机
-    private void setAutoClose(boolean flag) {
-        try {
-            TvManager.setGpioDeviceStatus(128, flag);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
         }
     }
 

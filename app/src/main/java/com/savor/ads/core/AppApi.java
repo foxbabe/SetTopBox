@@ -1,22 +1,14 @@
 package com.savor.ads.core;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.google.gson.Gson;
 import com.savor.ads.BuildConfig;
-import com.savor.ads.bean.AtvProgramInfo;
-import com.savor.ads.bean.AtvProgramRequestBean;
+import com.savor.tvlibrary.AtvChannel;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -239,10 +231,10 @@ public class AppApi {
         new AppServiceOk(context, Action.CP_GET_SP_IP_JSON, handler, params).get();
     }
 
-    public static void uploadProgram(Context context, ApiRequestListener handler, AtvProgramInfo[] programs) {
+    public static void uploadProgram(Context context, ApiRequestListener handler, AtvChannel[] programs) {
         if (programs == null || programs.length <= 0)
             return;
-        List<AtvProgramInfo> programInfo = Arrays.asList(programs);
+        List<AtvChannel> programInfo = Arrays.asList(programs);
         final HashMap<String, Object> params = new HashMap<>();
         params.put("data", programInfo);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();

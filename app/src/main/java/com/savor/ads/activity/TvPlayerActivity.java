@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
-import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.dialog.TvChannelListDialog;
@@ -26,11 +25,11 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
-import com.savor.ads.utils.tv.TvOperate;
-import com.tvos.common.TvManager;
-import com.tvos.common.TvPlayer;
-import com.tvos.common.exception.TvCommonException;
-import com.tvos.common.vo.TvOsType;
+import com.savor.tvlibrary.AtvChannel;
+import com.savor.tvlibrary.AutoTurningCallback;
+import com.savor.tvlibrary.ITVOperator;
+import com.savor.tvlibrary.TVOperatorFactory;
+import com.savor.tvlibrary.TVSignal;
 
 import java.util.ArrayList;
 
@@ -52,7 +51,7 @@ public class TvPlayerActivity extends BaseActivity {
     private TextView mChannelNumberTv;
     private TextView mChannelNameTv;
 
-    private TvOperate mTvOperate;
+    private ITVOperator mTvOperate;
 
     private TvChannelListDialog mChannelListDialog;
     private TvChannelSearchingDialog mChannelSearchingDialog;
@@ -82,19 +81,19 @@ public class TvPlayerActivity extends BaseActivity {
         }
     };
 
-    /**
-     * 输入信号源集合
-     */
-    private final TvOsType.EnumInputSource[] mInputSource = new TvOsType.EnumInputSource[]
-            {
-                    TvOsType.EnumInputSource.E_INPUT_SOURCE_ATV,
-                    TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI,
-                    TvOsType.EnumInputSource.E_INPUT_SOURCE_CVBS
-            };
+//    /**
+//     * 输入信号源集合
+//     */
+//    private final TvOsType.EnumInputSource[] mInputSource = new TvOsType.EnumInputSource[]
+//            {
+//                    TvOsType.EnumInputSource.E_INPUT_SOURCE_ATV,
+//                    TvOsType.EnumInputSource.E_INPUT_SOURCE_HDMI,
+//                    TvOsType.EnumInputSource.E_INPUT_SOURCE_CVBS
+//            };
     /**
      * 频道列表
      */
-    private ArrayList<AtvProgramInfo> mChannelList;
+    private ArrayList<AtvChannel> mChannelList;
     /**
      * 是否以自动搜台方式进入，目前设置页会这样进入
      */
@@ -119,6 +118,7 @@ public class TvPlayerActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tv_player);
 
+        mTvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.V600);
         handleIntent();
         findView();
         setView();
@@ -143,10 +143,9 @@ public class TvPlayerActivity extends BaseActivity {
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                TvPlayer tvPlayer = TvManager.getPlayerManager();
                 try {
 //                    if (!mIsSurfaceDestroyed) {
-                    tvPlayer.setDisplay(holder);
+                    mTvOperate.setDisplay(holder);
                     // 产生一个新的UUID作为日志标识
                     mUUID = String.valueOf(System.currentTimeMillis());
                     LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
@@ -183,20 +182,15 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void init() {
-        mTvOperate = new TvOperate();
 
-        TvOsType.EnumInputSource inputSource = mInputSource[mSession.getTvInputSource()];
-        try {
-            TvManager.setInputSource(inputSource);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
+        TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
+        mTvOperate.setSignalSource(tvSignal);
 
         // 填充节目列表到mChannelList
         fillChannelList();
 
         // 输入源为ANT模拟电视信号时，显示当前频道
-        if (inputSource == TvOsType.EnumInputSource.E_INPUT_SOURCE_ATV) {
+        if (tvSignal == TVSignal.ATV) {
             if (mChannelList == null || mChannelList.size() == 0) {
                 mChannelTipRl.setVisibility(View.GONE);
                 mHandler.post(new Runnable() {
@@ -216,7 +210,7 @@ public class TvPlayerActivity extends BaseActivity {
             mIsAutoTurning = false;
             autoTurning();
         } else {
-            if (mSession.getTvInputSource() >= mInputSource.length)
+            if (mSession.getTvInputSource() >= TVSignal.values().length)
                 mSession.setTvInputSource(0);
         }
         setVolume(mSession.getTvVolume());
@@ -231,7 +225,7 @@ public class TvPlayerActivity extends BaseActivity {
     private void initCurrentProgram() {
         boolean foundProgram = false;
         for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
-            AtvProgramInfo program = mChannelList.get(i);
+            AtvChannel program = mChannelList.get(i);
             if (program.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
                 mCurrentProgramIndex = i;
                 foundProgram = true;
@@ -252,16 +246,16 @@ public class TvPlayerActivity extends BaseActivity {
         // 自动搜台时直接把输入源切为ANT
         mSession.setTvInputSource(0);
 
-        mTvOperate.autoTuning(mTurningCallback);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 showAutoTurningDialog();
             }
         });
+        mTvOperate.autoTuning(mTurningCallback);
     }
 
-    private TvOperate.AutoTurningCallback mTurningCallback = new TvOperate.AutoTurningCallback() {
+    private AutoTurningCallback mTurningCallback = new AutoTurningCallback() {
         @Override
         public void onProgressUpdate(int percent) {
             if (mChannelSearchingDialog != null && mChannelSearchingDialog.isShowing()) {
@@ -314,7 +308,7 @@ public class TvPlayerActivity extends BaseActivity {
      *
      * @param program
      */
-    private void changeChannel(AtvProgramInfo program) {
+    private void changeChannel(AtvChannel program) {
         if (program.getChennalNum() == mSession.getTvCurrentChannelNumber())
             return;
         mTvOperate.switchATVChannel(program.getChennalNum());
@@ -342,7 +336,7 @@ public class TvPlayerActivity extends BaseActivity {
     private void showChannelTips() {
         mHandler.removeCallbacks(mHideChannelTipRunnable);
         String name = "";
-        for (AtvProgramInfo pro : mChannelList) {
+        for (AtvChannel pro : mChannelList) {
             if (pro.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
                 name = pro.getChannelName();
                 LogUtils.d("name:" + pro.getChannelName() + " freq:" + pro.getFreq());
@@ -367,10 +361,10 @@ public class TvPlayerActivity extends BaseActivity {
      */
     private void fillChannelList() {
 
-        AtvProgramInfo[] programList = mTvOperate.getAllProgramInfo();
+        AtvChannel[] programList = mTvOperate.getAtvChannels();
         mChannelList = new ArrayList<>();
         if (programList != null && programList.length > 0) {
-            for (AtvProgramInfo program : programList) {
+            for (AtvChannel program : programList) {
                 program.setChennalNum(program.getChennalNum() + 1);
                 mChannelList.add(program);
             }
@@ -414,7 +408,7 @@ public class TvPlayerActivity extends BaseActivity {
                 handled = true;
                 break;
             // 切换到广告模式
-            case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
+            case KeyCodeConstant.KEY_CODE_SWITCH_ADS_TV:
                 gotoAdsPlayer();
                 handled = true;
                 break;
@@ -488,10 +482,10 @@ public class TvPlayerActivity extends BaseActivity {
 
     private void uploadProgram() {
 
-        AtvProgramInfo[] programs = mTvOperate.getAllProgramInfo();
+        AtvChannel[] programs = mTvOperate.getAtvChannels();
         // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
         if (programs != null && programs.length > 0) {
-            for (AtvProgramInfo program : programs) {
+            for (AtvChannel program : programs) {
                 program.setChennalNum(program.getChennalNum() + 1);
             }
         }
@@ -542,15 +536,12 @@ public class TvPlayerActivity extends BaseActivity {
         ShowMessage.showToastLong(mContext, type);
 
         // 设置输入源
-        try {
-            TvManager.setInputSource(mInputSource[mSession.getTvInputSource()]);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
+        TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
+        mTvOperate.setSignalSource(tvSignal);
 
-        if (mInputSource[mSession.getTvInputSource()] == TvOsType.EnumInputSource.E_INPUT_SOURCE_ATV) {
+        if (tvSignal == TVSignal.ATV) {
             for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
-                AtvProgramInfo program = mChannelList.get(i);
+                AtvChannel program = mChannelList.get(i);
                 if (program.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
                     mCurrentProgramIndex = i;
                     break;
@@ -615,21 +606,23 @@ public class TvPlayerActivity extends BaseActivity {
         super.onPause();
 
         mHandler.removeCallbacks(mBackToAdsPlayerRunnable);
-        try {
-            TvManager.setInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            TvManager.setInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
+//        } catch (TvCommonException e) {
+//            e.printStackTrace();
+//        }
+
+        mTvOperate.exitTv();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            TvManager.setInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            TvManager.setInputSource(TvOsType.EnumInputSource.E_INPUT_SOURCE_STORAGE);
+//        } catch (TvCommonException e) {
+//            e.printStackTrace();
+//        }
         mHandler.removeCallbacksAndMessages(null);
         if (mChannelListDialog != null) {
             mChannelListDialog.onDestroy();
