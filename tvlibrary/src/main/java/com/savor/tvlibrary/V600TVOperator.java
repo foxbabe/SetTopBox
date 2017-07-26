@@ -78,6 +78,7 @@ class V600TVOperator implements ITVOperator {
             for (int i = 0; i < tvPrograms.size(); i++) {
                 TvProgram program = tvPrograms.get(i);
                 AtvChannel channel = new AtvChannel();
+                channel.setChennalNum(i);
                 channel.setFreq(program.getlFreq());
                 channel.setChannelName(program.getStrName());
                 atvChannels[i] = channel;
@@ -167,7 +168,7 @@ class V600TVOperator implements ITVOperator {
         public void onChannelScanProgress(ChannelScanInfo arg0) {
             SystemProperties.set("persist.atv.scanlock", "1");
             if (turningCallback != null) {
-                turningCallback.onProgressUpdate(arg0.getCurrFreq() / freqRange);
+                turningCallback.onProgressUpdate(arg0.getCurrFreq() * 100 / freqRange);
             }
         }
 
