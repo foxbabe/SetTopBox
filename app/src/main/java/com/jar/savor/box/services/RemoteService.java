@@ -17,6 +17,7 @@ import com.jar.savor.box.vo.PptRequestVo;
 import com.jar.savor.box.vo.PptResponseVo;
 import com.jar.savor.box.vo.PrepareRequestVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
+import com.jar.savor.box.vo.QueryStatusResponseVo;
 import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekResponseVo;
@@ -555,6 +556,20 @@ public class RemoteService extends Service {
                         vo.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resJson = new Gson().toJson(vo);
                     }
+                    break;
+                case "/queryStatus":
+                    LogUtils.d("enter method listener.queryStatus");
+                    QueryStatusResponseVo statusVo = new QueryStatusResponseVo();
+                    statusVo.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                    statusVo.setInfo("查询成功");
+                    if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                        statusVo.setStatus(1);
+                        statusVo.setDeviceId(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+                        statusVo.setDeviceName(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                    } else {
+                        statusVo.setStatus(0);
+                    }
+                    resJson = new Gson().toJson(statusVo);
                     break;
                 case "/showCode":
                     LogUtils.d("enter method listener.showCode");
