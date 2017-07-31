@@ -1,5 +1,7 @@
 package com.savor.ads.bean;
 
+import android.text.TextUtils;
+
 import com.savor.ads.utils.AppUtils;
 
 import java.text.SimpleDateFormat;
@@ -16,6 +18,7 @@ public class FaceLogBean {
     private long endTime;
     private float totalSeconds;
     private int trackId;
+    private String mediaIds;
 
     public String getUuid() {
         return uuid;
@@ -59,19 +62,19 @@ public class FaceLogBean {
         this.trackId = trackId;
     }
 
-    @Override
-    public String toString() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return "{" +
-                "uuid='" + uuid + '\'' +
-                ", trackId=" + trackId + '\'' +
-                ", startTime='" + df.format(new Date(startTime)) + '\'' +
-                ", endTime='" + df.format(new Date(endTime)) + '\'' +
-                ", totalSeconds='" + totalSeconds + '\'' +
-                '}';
-    }
-
     public float getTotalSeconds() {
         return totalSeconds;
+    }
+
+    public String getMediaIds() {
+        return mediaIds;
+    }
+
+    public void addMediaIds(String mediaId) {
+        if (TextUtils.isEmpty(this.mediaIds)) {
+            this.mediaIds = mediaId;
+        } else {
+            this.mediaIds = this.mediaIds + "," + mediaId;
+        }
     }
 }

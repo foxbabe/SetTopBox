@@ -1,10 +1,13 @@
 package com.savor.ads.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
@@ -66,13 +69,26 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         checkAndPlay();
     }
 
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            faceDetectService = ((FaceDetectService.DetectBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            faceDetectService = null;
+        }
+    };
+    FaceDetectService faceDetectService;
     /**
      * 启动人脸检测service
      */
     private void startFaceDetectService() {
         LogFileUtil.write("will start FaceDetectService");
         Intent intent = new Intent(this, FaceDetectService.class);
-        startService(intent);
+        bindService(intent, connection, BIND_AUTO_CREATE);
+//        startService(intent);
     }
 
     /**
@@ -80,8 +96,11 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
      */
     private void stopFaceDetectService() {
         LogFileUtil.write("will stop FaceDetectService");
-        Intent intent = new Intent(this, FaceDetectService.class);
-        stopService(intent);
+//        Intent intent = new Intent(this, FaceDetectService.class);
+//        stopService(intent);
+        if (connection != null) {
+            unbindService(connection);
+        }
     }
 
     private void registerDownloadReceiver() {
@@ -364,6 +383,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
     }
 
+    public String getCurrentVid() {
+        String vid = null;
+        if (mPlayList != null && mCurrentPlayingIndex >= 0 && mCurrentPlayingIndex < mPlayList.size()) {
+            vid = mPlayList.get(mCurrentPlayingIndex).getVid();
+        }
+        return vid;
+    }
+
     private int mCurrentPlayingIndex = -1;
     @Override
     public void onMediaPrepared(int index) {
@@ -385,6 +412,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
+
+            if ("start".equals(action) && faceDetectService != null) {
+                faceDetectService.notifyPlayingMediaId(mPlayList.get(index).getVid());
+            }
         }
     }
 

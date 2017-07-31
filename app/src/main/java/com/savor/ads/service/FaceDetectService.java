@@ -1,5 +1,6 @@
 package com.savor.ads.service;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -22,8 +24,10 @@ import android.view.WindowManager;
 import com.megvii.facepp.sdk.Facepp;
 import com.megvii.licensemanager.sdk.LicenseManager;
 import com.savor.ads.R;
+import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.bean.FaceLogBean;
 import com.savor.ads.log.FaceDetectLogUtil;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
@@ -39,6 +43,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -72,7 +77,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     private Handler mHandler;
 
     private HashMap<Integer, Long> mFaceTrackTime = new HashMap<>();
-    private HashMap<Integer, FaceLogBean> mWatchingMap = new HashMap<>();
+    private ConcurrentHashMap<Integer, FaceLogBean> mWatchingMap = new ConcurrentHashMap<>();
     private static final int DETECT_THRESHOLD = 2 * 1000;
 
     private boolean isSuccess;
@@ -96,19 +101,36 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        LogUtils.d("onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    DetectBinder binder = new DetectBinder();
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        LogUtils.d("onBind");
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 requireLicense();
             }
         });
-        return super.onStartCommand(intent, flags, startId);
+        return binder;
     }
 
-    @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public boolean onUnbind(Intent intent) {
+        LogUtils.d("onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    public void notifyPlayingMediaId(String mediaId) {
+        if (mediaId != null && mWatchingMap != null) {
+            for (FaceLogBean bean : mWatchingMap.values()) {
+                bean.addMediaIds(mediaId);
+            }
+        }
     }
 
     private void requireLicense() {
@@ -419,6 +441,12 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                     HashMap<Integer, Long> newMap = new HashMap<Integer, Long>();
                     int[] pointColors = new int[faces.length];
                     if (faces.length >= 0) {
+                        String vid = null;
+                        Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
+                        if (ac != null && ac instanceof AdsPlayerActivity) {
+                            vid = ((AdsPlayerActivity) ac).getCurrentVid();
+                        }
+
                         for (int c = 0; c < faces.length; c++) {
 //                    if (is106Points)
 //                        facepp.getLandmark(faces[c], Facepp.FPP_GET_LANDMARK106);
@@ -455,6 +483,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                                             faceLogBean.setStartTime(System.currentTimeMillis());
                                             faceLogBean.setNewestFrameIndex(mFrameIndex);
                                             faceLogBean.setTrackId(face.trackID);
+                                            faceLogBean.addMediaIds(vid);
                                             mWatchingMap.put(face.trackID, faceLogBean);
                                         } else {
                                             FaceLogBean faceLogBean = mWatchingMap.get(face.trackID);
@@ -514,6 +543,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
     @Override
     public void onDestroy() {
+        LogUtils.d("onDestroy");
         super.onDestroy();
         if (cameraInst != null) {
             cameraInst.stopPreview();
@@ -524,6 +554,12 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         if (facepp != null) {
             facepp.release();
             facepp = null;
+        }
+    }
+
+    public class DetectBinder extends Binder {
+        public FaceDetectService getService() {
+            return FaceDetectService.this;
         }
     }
 }
