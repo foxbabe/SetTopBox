@@ -121,7 +121,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
             licenseManager.setAuthTimeBufferMillis(0);
 
-            // 测试KEY不管传什么时长授权有效期都只有1天，换成正式KEY后需把授权时长换成KEY对应的时长
+            // TODO 测试KEY不管传什么时长授权有效期都只有1天，换成正式KEY后需把授权时长换成KEY对应的时长
             licenseManager.takeLicenseFromNetwork(uuid, Util.API_KEY, Util.API_SECRET, apiName,
                     LicenseManager.DURATION_30DAYS, "Landmark", "1", true, new LicenseManager.TakeLicenseCallback() {
                         @Override
