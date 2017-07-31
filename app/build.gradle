@@ -15,8 +15,8 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017070601
-        versionName "1.1.4"
+        versionCode 2017073101
+        versionName "1.1.5"
 
         multiDexEnabled true
     }
@@ -76,6 +76,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    provided fileTree(include: ['*.jar'], dir: 'provided')
     compile "com.android.support:support-v4:$SUPPORT_LIB_VERSION"
     compile "com.android.support:appcompat-v7:$SUPPORT_LIB_VERSION"
     //  rxjava 本例中线程切换要用到，代替handler
