@@ -763,31 +763,43 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
         // 检测抽奖时间
         if (Session.get(mContext).getPrizeInfo() != null) {
-            String tips = "";
-            boolean checkPass = false;
-            for (AwardTime awardTime : Session.get(mContext).getPrizeInfo().getAward_time()) {
-                if (awardTime != null) {
-                    tips += awardTime.getStart_time() + "-" + awardTime.getEnd_time() + "；";
-                    Date now = new Date();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    try {
-                        Date startDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getStart_time());
-                        Date endDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getEnd_time());
-                        if (now.compareTo(startDate) >= 0 && now.compareTo(endDate) < 0) {
-                            checkPass = true;
-                            break;
+            String nowStr = AppUtils.getCurTime("yyyy-MM-dd");
+            if (nowStr.equals(Session.get(mContext).getPrizeInfo().getDate_time())) {
+                String tips = "";
+                boolean checkPass = false;
+                for (AwardTime awardTime : Session.get(mContext).getPrizeInfo().getAward_time()) {
+                    if (awardTime != null) {
+                        tips += awardTime.getStart_time() + "-" + awardTime.getEnd_time() + "；";
+                        Date now = new Date();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        try {
+                            Date startDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getStart_time());
+                            Date endDate = simpleDateFormat.parse(Session.get(mContext).getPrizeInfo().getDate_time() + " " + awardTime.getEnd_time());
+                            if (now.compareTo(startDate) >= 0 && now.compareTo(endDate) < 0) {
+                                checkPass = true;
+                                break;
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
                     }
                 }
-            }
 
-            if (!checkPass) {
+                if (!checkPass) {
+                    localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    localResult.setInfo("游戏时间为" + tips + "准备好姿势来砸吧！");
+                    return localResult;
+                }
+            } else {
+                Session.get(mContext).setPrizeInfo(null);
                 localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                localResult.setInfo("游戏时间为" + tips + "准备好姿势来砸吧！");
+                localResult.setInfo("当前包间没有参与活动");
                 return localResult;
             }
+        } else {
+            localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+            localResult.setInfo("当前包间没有参与活动");
+            return localResult;
         }
 
         if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
