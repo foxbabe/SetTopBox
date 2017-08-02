@@ -151,11 +151,6 @@ public class LogUploadService {
         File[] files = getAllLogInfo(AppUtils.StorageFile.log);
         if (files != null && files.length > 0) {
             for (File file : files) {
-                if (file.isFile() && file.length() <= 0) {
-                    file.delete();
-                    continue;
-                }
-
                 final String name = file.getName();
                 final String path = file.getPath();
                 if (file.isFile()) {
