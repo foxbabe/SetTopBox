@@ -175,13 +175,7 @@ public class LogUploadService {
                         }
                         if (zipFile.exists()) {
                             final String object_key = archive.substring(1, archive.length());
-                            String oss_file_path = null;
-                            if (name.contains(ConstantValues.RSTR_LOG_SUFFIX)) {
-                                oss_file_path =  session.getOss_file_path() + "restaurant" + File.separator +
-                                        name.replace(ConstantValues.RSTR_LOG_SUFFIX, "") + ".zip";
-                            } else {
-                                oss_file_path = session.getOss_file_path() + name + ".zip";
-                            }
+                            String oss_file_path = session.getOss_file_path() + name + ".zip";
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,

@@ -16,7 +16,6 @@ import java.io.IOException;
  */
 public class LogProduceService {
 	private FileWriter mLogWriter = null;
-	private FileWriter mRstrLogWriter = null;
 	private Context mContext=null;
 	private String logTime=null;
 	private LogReportUtil logReportUtil = null;
@@ -64,26 +63,6 @@ public class LogProduceService {
                             }
                         }
 
-                        if (mRstrLogWriter != null) {
-                            if (LogReportUtil.getRstrLogNum() > 0) {
-                                try {
-                                    RestaurantLogBean mparam = logReportUtil.takeRstrLog();
-                                    if (mparam != null) {
-                                        String log = makeRstrLog(mparam);
-                                        LogUtils.i("log:" + log);
-                                        try {
-                                            mRstrLogWriter.write(log);
-                                            mRstrLogWriter.flush();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-
 						try {
 							Thread.sleep(5*1000);
 						} catch (InterruptedException e) {
@@ -110,15 +89,6 @@ public class LogProduceService {
 				e.printStackTrace();
 			}
 			mLogWriter = null;
-		}
-
-		if (mRstrLogWriter != null) {
-			try {
-                mRstrLogWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            mRstrLogWriter = null;
 		}
 	}
 
@@ -194,7 +164,6 @@ public class LogProduceService {
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
 			logTime = time;
 			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
-			mRstrLogWriter = new FileWriter(path + boxMac + "_" + time + ConstantValues.RSTR_LOG_SUFFIX + ".blog",true);
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
