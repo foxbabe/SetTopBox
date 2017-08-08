@@ -71,18 +71,19 @@ public class LogUploadService {
                         String[] split = name.split("_");
                         String currentDate = AppUtils.getTime("month");
                         String currentMonth = currentDate.substring(4, 6);
+                        String logMonth = null;
                         if (split.length == 4) {    // 老版日志命名结构
-                            String logMonth = split[3].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
-                                file.delete();
-                            }
+                            logMonth = split[3].substring(4, 6);
                         } else if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            String logMonth = split[1].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
+                            logMonth = split[1].substring(4, 6);
+                        }
+                        if (!TextUtils.isEmpty(logMonth)) {
+                            int logMonthInt = Integer.parseInt(logMonth);
+                            int curMonthInt = Integer.parseInt(currentMonth);
+                            int diff = curMonthInt - logMonthInt;
+                            diff = diff < 0 ? diff + 12 : diff;
+                            // 删除大于1个月的日志
+                            if (diff > 1) {
                                 file.delete();
                             }
                         }

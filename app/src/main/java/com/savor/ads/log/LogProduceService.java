@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.FileWriter;
@@ -61,7 +62,10 @@ public class LogProduceService {
                                     e.printStackTrace();
                                 }
                             }
-                        }
+                        } else {
+							LogFileUtil.write("Log FileWriter is null, will recreate file.");
+							createFile();
+						}
 
 						try {
 							Thread.sleep(5*1000);
@@ -166,6 +170,7 @@ public class LogProduceService {
 			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
 		} catch (Exception e2) {
 			e2.printStackTrace();
+			LogFileUtil.writeException(e2);
 		}
 	}
 
