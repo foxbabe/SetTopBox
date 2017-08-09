@@ -5,7 +5,6 @@ import android.text.TextUtils;
 
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -164,7 +163,7 @@ public class LogProduceService {
 //					||TextUtils.isEmpty(boxId)){
 //					return;
 //			}
-			String time = AppUtils.getTime("hour");
+			String time = AppUtils.getCurTime("yyyyMMddHH");
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
 			logTime = time;
 			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);

@@ -14,10 +14,9 @@ import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.Hashtable;
 
 public class LogUploadService {
@@ -69,19 +68,23 @@ public class LogUploadService {
 
                         String name = file.getName();
                         String[] split = name.split("_");
-                        String currentDate = AppUtils.getTime("month");
-                        String currentMonth = currentDate.substring(4, 6);
+                        String currentMonth = AppUtils.getCurTime("yyyyMM");
                         String logMonth = null;
-                        if (split.length == 4) {    // 老版日志命名结构
-                            logMonth = split[3].substring(4, 6);
-                        } else if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            logMonth = split[1].substring(4, 6);
+                        /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
+                            logMonth = split[2].substring(0, 6);
+                        } else */if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
+                            logMonth = split[1].substring(0, 6);
+                        } else {
+                            file.delete();
+                            continue;
                         }
                         if (!TextUtils.isEmpty(logMonth)) {
-                            int logMonthInt = Integer.parseInt(logMonth);
-                            int curMonthInt = Integer.parseInt(currentMonth);
-                            int diff = curMonthInt - logMonthInt;
-                            diff = diff < 0 ? diff + 12 : diff;
+                            int diff = 0;
+                            try {
+                                diff = AppUtils.calculateMonthDiff(logMonth, currentMonth, "yyyyMM");
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                             // 删除大于1个月的日志
                             if (diff > 1) {
                                 file.delete();

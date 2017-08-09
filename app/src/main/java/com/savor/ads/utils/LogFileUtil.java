@@ -138,28 +138,21 @@ public class LogFileUtil {
     }
 
     public static void writeBootInfo(String bootTime) {
-        LogUtils.d("writeBootInfo bootTime = " + bootTime);
         if (TextUtils.isEmpty(bootTime)) {
             return;
         }
-        final String month = bootTime.substring(5, 7);
+        final String month = AppUtils.getCurTime("yyyyMM");
 
         // 删除6个月前的开机日志
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    int monthInt = Integer.parseInt(month);
-
-                    LogUtils.d("Try to delete old log, mBootDirPath:" + mBootDirPath);
                     File bootLogDir = new File(mBootDirPath);
                     for (File file : bootLogDir.listFiles()) {
                         try {
                             String logMonth = file.getName();
-                            int logMonthInt = Integer.parseInt(logMonth);
-                            int diff = monthInt - logMonthInt;
-                            diff = diff < 0 ? diff + 12 : diff;
-                            LogUtils.d("diff = " +diff);
+                            int diff = AppUtils.calculateMonthDiff(logMonth, month, "yyyyMM");
                             if (diff > 6) {
                                 file.delete();
                             }
