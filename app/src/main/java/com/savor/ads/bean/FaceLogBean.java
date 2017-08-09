@@ -43,7 +43,7 @@ public class FaceLogBean {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
-        this.totalSeconds = (this.endTime - this.startTime) / 1000.0f;
+        this.totalSeconds = (this.endTime - this.startTime) / 1000.0f + 2;
     }
 
     public long getNewestFrameIndex() {
