@@ -35,6 +35,7 @@ import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.SaveFileData;
 
@@ -830,6 +831,7 @@ public class Session {
         setLastStartTime(this.startTime);
         this.startTime = startTime;
         writePreference(new Pair<String, Object>(P_APP_STARTTIME, startTime));
+        LogFileUtil.writeBootInfo(startTime);
     }
 
     public String getLastStartTime() {

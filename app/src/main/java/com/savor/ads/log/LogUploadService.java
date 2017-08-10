@@ -14,10 +14,9 @@ import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.Hashtable;
 
 public class LogUploadService {
@@ -69,20 +68,25 @@ public class LogUploadService {
 
                         String name = file.getName();
                         String[] split = name.split("_");
-                        String currentDate = AppUtils.getTime("month");
-                        String currentMonth = currentDate.substring(4, 6);
-                        if (split.length == 4) {    // 老版日志命名结构
-                            String logMonth = split[3].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
-                                file.delete();
+                        String currentMonth = AppUtils.getCurTime("yyyyMM");
+                        String logMonth = null;
+                        /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
+                            logMonth = split[2].substring(0, 6);
+                        } else */if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
+                            logMonth = split[1].substring(0, 6);
+                        } else {
+                            file.delete();
+                            continue;
+                        }
+                        if (!TextUtils.isEmpty(logMonth)) {
+                            int diff = 0;
+                            try {
+                                diff = AppUtils.calculateMonthDiff(logMonth, currentMonth, "yyyyMM");
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
-                        } else if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            String logMonth = split[1].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
+                            // 删除大于1个月的日志
+                            if (diff > 1) {
                                 file.delete();
                             }
                         }
@@ -194,11 +198,6 @@ public class LogUploadService {
         File[] files = getAllLogInfo(AppUtils.StorageFile.log);
         if (files != null && files.length > 0) {
             for (File file : files) {
-                if (file.isFile() && file.length() <= 0) {
-                    file.delete();
-                    continue;
-                }
-
                 final String name = file.getName();
                 final String path = file.getPath();
                 if (file.isFile()) {
@@ -223,13 +222,7 @@ public class LogUploadService {
                         }
                         if (zipFile.exists()) {
                             final String object_key = archive.substring(1, archive.length());
-                            String oss_file_path = null;
-                            if (name.contains(ConstantValues.RSTR_LOG_SUFFIX)) {
-                                oss_file_path =  session.getOss_file_path() + "restaurant" + File.separator +
-                                        name.replace(ConstantValues.RSTR_LOG_SUFFIX, "") + ".zip";
-                            } else {
-                                oss_file_path = session.getOss_file_path() + name + ".zip";
-                            }
+                            String oss_file_path = session.getOss_file_path() + name + ".zip";
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,

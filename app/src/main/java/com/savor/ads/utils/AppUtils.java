@@ -49,6 +49,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -589,6 +590,17 @@ public class AppUtils {
     public static Date parseDate(String dateStr) throws ParseException {
         SimpleDateFormat df = new SimpleDateFormat(DATEFORMAT_YYMMDD_HHMMSS);//设置日期格式
         return df.parse(dateStr);
+    }
+
+    public static int calculateMonthDiff(String dateSmall, String dateBig, String format) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        Calendar bef = Calendar.getInstance();
+        Calendar aft = Calendar.getInstance();
+        bef.setTime(sdf.parse(dateSmall));
+        aft.setTime(sdf.parse(dateBig));
+        int result = aft.get(Calendar.MONTH) - bef.get(Calendar.MONTH);
+        int month = (aft.get(Calendar.YEAR) - bef.get(Calendar.YEAR)) * 12;
+        return month + result;
     }
 
     /**
