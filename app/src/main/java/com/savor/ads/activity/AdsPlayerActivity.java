@@ -10,9 +10,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
+import com.savor.ads.bean.FaceLogBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
@@ -29,11 +32,12 @@ import com.savor.ads.utils.ShowMessage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback {
+public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, FaceDetectService.FaceDetectListener {
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
@@ -47,11 +51,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     private static final int DELAY_TIME = 2;
 
+    private LinearLayout mFaceLl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ads_player);
 
+        mFaceLl = (LinearLayout) findViewById(R.id.ll_faces);
         mSavorVideoView = (SavorVideoView) findViewById(R.id.video_view);
         mSavorVideoView.setIfShowPauseBtn(false);
         mSavorVideoView.setIfShowLoading(false);
@@ -73,6 +80,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             faceDetectService = ((FaceDetectService.DetectBinder) service).getService();
+            faceDetectService.setFaceDetectListener(AdsPlayerActivity.this);
         }
 
         @Override
@@ -463,5 +471,31 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity onDestroy");
         super.onDestroy();
         unregisterReceiver(mDownloadCompleteReceiver);
+    }
+
+    int mCurrentFaceCount = 0;
+    @Override
+    public void onFaceChange(ConcurrentHashMap<Integer, FaceLogBean> watchingFaces) {
+        int count = 0;
+        if (watchingFaces != null) {
+            count = watchingFaces.values().size();
+        }
+        final int diff = count - mCurrentFaceCount;
+        mCurrentFaceCount = count;
+        mFaceLl.post(new Runnable() {
+            @Override
+            public void run() {
+                if (diff > 0) {
+                    for (int i = 0; i < Math.abs(diff); i++) {
+                        View view = View.inflate(mContext, R.layout.item_face_layout, null);
+                        mFaceLl.addView(view);
+                    }
+                } else if (diff < 0 && mFaceLl.getChildCount() >= Math.abs(diff)) {
+                    for (int i = 0; i < Math.abs(diff); i++) {
+                        mFaceLl.removeViewAt(0);
+                    }
+                }
+            }
+        });
     }
 }

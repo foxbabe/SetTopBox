@@ -68,7 +68,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     private LicenseManager licenseManager;
     private Facepp facepp;
 
-    private int min_face_size = 200;
+    private int min_face_size = 10;
     private int detection_interval = 25;
     private float roi_ratio = 0.8f;
     private Display mDisplay;
@@ -415,6 +415,11 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     }
 
     long mFrameIndex = 0;
+    FaceDetectListener faceDetectListener;
+
+    public void setFaceDetectListener(FaceDetectListener faceDetectListener) {
+        this.faceDetectListener = faceDetectListener;
+    }
 
     @Override
     public void onPreviewFrame(final byte[] data, Camera camera) {
@@ -435,10 +440,10 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                 }
                 final Facepp.Face[] faces = facepp.detect(data, width, height, Facepp.IMAGEMODE_NV21);
 
+                HashMap<Integer, Long> newMap = new HashMap<Integer, Long>();
                 if (faces != null) {
                     confidence = 0.0f;
 
-                    HashMap<Integer, Long> newMap = new HashMap<Integer, Long>();
                     int[] pointColors = new int[faces.length];
                     if (faces.length >= 0) {
                         String vid = null;
@@ -505,23 +510,28 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
                         }
 
-                        for (Integer trackId :
-                                mWatchingMap.keySet()) {
-                            FaceLogBean faceLogBean = mWatchingMap.get(trackId);
-                            if (faceLogBean.getNewestFrameIndex() != mFrameIndex) {
-                                faceLogBean.setEndTime(System.currentTimeMillis());
-                                FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(faceLogBean);
-
-                                mWatchingMap.remove(trackId);
-                            }
-                        }
                     } else {
                         pitch = 0.0f;
                         yaw = 0.0f;
                         roll = 0.0f;
                     }
-                    mFaceTrackTime = newMap;
+                }
 
+                mFaceTrackTime = newMap;
+
+                for (Integer trackId :
+                        mWatchingMap.keySet()) {
+                    FaceLogBean faceLogBean = mWatchingMap.get(trackId);
+                    if (faceLogBean.getNewestFrameIndex() != mFrameIndex) {
+                        faceLogBean.setEndTime(System.currentTimeMillis());
+                        FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(faceLogBean);
+
+                        mWatchingMap.remove(trackId);
+                    }
+                }
+
+                if (faceDetectListener != null) {
+                    faceDetectListener.onFaceChange(mWatchingMap);
                 }
                 isSuccess = false;
             }
@@ -561,5 +571,9 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         public FaceDetectService getService() {
             return FaceDetectService.this;
         }
+    }
+
+    public interface FaceDetectListener {
+        void onFaceChange(ConcurrentHashMap<Integer, FaceLogBean> watchingFaces);
     }
 }
