@@ -212,6 +212,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity onStop " + this.hashCode());
         mSavorVideoView.onStop();
         stopFaceDetectService();
+        mCurrentFaceCount = 0;
+        if (mFaceLl != null) {
+            mFaceLl.removeAllViews();
+        }
         super.onStop();
     }
 

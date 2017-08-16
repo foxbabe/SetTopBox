@@ -555,16 +555,33 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     public void onDestroy() {
         LogUtils.d("onDestroy");
         super.onDestroy();
-        if (cameraInst != null) {
-            cameraInst.stopPreview();
-            cameraInst.setPreviewCallback(null);
-            cameraInst.release();
-            cameraInst = null;
-        }
-        if (facepp != null) {
-            facepp.release();
-            facepp = null;
-        }
+        new Thread(new Runnable() {
+            public void run() {
+                if (cameraInst != null) {
+                    LogUtils.d("Will stop and release camera");
+                    LogFileUtil.writeApInfo("Will stop and release camera");
+                    try {
+                        cameraInst.setPreviewCallback(null);
+                        LogUtils.d("Will stopPreview");
+                        LogFileUtil.writeApInfo("Will stopPreview");
+                        cameraInst.stopPreview();
+//                        cameraInst.unlock();
+                        LogUtils.d("Will release");
+                        LogFileUtil.writeApInfo("Will release");
+                        cameraInst.release();
+                        cameraInst = null;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (facepp != null) {
+                    LogUtils.d("Will release facepp");
+                    LogFileUtil.writeApInfo("Will release facepp");
+                    facepp.release();
+                    facepp = null;
+                }
+            }
+        }).start();
     }
 
     public class DetectBinder extends Binder {
