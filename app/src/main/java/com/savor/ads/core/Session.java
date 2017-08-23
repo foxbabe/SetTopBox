@@ -161,10 +161,14 @@ public class Session {
 //     * oss上传桶名称
 //     */
 //    private String oss_bucket;
+//    /**
+//     * oss上传路径
+//     */
+//    private String oss_file_path;
     /**
-     * oss上传路径
+     * oss区域ID
      */
-    private String oss_file_path;
+    private String ossAreaId;
 
     private boolean mIsConnectedToSP;
     /** 呼玛验证码*/
@@ -241,7 +245,8 @@ public class Session {
         mEthernetMac = mPreference.loadStringKey(P_APP_ETHERNET_MAC, null);
         mWlanMac = mPreference.loadStringKey(P_APP_WLAN_MAC, null);
 //        oss_bucket = mPreference.loadStringKey(P_APP_OSS_BUCKET,null);
-        oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
+//        oss_file_path = mPreference.loadStringKey(P_APP_OSS_PATH,null);
+        ossAreaId = mPreference.loadStringKey(P_APP_OSS_AREA_ID,null);
         mAuthCode = mPreference.loadStringKey(P_APP_AUTH_CODE,null);
         mSplashPath = mPreference.loadStringKey(P_APP_SPLASH_PATH, "/Pictures/logo.jpg");
         mLoadingPath = mPreference.loadStringKey(P_APP_LOADING_PATH, "/Pictures/loading.jpg");
@@ -317,8 +322,9 @@ public class Session {
                 || P_APP_LASTSTARTTIME.equals(key)
                 || P_APP_ETHERNET_MAC.equals(key)
                 || P_APP_WLAN_MAC.equals(key)
-                || P_APP_OSS_PATH.equals(key)
-                || P_APP_OSS_BUCKET.equals(key)
+//                || P_APP_OSS_PATH.equals(key)
+                || P_APP_OSS_AREA_ID.equals(key)
+//                || P_APP_OSS_BUCKET.equals(key)
                 || P_APP_AUTH_CODE.equals(key)
                 || P_APP_SPLASH_PATH.equals(key)
                 || P_APP_LOADING_PATH.equals(key)
@@ -902,14 +908,23 @@ public class Session {
 //        this.oss_bucket = oss_bucket;
 //        writePreference(new Pair<String, Object>(P_APP_OSS_BUCKET, oss_bucket));
 //    }
+//
+//    public String getOss_file_path() {
+//        return oss_file_path;
+//    }
+//
+//    public void setOss_file_path(String oss_file_path) {
+//        this.oss_file_path = oss_file_path;
+//        writePreference(new Pair<String, Object>(P_APP_OSS_PATH, oss_file_path));
+//    }
 
-    public String getOss_file_path() {
-        return oss_file_path;
+    public String getOssAreaId() {
+        return ossAreaId;
     }
 
-    public void setOss_file_path(String oss_file_path) {
-        this.oss_file_path = oss_file_path;
-        writePreference(new Pair<String, Object>(P_APP_OSS_PATH, oss_file_path));
+    public void setOssAreaId(String ossAreaId) {
+        this.ossAreaId = ossAreaId;
+        writePreference(new Pair<String, Object>(P_APP_OSS_AREA_ID, ossAreaId));
     }
 
     public boolean isConnectedToSP() {
@@ -1030,10 +1045,12 @@ public class Session {
     public static final String P_APP_ETHERNET_MAC = "com.savor.ads.ethernetMac";
     // 无线网卡MAC地址KEY
     public static final String P_APP_WLAN_MAC = "com.savor.ads.wlanMac";
-    //oss桶名称
-    public static final String P_APP_OSS_BUCKET = "com.savor.ads.oss.bucket";
-    //oss上传路径
-    public static final String P_APP_OSS_PATH = "com.savor.ads.oss.path";
+//    //oss桶名称
+//    public static final String P_APP_OSS_BUCKET = "com.savor.ads.oss.bucket";
+//    //oss上传路径
+//    public static final String P_APP_OSS_PATH = "com.savor.ads.oss.path";
+    //oss区域ID
+    public static final String P_APP_OSS_AREA_ID = "com.savor.ads.oss.areaId";
     //启动图版本key
     public static final String P_APP_SPLASH_VERSION = "com.savor.ads.splashVersion";
     //呼玛验证码key

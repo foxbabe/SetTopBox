@@ -9,6 +9,7 @@ import com.alibaba.sdk.android.oss.OSSClient;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
+import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider;
 import com.savor.ads.BuildConfig;
 import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
@@ -133,7 +134,7 @@ public class LogUploadService {
                                 BuildConfig.OSS_BUCKET_NAME,
                                 oss_file_path,
                                 object_key,
-                                new LogUploadService.UploadResult() {
+                                new UploadCallback() {
                                     @Override
                                     public void isSuccessOSSUpload(boolean flag) {
                                         if (flag) {
@@ -166,26 +167,26 @@ public class LogUploadService {
                     if (time.equals(AppUtils.getTime("hour"))) {
                         continue;
                     }
-                    final String archive = path + ".zip";
+                    final String archivePath = path + ".zip";
 
-                    if (!TextUtils.isEmpty(session.getOss_file_path())) {
+                    if (!TextUtils.isEmpty(session.getOssAreaId())) {
 
                         File sourceFile = new File(path);
-                        final File zipFile = new File(archive);
+                        final File zipFile = new File(archivePath);
                         try {
-                            AppUtils.zipFile(sourceFile, zipFile, name + ".zip");
+                            AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         if (zipFile.exists()) {
-                            final String object_key = archive.substring(1, archive.length());
-                            String oss_file_path = session.getOss_file_path() + name + ".zip";
+                            String localFilePath = archivePath.substring(1, archivePath.length());
+                            String ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator + name + ".zip";
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
-                                    oss_file_path,
-                                    object_key,
-                                    new LogUploadService.UploadResult() {
+                                    ossFilePath,
+                                    localFilePath,
+                                    new UploadCallback() {
                                         @Override
                                         public void isSuccessOSSUpload(boolean flag) {
                                             if (flag) {
@@ -241,7 +242,7 @@ public class LogUploadService {
     }
 
 
-    public interface UploadResult {
+    public interface UploadCallback {
         void isSuccessOSSUpload(boolean flag);
     }
 }
