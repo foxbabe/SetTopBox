@@ -180,7 +180,8 @@ public class LogUploadService {
                         }
                         if (zipFile.exists()) {
                             String localFilePath = archivePath.substring(1, archivePath.length());
-                            String ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator + name + ".zip";
+                            String ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator +
+                                    AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
