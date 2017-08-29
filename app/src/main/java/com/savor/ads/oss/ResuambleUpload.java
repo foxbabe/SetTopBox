@@ -1,7 +1,6 @@
 package com.savor.ads.oss;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.alibaba.sdk.android.oss.ClientException;
 import com.alibaba.sdk.android.oss.OSS;
@@ -22,22 +21,22 @@ import java.io.File;
 public class ResuambleUpload {
 
     private OSS oss;
-    private String testBucket;
-    private String testObject;
+    private String bucketName;
+    private String objectKey;
     private String uploadFilePath;
-    private LogUploadService.UploadResult uploadResult;
-    public ResuambleUpload(OSS client, String testBucket, String testObject, String uploadFilePath, LogUploadService.UploadResult result) {
+    private LogUploadService.UploadCallback mUploadCallback;
+    public ResuambleUpload(OSS client, String bucketName, String objectKey, String uploadFilePath, LogUploadService.UploadCallback result) {
         this.oss = client;
-        this.testBucket = testBucket;
-        this.testObject = testObject;
+        this.bucketName = bucketName;
+        this.objectKey = objectKey;
         this.uploadFilePath = uploadFilePath;
-        this.uploadResult = result;
+        this.mUploadCallback = result;
     }
 
     // 异步断点上传，不设置记录保存路径，只在本次上传内做断点续传
     public void resumableUpload() {
         // 创建断点上传请求
-        ResumableUploadRequest request = new ResumableUploadRequest(testBucket, testObject, uploadFilePath);
+        ResumableUploadRequest request = new ResumableUploadRequest(bucketName, objectKey, uploadFilePath);
         // 设置上传过程回调
         request.setProgressCallback(new OSSProgressCallback<ResumableUploadRequest>() {
             @Override
@@ -50,7 +49,7 @@ public class ResuambleUpload {
             @Override
             public void onSuccess(ResumableUploadRequest request, ResumableUploadResult result) {
                 LogUtils.d("success!");
-                uploadResult.isSuccessOSSUpload(true);
+                mUploadCallback.isSuccessOSSUpload(true);
             }
 
             @Override
@@ -67,7 +66,7 @@ public class ResuambleUpload {
                     LogUtils.e("HostId" + serviceException.getHostId());
                     LogUtils.e("RawMessage" + serviceException.getRawMessage());
                 }
-                uploadResult.isSuccessOSSUpload(false);
+                mUploadCallback.isSuccessOSSUpload(false);
             }
         });
 
@@ -87,7 +86,7 @@ public class ResuambleUpload {
         }
 
         // 创建断点上传请求，参数中给出断点记录文件的保存位置，需是一个文件夹的绝对路径
-        ResumableUploadRequest request = new ResumableUploadRequest(testBucket, testObject, uploadFilePath, recordDirectory);
+        ResumableUploadRequest request = new ResumableUploadRequest(bucketName, objectKey, uploadFilePath, recordDirectory);
         // 设置上传过程回调
         request.setProgressCallback(new OSSProgressCallback<ResumableUploadRequest>() {
             @Override

@@ -763,10 +763,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //        }
         /**桶地址*/
         if (!TextUtils.isEmpty(boiteBean.getAreaId())) {
-            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-            String datestr = format.format(new Date());
-
-            session.setOss_file_path(OSSValues.uploadFilePath + boiteBean.getAreaId() + File.separator + datestr + File.separator);
+            session.setOssAreaId(boiteBean.getAreaId());
         }
 
         // 组合小平台下发的各种版本信息
