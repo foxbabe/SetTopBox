@@ -161,14 +161,20 @@ public class BoxInfoDialog extends Dialog {
         }
 
         if (session.getServerInfo() != null) {
-            if (Session.get(getContext()).isConnectedToSP()) {
+            if (session.isConnectedToSP()) {
                 mServerIpTv.setText(session.getServerInfo().getServerIp());
             } else {
                 mServerIpTv.setText(Html.fromHtml("<font color=#E61A6B>"
                         + session.getServerInfo().getServerIp() + "</font> "));
             }
+            if (session.getServerInfo().getSource() == 3) {
+                mServerIpTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_manual, 0);
+            } else {
+                mServerIpTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_auto, 0);
+            }
         } else {
             mServerIpTv.setText("");
+            mServerIpTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
         }
         mLastPowerOnTimeTv.setText(TextUtils.isEmpty(session.getLastStartTime()) ? "初次开机" : session.getLastStartTime());
         mVolumeTv.setText(String.valueOf(session.getVolume()));
