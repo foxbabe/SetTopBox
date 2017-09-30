@@ -31,7 +31,8 @@ public class KeyCodeConstant {
      * 输入模式切换。广告模式下直接切到电视，电视模式下切换输入源
      * （电视/广播 按钮）
      */
-    public static final int KEY_CODE_CHANGE_SIGNAL = 15;
+    // TODO: 调接口临时改值
+    public static final int KEY_CODE_CHANGE_SIGNAL = 22;
     /**
      * 小遥控的切换按钮
      */
@@ -99,6 +100,7 @@ public class KeyCodeConstant {
      * 切换 广告/电视 模式
      * （咨询 按钮）
      */
-    public static final int KEY_CODE_SWITCH_ADS_TV = 7;
+    // TODO: 调接口临时改值
+    public static final int KEY_CODE_SWITCH_ADS_TV = 21;
     //endregion
 }

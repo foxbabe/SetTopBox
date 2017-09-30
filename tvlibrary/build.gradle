@@ -21,6 +21,6 @@ android {
 }
 
 dependencies {
-    compile files('libs/hitv.jar')
-    provided files('libs/v600framework.jar')
+    provided files('libs/libtv.jar')
+//    provided files('libs/v600framework.jar')
 }

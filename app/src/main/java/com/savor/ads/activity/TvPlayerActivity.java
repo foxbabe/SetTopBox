@@ -118,7 +118,7 @@ public class TvPlayerActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tv_player);
 
-        mTvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.V600);
+        mTvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.JACK);
         handleIntent();
         findView();
         setView();
@@ -184,6 +184,8 @@ public class TvPlayerActivity extends BaseActivity {
     private void init() {
 
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
+        // TODO: 调接口临时写死
+        tvSignal = TVSignal.HDMI;
         mTvOperate.setSignalSource(tvSignal);
 
         // 填充节目列表到mChannelList
