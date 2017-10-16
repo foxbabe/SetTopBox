@@ -1616,8 +1616,7 @@ public class AppUtils {
     public static String findSpecifiedPeriodByType(ArrayList<VersionInfo> versionList, String type) {
         String period = "";
         if (versionList != null && type != null) {
-            for (VersionInfo versionInfo :
-                    versionList) {
+            for (VersionInfo versionInfo : versionList) {
                 if (type.equals(versionInfo.getType())) {
                     period = versionInfo.getVersion();
                     break;

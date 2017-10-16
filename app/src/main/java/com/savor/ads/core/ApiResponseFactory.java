@@ -159,7 +159,7 @@ public class ApiResponseFactory {
             return result;
         }
         switch (action) {
-            case SP_GET_ADVERT_DATA_FROM_JSON:
+            case SP_GET_PROGRAM_DATA_FROM_JSON:
                 result = gson.fromJson(info, new TypeToken<SetTopBoxBean>() {
                 }.getType());
                 break;
