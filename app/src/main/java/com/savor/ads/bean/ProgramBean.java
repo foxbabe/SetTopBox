@@ -12,6 +12,8 @@ public class ProgramBean implements Serializable{
 
     private VersionInfo version;
     private List<MediaLibBean> media_lib;
+    /** 节目单号*/
+    private String menu_num;
 
     public VersionInfo getVersion() {
         return version;
@@ -27,5 +29,13 @@ public class ProgramBean implements Serializable{
 
     public void setMedia_lib(List<MediaLibBean> media_lib) {
         this.media_lib = media_lib;
+    }
+
+    public String getMenu_num() {
+        return menu_num;
+    }
+
+    public void setMenu_num(String menu_num) {
+        this.menu_num = menu_num;
     }
 }

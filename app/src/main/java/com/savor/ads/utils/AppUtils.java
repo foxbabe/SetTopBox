@@ -1584,7 +1584,7 @@ public class AppUtils {
     public static boolean checkPlayTime(Context context) {
         boolean canPlayNext = false;
         Session session = Session.get(context);
-        String pubTime = session.getNextAdvertMediaPubTime();
+        String pubTime = session.getProNextMediaPubTime();
         if (!TextUtils.isEmpty(pubTime)) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
@@ -1593,9 +1593,14 @@ public class AppUtils {
                     LogUtils.d("checkPlayTime 已到达发布时间，将更新期号");
                     LogFileUtil.write("checkPlayTime 已到达发布时间，将更新期号");
                     canPlayNext = true;
-                    session.setPlayListVersion(session.getNextPlayListVersion());
-                    session.setNextPlayListVersion(null);
-                    session.setNextAdvertMediaPubTime(null);
+
+
+                    session.setProPeriod(session.getProNextPeriod());
+                    session.setProNextPeriod(null);
+                    session.setProNextMediaPubTime(null);
+
+                    session.setAdvPeriod(session.getAdvNextPeriod());
+                    session.setAdvNextPeriod(null);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();

@@ -138,7 +138,7 @@ public class BoxInfoDialog extends Dialog {
         mProDownloadPeriodTv.setText(session.getProDownloadPeriod());
         mVodDownloadPeriodTv.setText(session.getVodDownloadPeriod());
 
-        if (!TextUtils.isEmpty(session.getNextAdvertMediaPubTime()) && session.getNextPlayListVersion() != null) {
+        if (!TextUtils.isEmpty(session.getProNextMediaPubTime())) {
             if (!TextUtils.isEmpty(session.getAdsNextPeriod()) && session.getAdsNextPeriod().equals(session.getAdsDownloadPeriod())) {
                 mAdsDownloadPeriodTv.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_check, 0);
             } else {

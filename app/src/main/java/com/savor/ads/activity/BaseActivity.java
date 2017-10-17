@@ -30,7 +30,11 @@ import com.savor.ads.utils.TechnicalLogReporter;
 import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -154,14 +158,53 @@ public abstract class BaseActivity extends Activity {
             if (playList != null && !playList.isEmpty()) {
                 for (int i = 0; i < playList.size(); i++) {
                     PlayListBean bean = playList.get(i);
+
+                    // 特殊处理ads数据
+                    if (bean.getMedia_type().equals(ConstantValues.ADS)) {
+                        String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
+                                + "=? ";
+                        String[] selectionArgs = new String[]{bean.getLocation_id()};
+                        List<PlayListBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
+                        if (list != null && !list.isEmpty()) {
+                            for (PlayListBean item :
+                                    list) {
+                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                Date startDate = null;
+                                Date endDate = null;
+                                try {
+                                    startDate = format.parse(item.getStart_date());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                try {
+                                    endDate = format.parse(item.getEnd_date());
+                                    // 截止日期要加1天
+                                    endDate.setTime(endDate.getTime() + (1000 * 60 * 60 * 24));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Date now = new Date();
+                                if (startDate != null && endDate != null &&
+                                        now.after(startDate) && now.before(endDate)) {
+                                    bean.setVid(item.getVid());
+                                    bean.setDuration(item.getDuration());
+                                    bean.setMd5(item.getMd5());
+                                    bean.setMedia_name(item.getMedia_name());
+                                    bean.setMediaPath(item.getMediaPath());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     File mediaFile = new File(bean.getMediaPath());
                     if (TextUtils.isEmpty(bean.getMd5()) ||
                             TextUtils.isEmpty(bean.getMediaPath()) ||
                             !mediaFile.exists() ||
                             !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
                         LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
-                        // 媒体文件校验失败时删除
-                        playList.remove(i);
+                        // 校验失败时将文件路径置空，下面会删除掉为空的项
+                        bean.setMediaPath(null);
 
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
@@ -186,7 +229,13 @@ public abstract class BaseActivity extends Activity {
             }
 
             if (playList != null && !playList.isEmpty()) {
-                GlobalValues.PLAY_LIST = playList;
+                ArrayList<PlayListBean> list = new ArrayList<>();
+                for (PlayListBean bean : playList) {
+                    if (!TextUtils.isEmpty(bean.getMediaPath())) {
+                        list.add(bean);
+                    }
+                }
+                GlobalValues.PLAY_LIST = list;
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {

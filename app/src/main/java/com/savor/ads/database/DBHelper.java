@@ -73,7 +73,6 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         public static class TableName {
-            public static final String MEDIALIB = "medialib_table";
             public static final String NEWPLAYLIST = "newplaylist_talbe";
             public static final String PLAYLIST = "playlist_talbe";
             public static final String ADSLIST = "adslist_table";
@@ -85,9 +84,8 @@ public class DBHelper extends SQLiteOpenHelper {
      * 数据库名称
      */
     public static final String DATABASE_NAME = "dbsavor.db";
-    /**
-     * 增加infonation_table
-     */
+
+
     private static final int DB_VERSION = 14;
 
     private Context mContext;
@@ -101,11 +99,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        LogFileUtil.writeApInfo("-------初次安装进onCreate-------");
-        /**
-         * 创建媒体库表
-         * */
-        createTable_medialibTrace(db);
+        LogFileUtil.writeApInfo("-------Database onCreate-------");
         /**
          * 创建新一期的播放列表
          * */
@@ -126,63 +120,46 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        LogFileUtil.writeApInfo("-------数据库升级进onUpgrade-------");
-        /**
-         * 创建媒体库表
-         * */
-        upgradeTable_medialibTrace(sqLiteDatabase);
-        /**
-         * 创建新一期的播放列表
-         * */
-        upgradeTable_newplaylistTrace(sqLiteDatabase);
-        /**
-         * 创建正在播放的播放列表
-         */
-        upgradeTable_playlistTrace(sqLiteDatabase);
-        /**
-         * 更新广告内容表
-         */
-        upgradeTable_adsListTrace(sqLiteDatabase);
-        /**
-         * 创建点播下载表
-         */
-        upgradeTable_multicastTrace(sqLiteDatabase);
+        LogFileUtil.writeApInfo("-------Database onUpgrade-------oldVersion=" + oldVersion + ", newVersion=" + newVersion);
 
+        if (newVersion == 14) {
+            // 14版本加入视频Location_id属性来给广告表做匹配
+            try {
+                String alterPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.PLAYLIST + " ADD " + MediaDBInfo.FieldName.LOCATION_ID +" TEXT;";
+                sqLiteDatabase.execSQL(alterPlaylist);
+
+                String alterNewPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.NEWPLAYLIST + " ADD " + MediaDBInfo.FieldName.LOCATION_ID +" TEXT;";
+                sqLiteDatabase.execSQL(alterNewPlaylist);
+
+                /**
+                 * 创建广告内容表
+                 */
+                createTable_adsListTrace(sqLiteDatabase);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
-    private void createTable_medialibTrace(SQLiteDatabase db) {
-        String DATABASE_CREATE = "create table "
-                + MediaDBInfo.TableName.MEDIALIB
-                + " (id INTEGER PRIMARY KEY, "
-                + MediaDBInfo.FieldName.VID + " TEXT, "
-                + MediaDBInfo.FieldName.MD5 + " TEXT, "
-                + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
-                + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.SURFIX + " TEXT, "
-                + MediaDBInfo.FieldName.DURATION + " TEXT, "
-                + MediaDBInfo.FieldName.CREATETIME + " TEXT, "
-                + MediaDBInfo.FieldName.UPDATETIME + " TEXT, "
-                + MediaDBInfo.FieldName.PERIOD + " TEXT, "
-                + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
-                + MediaDBInfo.FieldName.DOWNLOADED + " TEXT" + ");";
-        db.execSQL(DATABASE_CREATE);
-    }
-    private void upgradeTable_medialibTrace(SQLiteDatabase db) {
-        createTempTable(db,MediaDBInfo.TableName.MEDIALIB,MediaDBInfo.TableName.MEDIALIB+"_temp");
-        createTable_medialibTrace(db);
-        String column = "id,"
-                + MediaDBInfo.FieldName.VID + ","
-                + MediaDBInfo.FieldName.MD5 + ","
-                + MediaDBInfo.FieldName.MEDIANAME + ","
-                + MediaDBInfo.FieldName.MEDIATYPE + ","
-                + MediaDBInfo.FieldName.SURFIX + ","
-                + MediaDBInfo.FieldName.DURATION + ","
-                + MediaDBInfo.FieldName.CREATETIME + ","
-                + MediaDBInfo.FieldName.UPDATETIME + ","
-                + MediaDBInfo.FieldName.PERIOD + ","
-                + MediaDBInfo.FieldName.ADS_ORDER + ","
-                + MediaDBInfo.FieldName.DOWNLOADED ;
-        copyTempDataToTable(db,MediaDBInfo.TableName.MEDIALIB,column,MediaDBInfo.TableName.MEDIALIB + "_temp",column);
-    }
+
+//    @Override
+//    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//        LogFileUtil.writeApInfo("-------Database onUpgrade-------oldVersion=" + oldVersion + ", newVersion=" + newVersion);
+//        try {
+//            if (newVersion < 14) {
+//                String alterPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.PLAYLIST + " DROP COLUMN " + MediaDBInfo.FieldName.LOCATION_ID;
+//                db.execSQL(alterPlaylist);
+//
+//                String alterNewPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.NEWPLAYLIST + " DROP COLUMN " + MediaDBInfo.FieldName.LOCATION_ID;
+//                db.execSQL(alterNewPlaylist);
+//
+//                String dropAdsTable = "DROP TABLE " + MediaDBInfo.TableName.ADSLIST;
+//                db.execSQL(dropAdsTable);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     private void createTable_newplaylistTrace(SQLiteDatabase db) {
         String DATABASE_CREATE = "create table "
                 + MediaDBInfo.TableName.NEWPLAYLIST
@@ -196,6 +173,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT " + ");";
         db.execSQL(DATABASE_CREATE);
     }
@@ -215,6 +193,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.MD5;
         copyTempDataToTable(db,MediaDBInfo.TableName.NEWPLAYLIST,column,MediaDBInfo.TableName.NEWPLAYLIST + "_temp",column);
     }
+
     private void createTable_playlistTrace(SQLiteDatabase db) {
         String DATABASE_CREATE = "create table "
                 + MediaDBInfo.TableName.PLAYLIST
@@ -228,6 +207,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT " + ");";
 
         db.execSQL(DATABASE_CREATE);
@@ -377,7 +357,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @throws SQLException
      */
     public SQLiteDatabase open(){
-        if (db==null||!db.isOpen()){
+        if (db == null || !db.isOpen()) {
             db = getWritableDatabase();
             db.enableWriteAheadLogging();
         }
@@ -403,48 +383,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
-    //查询广告下载表
-    public List<MediaLibBean> findMediaLib(String selection, String[] selectionArgs) throws SQLException {
-
-        String[] columns = new String[]{DBHelper.MediaDBInfo.FieldName.MD5,
-                DBHelper.MediaDBInfo.FieldName.MEDIANAME,
-                DBHelper.MediaDBInfo.FieldName.VID,
-                DBHelper.MediaDBInfo.FieldName.SURFIX,
-                MediaDBInfo.FieldName.PERIOD};
-        String groupBy = null;
-        String having = null;
-        String orderBy = null;
-        Cursor cursor = null;
-        List<MediaLibBean> list = null;
-        try {
-//            open();
-            cursor = db.query(MediaDBInfo.TableName.MEDIALIB, columns,
-                    selection, selectionArgs, groupBy, having, orderBy, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    MediaLibBean bean = new MediaLibBean();
-                    bean.setVid(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.VID)));
-                    bean.setMd5(cursor.getString(cursor.getColumnIndex(DBHelper.MediaDBInfo.FieldName.MD5)));
-                    bean.setName(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
-                    bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
-                    list.add(bean);
-                }
-            }
-        } catch (Exception e) {
-            LogUtils.e(e.toString());
-        } finally {
-            try {
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-            } catch (Exception e2) {
-                LogUtils.e(e2.toString());
-            }
-
-        }
-        return list;
-    }
-
     /**
      * 向广告播放列表数据库中插入数据
      *
@@ -468,6 +406,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.PERIOD, playList.getPeriod());
             initialValues.put(MediaDBInfo.FieldName.ADS_ORDER, playList.getOrder());
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
+            initialValues.put(MediaDBInfo.FieldName.LOCATION_ID, playList.getLocation_id());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
             if (-1!=id){
                 String selection=DBHelper.MediaDBInfo.FieldName.ID + "=? ";
@@ -582,6 +521,48 @@ public class DBHelper extends SQLiteOpenHelper {
         return playList;
     }
 
+
+    public List<PlayListBean> findAdsByWhere(String selection, String[] selectionArgs) throws SQLException {
+        Cursor cursor = null;
+        List<PlayListBean> playList = null;
+        try {
+//            open();
+            cursor = db.query(MediaDBInfo.TableName.ADSLIST, null,
+                    selection, selectionArgs, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                playList = new ArrayList<>();
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    PlayListBean bean = new PlayListBean();
+                    bean.setVid(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
+                    bean.setMd5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MD5)));
+                    bean.setMedia_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
+                    bean.setMedia_type(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIATYPE)));
+                    bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
+                    bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
+                    bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                    bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
+                    bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+                    bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
+                    bean.setStart_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.START_DATE)));
+                    bean.setEnd_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.END_DATE)));
+                    playList.add(bean);
+                }
+            }
+        } catch (Exception e) {
+            LogUtils.e(e.toString());
+        } finally {
+            try {
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+            } catch (Exception e2) {
+                LogUtils.e(e2.toString());
+            }
+
+        }
+        return playList;
+    }
+
     /**
      * 广告数据单独入库
      * @param playList
@@ -643,8 +624,8 @@ public class DBHelper extends SQLiteOpenHelper {
             try {
                 //            open();
                 // 拼接查询条件
-                String selection = MediaDBInfo.FieldName.PERIOD + "=? ";
-                String[] args = new String[]{session.getProPeriod()};
+                String selection = MediaDBInfo.FieldName.PERIOD + "=? OR " + MediaDBInfo.FieldName.PERIOD + "=?";
+                String[] args = new String[]{session.getProPeriod(), session.getAdvPeriod()};
 //                ArrayList<VersionInfo> playListVersion = Session.get(mContext).getPlayListVersion();
 //                for (int i = 0; i < playListVersion.size(); i++) {
 //                    VersionInfo version = playListVersion.get(i);
@@ -670,6 +651,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
                         bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
                         bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+                        bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
 
                         playList.add(bean);
                     } while (cursor.moveToNext());

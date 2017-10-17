@@ -102,7 +102,7 @@ public class AppApi {
         private static final long serialVersionUID = -8469661978245513712L;
 
         {
-            put(Action.SP_GET_PROGRAM_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/vod/config");
+            put(Action.SP_GET_PROGRAM_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/vod/config/v2");
             put(Action.SP_GET_ADV_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/adv/config");
             put(Action.SP_GET_ADS_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/ads/config");
             put(Action.SP_GET_ON_DEMAND_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/demand/config");
