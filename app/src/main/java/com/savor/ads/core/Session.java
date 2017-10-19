@@ -99,9 +99,6 @@ public class Session {
     /**下一期要播放的广告时间*/
     private String proNextMediaPubTime;
 
-    private ArrayList<VersionInfo> mPlayListVersion;
-    private ArrayList<VersionInfo> mDownloadingPlayListVersion;
-    private ArrayList<VersionInfo> mNextPlayListVersion;
     /**节目单期号（含节目）*/
     private String proPeriod;
     /**宣传片期号*/
@@ -253,9 +250,11 @@ public class Session {
         mSplashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION, "");
         mLoadingVersion = mPreference.loadStringKey(P_APP_LOADING_VERSION, "");
         mSPVersionInfo = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_SP_VERSION_INFO, ""));
-//        setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
-//        setDownloadingPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, "")));
-//        setNextPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, "")));
+        // 以下三个方法目前作为新老期号存储方式过渡使用
+        setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
+        setDownloadingPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, "")));
+        setNextPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_NEXT_PLAY_LIST_VERSION, "")));
+
         setVodVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, "")));
         setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
         mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
@@ -701,6 +700,33 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_PRO_NEXT_MEDIA_PUBTIME,proNextMediaPubTime));
     }
 
+    public void setPlayListVersion(ArrayList<VersionInfo> playListVersion) {
+        if (playListVersion != null) {
+            setAdsPeriod(AppUtils.findSpecifiedPeriodByType(playListVersion, "ads"));
+            setAdvPeriod(AppUtils.findSpecifiedPeriodByType(playListVersion, "adv"));
+            setProPeriod(AppUtils.findSpecifiedPeriodByType(playListVersion, "pro"));
+            mPreference.removeKey(P_APP_PLAY_LIST_VERSION);
+        }
+    }
+
+    public void setNextPlayListVersion(ArrayList<VersionInfo> nextPlayListVersion) {
+        if (nextPlayListVersion != null) {
+            setAdsNextPeriod(AppUtils.findSpecifiedPeriodByType(nextPlayListVersion, "ads"));
+            setAdvNextPeriod(AppUtils.findSpecifiedPeriodByType(nextPlayListVersion, "adv"));
+            setProNextPeriod(AppUtils.findSpecifiedPeriodByType(nextPlayListVersion, "pro"));
+            mPreference.removeKey(P_APP_NEXT_PLAY_LIST_VERSION);
+        }
+    }
+
+   public void setDownloadingPlayListVersion(ArrayList<VersionInfo> downloadingPlayListVersion) {
+       if (downloadingPlayListVersion != null) {
+           setAdsDownloadPeriod(AppUtils.findSpecifiedPeriodByType(downloadingPlayListVersion, "ads"));
+           setAdvDownloadPeriod(AppUtils.findSpecifiedPeriodByType(downloadingPlayListVersion, "adv"));
+           setProDownloadPeriod(AppUtils.findSpecifiedPeriodByType(downloadingPlayListVersion, "pro"));
+           mPreference.removeKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION);
+       }
+   }
+
     public void setProPeriod(String proPeriod) {
         this.proPeriod = proPeriod;
         writePreference(new Pair<String, Object>(P_APP_PRO_MEDIA_PERIOD,proPeriod));
@@ -1015,6 +1041,11 @@ public class Session {
     public static final String P_APP_SP_VERSION_INFO = "com.savor.ads.spVersionInfo";
     // 奖项设置key
     public static final String P_APP_PRIZE_INFO = "com.savor.ads.prizeInfo";
+
+    public static final String P_APP_PLAY_LIST_VERSION = "com.savor.ads.play_list_version";
+    public static final String P_APP_DOWNLOADING_PLAY_LIST_VERSION = "com.savor.ads.downloading_play_list_version";
+    public static final String P_APP_NEXT_PLAY_LIST_VERSION = "com.savor.ads.next_play_list_version";
+
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;

@@ -616,12 +616,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             if (advDownloadedCount == programAdvBean.getMedia_lib().size()) {
                 isAdvCompleted = true;
-                // 记录日志
-                LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
-                        Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "update", programAdvBean.getVersion().getType(), "",
-                        "", Session.get(context).getVersionName(), programAdvBean.getVersion().getVersion(),
-                        Session.get(context).getVodPeriod(), "");
             } else {
                 isAdvCompleted = false;
             }
@@ -632,6 +626,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (isAdvCompleted && isProCompleted && !TextUtils.isEmpty(programAdvBean.getMenu_num()) &&
                 programAdvBean.getMenu_num().equals(mProCompletedPeriod)) {
             isFirstRun = false;
+            // 记录日志
+            LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
+                    Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "update", programAdvBean.getVersion().getType(), "",
+                    "", Session.get(context).getVersionName(), programAdvBean.getVersion().getVersion(),
+                    Session.get(context).getVodPeriod(), "");
 
             // 标识是立即播放还是预约发布
             boolean fillCurrentBill = true;
@@ -667,7 +667,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 notifyToPlay();
             }
         }
-
     }
 
     /**
@@ -678,9 +677,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             return;
         }
         String adsPeriod = programAdsBean.getVersion().getVersion();
-//        if (!isAdsFirstRun && session.getAdsPeriod().equals(adsPeriod)) {
-//            return;
-//        }
+        if (!isAdsFirstRun && session.getAdsPeriod().equals(adsPeriod)) {
+            return;
+        }
 
         // 先从下载表中删除该期的记录
         String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
@@ -747,11 +746,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
 
         if (isAdsCompleted) {
+            isAdsFirstRun = false;
             session.setAdsPeriod(adsPeriod);
             // 从ADS下载表中删除非该期的记录
             String selectionD = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
             String[] selectionArgsD = new String[]{adsPeriod};
             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.ADSLIST, selectionD, selectionArgsD);
+
+            // 记录日志
+            LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
+                    Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "update", programAdsBean.getVersion().getType(), "",
+                    "", Session.get(context).getVersionName(), programAdsBean.getVersion().getVersion(),
+                    Session.get(context).getVodPeriod(), "");
 
             notifyToPlay();
         }
@@ -817,9 +824,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             Date now = new Date();
                             if (startDate != null && endDate != null &&
                                     now.after(startDate) && now.before(endDate)) {
-                                int order = bean.getOrder();
-                                bean = item;
-                                bean.setOrder(order);
+                                bean.setVid(item.getVid());
+                                bean.setDuration(item.getDuration());
+                                bean.setMd5(item.getMd5());
+                                bean.setMedia_name(item.getMedia_name());
+                                bean.setMediaPath(item.getMediaPath());
                                 break;
                             }
                         }
@@ -832,8 +841,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         !mediaFile.exists() ||
                         !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
                     LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
-                    // 媒体文件校验失败时删除
-                    playList.remove(i);
+                    // 校验失败时将文件路径置空，下面会删除掉为空的项
+                    bean.setMediaPath(null);
 
                     dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
@@ -857,11 +866,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
 
         if (playList != null && !playList.isEmpty()) {
-            GlobalValues.PLAY_LIST = playList;
+            ArrayList<PlayListBean> list = new ArrayList<>();
+            for (PlayListBean bean : playList) {
+                if (!TextUtils.isEmpty(bean.getMediaPath())) {
+                    list.add(bean);
+                }
+            }
+            GlobalValues.PLAY_LIST = list;
             return true;
         } else {
-            LogFileUtil.writeApInfo("出现异常！下载完毕一整期但是数据库没查到对应期的数据！期号：" +
-                    session.getAdsPeriod() + "_" + session.getAdvPeriod() + "_" + session.getProPeriod());
             return false;
         }
     }
