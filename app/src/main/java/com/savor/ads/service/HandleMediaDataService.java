@@ -658,7 +658,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
             // 将下载表中的内容拷贝到播放表
-            dbHelper.copyPlaylist(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, DBHelper.MediaDBInfo.TableName.PLAYLIST);
+            dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, DBHelper.MediaDBInfo.TableName.PLAYLIST);
 
             // 如果是填充当前期（立即播放）的话，通知ADSPlayer播放
             if (fillCurrentBill) {
@@ -682,7 +682,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         // 先从下载表中删除该期的记录
         String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
         String[] selectionArgs = new String[]{adsPeriod};
-        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.ADSLIST, selection, selectionArgs);
+        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, selection, selectionArgs);
 
         session.setAdsDownloadPeriod(adsPeriod);
         boolean isAdsCompleted = false;
@@ -725,7 +725,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         playListBean.setEnd_date(bean.getEnd_date());
                         playListBean.setLocation_id(bean.getLocation_id());
                         // 插库成功，mDownloadedList中加入一条
-                        if (dbHelper.insertOrUpdateAdsList(playListBean, -1)) {
+                        if (dbHelper.insertOrUpdateNewAdsList(playListBean, -1)) {
                             adsDownloadedCount++;
                         }
                     }
@@ -747,10 +747,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             isAdsFirstRun = false;
             session.setAdsPeriod(adsPeriod);
             // 从ADS下载表中删除非该期的记录
-            String selectionD = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
-            String[] selectionArgsD = new String[]{adsPeriod};
-            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.ADSLIST, selectionD, selectionArgsD);
-
+            dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWADSLIST,DBHelper.MediaDBInfo.TableName.ADSLIST);
             // 记录日志
             LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                     Session.get(context).getBoiteId(), Session.get(context).getRoomId(),

@@ -75,6 +75,7 @@ public class DBHelper extends SQLiteOpenHelper {
         public static class TableName {
             public static final String NEWPLAYLIST = "newplaylist_talbe";
             public static final String PLAYLIST = "playlist_talbe";
+            public static final String NEWADSLIST = "new_adslist_table";
             public static final String ADSLIST = "adslist_table";
             public static final String MULTICASTMEDIALIB = "multicastmedialib_table";
         }
@@ -109,9 +110,14 @@ public class DBHelper extends SQLiteOpenHelper {
          */
         createTable_playlistTrace(db);
         /**
-         * 创建广告内容表
+         *创建新的一期广告内容表
+         */
+        createTable_newAdsListTrace(db);
+        /**
+         * 创建正在播放的广告内容表
          */
         createTable_adsListTrace(db);
+
         /**
          * 创建点播下载表
          */
@@ -132,7 +138,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL(alterNewPlaylist);
 
                 /**
-                 * 创建广告内容表
+                 * 创建存储新的一期的广告内容表
+                 */
+                createTable_newAdsListTrace(sqLiteDatabase);
+                /**
+                 * 创建当前播放的完整的广告内容表
                  */
                 createTable_adsListTrace(sqLiteDatabase);
             } catch (Exception e) {
@@ -228,7 +238,30 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.MD5;
         copyTempDataToTable(db,MediaDBInfo.TableName.PLAYLIST,column,MediaDBInfo.TableName.PLAYLIST + "_temp",column);
     }
-
+    /**
+     * 创建广告表
+     * @param db
+     */
+    private void createTable_newAdsListTrace(SQLiteDatabase db) {
+        String DATABASE_CREATE = "create table "
+                + MediaDBInfo.TableName.NEWADSLIST
+                + " (id INTEGER PRIMARY KEY, "
+                + MediaDBInfo.FieldName.VID + " TEXT, "
+                + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
+                + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
+                + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
+                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.MD5 + " TEXT, "
+                + MediaDBInfo.FieldName.PERIOD + " TEXT, "
+                + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
+                + MediaDBInfo.FieldName.CREATETIME + " TEXT, "
+                + MediaDBInfo.FieldName.SURFIX + " TEXT, "
+                + MediaDBInfo.FieldName.DURATION + " TEXT, "
+                + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.START_DATE + " TEXT, "
+                + MediaDBInfo.FieldName.END_DATE + " TEXT " + ");";
+        db.execSQL(DATABASE_CREATE);
+    }
     /**
      * 创建广告表
      * @param db
@@ -569,7 +602,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param id
      * @return
      */
-    public boolean insertOrUpdateAdsList(PlayListBean playList,int id) {
+    public boolean insertOrUpdateNewAdsList(PlayListBean playList,int id) {
         if (playList == null) {
             return false;
         }
@@ -593,9 +626,9 @@ public class DBHelper extends SQLiteOpenHelper {
             if (-1!=id){
                 String selection=DBHelper.MediaDBInfo.FieldName.ID + "=? ";
                 String[] selectionArgs = new String[]{String.valueOf(id)};
-                in = db.update(MediaDBInfo.TableName.ADSLIST,initialValues,selection,selectionArgs);
+                in = db.update(MediaDBInfo.TableName.NEWADSLIST,initialValues,selection,selectionArgs);
             }else {
-                in = db.insert(MediaDBInfo.TableName.ADSLIST, null, initialValues);
+                in = db.insert(MediaDBInfo.TableName.NEWADSLIST, null, initialValues);
             }
 
             if (in > 0) {
@@ -711,7 +744,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param fromTable
      * @param toTable
      */
-    public void copyPlaylist(String fromTable, String toTable) {
+    public void copyTableMethod(String fromTable, String toTable) {
         try{
 //            open();
             db.delete(toTable, "1=1", null);
