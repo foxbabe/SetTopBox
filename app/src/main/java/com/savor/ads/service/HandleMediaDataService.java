@@ -575,13 +575,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     }
                     if (isChecked) {
-                        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD
-                                + "=? and "
-                                + DBHelper.MediaDBInfo.FieldName.MEDIATYPE
+                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE
                                 + "=? and "
                                 + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
                                 + "=? ";
-                        String[] selectionArgs = new String[]{bean.getPeriod(), bean.getType(), bean.getLocation_id()};
+                        String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id()};
                         List<PlayListBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
                         int id = -1;
                         if (list != null) {

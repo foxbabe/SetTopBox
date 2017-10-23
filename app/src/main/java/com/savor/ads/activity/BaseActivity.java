@@ -149,7 +149,7 @@ public abstract class BaseActivity extends Activity {
         }
     }
 
-    protected void fillPlayList() {
+    public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
         if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
