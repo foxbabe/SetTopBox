@@ -596,6 +596,47 @@ public class DBHelper extends SQLiteOpenHelper {
         return playList;
     }
 
+    public List<PlayListBean> findNewAdsByWhere(String selection, String[] selectionArgs) throws SQLException {
+        Cursor cursor = null;
+        List<PlayListBean> playList = null;
+        try {
+//            open();
+            cursor = db.query(MediaDBInfo.TableName.NEWADSLIST, null,
+                    selection, selectionArgs, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                playList = new ArrayList<>();
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    PlayListBean bean = new PlayListBean();
+                    bean.setVid(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
+                    bean.setMd5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MD5)));
+                    bean.setMedia_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
+                    bean.setMedia_type(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIATYPE)));
+                    bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
+                    bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
+                    bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                    bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
+                    bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+                    bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
+                    bean.setStart_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.START_DATE)));
+                    bean.setEnd_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.END_DATE)));
+                    playList.add(bean);
+                }
+            }
+        } catch (Exception e) {
+            LogUtils.e(e.toString());
+        } finally {
+            try {
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+            } catch (Exception e2) {
+                LogUtils.e(e2.toString());
+            }
+
+        }
+        return playList;
+    }
+
     /**
      * 广告数据单独入库
      * @param playList

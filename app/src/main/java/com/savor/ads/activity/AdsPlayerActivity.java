@@ -278,7 +278,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
                             if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null &&
                                     dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null &&
-                                    dbHelper.findAdsByWhere(selection, selectionArgs) == null) {
+                                    dbHelper.findAdsByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findNewAdsByWhere(selection, selectionArgs) == null) {
                                 file.delete();
                                 LogUtils.d("删除文件===================" + file.getName());
                             }
