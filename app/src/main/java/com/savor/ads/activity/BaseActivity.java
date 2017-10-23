@@ -198,13 +198,26 @@ public abstract class BaseActivity extends Activity {
                     }
 
                     File mediaFile = new File(bean.getMediaPath());
-                    if (TextUtils.isEmpty(bean.getMd5()) ||
-                            TextUtils.isEmpty(bean.getMediaPath()) ||
-                            !mediaFile.exists() ||
-                            !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                    boolean fileCheck = false;
+                    if (!TextUtils.isEmpty(bean.getMd5()) &&
+                            !TextUtils.isEmpty(bean.getMediaPath()) &&
+                            mediaFile.exists()) {
+                        if (!bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                            fileCheck = true;
+
+                            TechnicalLogReporter.md5Failed(this, bean.getVid());
+                        }
+                    } else {
+                        fileCheck = true;
+                    }
+
+                    if (fileCheck) {
                         LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
                         // 校验失败时将文件路径置空，下面会删除掉为空的项
                         bean.setMediaPath(null);
+                        if (mediaFile.exists()) {
+                            mediaFile.delete();
+                        }
 
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
@@ -216,12 +229,6 @@ public abstract class BaseActivity extends Activity {
                                         DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
                                 new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
-
-                        if (mediaFile.exists()) {
-                            mediaFile.delete();
-                        }
-
-                        TechnicalLogReporter.md5Failed(this, bean.getVid());
                     }
                 }
 

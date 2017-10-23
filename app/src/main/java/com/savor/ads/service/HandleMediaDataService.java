@@ -502,7 +502,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             bean.setSurfix(mediaItem.getSurfix());
                             bean.setLocation_id(mediaItem.getLocation_id());
                             bean.setMediaPath(path);
-                            // 插库成功，mDownloadedList中加入一条
+                            // 插库成功，downloadedCount加1
                             if (dbHelper.insertOrUpdateNewPlayListLib(bean, -1)) {
                                 downloadedCount++;
                             }
@@ -603,7 +603,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             playListBean.setSurfix(bean.getSurfix());
                             playListBean.setMediaPath(path);
                             playListBean.setLocation_id(bean.getLocation_id());
-                            // 插库成功，advDownloadedList中加入一条
+                            // 插库成功，downloadedCount加1
                             if (dbHelper.insertOrUpdateNewPlayListLib(playListBean, id)) {
                                 advDownloadedCount++;
                             }
@@ -653,10 +653,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             }
 
 
-            // 删除下载表中的非刚下载完的节目单的内容
-            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? ";
+            // 删除下载表中的当前、非预发布的节目单的内容
+            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
             String[] selectionArgs;
-            selectionArgs = new String[]{mProCompletedPeriod};
+            selectionArgs = new String[]{session.getProPeriod(), session.getProNextPeriod()};
             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
             // 将下载表中的内容拷贝到播放表
@@ -836,13 +836,26 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 }
 
                 File mediaFile = new File(bean.getMediaPath());
-                if (TextUtils.isEmpty(bean.getMd5()) ||
-                        TextUtils.isEmpty(bean.getMediaPath()) ||
-                        !mediaFile.exists() ||
-                        !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                boolean fileCheck = false;
+                if (!TextUtils.isEmpty(bean.getMd5()) &&
+                        !TextUtils.isEmpty(bean.getMediaPath()) &&
+                        mediaFile.exists()) {
+                    if (!bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                        fileCheck = true;
+
+                        TechnicalLogReporter.md5Failed(this, bean.getVid());
+                    }
+                } else {
+                    fileCheck = true;
+                }
+
+                if (fileCheck) {
                     LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
                     // 校验失败时将文件路径置空，下面会删除掉为空的项
                     bean.setMediaPath(null);
+                    if (mediaFile.exists()) {
+                        mediaFile.delete();
+                    }
 
                     dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
@@ -854,14 +867,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                     DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
                             new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
-
-                    if (mediaFile.exists()) {
-                        mediaFile.delete();
-                    }
-
-                    TechnicalLogReporter.md5Failed(this, bean.getVid());
                 }
-
             }
         }
 
