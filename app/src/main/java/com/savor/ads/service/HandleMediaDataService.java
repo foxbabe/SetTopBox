@@ -679,10 +679,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             return;
         }
 
-        // 先从下载表中删除该期的记录
-        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
-        String[] selectionArgs = new String[]{adsPeriod};
-        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, selection, selectionArgs);
+        // 清空ads下载表
+//        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
+//        String[] selectionArgs = new String[]{adsPeriod};
+        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, null, null);
 
         session.setAdsDownloadPeriod(adsPeriod);
         boolean isAdsCompleted = false;
@@ -811,8 +811,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             }
                             try {
                                 endDate = format.parse(item.getEnd_date());
-                                // 截止日期要加1天
-                                endDate.setTime(endDate.getTime() + (1000 * 60 * 60 * 24));
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }

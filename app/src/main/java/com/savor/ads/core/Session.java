@@ -229,7 +229,9 @@ public class Session {
         proNextMediaPubTime = mPreference.loadStringKey(P_APP_PRO_NEXT_MEDIA_PUBTIME,"");
         advPeriod = mPreference.loadStringKey(P_APP_ADV_MEDIA_PERIOD,"");
         advDownloadPeriod = mPreference.loadStringKey(P_APP_ADV_DOWNLOAD_MEDIA_PERIOD,"");
+        advNextPeriod = mPreference.loadStringKey(P_APP_ADV_NEXT_MEDIA_PERIOD,"");
         adsPeriod = mPreference.loadStringKey(P_APP_ADS_MEIDA_PERIOD,"");
+        adsDownloadPeriod = mPreference.loadStringKey(P_APP_ADS_DOWNLOAD_MEIDA_PERIOD, "");
 
         TVLastChannel = mPreference.loadStringKey(P_APP_TVLASTCHANNEL, null);
         logVersionCode = mPreference.loadStringKey(P_APP_LOGVERSIONCODE, null);
@@ -315,7 +317,9 @@ public class Session {
                 || P_APP_PRO_NEXT_MEDIA_PUBTIME.equals(key)
                 || P_APP_ADV_MEDIA_PERIOD.equals(key)
                 || P_APP_ADV_DOWNLOAD_MEDIA_PERIOD.equals(key)
+                || P_APP_ADV_NEXT_MEDIA_PERIOD.equals(key)
                 || P_APP_ADS_MEIDA_PERIOD.equals(key)
+                || P_APP_ADS_DOWNLOAD_MEIDA_PERIOD.equals(key)
                 || P_APP_TVLASTCHANNEL.equals(key)
                 || P_APP_LOGVERSIONCODE.equals(key)
                 || P_APP_MULTICASTMEDIAPERIOD.equals(key)
@@ -754,6 +758,7 @@ public class Session {
 
     public void setAdsDownloadPeriod(String adsDownloadPeriod) {
         this.adsDownloadPeriod = adsDownloadPeriod;
+        writePreference(new Pair<String, Object>(P_APP_ADS_DOWNLOAD_MEIDA_PERIOD, adsDownloadPeriod));
     }
 
     public void setProNextPeriod(String proNextPeriod) {
@@ -767,6 +772,7 @@ public class Session {
 
     public void setAdvNextPeriod(String advNextPeriod) {
         this.advNextPeriod = advNextPeriod;
+        writePreference(new Pair<String, Object>(P_APP_ADV_NEXT_MEDIA_PERIOD, advNextPeriod));
     }
 
     public ArrayList<VersionInfo> getVodVersion() {
@@ -992,8 +998,10 @@ public class Session {
     /**宣传片相关期号*/
     public static final String P_APP_ADV_MEDIA_PERIOD = "com.savor.adv.mediaPeriod";
     public static final String P_APP_ADV_DOWNLOAD_MEDIA_PERIOD = "com.savor.adv.downloadMediaPeriod";
+    public static final String P_APP_ADV_NEXT_MEDIA_PERIOD = "com.savor.adv.nextMediaPeriod";
     /**广告相关期号*/
     public static final String P_APP_ADS_MEIDA_PERIOD = "com.savor.ads.mediaPeriod";
+    public static final String P_APP_ADS_DOWNLOAD_MEIDA_PERIOD = "com.savor.ads.downloadMediaPeriod";
 
     /** 当前点播期号KEY*/
     public static final String P_APP_VOD_VERSION = "com.savor.ads.vod_version";

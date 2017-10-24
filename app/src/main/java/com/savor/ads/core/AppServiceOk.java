@@ -124,6 +124,7 @@ public class AppServiceOk {
             headers.put("traceinfo", appSession.getDeviceInfo());
             LogUtils.d("url-->" + requestUrl);
             LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
+            headers.put("boxMac", appSession.getEthernetMac());
             if (isGzip) {
                 headers.put("Accept-Encoding", "gzip");
             }
@@ -229,6 +230,7 @@ public class AppServiceOk {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("traceinfo", appSession.getDeviceInfo());
         LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
+        headers.put("boxMac", appSession.getEthernetMac());
         Callback<Object> callback = new Callback<Object>() {
 
             @Override
@@ -279,6 +281,7 @@ public class AppServiceOk {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("traceinfo", appSession.getDeviceInfo());
         LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
+        headers.put("boxMac", appSession.getEthernetMac());
         requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
         LogUtils.d("url-->" + requestUrl);
         Request request = new Request.Builder()

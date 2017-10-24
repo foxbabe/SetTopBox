@@ -178,8 +178,6 @@ public abstract class BaseActivity extends Activity {
                                 }
                                 try {
                                     endDate = format.parse(item.getEnd_date());
-                                    // 截止日期要加1天
-                                    endDate.setTime(endDate.getTime() + (1000 * 60 * 60 * 24));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
