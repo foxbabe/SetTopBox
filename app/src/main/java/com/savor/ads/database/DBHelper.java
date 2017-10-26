@@ -434,7 +434,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.MEDIANAME, playList.getMedia_name());
             initialValues.put(MediaDBInfo.FieldName.MEDIATYPE, playList.getMedia_type());
             initialValues.put(MediaDBInfo.FieldName.SURFIX, playList.getSurfix());
-            initialValues.put(MediaDBInfo.FieldName.CREATETIME, AppUtils.getTime("all"));
+            initialValues.put(MediaDBInfo.FieldName.CREATETIME, AppUtils.getCurTime("yyyyMMddHHmm"));
             initialValues.put(MediaDBInfo.FieldName.MD5, playList.getMd5());
             initialValues.put(MediaDBInfo.FieldName.PERIOD, playList.getPeriod());
             initialValues.put(MediaDBInfo.FieldName.ADS_ORDER, playList.getOrder());
@@ -658,7 +658,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.MD5, playList.getMd5());
             initialValues.put(MediaDBInfo.FieldName.PERIOD, playList.getPeriod());
             initialValues.put(MediaDBInfo.FieldName.ADS_ORDER, playList.getOrder());
-            initialValues.put(MediaDBInfo.FieldName.CREATETIME, AppUtils.getTime("all"));
+            initialValues.put(MediaDBInfo.FieldName.CREATETIME, AppUtils.getCurTime("yyyyMMddHHmm"));
             initialValues.put(MediaDBInfo.FieldName.SURFIX, playList.getSurfix());
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());

@@ -1040,60 +1040,60 @@ public class AppUtils {
     }
 
 
-    /**
-     * 获取当前系统日期时间
-     *
-     * @param format "all"获取年月日加时间
-     *               "date"只获取当前年月日
-     *               "time"只获取当前时间
-     * @return
-     */
-    public static String getTime(String format) {
-        Time t = new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
-        t.setToNow(); // 取得系统时间。
-        String monthM = "";
-        String monthDayM = "";
-        String hourM = "";
-        String minuteM = "";
-        if (t.month + 1 < 10) {
-            monthM = "0" + (t.month + 1);
-        } else
-            monthM = "" + (t.month + 1);
-        if (t.monthDay < 10) {
-            monthDayM = "0" + t.monthDay;
-        } else
-            monthDayM = "" + t.monthDay;
-        if (t.hour < 10) {
-            hourM = "0" + t.hour;
-        } else {
-            hourM = "" + t.hour;
-        }
-
-        if (t.minute < 10) {
-            minuteM = "0" + t.minute;
-        } else {
-            minuteM = "" + t.minute;
-        }
-        String time = null;
-        switch (format) {
-            case "all":
-                time = "" + t.year + monthM + monthDayM + hourM + minuteM;
-                break;
-            case "date":
-                time = "" + t.year + monthM + monthDayM;
-                break;
-            case "hour":
-                time = "" + t.year + monthM + monthDayM + hourM;
-                break;
-            case "time":
-                time = "" + hourM + minuteM;
-                break;
-            case "month":
-                time = "" + t.year + monthM;
-                break;
-        }
-        return time;
-    }
+//    /**
+//     * 获取当前系统日期时间
+//     *
+//     * @param format "all"获取年月日加时间
+//     *               "date"只获取当前年月日
+//     *               "time"只获取当前时间
+//     * @return
+//     */
+//    public static String getTime(String format) {
+//        Time t = new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
+//        t.setToNow(); // 取得系统时间。
+//        String monthM = "";
+//        String monthDayM = "";
+//        String hourM = "";
+//        String minuteM = "";
+//        if (t.month + 1 < 10) {
+//            monthM = "0" + (t.month + 1);
+//        } else
+//            monthM = "" + (t.month + 1);
+//        if (t.monthDay < 10) {
+//            monthDayM = "0" + t.monthDay;
+//        } else
+//            monthDayM = "" + t.monthDay;
+//        if (t.hour < 10) {
+//            hourM = "0" + t.hour;
+//        } else {
+//            hourM = "" + t.hour;
+//        }
+//
+//        if (t.minute < 10) {
+//            minuteM = "0" + t.minute;
+//        } else {
+//            minuteM = "" + t.minute;
+//        }
+//        String time = null;
+//        switch (format) {
+//            case "all":
+//                time = "" + t.year + monthM + monthDayM + hourM + minuteM;
+//                break;
+//            case "hour":
+//                time = "" + t.year + monthM + monthDayM + hourM;
+//                break;
+//            case "date":
+//                time = "" + t.year + monthM + monthDayM;
+//                break;
+//            case "month":
+//                time = "" + t.year + monthM;
+//                break;
+//            case "time":
+//                time = "" + hourM + minuteM;
+//                break;
+//        }
+//        return time;
+//    }
 
     /**
      * wifi IP

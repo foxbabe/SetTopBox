@@ -40,7 +40,7 @@ public class LogProduceService {
 					createFile();
 
 					while (true) {
-                        if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getTime("hour"))){
+                        if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getCurTime("yyyyMMddHH"))){
                             break;
                         }
                         if (mLogWriter != null) {
@@ -163,10 +163,9 @@ public class LogProduceService {
 //					||TextUtils.isEmpty(boxId)){
 //					return;
 //			}
-			String time = AppUtils.getCurTime("yyyyMMddHH");
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
-			logTime = time;
-			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
+			logTime = AppUtils.getCurTime("yyyyMMddHH");
+			mLogWriter = new FileWriter(path + boxMac + "_" + logTime + ".blog",true);
 		} catch (Exception e2) {
 			e2.printStackTrace();
 			LogFileUtil.writeException(e2);
