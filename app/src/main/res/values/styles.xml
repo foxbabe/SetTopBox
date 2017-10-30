@@ -57,8 +57,8 @@
     </style>
 
     <style name="channel_list_animation" parent="@android:style/Animation">
-        <item name="@android:windowEnterAnimation">@anim/channel_list_in</item>
-        <item name="@android:windowExitAnimation">@anim/channel_list_out</item>
+        <item name="android:windowEnterAnimation">@anim/channel_list_in</item>
+        <item name="android:windowExitAnimation">@anim/channel_list_out</item>
     </style>
     <style name="channel_list_dialog_theme" parent="@android:style/Theme.Dialog">
         <item name="android:windowAnimationStyle">@style/channel_list_animation</item>
