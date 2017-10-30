@@ -15,6 +15,9 @@ import android.view.KeyEvent;
 
 import com.mstar.tv.service.skin.AudioSkin;
 import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
+import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
@@ -401,6 +404,10 @@ public abstract class BaseActivity extends Activity {
                 gotoSetting();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
+                manualHeartbeat();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -414,6 +421,31 @@ public abstract class BaseActivity extends Activity {
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
         startActivity(intent);
+    }
+
+    private void manualHeartbeat() {
+        ShowMessage.showToast(this, "开始上报心跳");
+        AppApi.heartbeat(this, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+                ShowMessage.showToast(mContext, "上报心跳成功");
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+                String msg = "";
+                if (obj instanceof ResponseErrorMessage) {
+                    ResponseErrorMessage errorMessage = (ResponseErrorMessage) obj;
+                    msg = errorMessage.getMessage();
+                }
+                ShowMessage.showToast(mContext, "上报心跳失败 " + msg);
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+                ShowMessage.showToast(mContext, "上报心跳失败，网络异常");
+            }
+        });
     }
 
     protected void setVolume(int volume) {

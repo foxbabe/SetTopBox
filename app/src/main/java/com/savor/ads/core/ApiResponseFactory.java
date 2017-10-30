@@ -192,6 +192,9 @@ public class ApiResponseFactory {
             case PH_NOTIFY_STOP_JSON:
                 result = info;
                 break;
+            case CP_GET_HEARTBEAT_PLAIN:
+                result = info;
+                break;
             default:
                 break;
         }
