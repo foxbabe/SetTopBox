@@ -9,15 +9,15 @@ import com.alibaba.sdk.android.oss.OSSClient;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
+import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider;
 import com.savor.ads.BuildConfig;
 import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.Hashtable;
 
 public class LogUploadService {
@@ -69,20 +69,25 @@ public class LogUploadService {
 
                         String name = file.getName();
                         String[] split = name.split("_");
-                        String currentDate = AppUtils.getTime("month");
-                        String currentMonth = currentDate.substring(4, 6);
-                        if (split.length == 4) {    // 老版日志命名结构
-                            String logMonth = split[3].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
-                                file.delete();
+                        String currentMonth = AppUtils.getCurTime("yyyyMM");
+                        String logMonth = null;
+                        /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
+                            logMonth = split[2].substring(0, 6);
+                        } else */if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
+                            logMonth = split[1].substring(0, 6);
+                        } else {
+                            file.delete();
+                            continue;
+                        }
+                        if (!TextUtils.isEmpty(logMonth)) {
+                            int diff = 0;
+                            try {
+                                diff = AppUtils.calculateMonthDiff(logMonth, currentMonth, "yyyyMM");
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
-                        } else if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            String logMonth = split[1].substring(4, 6);
-
-                            if (Integer.parseInt(logMonth) != Integer.parseInt(currentMonth)
-                                    && Integer.parseInt(logMonth) != Integer.parseInt(currentMonth) - 1) {
+                            // 删除大于1个月的日志
+                            if (diff > 1) {
                                 file.delete();
                             }
                         }
@@ -113,7 +118,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile()) {
 
-                    if (name.contains(AppUtils.getTime("date"))) {
+                    if (name.contains(AppUtils.getCurTime("yyyyMMdd"))) {
                         continue;
                     }
                     final String archive = path + ".zip";
@@ -129,7 +134,7 @@ public class LogUploadService {
                                 BuildConfig.OSS_BUCKET_NAME,
                                 oss_file_path,
                                 object_key,
-                                new LogUploadService.UploadResult() {
+                                new UploadCallback() {
                                     @Override
                                     public void isSuccessOSSUpload(boolean flag) {
                                         if (flag) {
@@ -151,11 +156,6 @@ public class LogUploadService {
         File[] files = getAllLogInfo(AppUtils.StorageFile.log);
         if (files != null && files.length > 0) {
             for (File file : files) {
-                if (file.isFile() && file.length() <= 0) {
-                    file.delete();
-                    continue;
-                }
-
                 final String name = file.getName();
                 final String path = file.getPath();
                 if (file.isFile()) {
@@ -164,35 +164,30 @@ public class LogUploadService {
                         continue;
                     }
                     final String time = split[1].substring(0, 10);
-                    if (time.equals(AppUtils.getTime("hour"))) {
+                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
                         continue;
                     }
-                    final String archive = path + ".zip";
+                    final String archivePath = path + ".zip";
 
-                    if (!TextUtils.isEmpty(session.getOss_file_path())) {
+                    if (!TextUtils.isEmpty(session.getOssAreaId())) {
 
                         File sourceFile = new File(path);
-                        final File zipFile = new File(archive);
+                        final File zipFile = new File(archivePath);
                         try {
-                            AppUtils.zipFile(sourceFile, zipFile, name + ".zip");
+                            AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         if (zipFile.exists()) {
-                            final String object_key = archive.substring(1, archive.length());
-                            String oss_file_path = null;
-                            if (name.contains(ConstantValues.RSTR_LOG_SUFFIX)) {
-                                oss_file_path =  session.getOss_file_path() + "restaurant" + File.separator +
-                                        name.replace(ConstantValues.RSTR_LOG_SUFFIX, "") + ".zip";
-                            } else {
-                                oss_file_path = session.getOss_file_path() + name + ".zip";
-                            }
+                            String localFilePath = archivePath.substring(1, archivePath.length());
+                            String ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator +
+                                    AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
-                                    oss_file_path,
-                                    object_key,
-                                    new LogUploadService.UploadResult() {
+                                    ossFilePath,
+                                    localFilePath,
+                                    new UploadCallback() {
                                         @Override
                                         public void isSuccessOSSUpload(boolean flag) {
                                             if (flag) {
@@ -239,7 +234,7 @@ public class LogUploadService {
             return;
         }
         String filepath = AppUtils.getFilePath(context, AppUtils.StorageFile.log) + fileName;
-        String currentTime = AppUtils.getTime("hour");
+        String currentTime = AppUtils.getCurTime("yyyyMMddHH");
         if (!time.equals(currentTime) && new File(filepath).exists()) {
             String deskPath = AppUtils.getFilePath(context, AppUtils.StorageFile.loged);
             new File(filepath).renameTo(new File(deskPath + fileName));
@@ -248,7 +243,7 @@ public class LogUploadService {
     }
 
 
-    public interface UploadResult {
+    public interface UploadCallback {
         void isSuccessOSSUpload(boolean flag);
     }
 }

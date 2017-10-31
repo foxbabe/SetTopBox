@@ -34,7 +34,7 @@ public class KeyCodeConstant {
     // TODO: 调接口临时改值
     public static final int KEY_CODE_CHANGE_SIGNAL = 22;
     /**
-     * 小遥控的切换按钮
+     * 切换 广告/电视 模式
      */
     public static final int KEY_CODE_CHANGE_MODE = -1;
     /**
@@ -97,10 +97,14 @@ public class KeyCodeConstant {
      */
     public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 166;
     /**
+     * 上传心跳
+     */
+    public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
+    /**
      * 切换 广告/电视 模式
      * （咨询 按钮）
      */
     // TODO: 调接口临时改值
-    public static final int KEY_CODE_SWITCH_ADS_TV = 21;
+    public static final int KEY_CODE_SWITCH_ADS_TV = 127;
     //endregion
 }

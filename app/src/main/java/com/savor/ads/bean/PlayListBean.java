@@ -27,6 +27,9 @@ public class PlayListBean implements Serializable{
 
     private String mediaPath;
 
+    private String location_id;
+    private String start_date;
+    private String end_date;
     public int getId() {
         return id;
     }
@@ -105,5 +108,29 @@ public class PlayListBean implements Serializable{
 
     public void setMediaPath(String mediaPath) {
         this.mediaPath = mediaPath;
+    }
+
+    public String getLocation_id() {
+        return location_id;
+    }
+
+    public void setLocation_id(String location_id) {
+        this.location_id = location_id;
+    }
+
+    public String getStart_date() {
+        return start_date;
+    }
+
+    public void setStart_date(String start_date) {
+        this.start_date = start_date;
+    }
+
+    public String getEnd_date() {
+        return end_date;
+    }
+
+    public void setEnd_date(String end_date) {
+        this.end_date = end_date;
     }
 }

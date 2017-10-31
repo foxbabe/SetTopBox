@@ -159,7 +159,7 @@ public class ApiResponseFactory {
             return result;
         }
         switch (action) {
-            case SP_GET_ADVERT_DATA_FROM_JSON:
+            case SP_GET_PROGRAM_DATA_FROM_JSON:
                 result = gson.fromJson(info, new TypeToken<SetTopBoxBean>() {
                 }.getType());
                 break;
@@ -190,6 +190,9 @@ public class ApiResponseFactory {
                 }.getType());
                 break;
             case PH_NOTIFY_STOP_JSON:
+                result = info;
+                break;
+            case CP_GET_HEARTBEAT_PLAIN:
                 result = info;
                 break;
             default:

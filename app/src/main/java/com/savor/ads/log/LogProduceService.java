@@ -5,7 +5,7 @@ import android.text.TextUtils;
 
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.FileWriter;
@@ -16,7 +16,6 @@ import java.io.IOException;
  */
 public class LogProduceService {
 	private FileWriter mLogWriter = null;
-	private FileWriter mRstrLogWriter = null;
 	private Context mContext=null;
 	private String logTime=null;
 	private LogReportUtil logReportUtil = null;
@@ -41,7 +40,7 @@ public class LogProduceService {
 					createFile();
 
 					while (true) {
-                        if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getTime("hour"))){
+                        if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getCurTime("yyyyMMddHH"))){
                             break;
                         }
                         if (mLogWriter != null) {
@@ -62,27 +61,10 @@ public class LogProduceService {
                                     e.printStackTrace();
                                 }
                             }
-                        }
-
-                        if (mRstrLogWriter != null) {
-                            if (LogReportUtil.getRstrLogNum() > 0) {
-                                try {
-                                    RestaurantLogBean mparam = logReportUtil.takeRstrLog();
-                                    if (mparam != null) {
-                                        String log = makeRstrLog(mparam);
-                                        LogUtils.i("log:" + log);
-                                        try {
-                                            mRstrLogWriter.write(log);
-                                            mRstrLogWriter.flush();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
+                        } else {
+							LogFileUtil.write("Log FileWriter is null, will recreate file.");
+							createFile();
+						}
 
 						try {
 							Thread.sleep(5*1000);
@@ -110,15 +92,6 @@ public class LogProduceService {
 				e.printStackTrace();
 			}
 			mLogWriter = null;
-		}
-
-		if (mRstrLogWriter != null) {
-			try {
-                mRstrLogWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            mRstrLogWriter = null;
 		}
 	}
 
@@ -190,13 +163,12 @@ public class LogProduceService {
 //					||TextUtils.isEmpty(boxId)){
 //					return;
 //			}
-			String time = AppUtils.getTime("hour");
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
-			logTime = time;
-			mLogWriter = new FileWriter(path + boxMac + "_" + time + ".blog",true);
-			mRstrLogWriter = new FileWriter(path + boxMac + "_" + time + ConstantValues.RSTR_LOG_SUFFIX + ".blog",true);
+			logTime = AppUtils.getCurTime("yyyyMMddHH");
+			mLogWriter = new FileWriter(path + boxMac + "_" + logTime + ".blog",true);
 		} catch (Exception e2) {
 			e2.printStackTrace();
+			LogFileUtil.writeException(e2);
 		}
 	}
 

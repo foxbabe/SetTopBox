@@ -64,7 +64,11 @@ public class ConstantValues {
     public static final int DEFAULT_VOD_VOLUME = 65;
     /** 默认电视音量*/
     public static final int DEFAULT_TV_VOLUME = 100;
+    /**节目单-节目*/
+    public static final String PRO = "pro";
+    /**节目单-宣传单*/
+    public static final String ADV = "adv";
+    /**节目单-广告*/
+    public static final String ADS = "ads";
 
-    /** 餐厅端涉及的投屏文件名后缀*/
-    public static final String RSTR_LOG_SUFFIX = "-RSTR";
 }
