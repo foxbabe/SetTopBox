@@ -12,6 +12,7 @@ import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -269,12 +270,11 @@ public class AppApi {
         new AppServiceOk(context, Action.CP_GET_SP_IP_JSON, handler, params).get();
     }
 
-    public static void uploadProgram(Context context, ApiRequestListener handler, AtvChannel[] programs) {
-        if (programs == null || programs.length <= 0)
+    public static void uploadProgram(Context context, ApiRequestListener handler, ArrayList<AtvChannel> programs) {
+        if (programs == null || programs.size() <= 0)
             return;
-        List<AtvChannel> programInfo = Arrays.asList(programs);
         final HashMap<String, Object> params = new HashMap<>();
-        params.put("data", programInfo);
+        params.put("data", programs);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
     }
 

@@ -93,7 +93,7 @@ public class TvChannelListDialog extends Dialog {
             super.show();
             for (int i = 0; i < mChannels.size(); i++) {
                 AtvChannel program = mChannels.get(i);
-                if (program.getChennalNum() == Session.get(getContext()).getTvCurrentChannelNumber()) {
+                if (program.getChannelNum() == Session.get(getContext()).getTvCurrentChannelNumber()) {
                     mChannelsLv.setSelection(i);
                     break;
                 }

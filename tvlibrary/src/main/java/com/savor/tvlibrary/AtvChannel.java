@@ -5,47 +5,96 @@ package com.savor.tvlibrary;
  * Created by zhanghq on 2016/12/27.
  */
 public class AtvChannel {
-    /** 频道序号 */
-    private int chennalNum;
-    /** 节目频段 */
-    private long freq;
-    /** 音频标准 */
-    private int audioStandard;
-    /** 视频标准 */
-    private int videoStandard;
-    /** 频道名称 */
+    private String inputId;
+
+    private String displayName;
+
+    private String displayNumber;
+
+    private String type;
+
+    private int isBrowsable;
+
+    private String serviceType;
+
+    private int serviceId;
+
+    private String providerData;
+
+    private int channelNum;
+
     private String channelName;
 
-    public int getChennalNum() {
-        return chennalNum;
+    public String getInputId() {
+        return inputId;
     }
 
-    public void setChennalNum(int chennalNum) {
-        this.chennalNum = chennalNum;
+    public void setInputId(String inputId) {
+        this.inputId = inputId;
     }
 
-    public long getFreq() {
-        return freq;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setFreq(long freq) {
-        this.freq = freq;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public int getAudioStandard() {
-        return audioStandard;
+    public String getDisplayNumber() {
+        return displayNumber;
     }
 
-    public void setAudioStandard(int audioStandard) {
-        this.audioStandard = audioStandard;
+    public void setDisplayNumber(String displayNumber) {
+        this.displayNumber = displayNumber;
     }
 
-    public int getVideoStandard() {
-        return videoStandard;
+    public String getType() {
+        return type;
     }
 
-    public void setVideoStandard(int videoStandard) {
-        this.videoStandard = videoStandard;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getIsBrowsable() {
+        return isBrowsable;
+    }
+
+    public void setIsBrowsable(int isBrowsable) {
+        this.isBrowsable = isBrowsable;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public int getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(int serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getProviderData() {
+        return providerData;
+    }
+
+    public void setProviderData(String providerData) {
+        this.providerData = providerData;
+    }
+
+    public int getChannelNum() {
+        return channelNum;
+    }
+
+    public void setChannelNum(int channelNum) {
+        this.channelNum = channelNum;
     }
 
     public String getChannelName() {

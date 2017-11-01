@@ -4,7 +4,7 @@ android {
     buildToolsVersion "26.0.2"
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 25
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -21,6 +21,6 @@ android {
 }
 
 dependencies {
-    provided files('libs/libtv.jar')
-//    provided files('libs/v600framework.jar')
+    provided files('libs/classes.jar')
+    compile files('libs/droidlogic.jar', 'libs/droidlogic-tv.jar')
 }

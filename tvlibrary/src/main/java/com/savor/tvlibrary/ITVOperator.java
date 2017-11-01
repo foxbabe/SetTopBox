@@ -1,6 +1,9 @@
 package com.savor.tvlibrary;
 
+import android.media.tv.TvView;
 import android.view.SurfaceHolder;
+
+import java.util.ArrayList;
 
 /**
  * Created by zhang.haiqiang on 2017/7/19.
@@ -11,9 +14,9 @@ public interface ITVOperator {
     void switchATVChannel(int channelNum);
     void autoTuning(AutoTurningCallback turningCallback);
     void interruptTuning();
-    AtvChannel[] getAtvChannels();
-    void setAtvChannels(AtvChannel[] channels);
+    ArrayList<AtvChannel> getAtvChannels();
+    void setAtvChannels(ArrayList<AtvChannel> channels);
     TVSignal getCurrentSignalSource();
     void setSignalSource(TVSignal signal);
-    void exitTv();
+    void exitTv(TvView tvView);
 }

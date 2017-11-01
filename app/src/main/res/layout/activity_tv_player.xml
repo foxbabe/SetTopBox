@@ -7,8 +7,8 @@
     android:layout_height="match_parent"
     tools:context="com.savor.ads.activity.TvPlayerActivity">
 
-    <SurfaceView
-        android:id="@+id/surface_view"
+    <android.media.tv.TvView
+        android:id="@+id/tvView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

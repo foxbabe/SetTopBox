@@ -2,6 +2,7 @@ package com.savor.ads.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.tv.TvView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -44,9 +45,10 @@ public class TvPlayerActivity extends BaseActivity {
      */
     public static final String EXTRA_LAST_VID = "extra_last_vid";
 
-    private SurfaceView mPreviewSv;
-    private SurfaceHolder mSurfaceHolder;
-    private boolean mIsSurfaceCreated;
+//    private SurfaceView mPreviewSv;
+//    private SurfaceHolder mSurfaceHolder;
+//    private boolean mIsSurfaceCreated;
+    private TvView mTvView;
     private RelativeLayout mChannelTipRl;
     private TextView mChannelNumberTv;
     private TextView mChannelNameTv;
@@ -118,10 +120,29 @@ public class TvPlayerActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tv_player);
 
-        mTvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.JACK);
+        mTvOperate = TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC);
         handleIntent();
         findView();
         setView();
+
+        // 产生一个新的UUID作为日志标识
+        mUUID = String.valueOf(System.currentTimeMillis());
+        LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                String.valueOf(System.currentTimeMillis()), "start", "tv", mLastAdsVid,
+                "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                "");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (TextUtils.isEmpty(mUUID)) {
+            mUUID = String.valueOf(System.currentTimeMillis());
+        }
+        LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                String.valueOf(System.currentTimeMillis()), "end", "tv", mLastAdsVid,
+                "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+                "");
     }
 
     private void handleIntent() {
@@ -132,60 +153,60 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void findView() {
-        mPreviewSv = (SurfaceView) findViewById(R.id.surface_view);
+        mTvView = (TvView) findViewById(R.id.tvView);
         mChannelTipRl = (RelativeLayout) findViewById(R.id.rl_channel_tip);
         mChannelNameTv = (TextView) findViewById(R.id.tv_channel_name);
         mChannelNumberTv = (TextView) findViewById(R.id.tv_channel_number);
     }
 
     private void setView() {
-        mSurfaceHolder = mPreviewSv.getHolder();
-        mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                try {
-//                    if (!mIsSurfaceDestroyed) {
-                    mTvOperate.setDisplay(holder);
-                    // 产生一个新的UUID作为日志标识
-                    mUUID = String.valueOf(System.currentTimeMillis());
-                    LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                            String.valueOf(System.currentTimeMillis()), "start", "tv", mLastAdsVid,
-                            "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
-                            "");
-//                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                mIsSurfaceCreated = true;
-//                mIsSurfaceDestroyed = false;
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在surfaceCreated()中赋值
-                if (TextUtils.isEmpty(mUUID)) {
-                    mUUID = String.valueOf(System.currentTimeMillis());
-                }
-                LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "end", "tv", mLastAdsVid,
-                        "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
-                        "");
-
-//                mIsSurfaceDestroyed = true;
-                mIsSurfaceCreated = false;
-            }
-        });
+//        mSurfaceHolder = mPreviewSv.getHolder();
+//        mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
+//            @Override
+//            public void surfaceCreated(SurfaceHolder holder) {
+//                try {
+////                    if (!mIsSurfaceDestroyed) {
+//                    mTvOperate.setDisplay(holder);
+//                    // 产生一个新的UUID作为日志标识
+//                    mUUID = String.valueOf(System.currentTimeMillis());
+//                    LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+//                            String.valueOf(System.currentTimeMillis()), "start", "tv", mLastAdsVid,
+//                            "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+//                            "");
+////                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                mIsSurfaceCreated = true;
+////                mIsSurfaceDestroyed = false;
+//            }
+//
+//            @Override
+//            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+//            }
+//
+//            @Override
+//            public void surfaceDestroyed(SurfaceHolder holder) {
+//                // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在surfaceCreated()中赋值
+//                if (TextUtils.isEmpty(mUUID)) {
+//                    mUUID = String.valueOf(System.currentTimeMillis());
+//                }
+//                LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+//                        String.valueOf(System.currentTimeMillis()), "end", "tv", mLastAdsVid,
+//                        "", mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(),
+//                        "");
+//
+////                mIsSurfaceDestroyed = true;
+//                mIsSurfaceCreated = false;
+//            }
+//        });
     }
 
     private void init() {
 
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
         // TODO: 调接口临时写死
-        tvSignal = TVSignal.HDMI;
+        tvSignal = TVSignal.ATV;
         mTvOperate.setSignalSource(tvSignal);
 
         // 填充节目列表到mChannelList
@@ -228,14 +249,14 @@ public class TvPlayerActivity extends BaseActivity {
         boolean foundProgram = false;
         for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
             AtvChannel program = mChannelList.get(i);
-            if (program.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
+            if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
                 mCurrentProgramIndex = i;
                 foundProgram = true;
                 break;
             }
         }
         if (!foundProgram) {
-            mSession.setTvCurrentChannelNumber(mChannelList.get(0).getChennalNum());
+            mSession.setTvCurrentChannelNumber(mChannelList.get(0).getChannelNum());
             mCurrentProgramIndex = 0;
         }
         mTvOperate.switchATVChannel(mSession.getTvCurrentChannelNumber());
@@ -311,10 +332,10 @@ public class TvPlayerActivity extends BaseActivity {
      * @param program
      */
     private void changeChannel(AtvChannel program) {
-        if (program.getChennalNum() == mSession.getTvCurrentChannelNumber())
+        if (program.getChannelNum() == mSession.getTvCurrentChannelNumber())
             return;
-        mTvOperate.switchATVChannel(program.getChennalNum());
-        mSession.setTvCurrentChannelNumber(program.getChennalNum());
+        mTvOperate.switchATVChannel(program.getChannelNum());
+        mSession.setTvCurrentChannelNumber(program.getChannelNum());
         showChannelTips();
     }
 
@@ -339,9 +360,9 @@ public class TvPlayerActivity extends BaseActivity {
         mHandler.removeCallbacks(mHideChannelTipRunnable);
         String name = "";
         for (AtvChannel pro : mChannelList) {
-            if (pro.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
+            if (pro.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
                 name = pro.getChannelName();
-                LogUtils.d("name:" + pro.getChannelName() + " freq:" + pro.getFreq());
+                LogUtils.d("name:" + pro.getChannelName() /*+ " freq:" + pro.getFreq()*/);
                 break;
             }
         }
@@ -363,11 +384,11 @@ public class TvPlayerActivity extends BaseActivity {
      */
     private void fillChannelList() {
 
-        AtvChannel[] programList = mTvOperate.getAtvChannels();
+        ArrayList<AtvChannel> programList = mTvOperate.getAtvChannels();
         mChannelList = new ArrayList<>();
-        if (programList != null && programList.length > 0) {
+        if (programList != null && programList.size() > 0) {
             for (AtvChannel program : programList) {
-                program.setChennalNum(program.getChennalNum() + 1);
+                program.setChannelNum(program.getChannelNum() + 1);
                 mChannelList.add(program);
             }
         }
@@ -410,7 +431,7 @@ public class TvPlayerActivity extends BaseActivity {
                 handled = true;
                 break;
             // 切换到广告模式
-            case KeyCodeConstant.KEY_CODE_SWITCH_ADS_TV:
+            case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
                 gotoAdsPlayer();
                 handled = true;
                 break;
@@ -484,11 +505,11 @@ public class TvPlayerActivity extends BaseActivity {
 
     private void uploadProgram() {
 
-        AtvChannel[] programs = mTvOperate.getAtvChannels();
+        ArrayList<AtvChannel> programs = mTvOperate.getAtvChannels();
         // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
-        if (programs != null && programs.length > 0) {
+        if (programs != null && programs.size() > 0) {
             for (AtvChannel program : programs) {
-                program.setChennalNum(program.getChennalNum() + 1);
+                program.setChannelNum(program.getChannelNum() + 1);
             }
         }
 
@@ -544,7 +565,7 @@ public class TvPlayerActivity extends BaseActivity {
         if (tvSignal == TVSignal.ATV) {
             for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
                 AtvChannel program = mChannelList.get(i);
-                if (program.getChennalNum() == mSession.getTvCurrentChannelNumber()) {
+                if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
                     mCurrentProgramIndex = i;
                     break;
                 }
@@ -614,7 +635,7 @@ public class TvPlayerActivity extends BaseActivity {
 //            e.printStackTrace();
 //        }
 
-        mTvOperate.exitTv();
+        mTvOperate.exitTv(mTvView);
     }
 
     @Override

@@ -199,7 +199,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 handled = true;
                 break;
             // 切换到电视模式
-            case KeyCodeConstant.KEY_CODE_SWITCH_ADS_TV:
+            case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
                 switchToTvPlayer();
                 handled = true;
                 break;

@@ -32,11 +32,11 @@ public class KeyCodeConstant {
      * （电视/广播 按钮）
      */
     // TODO: 调接口临时改值
-    public static final int KEY_CODE_CHANGE_SIGNAL = 22;
+    public static final int KEY_CODE_CHANGE_SIGNAL = 183;
     /**
      * 切换 广告/电视 模式
      */
-    public static final int KEY_CODE_CHANGE_MODE = -1;
+    public static final int KEY_CODE_CHANGE_MODE = 186;
     /**
      * 显示二维码（节目表 按钮）
      */
@@ -70,7 +70,8 @@ public class KeyCodeConstant {
      * 应用设置
      * （HOME 按钮）
      */
-    public static final int KEY_CODE_SETTING = 10;
+    //TODO:10
+    public static final int KEY_CODE_SETTING = 168;
     /**
      * 弹出电视频道列表
      * （确定 按钮）
@@ -80,7 +81,7 @@ public class KeyCodeConstant {
      * 切换电视输入源为AV IN
      * （电脑 按钮）
      */
-    public static final int KEY_CODE_AV_IN = 183;
+    public static final int KEY_CODE_AV_IN = 183000;
     /**
      * 切换电视输入源为ANT IN
      * （电视 按钮）
@@ -100,11 +101,5 @@ public class KeyCodeConstant {
      * 上传心跳
      */
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
-    /**
-     * 切换 广告/电视 模式
-     * （咨询 按钮）
-     */
-    // TODO: 调接口临时改值
-    public static final int KEY_CODE_SWITCH_ADS_TV = 127;
     //endregion
 }

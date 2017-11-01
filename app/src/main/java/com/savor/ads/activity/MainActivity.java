@@ -149,7 +149,8 @@ public class MainActivity extends BaseActivity {
             getSpIpFromServer();
         }
 
-        startDownloadMediaDataService();
+        // TODO;
+//        startDownloadMediaDataService();
 
         startProduceLogService();
         startUploadLogService();
@@ -290,8 +291,10 @@ public class MainActivity extends BaseActivity {
         if (mAudioManager != null) {
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
         }
-        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
-        timeCalibrateHelper.startCalibrateTime();
+
+        // 暂时关闭NTP服务 TODO：借助
+//        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
+//        timeCalibrateHelper.startCalibrateTime();
 
     }
 

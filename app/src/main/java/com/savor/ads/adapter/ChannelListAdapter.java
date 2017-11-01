@@ -52,7 +52,7 @@ public class ChannelListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.mChannelTv.setText(String.format("%03d %s", mChannels.get(position).getChennalNum(), mChannels.get(position).getChannelName()));
+        viewHolder.mChannelTv.setText(String.format("%03d %s", mChannels.get(position).getChannelNum(), mChannels.get(position).getChannelName()));
         return convertView;
     }
 

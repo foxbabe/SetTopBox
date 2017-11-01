@@ -442,20 +442,20 @@ public abstract class BaseActivity extends Activity {
     protected void setVolume(int volume) {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
-            LogUtils.d("Music volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) +
+            LogUtils.d("Music volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM) +
             "System volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM));
             if (volume > 100)
                 volume = 100;
             else if (volume < 0)
                 volume = 0;
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+            audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, volume, AudioManager.FLAG_SHOW_UI);
         }
     }
 
     protected int getVolume() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
-            return audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            return audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM);
         }
         return -1;
     }
