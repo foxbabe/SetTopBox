@@ -11,12 +11,12 @@ import java.util.ArrayList;
 
 public interface ITVOperator {
     void setDisplay(SurfaceHolder holder);
-    void switchATVChannel(int channelNum);
+    void switchATVChannel(TvView tvView, int channelId);
     void autoTuning(AutoTurningCallback turningCallback);
     void interruptTuning();
     ArrayList<AtvChannel> getAtvChannels();
+    ArrayList<AtvChannel> getSysChannels();
     void setAtvChannels(ArrayList<AtvChannel> channels);
-    TVSignal getCurrentSignalSource();
-    void setSignalSource(TVSignal signal);
+    void setSignalSource(TvView tvView, TVSignal signal);
     void exitTv(TvView tvView);
 }

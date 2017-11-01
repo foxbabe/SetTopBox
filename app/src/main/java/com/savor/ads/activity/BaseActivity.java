@@ -399,6 +399,10 @@ public abstract class BaseActivity extends Activity {
                 manualHeartbeat();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_CHANGE_RESOLUTION:
+                manualHeartbeat();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -437,6 +441,10 @@ public abstract class BaseActivity extends Activity {
                 ShowMessage.showToast(mContext, "上报心跳失败，网络异常");
             }
         });
+    }
+
+    private void changeResolution() {
+
     }
 
     protected void setVolume(int volume) {

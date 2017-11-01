@@ -101,5 +101,9 @@ public class KeyCodeConstant {
      * 上传心跳
      */
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
+    /**
+     * 改变输出分辨率
+     */
+    public static final int KEY_CODE_CHANGE_RESOLUTION = 169;
     //endregion
 }

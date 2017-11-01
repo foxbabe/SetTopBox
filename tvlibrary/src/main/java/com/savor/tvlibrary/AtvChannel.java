@@ -5,6 +5,8 @@ package com.savor.tvlibrary;
  * Created by zhanghq on 2016/12/27.
  */
 public class AtvChannel {
+    private int id;
+
     private String inputId;
 
     private String displayName;
@@ -103,5 +105,13 @@ public class AtvChannel {
 
     public void setChannelName(String channelName) {
         this.channelName = channelName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

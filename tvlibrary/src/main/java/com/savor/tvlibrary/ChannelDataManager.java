@@ -101,7 +101,7 @@ public class ChannelDataManager {
     }
 
     //保存播放节目的必要信息，
-    private ContentValues buildAtvChannelData(ChannelInfo channel) {
+    static ContentValues buildAtvChannelData(ChannelInfo channel) {
         ContentValues values = new ContentValues();
         values.put(Channels.COLUMN_INPUT_ID, channel.getInputId());
         values.put(Channels.COLUMN_DISPLAY_NUMBER, channel.getDisplayNumber());
@@ -116,7 +116,7 @@ public class ChannelDataManager {
         return values;
     }
 
-    private Map<String, String> buildAtvChannelMap(ChannelInfo channel) {
+    private static Map<String, String> buildAtvChannelMap(ChannelInfo channel) {
         Map<String, String> map = new HashMap<String, String>();
         map.put(ChannelInfo.KEY_VFMT, String.valueOf(channel.getVfmt()));
         map.put(ChannelInfo.KEY_FREQUENCY, String.valueOf(channel.getFrequency()));

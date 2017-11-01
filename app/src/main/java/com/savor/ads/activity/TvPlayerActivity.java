@@ -205,9 +205,6 @@ public class TvPlayerActivity extends BaseActivity {
     private void init() {
 
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
-        // TODO: 调接口临时写死
-        tvSignal = TVSignal.ATV;
-        mTvOperate.setSignalSource(tvSignal);
 
         // 填充节目列表到mChannelList
         fillChannelList();
@@ -226,6 +223,7 @@ public class TvPlayerActivity extends BaseActivity {
                 initCurrentProgram();
             }
         } else {
+            mTvOperate.setSignalSource(mTvView, tvSignal);
             mChannelTipRl.setVisibility(View.GONE);
         }
 
@@ -259,7 +257,7 @@ public class TvPlayerActivity extends BaseActivity {
             mSession.setTvCurrentChannelNumber(mChannelList.get(0).getChannelNum());
             mCurrentProgramIndex = 0;
         }
-        mTvOperate.switchATVChannel(mSession.getTvCurrentChannelNumber());
+        mTvOperate.switchATVChannel(mTvView, mChannelList.get(mCurrentProgramIndex).getId());
 
         showChannelTips();
     }
@@ -334,7 +332,7 @@ public class TvPlayerActivity extends BaseActivity {
     private void changeChannel(AtvChannel program) {
         if (program.getChannelNum() == mSession.getTvCurrentChannelNumber())
             return;
-        mTvOperate.switchATVChannel(program.getChannelNum());
+        mTvOperate.switchATVChannel(mTvView, program.getId());
         mSession.setTvCurrentChannelNumber(program.getChannelNum());
         showChannelTips();
     }
@@ -387,8 +385,9 @@ public class TvPlayerActivity extends BaseActivity {
         ArrayList<AtvChannel> programList = mTvOperate.getAtvChannels();
         mChannelList = new ArrayList<>();
         if (programList != null && programList.size() > 0) {
-            for (AtvChannel program : programList) {
-                program.setChannelNum(program.getChannelNum() + 1);
+            for (int i = 0; i < programList.size(); i++) {
+                AtvChannel program = programList.get(i);
+                program.setChannelNum(i + 1);
                 mChannelList.add(program);
             }
         }
@@ -505,13 +504,13 @@ public class TvPlayerActivity extends BaseActivity {
 
     private void uploadProgram() {
 
-        ArrayList<AtvChannel> programs = mTvOperate.getAtvChannels();
-        // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
-        if (programs != null && programs.size() > 0) {
-            for (AtvChannel program : programs) {
-                program.setChannelNum(program.getChannelNum() + 1);
-            }
-        }
+        ArrayList<AtvChannel> programs = mTvOperate.getSysChannels();
+//        // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
+//        if (programs != null && programs.size() > 0) {
+//            for (AtvChannel program : programs) {
+//                program.setChannelNum(program.getChannelNum() + 1);
+//            }
+//        }
 
         AppApi.uploadProgram(this, new ApiRequestListener() {
             @Override
@@ -560,7 +559,7 @@ public class TvPlayerActivity extends BaseActivity {
 
         // 设置输入源
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
-        mTvOperate.setSignalSource(tvSignal);
+        mTvOperate.setSignalSource(mTvView, tvSignal);
 
         if (tvSignal == TVSignal.ATV) {
             for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
@@ -571,7 +570,7 @@ public class TvPlayerActivity extends BaseActivity {
                 }
             }
             // 如果切换到电视模式的话，恢复频道为保存的值
-            mTvOperate.switchATVChannel(mSession.getTvCurrentChannelNumber());
+            mTvOperate.switchATVChannel(mTvView, mChannelList.get(mCurrentProgramIndex).getId());
         } else {
             // 如果切换到非电视模式的话，隐藏频道提示
             if (mChannelTipRl != null && mChannelTipRl.getVisibility() == View.VISIBLE) {

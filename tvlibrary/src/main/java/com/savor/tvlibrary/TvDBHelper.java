@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteTransactionListener;
+import android.media.tv.TvContract;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ public class TvDBHelper extends SQLiteOpenHelper {
         public static final String ID = "_id";
         public static final String CHANNEL_ID = "channel_id";
         public static final String CHANNEL_NAME = "channel_name";
-        public static final String CHANNEL_NUM = "channel_num";
     }
 
     public static class TableName {
@@ -73,56 +73,10 @@ public class TvDBHelper extends SQLiteOpenHelper {
                 + TableName.ATV_CHANNEL
                 + " ("
                 + FieldName.ID + " INTEGER PRIMARY KEY, "
-                + FieldName.CHANNEL_ID + " TEXT, "
-                + FieldName.CHANNEL_NUM + " INTEGER, "
+                + FieldName.CHANNEL_ID + " INTEGER, "
                 + FieldName.CHANNEL_NAME + " TEXT "
                 + ");";
         db.execSQL(DATABASE_CREATE);
-    }
-
-    void cleanAtcChannels() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.delete(TableName.ATV_CHANNEL, null, null);
-        db.close();
-    }
-
-    void insertChannels() {
-
-    }
-
-    void setAtvChannels(ArrayList<AtvChannel> newChannels) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransactionWithListener(new SQLiteTransactionListener() {
-            @Override
-            public void onBegin() {
-                Log.d(TAG, "setAtvChannels onBegin");
-            }
-
-            @Override
-            public void onCommit() {
-                Log.d(TAG,"setAtvChannels onCommit");
-            }
-
-            @Override
-            public void onRollback() {
-                Log.d(TAG,"setAtvChannels onRollback");
-            }
-        });
-        db.delete(TableName.ATV_CHANNEL, null, null);
-        if (newChannels != null) {
-            for (AtvChannel channel :
-                    newChannels) {
-                ContentValues contentValues = new ContentValues();
-//                contentValues.put(FieldName.CHANNEL_ID, channel.getFreq());
-//                contentValues.put(FieldName.CHANNEL_NUM, channel.getChannelNum());
-                contentValues.put(FieldName.CHANNEL_NAME, channel.getChannelName());
-                db.insert(TableName.ATV_CHANNEL, null, contentValues);
-            }
-        }
-
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        db.close();
     }
 
     ArrayList<AtvChannel> getAtvChannels() {
@@ -135,9 +89,8 @@ public class TvDBHelper extends SQLiteOpenHelper {
                 channels = new ArrayList<>();
                 do {
                     AtvChannel bean = new AtvChannel();
-//                    bean.setChannelNum(cursor.getInt(cursor.getColumnIndex(FieldName.CHANNEL_NUM)));
                     bean.setChannelName(cursor.getString(cursor.getColumnIndex(FieldName.CHANNEL_NAME)));
-//                    bean.setFreq(cursor.getInt(cursor.getColumnIndex(FieldName.CHANNEL_ID)));
+                    bean.setId(cursor.getInt(cursor.getColumnIndex(FieldName.CHANNEL_ID)));
 
                     channels.add(bean);
                 } while (cursor.moveToNext());
@@ -155,6 +108,100 @@ public class TvDBHelper extends SQLiteOpenHelper {
             }
         }
         db.close();
+
         return channels;
+    }
+
+    ArrayList<AtvChannel> getSysChannels() {
+        ArrayList<AtvChannel> channels = null;
+        Cursor cursor = null;
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            cursor = mContext.getContentResolver().query(TvContract.Channels.CONTENT_URI, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                channels = new ArrayList<>();
+                int i = 0;
+                do {
+                    AtvChannel bean = new AtvChannel();
+
+                    bean.setInputId(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_INPUT_ID)));
+                    bean.setDisplayNumber(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NUMBER)));
+                    bean.setDisplayName(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NAME)));
+                    bean.setType(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_TYPE)));
+                    bean.setIsBrowsable(cursor.getInt(cursor.getColumnIndex("browsable")));
+                    bean.setServiceType(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_SERVICE_TYPE)));
+                    bean.setServiceId(cursor.getInt(cursor.getColumnIndex(TvContract.Channels.COLUMN_SERVICE_ID)));
+                    bean.setProviderData(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_INTERNAL_PROVIDER_DATA)));
+
+                    bean.setChannelName(bean.getDisplayName());
+                    bean.setChannelNum(++i);
+                    channels.add(bean);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        db.close();
+
+        return channels;
+    }
+
+    void mappingChannelFromSysDb() {
+        Cursor cursor = mContext.getContentResolver().query(TvContract.Channels.CONTENT_URI, null, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                try {
+                    SQLiteDatabase db = getWritableDatabase();
+                    db.beginTransaction();
+
+                    db.delete(TableName.ATV_CHANNEL, null, null);
+
+                    int i = 1;
+                    do {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(FieldName.CHANNEL_ID, cursor.getInt(cursor.getColumnIndex(TvContract.Channels._ID)));
+                        contentValues.put(FieldName.CHANNEL_NAME, cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NAME)) + i++);
+
+                        db.insert(TableName.ATV_CHANNEL, null, contentValues);
+                    } while (cursor.moveToNext());
+
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                    db.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            cursor.close();
+        }
+    }
+
+    void updateSysDb(ArrayList<AtvChannel> newChannels) {
+        if (newChannels != null) {
+            mContext.getContentResolver().delete(TvContract.Channels.CONTENT_URI, null, null);
+            for (AtvChannel channel :
+                    newChannels) {
+                ContentValues values = new ContentValues();
+                values.put(TvContract.Channels.COLUMN_INPUT_ID, channel.getInputId());
+                values.put(TvContract.Channels.COLUMN_DISPLAY_NUMBER, channel.getDisplayNumber());
+                values.put(TvContract.Channels.COLUMN_DISPLAY_NAME, channel.getDisplayName());
+                values.put(TvContract.Channels.COLUMN_TYPE, channel.getType());
+//        values.put(Channels.COLUMN_BROWSABLE, channel.isBrowsable() ? 1 : 0);
+                values.put("browsable", channel.getIsBrowsable());
+                values.put(TvContract.Channels.COLUMN_SERVICE_TYPE, channel.getServiceType());
+                values.put(TvContract.Channels.COLUMN_SERVICE_ID, channel.getServiceId());
+                values.put(TvContract.Channels.COLUMN_INTERNAL_PROVIDER_DATA, channel.getProviderData());
+                mContext.getContentResolver().insert(TvContract.Channels.CONTENT_URI, values);
+            }
+        }
     }
 }

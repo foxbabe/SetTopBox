@@ -31,17 +31,18 @@ public class GiecTVOperator implements ITVOperator {
     }
 
     @Override
-    public void switchATVChannel(int channelNum) {
-
+    public void switchATVChannel(TvView tvView, int channelId) {
+        tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
     }
 
     @Override
     public void autoTuning(final AutoTurningCallback turningCallback) {
         final String TAG = "autoTurning";
 
-        final TvStoreManager storeManager = new TvStoreManager(mContext, "com.droidlogic.tvinput/.services.ADTVInputService/HW16", 1) {
+        final TvStoreManager storeManager = new TvStoreManager(mContext, ConstantValues.INPUT_ID_ATV, 1) {
             @Override
             public void onScanEnd() {
+                Log.d(TAG, "onScanEnd");
                 TvControlManager.getInstance().DtvStopScan();
                 TvControlManager.getInstance().StopTv();
             }
@@ -105,6 +106,9 @@ public class GiecTVOperator implements ITVOperator {
 
                     case TvControlManager.EVENT_STORE_END:
                         Log.d(TAG, "onEvent:Store end");
+                        // 搜台结束，从系统数据表中映射出到自己的数据表中
+                        TvDBHelper.getInstance(mContext).mappingChannelFromSysDb();
+                        turningCallback.onComplete();
                         break;
 
                     case TvControlManager.EVENT_SCAN_END:
@@ -113,9 +117,10 @@ public class GiecTVOperator implements ITVOperator {
 
                     case TvControlManager.EVENT_SCAN_EXIT:
                         Log.d(TAG, "onEvent:Scan exit. percent=" + event.precent);
-                        if (event.precent >= 100) {
-                            turningCallback.onComplete();
-                        }
+//                        if (event.precent >= 100) {
+//                            TvDBHelper.getInstance(mContext).mappingChannelFromSysDb();
+//                            turningCallback.onComplete();
+//                        }
                         break;
                     default:
                         break;
@@ -147,9 +152,9 @@ public class GiecTVOperator implements ITVOperator {
          * 在做搜索可以设置Channels.COLUMN_SERVICE_ID用来排序
          * 这个值好像对节目播放没有影响，其实节目编辑就是对数据进行操作， 可参考之前发的demo是如何进行数据库操作
          */
-        //每次搜索先清空数据库信息，也可以不清空，根据实际需求
         mContext.getContentResolver().delete(TvContract.Channels.CONTENT_URI, null, null);
-//        TvControlManager.getInstance().TvScan(fe, scan);
+
+        TvControlManager.getInstance().TvScan(fe, scan);
     }
 
     @Override
@@ -167,40 +172,32 @@ public class GiecTVOperator implements ITVOperator {
     }
 
     @Override
+    public ArrayList<AtvChannel> getSysChannels() {
+        TvDBHelper dbHelper = TvDBHelper.getInstance(mContext);
+        ArrayList<AtvChannel> channels = dbHelper.getSysChannels();
+        return channels;
+    }
+
+    @Override
     public void setAtvChannels(ArrayList<AtvChannel> channels) {
         TvDBHelper dbHelper = TvDBHelper.getInstance(mContext);
-        dbHelper.setAtvChannels(channels);
+        dbHelper.updateSysDb(channels);
+        dbHelper.mappingChannelFromSysDb();
     }
 
     @Override
-    public TVSignal getCurrentSignalSource() {
-        TVSignal tvSignal = TVSignal.ATV;
-        int source = TvControlManager.getInstance().GetCurrentSourceInput();
-        if (source == TvControlManager.SourceInput.TV.toInt()) {
-            tvSignal = TVSignal.ATV;
-        } else if (source == TvControlManager.SourceInput.AV1.toInt()) {
-            tvSignal = TVSignal.AVI;
-        } else if (source == TvControlManager.SourceInput.HDMI1.toInt()) {
-            tvSignal = TVSignal.HDMI;
-        }
-        return tvSignal;
-    }
-
-    @Override
-    public void setSignalSource(TVSignal signal) {
-//        TvControlManager.SourceInput source = TvControlManager.SourceInput.TV;
-//        switch (signal) {
+    public void setSignalSource(TvView tvView, TVSignal signal) {
+        switch (signal) {
 //            case ATV:
-//                source = TvControlManager.SourceInput.TV;
+//                tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUriForPassthroughInput(ConstantValues.INPUT_ID_AV));
 //                break;
-//            case AVI:
-//                source = TvControlManager.SourceInput.AV1;
-//                break;
-//            case HDMI:
-//                source = TvControlManager.SourceInput.HDMI3;
-//                break;
-//        }
-//        TvControlManager.getInstance().SetSourceInput(source);
+            case AVI:
+                tvView.tune(ConstantValues.INPUT_ID_AV, TvContract.buildChannelUriForPassthroughInput(ConstantValues.INPUT_ID_AV));
+                break;
+            case HDMI:
+                tvView.tune(ConstantValues.INPUT_ID_HDMI, TvContract.buildChannelUriForPassthroughInput(ConstantValues.INPUT_ID_HDMI));
+                break;
+        }
     }
 
     @Override
