@@ -654,9 +654,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
 
             // 删除下载表中的当前、非预发布的节目单的内容
-            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
+            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " +
+                    DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? ";
             String[] selectionArgs;
-            selectionArgs = new String[]{session.getProPeriod(), session.getProNextPeriod()};
+            selectionArgs = new String[]{session.getProPeriod(), session.getProNextPeriod(), session.getAdvPeriod(), session.getAdvNextPeriod()};
             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
             // 将下载表中的内容拷贝到播放表
