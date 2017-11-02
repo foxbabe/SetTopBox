@@ -1,62 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.savor.ads"
-          xmlns:tools="http://schemas.android.com/tools">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.savor.ads">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
+    <!--<uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"/>
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
-    <uses-permission android:name="android.permission.DELETE_PACKAGES"/>
+    <uses-permission android:name="android.permission.DELETE_PACKAGES"/>-->
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE"/>
-    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA"/>
+    <!--<uses-permission android:name="android.permission.CLEAR_APP_USER_DATA"/>-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
+    <!--<uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>-->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.RESTART_PACKAGES"/>
     <uses-permission android:name="android.permission.GET_TASKS"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.REBOOT"/>
+    <!--<uses-permission android:name="android.permission.REBOOT"/>-->
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.GLOBAL_SEARCH" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS" />
-    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
-    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
-    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_ALL_EPG_DATA" />
-    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
-    <uses-permission android:name="droidlogic.permission.SYSTEM_CONTROL" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission
+        android:name="android.permission.GLOBAL_SEARCH"
+        tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"/>
+    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_ALL_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS"/>
+    <uses-permission android:name="droidlogic.permission.SYSTEM_CONTROL"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.HDMI_CEC"/>
 
-    <uses-feature android:name="android.software.live_tv" android:required="true" />
+    <uses-feature
+        android:name="android.software.live_tv"
+        android:required="true"/>
 
     <!-- Permissions/feature for USB tuner -->
-    <uses-permission android:name="android.permission.DVB_DEVICE" />
-    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+    <uses-permission android:name="android.permission.DVB_DEVICE"/>
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false"/>
 
     <!-- Limit only for Android TV -->
-    <uses-feature android:name="android.software.leanback" android:required="true" />
-    <uses-feature android:name="android.software.live_tv" android:required="true" />
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.software.live_tv"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false"/>
 
     <application
         android:name=".SavorApplication"
         android:allowBackup="true"
+        android:banner="@mipmap/ic_launcher"
         android:icon="@mipmap/ic_launcher"
+        android:keepScreenOn="true"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:supportsRtl="true"
-        android:keepScreenOn="true"
         android:theme="@style/AppTheme">
         <meta-data
             android:name="UMENG_APPKEY"
@@ -156,8 +170,9 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".activity.LotteryActivity"
-                  android:launchMode="singleTask">
+        <activity
+            android:name=".activity.LotteryActivity"
+            android:launchMode="singleTask">
         </activity>
     </application>
 
