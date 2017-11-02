@@ -464,22 +464,12 @@ public class DBHelper extends SQLiteOpenHelper {
     //查询播放列表本期数据是否存在
     public List<PlayListBean> findNewPlayListByWhere(String selection, String[] selectionArgs) throws SQLException {
 
-        String[] columns = new String[]{
-                MediaDBInfo.FieldName.ID,
-                DBHelper.MediaDBInfo.FieldName.MD5,
-                DBHelper.MediaDBInfo.FieldName.MEDIANAME,
-                DBHelper.MediaDBInfo.FieldName.VID,
-                DBHelper.MediaDBInfo.FieldName.SURFIX,
-                MediaDBInfo.FieldName.PERIOD};
-        String groupBy = null;
-        String having = null;
-        String orderBy = null;
         Cursor cursor = null;
         List<PlayListBean> playList = null;
         try {
 //            open();
-            cursor = db.query(MediaDBInfo.TableName.NEWPLAYLIST, columns,
-                    selection, selectionArgs, groupBy, having, orderBy, null);
+            cursor = db.query(MediaDBInfo.TableName.NEWPLAYLIST, null,
+                    selection, selectionArgs, null, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 playList = new ArrayList<>();
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -490,6 +480,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     bean.setMedia_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
                     bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
                     bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                    bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                     playList.add(bean);
                 }
             }
