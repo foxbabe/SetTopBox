@@ -124,6 +124,7 @@ public class TvDBHelper extends SQLiteOpenHelper {
                 do {
                     AtvChannel bean = new AtvChannel();
 
+                    bean.setId(cursor.getInt(cursor.getColumnIndex(TvContract.Channels._ID)));
                     bean.setInputId(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_INPUT_ID)));
                     bean.setDisplayNumber(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NUMBER)));
                     bean.setDisplayName(cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NAME)));

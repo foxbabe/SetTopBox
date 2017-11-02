@@ -7,7 +7,7 @@ package com.savor.tvlibrary;
 public enum OutputResolution {
     RESOLUTION_1080p("1080p60hz"),
     RESOLUTION_720p("720p60hz"),
-    RESOLUTION_480p("480p60hz");
+    RESOLUTION_480p("576p60hz");
 
     String strValue;
     OutputResolution(String value) {

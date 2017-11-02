@@ -212,7 +212,6 @@ public class GiecTVOperator implements ITVOperator {
     public void switchResolution(OutputResolution resolution) {
         try {
             OutputModeManager outputModeManager = new OutputModeManager(mContext);
-            String res = outputModeManager.getSupportedResolution();
             outputModeManager.setBestMode(resolution.strValue);
         } catch (Exception e) {
             e.printStackTrace();

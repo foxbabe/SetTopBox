@@ -451,7 +451,9 @@ public class TvPlayerActivity extends BaseActivity {
                 handled = true;
                 break;
             // 上传频道列表
-            case KeyCodeConstant.KEY_CODE_UPLOAD_CHANNEL_INFO:
+            // TODO: 记得解注
+//            case KeyCodeConstant.KEY_CODE_UPLOAD_CHANNEL_INFO:
+            case KeyCodeConstant.KEY_CODE_LEFT:
                 if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
                     uploadProgram();
                     handled = true;
