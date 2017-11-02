@@ -22,6 +22,8 @@ import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
+import com.savor.tvlibrary.OutputResolution;
+import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -229,8 +231,32 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 showBoxInfo();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_CHANGE_RESOLUTION:
+                changeResolution();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
+    }
+
+    int resolutionIndex = 0;
+    private void changeResolution() {
+        OutputResolution resolution = OutputResolution.values()[(resolutionIndex++) % OutputResolution.values().length];
+        TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC)
+                .switchResolution(resolution);
+        String msg = "1080P";
+        switch (resolution) {
+            case RESOLUTION_1080p:
+                msg = "1080P";
+                break;
+            case RESOLUTION_720p:
+                msg = "720P";
+                break;
+            case RESOLUTION_480p:
+                msg = "480P";
+                break;
+        }
+        ShowMessage.showToast(getApplicationContext(), msg);
     }
 
     /**

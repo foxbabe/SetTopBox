@@ -19,4 +19,5 @@ public interface ITVOperator {
     void setAtvChannels(ArrayList<AtvChannel> channels);
     void setSignalSource(TvView tvView, TVSignal signal);
     void exitTv(TvView tvView);
+    void switchResolution(OutputResolution resolution);
 }

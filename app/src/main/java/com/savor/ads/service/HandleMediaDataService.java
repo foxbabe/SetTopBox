@@ -571,8 +571,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 + "=? ";
                         String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), programAdvBean.getMenu_num()};
                         List<PlayListBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
-                        int id = -1;
-                        if (list != null) {
+                        int id = -1;                       if (list != null) {
                             if (list.size() > 1) {
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
                             } else if (list.size() == 1) {

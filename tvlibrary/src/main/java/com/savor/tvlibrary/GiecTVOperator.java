@@ -6,6 +6,7 @@ import android.media.tv.TvView;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.droidlogic.app.OutputModeManager;
 import com.droidlogic.app.tv.DroidLogicTvUtils;
 import com.droidlogic.app.tv.TVChannelParams;
 import com.droidlogic.app.tv.TvControlManager;
@@ -205,5 +206,16 @@ public class GiecTVOperator implements ITVOperator {
         TvControlManager.getInstance().StopTv();
 //        TvControlManager.getInstance().release();
         tvView.reset();
+    }
+
+    @Override
+    public void switchResolution(OutputResolution resolution) {
+        try {
+            OutputModeManager outputModeManager = new OutputModeManager(mContext);
+            String res = outputModeManager.getSupportedResolution();
+            outputModeManager.setBestMode(resolution.strValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
