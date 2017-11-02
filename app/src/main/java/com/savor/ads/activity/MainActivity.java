@@ -107,23 +107,6 @@ public class MainActivity extends BaseActivity {
         unregisterReceiver(mDownloadCompleteReceiver);
     }
 
-//    private boolean mIsFirstResume = true;
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (!mIsFirstResume) {
-//            fillPlayList();
-//
-//            // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
-//            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-//                Intent intent = new Intent(this, AdsPlayerActivity.class);
-//                startActivity(intent);
-//            }
-//        }
-//        mIsFirstResume = false;
-    }
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -149,8 +132,7 @@ public class MainActivity extends BaseActivity {
             getSpIpFromServer();
         }
 
-        // TODO;
-//        startDownloadMediaDataService();
+        startDownloadMediaDataService();
 
         startProduceLogService();
         startUploadLogService();
@@ -288,14 +270,8 @@ public class MainActivity extends BaseActivity {
             main_imgIv.setImageResource(R.mipmap.bg_splash);
         }
 
-        if (mAudioManager != null) {
-            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
-        }
-
-        // 暂时关闭NTP服务 TODO：借助
-//        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
-//        timeCalibrateHelper.startCalibrateTime();
-
+        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
+        timeCalibrateHelper.startCalibrateTime();
     }
 
 
