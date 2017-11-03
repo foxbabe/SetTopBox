@@ -40,6 +40,8 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.UpdateUtil;
+import com.savor.tvlibrary.ITVOperator;
+import com.savor.tvlibrary.TVOperatorFactory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -338,8 +340,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             case SP_GET_TV_MATCH_DATA_FROM_JSON:
                 if (obj instanceof TvProgramResponse) {
                     TvProgramResponse response = (TvProgramResponse) obj;
-//                    ITVOperator tvOperate = TVOperatorFactory.getTVOperator(TVOperatorFactory.TVType.V600);
-//                    tvOperate.setAtvChannels();
+                    ITVOperator tvOperate = TVOperatorFactory.getTVOperator(getApplicationContext(), TVOperatorFactory.TVType.GIEC);
+                    tvOperate.setAtvChannels(response.getTvChannelList());
+                    session.setTvDefaultChannelNumber(response.getLockingChannelNum());
                 }
                 break;
             case SP_GET_LOGO_DOWN:

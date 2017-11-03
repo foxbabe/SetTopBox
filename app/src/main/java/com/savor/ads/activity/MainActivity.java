@@ -132,7 +132,7 @@ public class MainActivity extends BaseActivity {
             getSpIpFromServer();
         }
 
-        startDownloadMediaDataService();
+//        startDownloadMediaDataService();
 
         startProduceLogService();
         startUploadLogService();
