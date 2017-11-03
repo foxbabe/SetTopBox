@@ -166,11 +166,11 @@ public class TvDBHelper extends SQLiteOpenHelper {
 
                     db.delete(TableName.ATV_CHANNEL, null, null);
 
-                    int i = 1;
+                    int i = 0;
                     do {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(FieldName.CHANNEL_ID, cursor.getInt(cursor.getColumnIndex(TvContract.Channels._ID)));
-                        contentValues.put(FieldName.CHANNEL_NAME, cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NAME)) + i++);
+                        contentValues.put(FieldName.CHANNEL_NAME, "P-" + ++i);
 
                         db.insert(TableName.ATV_CHANNEL, null, contentValues);
                     } while (cursor.moveToNext());
