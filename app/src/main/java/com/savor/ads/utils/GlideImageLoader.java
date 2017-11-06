@@ -98,14 +98,6 @@ public class GlideImageLoader {
         loadImage(appContext, imgPath, imageView, placeHolderId, placeHolderId, listener);
     }
 
-    public static void loadRoundImage(Context context, String imgPath, ImageView imageView, int defaultId) {
-        if (context == null) {
-            return;
-        }
-        Context appContext = context.getApplicationContext();
-        loadRoundImage(appContext, imgPath, imageView, defaultId, defaultId);
-    }
-
     public static void loadImage(Context context, String imgPath, ImageView imageView, int placeholderResId, int failedResId) {
         if (context == null) {
             return;
@@ -155,28 +147,6 @@ public class GlideImageLoader {
                     .crossFade()
                     .into(imageView);
         }
-    }
-
-    public static void loadRoundImage(final Context context, String imgPath, final ImageView imageView, int placeholderResId, int failedResId) {
-        if (context == null) {
-            return;
-        }
-        Context appContext = context.getApplicationContext();
-        Glide.with(appContext).
-                load(imgPath)
-                .asBitmap()
-                .placeholder(placeholderResId)
-                .error(failedResId)
-                .centerCrop()
-                .into(new BitmapImageViewTarget(imageView) {
-                    @Override
-                    protected void setResource(Bitmap resource) {
-                        RoundedBitmapDrawable circularBitmapDrawable =
-                                RoundedBitmapDrawableFactory.create(context.getResources(), resource);
-                        circularBitmapDrawable.setCircular(true);
-                        imageView.setImageDrawable(circularBitmapDrawable);
-                    }
-                });
     }
 
     public static void loadImageWithNoAnimate(Context context, String imgPath, ImageView imageView, int placeholderResId, int failedResId) {

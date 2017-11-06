@@ -249,7 +249,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
         mPptAdapter = new PptVpAdapter(this, null, this);
         mPptVp.setAdapter(mPptAdapter);
-        mPptVp.addOnPageChangeListener(this);
+        mPptVp.setOnPageChangeListener(this);
     }
 
     private void initVolume() {

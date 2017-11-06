@@ -146,7 +146,8 @@
         <!-- 应用设置页面 -->
         <activity
             android:name=".activity.SettingActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustNothing|stateAlwaysHidden">
         </activity>
 
         <service

@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.savor.ads.R;
+import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
@@ -138,6 +139,8 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
+
+        ((SavorApplication) getApplication()).acquireWakelock();
     }
 
     /**

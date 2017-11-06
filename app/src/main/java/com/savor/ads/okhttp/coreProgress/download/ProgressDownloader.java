@@ -130,7 +130,7 @@ public class ProgressDownloader {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = inputStream.read(buffer))!=-1){
-                ByteBuffer bf  = mappedByteBuffer.put(buffer,0,len);
+//                ByteBuffer bf  = mappedByteBuffer.put(buffer,0,len);
                 LogUtils.v("while---------" + url+"   " + randomAccessFile.length());
             }
         }catch (Exception e){

@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.savor.ads.customview.IPEditText;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.GlobalValues;
+import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.ShellUtils;
 
 public class SettingActivity extends BaseActivity {
@@ -27,6 +29,7 @@ public class SettingActivity extends BaseActivity {
     private ViewGroup mEditIpLl;
     private TextView mServerIpTv;
     private IPEditText mIPEditText;
+    private Button mConfirmBtn;
 
     private String mServerIp;
     private boolean mIsEditIp;
@@ -39,6 +42,7 @@ public class SettingActivity extends BaseActivity {
         mEditIpLl = (ViewGroup) findViewById(R.id.ll_edit_ip);
         mServerIpTv = (TextView) findViewById(R.id.tv_server_ip);
         mIPEditText = (IPEditText) findViewById(R.id.et_ip);
+        mConfirmBtn = (Button) findViewById(R.id.btn_ok);
 
         if (mSession.getServerInfo() != null) {
             mServerIp = mSession.getServerInfo().getServerIp();
@@ -53,11 +57,12 @@ public class SettingActivity extends BaseActivity {
         mBaseLl.requestFocus();
 
         if (!TextUtils.isEmpty(mServerIp)) {
-            String[] splits = mServerIp.split(".");
-            if (splits != null && splits.length == 4) {
+            String[] splits = mServerIp.split("\\.");
+            if (splits.length == 4) {
                 mIPEditText.setText(splits[0], splits[1], splits[2], splits[3]);
             }
         }
+        mIPEditText.setListener();
     }
 
     @Override
@@ -94,7 +99,7 @@ public class SettingActivity extends BaseActivity {
 
     // 修改IP地址
     public void doModifyIp(View v) {
-        final String serverIp = mIPEditText.getText(this);
+        final String serverIp = mIPEditText.getText();
 
         AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
                 .setTitle("提示")
@@ -144,5 +149,29 @@ public class SettingActivity extends BaseActivity {
     public void goSearch(View v) {
         gotoTvSearch();
         finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean handled = false;
+        if (mIsEditIp) {
+            switch (keyCode) {
+                case KeyCodeConstant.KEY_CODE_UP:
+                    handled = true;
+                    mIPEditText.requestFocus();
+                    break;
+                case KeyCodeConstant.KEY_CODE_DOWN:
+                    handled = true;
+                    mConfirmBtn.requestFocus();
+                    break;
+                case KeyCodeConstant.KEY_CODE_LEFT:
+                case KeyCodeConstant.KEY_CODE_RIGHT:
+                    if (mConfirmBtn.isFocused()) {
+                        handled = true;
+                    }
+                    break;
+            }
+        }
+        return handled || super.onKeyDown(keyCode, event);
     }
 }
