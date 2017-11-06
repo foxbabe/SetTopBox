@@ -547,6 +547,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
+        // 先从下载表中删除该期的记录
+        String selectionDel = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
+        String[] argsDel = new String[]{advPeriod, programAdvBean.getVersion().getType()};
+        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selectionDel, argsDel);
+
         boolean isAdvCompleted = false;
         session.setAdvDownloadPeriod(programAdvBean.getVersion().getVersion());
         if (programAdvBean.getMedia_lib() != null && programAdvBean.getMedia_lib().size() > 0) {
@@ -566,6 +571,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     }
                     if (isChecked) {
+                        // ADV是先在handleSmallPlatformProgramData()中插入，然后在这里更新实际数据，插入时的期号是节目单号
                         String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE
                                 + "=? and "
                                 + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
