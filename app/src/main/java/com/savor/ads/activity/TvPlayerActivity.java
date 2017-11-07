@@ -564,15 +564,19 @@ public class TvPlayerActivity extends BaseActivity {
         mTvOperate.setSignalSource(mTvView, tvSignal);
 
         if (tvSignal == TVSignal.ATV) {
-            for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
-                AtvChannel program = mChannelList.get(i);
-                if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
-                    mCurrentProgramIndex = i;
-                    break;
+            int id = 0;
+            if (mChannelList != null) {
+                for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
+                    AtvChannel program = mChannelList.get(i);
+                    if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
+                        mCurrentProgramIndex = i;
+                        id = program.getId();
+                        break;
+                    }
                 }
             }
             // 如果切换到电视模式的话，恢复频道为保存的值
-            mTvOperate.switchATVChannel(mTvView, mChannelList.get(mCurrentProgramIndex).getId());
+            mTvOperate.switchATVChannel(mTvView, id);
         } else {
             // 如果切换到非电视模式的话，隐藏频道提示
             if (mChannelTipRl != null && mChannelTipRl.getVisibility() == View.VISIBLE) {

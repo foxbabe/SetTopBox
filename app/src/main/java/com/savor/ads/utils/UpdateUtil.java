@@ -98,7 +98,7 @@ public class UpdateUtil implements ApiRequestListener {
                 DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
                 dos.writeBytes("mount -o remount,rw /system\n");
 
-                String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
+                String catCommand = "cat " + file.getPath() + " > /system/priv-app/savormedia/1.apk\n";
                 dos.writeBytes(catCommand);
 
                 Thread.sleep(3000);
