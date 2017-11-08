@@ -33,6 +33,8 @@ public class SSDPMulticastService extends IntentService {
     private static final String TYPE_LABEL_PREFIX = "Savor-Type:";
     /** 机顶盒IP*/
     private static final String BOX_IP_LABEL_PREFIX = "Savor-Box-HOST:";
+    /** 包间ID*/
+    private static final String ROOM_ID_PREFIX = "Savor-Room-ID:";
     /** 小平台IP*/
     private static final String IP_LABEL_PREFIX = "Savor-HOST:";
     /** 以下为小平台端口信息*/
@@ -67,6 +69,7 @@ public class SSDPMulticastService extends IntentService {
                 // 拼接message
                 String msg = TYPE_LABEL_PREFIX + ConstantValues.SSDP_CONTENT_TYPE + CRLF +
                         BOX_IP_LABEL_PREFIX + AppUtils.getLocalIPAddress() + CRLF +
+                        ROOM_ID_PREFIX + Session.get(this).getRoomId() + CRLF +
                         HOTEL_ID_PREFIX + Session.get(this).getBoiteId() + CRLF;
                 ServerInfo serverInfo = Session.get(this).getServerInfo();
                 if (serverInfo != null) {
