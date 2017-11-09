@@ -66,17 +66,22 @@ public class UpdateUtil implements ApiRequestListener {
             try {
                 DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
                 dos.writeBytes("mount -o remount,rw /system\n");
+                dos.flush();
 
                 String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
                 dos.writeBytes(catCommand);
+                dos.flush();
 
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 file.delete();
 
                 File file1 = new File(tempPath);
                 if (file1.length() > 0) {
                     dos.writeBytes("mv " + tempPath+ " /system/priv-app/savormedia/savormedia.apk\n");
-                    Thread.sleep(3000);
+                    dos.flush();
+
+                    dos.writeBytes("chmod 777 /system/priv-app/savormedia/savormedia.apk\n");
+                    dos.flush();
                     isflag = true;
                 } else {
                     file1.delete();
@@ -89,12 +94,10 @@ public class UpdateUtil implements ApiRequestListener {
         } finally {
             if (proc != null) {
                 try {
-                    proc.waitFor();
-                } catch (InterruptedException e) {
+                    proc.destroy();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                proc.destroy();
             }
         }
 

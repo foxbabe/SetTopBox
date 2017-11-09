@@ -14,8 +14,7 @@ public class ShellUtils {
 
     public static void reboot() {
         try {
-            Runtime.getRuntime().exec("reboot");
-//            Runtime.getRuntime().exec("su -c reboot");
+            Runtime.getRuntime().exec("su -c reboot");
         } catch (IOException e) {
             e.printStackTrace();
         }
