@@ -33,7 +33,11 @@ public class GiecTVOperator implements ITVOperator {
 
     @Override
     public void switchATVChannel(TvView tvView, int channelId) {
-        tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
+        if (channelId < 0) {
+            tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUriForPassthroughInput(ConstantValues.INPUT_ID_ATV));
+        } else {
+            tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
+        }
     }
 
     @Override
@@ -107,9 +111,6 @@ public class GiecTVOperator implements ITVOperator {
 
                     case TvControlManager.EVENT_STORE_END:
                         Log.d(TAG, "onEvent:Store end");
-                        // 搜台结束，从系统数据表中映射出到自己的数据表中
-                        TvDBHelper.getInstance(mContext).mappingChannelFromSysDb();
-                        turningCallback.onComplete();
                         break;
 
                     case TvControlManager.EVENT_SCAN_END:
@@ -118,10 +119,9 @@ public class GiecTVOperator implements ITVOperator {
 
                     case TvControlManager.EVENT_SCAN_EXIT:
                         Log.d(TAG, "onEvent:Scan exit. percent=" + event.precent);
-//                        if (event.precent >= 100) {
-//                            TvDBHelper.getInstance(mContext).mappingChannelFromSysDb();
-//                            turningCallback.onComplete();
-//                        }
+                        // 搜台结束，从系统数据表中映射出到自己的数据表中
+                        TvDBHelper.getInstance(mContext).mappingChannelFromSysDb();
+                        turningCallback.onComplete();
                         break;
                     default:
                         break;
@@ -154,6 +154,7 @@ public class GiecTVOperator implements ITVOperator {
          * 这个值好像对节目播放没有影响，其实节目编辑就是对数据进行操作， 可参考之前发的demo是如何进行数据库操作
          */
         mContext.getContentResolver().delete(TvContract.Channels.CONTENT_URI, null, null);
+        TvDBHelper.getInstance(mContext).cleanChannelDb();
 
         TvControlManager.getInstance().TvScan(fe, scan);
     }

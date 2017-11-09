@@ -156,6 +156,12 @@ public class TvDBHelper extends SQLiteOpenHelper {
         return channels;
     }
 
+    void cleanChannelDb() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TableName.ATV_CHANNEL, null, null);
+        db.close();
+    }
+
     void mappingChannelFromSysDb() {
         Cursor cursor = mContext.getContentResolver().query(TvContract.Channels.CONTENT_URI, null, null, null, null);
         if (cursor != null) {
@@ -163,8 +169,6 @@ public class TvDBHelper extends SQLiteOpenHelper {
                 try {
                     SQLiteDatabase db = getWritableDatabase();
                     db.beginTransaction();
-
-                    db.delete(TableName.ATV_CHANNEL, null, null);
 
                     int i = 0;
                     do {

@@ -212,13 +212,14 @@ public class TvPlayerActivity extends BaseActivity {
         // 输入源为ANT模拟电视信号时，显示当前频道
         if (tvSignal == TVSignal.ATV) {
             if (mChannelList == null || mChannelList.size() == 0) {
-                mChannelTipRl.setVisibility(View.GONE);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        mChannelTipRl.setVisibility(View.GONE);
                         ShowMessage.showToast(mContext, "未获取到频道信息");
                     }
                 });
+                mTvOperate.switchATVChannel(mTvView, -1);
             } else {
                 initCurrentProgram();
             }
@@ -245,10 +246,12 @@ public class TvPlayerActivity extends BaseActivity {
 
     private void initCurrentProgram() {
         boolean foundProgram = false;
+        int id = -1;
         for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
             AtvChannel program = mChannelList.get(i);
             if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
                 mCurrentProgramIndex = i;
+                id = program.getId();
                 foundProgram = true;
                 break;
             }
@@ -256,8 +259,9 @@ public class TvPlayerActivity extends BaseActivity {
         if (!foundProgram) {
             mSession.setTvCurrentChannelNumber(mChannelList.get(0).getChannelNum());
             mCurrentProgramIndex = 0;
+            id = mChannelList.get(0).getId();
         }
-        mTvOperate.switchATVChannel(mTvView, mChannelList.get(mCurrentProgramIndex).getId());
+        mTvOperate.switchATVChannel(mTvView, id);
 
         showChannelTips();
     }
@@ -564,8 +568,8 @@ public class TvPlayerActivity extends BaseActivity {
         mTvOperate.setSignalSource(mTvView, tvSignal);
 
         if (tvSignal == TVSignal.ATV) {
-            int id = 0;
-            if (mChannelList != null) {
+            int id = -1;
+            if (mChannelList != null && !mChannelList.isEmpty()) {
                 for (int i = 0, mChannelListSize = mChannelList.size(); i < mChannelListSize; i++) {
                     AtvChannel program = mChannelList.get(i);
                     if (program.getChannelNum() == mSession.getTvCurrentChannelNumber()) {
@@ -579,10 +583,8 @@ public class TvPlayerActivity extends BaseActivity {
             mTvOperate.switchATVChannel(mTvView, id);
         } else {
             // 如果切换到非电视模式的话，隐藏频道提示
-            if (mChannelTipRl != null && mChannelTipRl.getVisibility() == View.VISIBLE) {
-                mChannelTipRl.setVisibility(View.GONE);
-                mHandler.removeCallbacks(mHideChannelTipRunnable);
-            }
+            mChannelTipRl.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mHideChannelTipRunnable);
         }
     }
 

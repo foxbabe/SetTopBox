@@ -273,8 +273,8 @@ public class MainActivity extends BaseActivity {
             main_imgIv.setImageResource(R.mipmap.bg_splash);
         }
 
-        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
-        timeCalibrateHelper.startCalibrateTime();
+//        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
+//        timeCalibrateHelper.startCalibrateTime();
     }
 
 

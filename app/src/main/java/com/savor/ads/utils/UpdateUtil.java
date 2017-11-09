@@ -92,19 +92,21 @@ public class UpdateUtil implements ApiRequestListener {
         boolean isflag = false;
 
         Process proc = null;
+        String tempPath = "/system/priv-app/savormedia/temp.apk";
         try {
-            proc = Runtime.getRuntime().exec("su");
+            proc = Runtime.getRuntime().exec("system/xbin/su");
             try {
                 DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
                 dos.writeBytes("mount -o remount,rw /system\n");
 
-                String catCommand = "cat " + file.getPath() + " > /system/priv-app/savormedia/1.apk\n";
+                String catCommand = "cp " + file.getPath() + " " + tempPath + "\n";
+//                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
                 dos.writeBytes(catCommand);
 
                 Thread.sleep(3000);
                 file.delete();
 
-                File file1 = new File("/system/priv-app/savormedia/1.apk");
+                File file1 = new File(tempPath);
                 if (file1.length() > 0) {
                     dos.writeBytes("mv " + file1.getPath() + " /system/priv-app/savormedia/savormedia.apk\n");
                     Thread.sleep(3000);
