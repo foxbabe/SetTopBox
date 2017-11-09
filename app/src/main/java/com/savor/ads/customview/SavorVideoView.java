@@ -237,8 +237,6 @@ public class SavorVideoView extends RelativeLayout {
             mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                    LogUtils.v(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
 
                     // 播放器状态不对时getDuration报错，也没必要处理播放、暂停了，这里直接return
                     if (mPlayState == MediaPlayerState.IDLE || mPlayState == MediaPlayerState.INITIALIZED ||
@@ -246,8 +244,6 @@ public class SavorVideoView extends RelativeLayout {
                         return;
 
                     int currentPercent = mp.getCurrentPosition() * 100 / mp.getDuration();
-                    LogUtils.v(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
                     if (percent != 100 && currentPercent >= percent - 1) {
                         // 缓冲部分不足时，暂停播放并显示进度圈
                         if (mIfShowLoading) {
