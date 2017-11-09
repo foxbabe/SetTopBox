@@ -62,13 +62,12 @@ public class UpdateUtil implements ApiRequestListener {
         Process proc = null;
         String tempPath = "/system/priv-app/savormedia/temp.apk";
         try {
-            proc = Runtime.getRuntime().exec("system/xbin/su");
+            proc = Runtime.getRuntime().exec("su");
             try {
                 DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
                 dos.writeBytes("mount -o remount,rw /system\n");
 
-                String catCommand = "cp " + file.getPath() + " " + tempPath + "\n";
-//                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
+                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
                 dos.writeBytes(catCommand);
 
                 Thread.sleep(3000);
@@ -76,7 +75,7 @@ public class UpdateUtil implements ApiRequestListener {
 
                 File file1 = new File(tempPath);
                 if (file1.length() > 0) {
-                    dos.writeBytes("mv " + file1.getPath() + " /system/priv-app/savormedia/savormedia.apk\n");
+                    dos.writeBytes("mv " + tempPath+ " /system/priv-app/savormedia/savormedia.apk\n");
                     Thread.sleep(3000);
                     isflag = true;
                 } else {

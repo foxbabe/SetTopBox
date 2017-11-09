@@ -151,16 +151,16 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         notifyToPlay();
                     }
 
-                    LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
-                    // 同步获取轮播节目媒体数据
-                    getProgramDataFromSmallPlatform();
-                    //同步获取宣传片媒体数据
-                    getAdvDataFromSmallPlatform();
-                    //同步获取广告片媒体数据
-                    getAdsDataFromSmallPlatform();
-                    LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
-                    // 同步获取点播媒体数据
-                    getOnDemandDataFromSmallPlatform();
+//                    LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
+//                    // 同步获取轮播节目媒体数据
+//                    getProgramDataFromSmallPlatform();
+//                    //同步获取宣传片媒体数据
+//                    getAdvDataFromSmallPlatform();
+//                    //同步获取广告片媒体数据
+//                    getAdsDataFromSmallPlatform();
+//                    LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
+//                    // 同步获取点播媒体数据
+//                    getOnDemandDataFromSmallPlatform();
 //                    setAutoClose(true);
 
                     LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");

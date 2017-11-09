@@ -25,7 +25,7 @@ public class ShellUtils {
         Process process = null;
         DataOutputStream os = null;
         try{
-            process = Runtime.getRuntime().exec("system/xbin/su");
+            process = Runtime.getRuntime().exec("su");
             os = new DataOutputStream(process.getOutputStream());
             os.writeBytes("exit\n");
             os.flush();
