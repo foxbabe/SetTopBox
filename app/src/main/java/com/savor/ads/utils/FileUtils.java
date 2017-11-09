@@ -36,24 +36,21 @@ public class FileUtils {
     /**
      * 复制单个文件
      */
-    public static void copyFile(String oldPath, String newPath) {
+    public static void copyFile(String srcPath, String dstPath) {
         InputStream inStream = null;
         FileOutputStream fs = null;
         try {
-            int bytesum = 0;
             int byteread = 0;
-            File oldfile = new File(oldPath);
-            File newfile = new File(newPath);
+            File oldfile = new File(srcPath);
+            File newfile = new File(dstPath);
             if (!newfile.getParentFile().exists()) {
                 newfile.getParentFile().mkdirs();
             }
             if (oldfile.exists()) { //文件存在时
-                inStream = new FileInputStream(oldPath); //读入原文件
-                fs = new FileOutputStream(newPath);
-                byte[] buffer = new byte[1444];
+                inStream = new FileInputStream(srcPath); //读入原文件
+                fs = new FileOutputStream(dstPath);
+                byte[] buffer = new byte[1024];
                 while ((byteread = inStream.read(buffer)) != -1) {
-                    bytesum += byteread; //字节数 文件大小
-                    System.out.println(bytesum);
                     fs.write(buffer, 0, byteread);
                 }
             }

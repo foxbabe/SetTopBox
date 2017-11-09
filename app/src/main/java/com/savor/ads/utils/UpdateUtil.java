@@ -1,6 +1,8 @@
 package com.savor.ads.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.TextUtils;
 
 
@@ -45,40 +47,7 @@ public class UpdateUtil implements ApiRequestListener {
         }
     }
 
-    private static boolean updateRom(File file) {
-
-        boolean isflag = false;
-        try {
-            String sourcePath = file.getPath();
-            String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
-            Process proc = Runtime.getRuntime().exec(catCommand);
-//            Process proc = Runtime.getRuntime().exec("su");
-            DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
-            try {
-
-//                String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
-//                dos.writeBytes(catCommand);
-//                dos.flush();
-                dos.writeBytes("exit\n");
-                dos.flush();
-                isflag = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                dos.close();
-            }
-
-            try {
-                proc.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            proc.destroy();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return isflag;
+    private static void updateRom(File file) {
 
     }
 
@@ -90,7 +59,6 @@ public class UpdateUtil implements ApiRequestListener {
         }
 
         boolean isflag = false;
-
         Process proc = null;
         String tempPath = "/system/priv-app/savormedia/temp.apk";
         try {

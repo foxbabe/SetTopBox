@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -101,7 +102,7 @@ public class AppUtils {
     public static final String BoxlogedDir = "loged/";
     public static final String BoxMediaDir = "media/";
     public static final String BoxMulticast = "multicast/";
-    public static final String BoxLotteryDir= "lottery/";
+    public static final String BoxLotteryDir = "lottery/";
     // UTF-8 encoding
     private static final String ENCODING_UTF8 = "UTF-8";
 
@@ -152,7 +153,9 @@ public class AppUtils {
          * 抽奖记录
          */
         lottery,
-        /**幻灯片所用图片*/
+        /**
+         * 幻灯片所用图片
+         */
         ppt,
     }
 
@@ -294,8 +297,8 @@ public class AppUtils {
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
-        File targetLotteryFile = new File(path + File.separator,BoxLotteryDir);
-        if (!targetLotteryFile.exists()){
+        File targetLotteryFile = new File(path + File.separator, BoxLotteryDir);
+        if (!targetLotteryFile.exists()) {
             targetLotteryFile.mkdir();
         }
         File targetPptFile = new File(path + File.separator, "ppt");
@@ -431,7 +434,7 @@ public class AppUtils {
         String md5Vod1 = MD5(newb1);
         String md5Vod2 = MD5(newb2);
 
-        String md5Vod = getMD5(md5Vod1+md5Vod2);
+        String md5Vod = getMD5(md5Vod1 + md5Vod2);
         return md5Vod;
     }
 
@@ -1146,49 +1149,17 @@ public class AppUtils {
      * @return
      */
     public static String getEthernetMacAddr() {
-        String cmd = "busybox ifconfig eth0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ethernetMac = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            if (!TextUtils.isEmpty(line)) {
-                result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                        .replaceAll(":", "");
+            NetworkInterface inter = NetworkInterface.getByName("eth0");
+            if (inter != null) {
+                byte[] buf = inter.getHardwareAddress();
+                ethernetMac = ethernetMac + StringUtils.toHexString(buf, true);
             }
-        } catch (NullPointerException e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ethernetMac;
     }
 
     /**
@@ -1197,52 +1168,21 @@ public class AppUtils {
      * @return
      */
     public static String getEthernetIP() {
-        String cmd = "busybox ifconfig eth0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ip = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            while (line != null) {
-                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
-                    result = line.substring(line.indexOf("addr:") + 5);
-                    result = result.substring(0, result.indexOf(" ")).trim();
-                    break;
+            NetworkInterface inter = NetworkInterface.getByName("eth0");
+            if (inter != null) {
+                for (Enumeration<InetAddress> enumIpAddr = inter.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        ip = inetAddress.getHostAddress();
+                    }
                 }
-                line = reader.readLine();
             }
-
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ip;
     }
 
     /**
@@ -1251,47 +1191,17 @@ public class AppUtils {
      * @return
      */
     public static String getWlanMacAddr() {
-        String cmd = "busybox ifconfig wlan0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ethernetMac = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            if (!TextUtils.isEmpty(line)) {
-                result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                        .replaceAll(":", "");
+            NetworkInterface inter = NetworkInterface.getByName("wlan0");
+            if (inter != null) {
+                byte[] buf = inter.getHardwareAddress();
+                ethernetMac = ethernetMac + StringUtils.toHexString(buf, true);
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ethernetMac;
     }
 
     /**
@@ -1300,51 +1210,21 @@ public class AppUtils {
      * @return
      */
     public static String getWlanIP() {
-        String cmd = "busybox ifconfig wlan0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ip = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            while (line != null) {
-                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
-                    result = line.substring(line.indexOf("addr:") + 5);
-                    result = result.substring(0, result.indexOf(" ")).trim();
-                    break;
+            NetworkInterface inter = NetworkInterface.getByName("wlan0");
+            if (inter != null) {
+                for (Enumeration<InetAddress> enumIpAddr = inter.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        ip = inetAddress.getHostAddress();
+                    }
                 }
-                line = reader.readLine();
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ip;
     }
 
     //检查redian文件夹下是否有图有真相
@@ -1404,29 +1284,28 @@ public class AppUtils {
     }
 
     /**
-     *
      * @param context
      * @param serverVersion
      * @param type：1是rom升级，2是apk升级
      * @return
      */
-    public static boolean needUpdate(Context context,String serverVersion,int type){
+    public static boolean needUpdate(Context context, String serverVersion, int type) {
         Session session = Session.get(context);
-        if (serverVersion == null){
+        if (serverVersion == null) {
             return false;
         }
         String localVersion = null;
-        if (type ==1){
+        if (type == 1) {
             String rom = session.getRomVersion();
-            if (!TextUtils.isEmpty(rom)){
-                localVersion = rom.replace("V","").trim();
-            }else{
+            if (!TextUtils.isEmpty(rom)) {
+                localVersion = rom.replace("V", "").trim();
+            } else {
                 return false;
             }
-        }else{
+        } else {
             localVersion = session.getVersionName();
         }
-        if (!TextUtils.isEmpty(serverVersion)&&!localVersion.equals(serverVersion)){
+        if (!TextUtils.isEmpty(serverVersion) && !localVersion.equals(serverVersion)) {
             return true;
         }
         return false;
@@ -1463,6 +1342,7 @@ public class AppUtils {
         }
         return state;
     }
+
     public static boolean setWifiApEnabled(Context context, boolean enabled) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (enabled) { // disable WiFi in any case
@@ -1528,7 +1408,7 @@ public class AppUtils {
             reader = new BufferedReader(
                     new InputStreamReader(is));
             String line = null;
-            while ((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.contains("wlan0") && line.contains("proto kernel")) {
                     result = line.substring(line.lastIndexOf(" ") + 1).trim();
@@ -1569,7 +1449,7 @@ public class AppUtils {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         try {
             Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
-            WifiConfiguration wifiConfig = (WifiConfiguration)method.invoke(wifiManager);
+            WifiConfiguration wifiConfig = (WifiConfiguration) method.invoke(wifiManager);
             return wifiConfig.SSID;
         } catch (Exception e) {
             return null;
@@ -1578,6 +1458,7 @@ public class AppUtils {
 
     /**
      * 检测是否可播放下一期
+     *
      * @param context
      * @return
      */
