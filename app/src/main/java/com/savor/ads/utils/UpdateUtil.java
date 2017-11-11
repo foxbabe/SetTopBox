@@ -61,6 +61,7 @@ public class UpdateUtil implements ApiRequestListener {
         boolean isflag = false;
         Process proc = null;
         String tempPath = "/system/priv-app/savormedia/temp.apk";
+        String targetPath = "/system/priv-app/savormedia/savormedia.apk";
         try {
             proc = Runtime.getRuntime().exec("su");
             try {
@@ -71,17 +72,20 @@ public class UpdateUtil implements ApiRequestListener {
                 String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
                 dos.writeBytes(catCommand);
                 dos.flush();
-
                 Thread.sleep(2000);
+
                 file.delete();
 
                 File file1 = new File(tempPath);
                 if (file1.length() > 0) {
-                    dos.writeBytes("mv " + tempPath+ " /system/priv-app/savormedia/savormedia.apk\n");
-                    dos.flush();
 
-                    dos.writeBytes("chmod 777 /system/priv-app/savormedia/savormedia.apk\n");
+                    dos.writeBytes("mv " + tempPath + " " + targetPath + "\n");
                     dos.flush();
+                    Thread.sleep(1000);
+
+                    dos.writeBytes("chmod 755 " + targetPath + "\n");
+                    dos.flush();
+                    Thread.sleep(1000);
                     isflag = true;
                 } else {
                     file1.delete();

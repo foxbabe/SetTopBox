@@ -243,23 +243,23 @@ public class SavorVideoView extends RelativeLayout {
                             mPlayState == MediaPlayerState.PREPARING || mPlayState == MediaPlayerState.ERROR)
                         return;
 
-                    int currentPercent = mp.getCurrentPosition() * 100 / mp.getDuration();
+                    double currentPercent = mp.getCurrentPosition() * 100.0 / mp.getDuration();
                     if (percent != 100 && currentPercent >= percent - 1) {
                         // 缓冲部分不足时，暂停播放并显示进度圈
                         if (mIfShowLoading) {
                             mProgressBar.setVisibility(VISIBLE);
                         }
-                        if (mPlayState == MediaPlayerState.STARTED) {
-                            pauseInner();
-                        }
+//                        if (mPlayState == MediaPlayerState.STARTED) {
+//                            pauseInner();
+//                        }
                     } else {
                         // 缓冲好时，继续播放并隐藏进度圈
                         if (mIfShowLoading) {
                             mProgressBar.setVisibility(GONE);
                         }
-                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
-                            playInner();
-                        }
+//                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
+//                            playInner();
+//                        }
                     }
                 }
             });
@@ -668,21 +668,21 @@ public class SavorVideoView extends RelativeLayout {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            removeCallbacks(mPrepareTimeoutRunnable);
+
+            if (mPlayStateCallback != null) {
+                mPlayStateCallback.onMediaPause(mCurrentFileIndex);
+            }
+//        mMediaPlayer.reset();
+//        mPlayState = MediaPlayerState.IDLE;
+            release();
         }
     }
 
     public void onStop() {
         LogUtils.w(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-
-        removeCallbacks(mPrepareTimeoutRunnable);
-
-        if (mPlayStateCallback != null) {
-            mPlayStateCallback.onMediaPause(mCurrentFileIndex);
-        }
-//        mMediaPlayer.reset();
-//        mPlayState = MediaPlayerState.IDLE;
-        release();
     }
 
     /**
@@ -715,6 +715,7 @@ public class SavorVideoView extends RelativeLayout {
                     stopInner();
 
                     if (mMediaPlayer != null) {
+                        mMediaPlayer.reset();
                         mMediaPlayer.release();
                     }
                     mPlayState = MediaPlayerState.END;

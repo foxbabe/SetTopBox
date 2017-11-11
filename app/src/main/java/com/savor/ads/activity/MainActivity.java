@@ -67,7 +67,7 @@ public class MainActivity extends BaseActivity {
 
         registerDownloadReceiver();
 
-        // 清楚Glide图片缓存
+        // 清除Glide图片缓存
         GlideImageLoader.clearCache(mContext, true, true);
 
         mHandler.postDelayed(new Runnable() {
@@ -96,7 +96,7 @@ public class MainActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             LogUtils.d("收到下载完成广播");
             if (mIsLagElapse && ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity) {
-                // 停留时间已到却仍未调到Ads的话，这里做跳转
+                // 停留时间已到却仍未跳到Ads的话，这里做跳转
                 gotoAdsActivity();
             }
         }
