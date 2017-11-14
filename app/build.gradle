@@ -71,11 +71,15 @@ android {
 //            if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
 //                def fileName = "SavorBox_v${variant.versionName}_${variant.versionCode}_${variant.flavorName}.apk"
 //                def filePath = "${outputFile.parent}\\${releaseDate()}"
-//                output..outputFile = new File(filePath, fileName)
+//                output.outputFile = new File(filePath, fileName)
 //            }
 //        }
-        variant.outputs.all {
-            outputFileName = "SavorBox_v${variant.versionName}_${variant.versionCode}_${variant.flavorName}.apk"
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = "SavorBox_v${variant.versionName}_${variant.versionCode}_${variant.flavorName}.apk"
+                outputFileName = fileName
+            }
         }
     }
     buildToolsVersion '26.0.2'
