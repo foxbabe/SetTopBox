@@ -1,14 +1,18 @@
 package com.savor.ads.service;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import com.savor.ads.activity.BaseActivity;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
@@ -72,11 +76,20 @@ public class HeartbeatService extends IntentService {
                 doHeartbeat();
             }
 
-            // 检测时间是否到达凌晨2点整，去删除存本地的投屏文件
-            String time = AppUtils.getCurTime("hh:mm");
+            String time = AppUtils.getCurTime("HH:mm");
+            // 检测时间是否到达凌晨2点整
             if ("02:00".equals(time)) {
+                // 去删除存本地的投屏文件
                 AppUtils.clearPptTmpFiles(this);
                 AppUtils.clearAllCache(this);
+
+                // 刷新播放列表
+                Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+                if(activity instanceof BaseActivity) {
+                    BaseActivity baseActivity = (BaseActivity) activity;
+                    baseActivity.fillPlayList();
+                    sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+                }
             }
 
             try {

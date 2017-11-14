@@ -35,6 +35,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
+import com.savor.ads.utils.TimeCalibrateHelper;
 
 import java.util.Date;
 
@@ -289,6 +290,8 @@ public class MainActivity extends BaseActivity {
         if (mAudioManager != null) {
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
         }
+        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
+        timeCalibrateHelper.startCalibrateTime();
 
     }
 
