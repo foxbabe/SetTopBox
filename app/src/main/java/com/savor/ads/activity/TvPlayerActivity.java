@@ -299,6 +299,7 @@ public class TvPlayerActivity extends BaseActivity {
             if (mChannelList == null || mChannelList.size() == 0) {
                 mChannelTipRl.setVisibility(View.GONE);
                 ShowMessage.showToastLong(mContext, "未获取到频道信息");
+                mTvOperate.switchATVChannel(mTvView, -1);
             } else {
                 initCurrentProgram();
             }
