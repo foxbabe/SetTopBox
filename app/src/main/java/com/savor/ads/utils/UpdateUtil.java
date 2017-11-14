@@ -50,7 +50,18 @@ public class UpdateUtil implements ApiRequestListener {
     private static void updateRom(File file) {
 
     }
-
+    private static void updateApkNotSystem(File file){
+        if (file.length() <= 0) {
+            file.delete();
+            LogFileUtil.writeException(new Throwable("apk update fatal, updateapksamples.apk length is 0"));
+            return;
+        }
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.setDataAndType(Uri.parse("file://" + file.getAbsolutePath()),
+                "application/vnd.android.package-archive");
+        mContext.startActivity(i);
+    }
     private static void updateApk(File file) {
         if (file.length() <= 0) {
             file.delete();
