@@ -3,9 +3,12 @@ package com.savor.ads.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.RecoverySystem;
 import android.text.TextUtils;
+import android.util.Log;
 
 
+import com.amlogic.update.OtaUpgradeUtils;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.UpgradeInfo;
 import com.savor.ads.bean.UpgradeResult;
@@ -22,13 +25,17 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-public class UpdateUtil implements ApiRequestListener {
+public class UpdateUtil implements ApiRequestListener ,OtaUpgradeUtils.ProgressListener{
 
+    private static final String TAG = "UpdateUtil";
     private UpgradeInfo upgradeInfo = null;
     private static Context mContext = null;
     Session session = null;
     ServerInfo serverInfo;
-
+    //系统升级
+    private GiecUpdateSystem utils;
+    int UpdateMode;
+    private OtaUpgradeUtils mUpdateUtils;
     /**
      * 更新apk
      *
@@ -45,11 +52,34 @@ public class UpdateUtil implements ApiRequestListener {
         if (serverInfo != null) {
             AppApi.upgradeInfo(mContext, UpdateUtil.this, session.getVersionCode());
         }
+//        File file = new File(AppUtils.getSDCardPath()+"txlx_t962e_r321-ota-20171114.zip");
+//        updateRom(file);
     }
 
-    private static void updateRom(File file) {
-
+    /**
+     * 升级系统rom
+     * @param file
+     */
+    private  void updateRom(final File file) {
+        if (file==null||!file.exists()){
+            return;
+        }
+        utils=new GiecUpdateSystem(mContext);
+        mUpdateUtils = new OtaUpgradeUtils(mContext);
+        UpdateMode = utils.createAmlScript(file.getAbsolutePath(),false,false);
+        if (utils != null) {
+            utils.write2File();
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                utils.copyBKFile();
+                mUpdateUtils.setDeleteSource(false);
+                mUpdateUtils.upgrade(file,UpdateUtil.this, UpdateMode);
+            }
+        }).start();
     }
+    //如果系统非root，应该怎么升级哪？
     private static void updateApkNotSystem(File file){
         if (file.length() <= 0) {
             file.delete();
@@ -183,6 +213,31 @@ public class UpdateUtil implements ApiRequestListener {
 
     @Override
     public void onNetworkFailed(AppApi.Action method) {
+
+    }
+
+    @Override
+    public void onProgress(int i) {
+
+    }
+
+    @Override
+    public void onVerifyFailed(int i, Object o) {
+
+    }
+
+    @Override
+    public void onCopyProgress(int i) {
+
+    }
+
+    @Override
+    public void onCopyFailed(int i, Object o) {
+
+    }
+
+    @Override
+    public void onStopProgress(int i) {
 
     }
 }
