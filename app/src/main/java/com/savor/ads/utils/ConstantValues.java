@@ -71,4 +71,6 @@ public class ConstantValues {
     /**节目单-广告*/
     public static final String ADS = "ads";
 
+
+    public static final String VIRTUAL_SP_HOST = "v-small.littlehotspot.com";
 }

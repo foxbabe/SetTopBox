@@ -14,6 +14,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.StatFs;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.view.View;
@@ -1616,6 +1617,13 @@ public class AppUtils {
             ssid = Session.get(context).getBoxName();
         }
         return ssid;
+    }
+
+    public static long getAvailableExtSize() {
+        StatFs stat = new StatFs(getExternalSDCardPath());
+        long blockSize = stat.getBlockSize();
+        long blocks = stat.getAvailableBlocks();
+        return blockSize * blocks;
     }
 
     public static String findSpecifiedPeriodByType(ArrayList<VersionInfo> versionList, String type) {

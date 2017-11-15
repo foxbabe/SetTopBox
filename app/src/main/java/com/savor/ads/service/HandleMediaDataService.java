@@ -768,23 +768,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
     }
 
-    private boolean isVersionListMatchNewer(ArrayList<VersionInfo> versionList, SetTopBoxBean bean) {
-        boolean match = false;
-        if (versionList != null && bean != null && bean.getPlaybill_list() != null) {
-            if (bean.getPlaybill_list().size() == versionList.size()) {
-                for (PlayListCategoryItem playListCategory : bean.getPlaybill_list()) {
-                    VersionInfo versionInfo = playListCategory.getVersion();
-                    if (versionInfo != null && !TextUtils.isEmpty(versionInfo.getType()) &&
-                            !AppUtils.findSpecifiedPeriodByType(versionList, versionInfo.getType()).equals(versionInfo.getVersion())) {
-                        return false;
-                    }
-                }
-                match = true;
-            }
-        }
-        return match;
-    }
-
     private void notifyToPlay() {
         if (fillPlayList()) {
             LogUtils.d("发送广告下载完成广播");
