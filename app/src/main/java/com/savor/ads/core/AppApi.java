@@ -29,7 +29,7 @@ public class AppApi {
     /**
      * 小平台地址（默认值是一个假数据，获取到真实的小平台地址后会被重置）
      */
-	public static String SP_BASE_URL = "http://192.168.1.2/";
+    public static String SP_BASE_URL = "http://192.168.1.2/";
 
     private static String PHONE_BASE_URL = "http://192.168.0.1:8080/";
 

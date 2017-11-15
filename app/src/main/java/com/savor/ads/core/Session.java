@@ -182,6 +182,8 @@ public class Session {
 
     /** 抽奖奖项信息*/
     private PrizeInfo mPrizeInfo;
+    /** 是否使用虚拟小平台*/
+    private boolean mUseVirtualSp;
 
     private Session(Context context) {
 
@@ -260,6 +262,7 @@ public class Session {
         setVodVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_VOD_VERSION, "")));
         setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
         mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
+        mUseVirtualSp = mPreference.loadBooleanKey(P_APP_USE_VIRTUAL_SP, false);
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -343,6 +346,8 @@ public class Session {
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
                 P_APP_SWITCHTIME.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
+        } else if (P_APP_USE_VIRTUAL_SP.equals(key)) {
+            mPreference.saveBooleanKey(key, (boolean) updateItem.second);
         } else {
             String string = ObjectToString(updateItem.second);
             mPreference.saveStringKey(key, string);
@@ -1049,6 +1054,8 @@ public class Session {
     public static final String P_APP_SP_VERSION_INFO = "com.savor.ads.spVersionInfo";
     // 奖项设置key
     public static final String P_APP_PRIZE_INFO = "com.savor.ads.prizeInfo";
+    // 是否使用虚拟小平台key
+    public static final String P_APP_USE_VIRTUAL_SP = "com.savor.ads.use_virtual_sp";
 
     public static final String P_APP_PLAY_LIST_VERSION = "com.savor.ads.play_list_version";
     public static final String P_APP_DOWNLOADING_PLAY_LIST_VERSION = "com.savor.ads.downloading_play_list_version";
@@ -1106,5 +1113,16 @@ public class Session {
     public void setPrizeInfo(PrizeInfo prizeInfo) {
         mPrizeInfo = prizeInfo;
         writePreference(new Pair<String, Object>(P_APP_PRIZE_INFO, mPrizeInfo));
+    }
+
+    public boolean isUseVirtualSp() {
+        return mUseVirtualSp;
+    }
+
+    public void setUseVirtualSp(boolean useVirtualSp) {
+        if (useVirtualSp != mUseVirtualSp) {
+            mUseVirtualSp = useVirtualSp;
+            writePreference(new Pair<String, Object>(P_APP_USE_VIRTUAL_SP, mUseVirtualSp));
+        }
     }
 }
