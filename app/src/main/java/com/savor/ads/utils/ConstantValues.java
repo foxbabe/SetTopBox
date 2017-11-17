@@ -34,6 +34,10 @@ public class ConstantValues {
      */
     public static final String PROJECT_TYPE_RSTR_PPT = "rstr_ppt";
     /**
+     * 投屏类型:餐厅端，视频幻灯片
+     */
+    public static final String PROJECT_TYPE_RSTR_VIDEO_PPT = "rstr_video_ppt";
+    /**
      * 投屏类型:视频
      */
     public static final String PROJECT_TYPE_VIDEO = "video";
@@ -71,6 +75,9 @@ public class ConstantValues {
     /**节目单-广告*/
     public static final String ADS = "ads";
 
-
+    /** 虚拟小平台地址*/
     public static final String VIRTUAL_SP_HOST = "v-small.littlehotspot.com";
+
+    /**外置SD卡至少保留的可用空间*/
+    public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
 }

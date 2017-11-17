@@ -9,6 +9,7 @@ import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PptRequestVo;
+import com.jar.savor.box.vo.PptVideoRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.ResponseT;
@@ -33,6 +34,7 @@ import com.savor.ads.projection.action.SeekAction;
 import com.savor.ads.projection.action.ShowEggAction;
 import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.projection.action.VideoAction;
+import com.savor.ads.projection.action.VideoPptAction;
 import com.savor.ads.projection.action.VodAction;
 import com.savor.ads.projection.action.VolumeAction;
 import com.savor.ads.utils.ActivitiesManager;
@@ -351,6 +353,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     @Override
     public void showPpt(String deviceId, PptRequestVo currentPptRequest, boolean isNewDevice) {
         PptAction imageAction = new PptAction(mContext, currentPptRequest, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(imageAction);
+    }
+
+    @Override
+    public void showVideoPpt(String deviceId, PptVideoRequestVo currentPptRequest, boolean isNewDevice) {
+        VideoPptAction imageAction = new VideoPptAction(mContext, currentPptRequest, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(imageAction);
     }
 

@@ -4,6 +4,7 @@ import com.jar.savor.box.vo.CodeVerifyBean;
 import com.jar.savor.box.vo.HitEggResponseVo;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PptRequestVo;
+import com.jar.savor.box.vo.PptVideoRequestVo;
 import com.jar.savor.box.vo.PrepareResponseVoNew;
 import com.jar.savor.box.vo.ResponseT;
 import com.jar.savor.box.vo.RotateResponseVo;
@@ -69,4 +70,6 @@ public interface OnRemoteOperationListener {
     ResponseT<CodeVerifyBean> verify(String code);
 
     void showPpt(String deviceId, PptRequestVo currentPptRequest, boolean isNewDevice);
+
+    void showVideoPpt(String deviceId, PptVideoRequestVo currentPptRequest, boolean isNewDevice);
 }

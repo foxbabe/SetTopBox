@@ -42,6 +42,4 @@ public class GlobalValues {
 
 
     public static volatile boolean IS_BOX_BUSY = false;
-
-    public volatile static PptRequestVo CURRENT_PPT_REQUEST;
 }

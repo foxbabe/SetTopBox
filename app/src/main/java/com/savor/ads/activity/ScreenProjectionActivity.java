@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PptRequestVo;
+import com.jar.savor.box.vo.PptVideoRequestVo;
 import com.jar.savor.box.vo.QueryPosBySessionIdResponseVo;
 import com.jar.savor.box.vo.RotateResponseVo;
 import com.jar.savor.box.vo.SeekResponseVo;
@@ -25,6 +26,7 @@ import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.adapter.PptVpAdapter;
+import com.savor.ads.bean.PptVideo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.CircleProgressBar;
@@ -33,6 +35,7 @@ import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.projection.ProjectionManager;
 import com.savor.ads.projection.action.ProjectionActionBase;
 import com.savor.ads.projection.action.StopAction;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
@@ -41,6 +44,7 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener, PptVpAdapter.ImageLoadCallback, ViewPager.OnPageChangeListener {
@@ -55,6 +59,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_IS_FROM_WEB = "extra_is_from_web";
     public static final String EXTRA_PROJECT_ACTION = "extra_project_action";
     public static final String EXTRA_PPT_CONFIG = "extra_ppt_config";
+    public static final String EXTRA_VIDEO_PPT_CONFIG = "extra_video_ppt_config";
     public static final String EXTRA_IS_NEW_DEVICE = "extra_is_new_device";
 
     /**
@@ -211,6 +216,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private ProjectionActionBase mProjectAction;
     private PptRequestVo mPptConfig;
     private PptVpAdapter mPptAdapter;
+    private PptVideoRequestVo mVideoPptConfig;
     private int[] mPptImgStates;
 
     @Override
@@ -298,6 +304,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
         mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
+        mVideoPptConfig = (PptVideoRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
             mProjectAction.onActionEnd();
@@ -432,6 +439,25 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             if (mPptConfig.getDuration() > 0) {
                 mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
             }
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType)) {
+            // 餐厅端视频幻灯片
+            mSavorVideoView.setVisibility(View.VISIBLE);
+            mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+
+            ArrayList<String> list = new ArrayList<>();
+            String basePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID + File.separator;
+            for (PptVideo video :
+                    mVideoPptConfig.getVideos()) {
+                list.add(basePath + video.getName());
+            }
+            mSavorVideoView.setMediaFiles(list, 0, 0);
+
+            if (mVideoPptConfig.getDuration() > 0) {
+                mHandler.postDelayed(mPPTPlayFinishRunnable, mVideoPptConfig.getDuration() * 1000);
+            }
         }
 
         if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
@@ -439,6 +465,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                     String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
                     mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
                     mPptConfig.getInterval(), mInnerType, "", "", "");
+        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
+                    -1, mInnerType, "", "", "");
         } else {
             if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
@@ -478,6 +509,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                     String.valueOf(System.currentTimeMillis()), "break", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
                     mSession.getVersionName(), String.valueOf(lastPptConfig.getDuration()), lastPptConfig.getImages().size(),
                     lastPptConfig.getInterval(), mInnerType, "", "", "");
+        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
+                    -1, mInnerType, "", "", "");
         } else {
             // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
             if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
@@ -544,6 +580,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
             mType = "projection";
             mInnerType = "ppt";
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType)) {
+            mType = "projection";
+            mInnerType = "v-ppt";
         }
     }
 
@@ -898,6 +937,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                     String.valueOf(System.currentTimeMillis()), "end", mType, GlobalValues.LAST_PROJECT_DEVICE_ID,
                     mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
                     mPptConfig.getInterval(), mInnerType, "", "", "");
+        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
+            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
+                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
+                    -1, mInnerType, "", "", "");
         } else {
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.LAST_PROJECT_DEVICE_ID,
