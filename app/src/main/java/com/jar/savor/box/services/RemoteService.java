@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
 import javax.servlet.MultipartConfigElement;
@@ -1268,20 +1269,36 @@ public class RemoteService extends Service {
                 fileName = StringUtils.inputStreamToString(partName.getInputStream());
                 partName.delete();
 
+                Part partRange = request.getPart("range");
+                String range = StringUtils.inputStreamToString(partRange.getInputStream());
+                partRange.delete();
+
+                long start = 0;
+                boolean isFileEnd = false;
+                if (!TextUtils.isEmpty(range) && range.contains("-")) {
+                    if (range.endsWith("-")) {
+                        isFileEnd = true;
+                    }
+
+                    String[] temp = range.split("-");
+                    start = Long.parseLong(temp[0]);
+//                    long end = Long.parseLong(temp[1]);
+                }
+
                 File videoFile = new File(deviceIdDirPath + fileName);
 
                 for (Part part : request.getParts()) {
                     switch (part.getName()) {
                         case "fileUpload":
                             // 存文件
-                            FileOutputStream outputStream = new FileOutputStream(videoFile);
+                            RandomAccessFile raf = new RandomAccessFile(videoFile, "rw");
+                            raf.seek(start);
                             byte[] byteBuffer = new byte[1024];
                             int len = 0;
                             while ((len = part.getInputStream().read(byteBuffer)) > 0) {
-                                outputStream.write(byteBuffer, 0, len);
-                                outputStream.flush();
+                                raf.write(byteBuffer, 0, len);
                             }
-                            outputStream.close();
+                            raf.close();
                             part.delete();
                             break;
 //                        case "fileName":
@@ -1292,10 +1309,12 @@ public class RemoteService extends Service {
                             pptName = StringUtils.inputStreamToString(part.getInputStream());
                             part.delete();
                             break;
+                        default:
+                            part.delete();
                     }
                 }
 
-                if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName) && videoFile.length() > 0) {
+                if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName) && isFileEnd) {
                     // 查找、读取幻灯片配置
 
                     String configJson = FileUtils.read(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg");
