@@ -215,8 +215,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 break;
             // 机顶盒信息
             case KeyCodeConstant.KEY_CODE_SHOW_INFO:
-                //TODO: 临时加上方便测试
-            case KeyCodeConstant.KEY_CODE_UP:
                 // 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
                 showBoxInfo();
                 handled = true;

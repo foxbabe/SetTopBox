@@ -6,41 +6,39 @@ package com.savor.ads.utils;
  */
 public class KeyCodeConstant {
 
-    //region V600 Key Code
     /**
      * 播放、暂停
      * （停止 按钮）
      */
-    public static final int KEY_CODE_PLAY_PAUSE = 9;
+    public static final int KEY_CODE_PLAY_PAUSE = 4126;
     /**
      * 信息预览弹窗
      * （ASPECT 按钮）
      */
-    public static final int KEY_CODE_SHOW_INFO = 165;
+    public static final int KEY_CODE_SHOW_INFO = 4131;
     /**
      * 上一条广告
      * （快退 按钮）
      */
-    public static final int KEY_CODE_PREVIOUS_ADS = 166;
+    public static final int KEY_CODE_PREVIOUS_ADS = 4132;
     /**
      * 下一条广告
      * （快进 按钮）
      */
-    public static final int KEY_CODE_NEXT_ADS = 167;
+    public static final int KEY_CODE_NEXT_ADS = 4133;
     /**
      * 输入模式切换。广告模式下直接切到电视，电视模式下切换输入源
      * （电视/广播 按钮）
      */
-    // TODO: 调接口临时改值
-    public static final int KEY_CODE_CHANGE_SIGNAL = 183;
+    public static final int KEY_CODE_CHANGE_SIGNAL = 4127;
     /**
      * 切换 广告/电视 模式
      */
-    public static final int KEY_CODE_CHANGE_MODE = 186;
+    public static final int KEY_CODE_CHANGE_MODE = 174;
     /**
      * 显示二维码（节目表 按钮）
      */
-    public static final int KEY_CODE_SHOW_QRCODE = 12;
+    public static final int KEY_CODE_SHOW_QRCODE = 225;
     /**
      * 后退（退出 按钮）
      */
@@ -65,23 +63,22 @@ public class KeyCodeConstant {
      * 系统设置
      * （菜单 按钮）
      */
-    public static final int KEY_CODE_SYSTEM_SETTING = 82;
+    public static final int KEY_CODE_SYSTEM_SETTING = 4129;
     /**
      * 应用设置
      * （HOME 按钮）
      */
-    //TODO:10
-    public static final int KEY_CODE_SETTING = 168;
+    public static final int KEY_CODE_SETTING = 4101;
     /**
      * 弹出电视频道列表
      * （确定 按钮）
      */
-    public static final int KEY_CODE_CHANNEL_LIST = 23;
+    public static final int KEY_CODE_CHANNEL_LIST = 66;
     /**
      * 切换电视输入源为AV IN
      * （电脑 按钮）
      */
-    public static final int KEY_CODE_AV_IN = 183000;
+    public static final int KEY_CODE_AV_IN = 183;
     /**
      * 切换电视输入源为ANT IN
      * （电视 按钮）
@@ -96,14 +93,14 @@ public class KeyCodeConstant {
      * 上传频道信息
      * （频道+ 按钮）
      */
-    public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 166;
+    public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 4128;
     /**
      * 上传心跳
      */
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
     /**
-     * 改变输出分辨率
+     * 改变分辨率
+     * TODO: 值待定
      */
-    public static final int KEY_CODE_CHANGE_RESOLUTION = 169;
-    //endregion
+    public static final int KEY_CODE_CHANGE_RESOLUTION = 666;
 }

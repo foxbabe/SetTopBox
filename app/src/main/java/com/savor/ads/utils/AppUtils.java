@@ -1266,7 +1266,6 @@ public class AppUtils {
             zOutStream.flush();
             zOutStream.close();
         } catch (Exception e) {
-            // TODO: handle exception
             LogUtils.e(e.toString());
             return false;
         } finally {
@@ -1276,7 +1275,6 @@ public class AppUtils {
                     zOutStream = null;
                 }
             } catch (Exception e2) {
-                // TODO: handle exception
                 LogUtils.e(e2.toString());
             }
         }

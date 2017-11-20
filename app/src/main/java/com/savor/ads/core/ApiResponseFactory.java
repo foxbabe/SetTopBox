@@ -60,7 +60,6 @@ public class ApiResponseFactory {
         try {
             jsonResult = response.body().string();
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         } finally {
             response.close();

@@ -175,7 +175,6 @@ public class AppServiceOk {
                     LogUtils.d(object.toString() + "");
                     response.close();
 //					} catch (IOException e) {
-//						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
                     return object;
@@ -183,7 +182,6 @@ public class AppServiceOk {
 
                 @Override
                 public void onError(Call call, Exception e) {
-                    // TODO Auto-generated method stub
                     handler.onNetworkFailed(action);
                 }
 
@@ -247,7 +245,6 @@ public class AppServiceOk {
 
             @Override
             public void onError(Call call, Exception e) {
-                // TODO Auto-generated method stub
                 handler.onNetworkFailed(action);
             }
 
@@ -264,7 +261,6 @@ public class AppServiceOk {
 
             @Override
             public void inProgress(float progress) {
-                // TODO Auto-generated method stub
                 super.inProgress(progress);
             }
 
