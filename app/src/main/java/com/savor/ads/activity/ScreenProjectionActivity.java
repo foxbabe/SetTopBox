@@ -304,7 +304,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
         mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
-        mVideoPptConfig = (PptVideoRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
+        mVideoPptConfig = (PptVideoRequestVo) bundle.getSerializable(EXTRA_VIDEO_PPT_CONFIG);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
             mProjectAction.onActionEnd();
@@ -376,6 +376,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         } else if (ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType)) {
             // 视频投屏
             mSavorVideoView.setVisibility(View.VISIBLE);
+            mSavorVideoView.setLooping(false);
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
@@ -442,6 +443,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         } else if (ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType)) {
             // 餐厅端视频幻灯片
             mSavorVideoView.setVisibility(View.VISIBLE);
+            mSavorVideoView.setLooping(true);
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
@@ -981,9 +983,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         public boolean onMediaComplete(int index, boolean isLast) {
             LogUtils.w("activity onMediaComplete " + this.hashCode());
 
-            AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
-            resetGlobalFlag();
-            exitProjection();
+            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+                AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
+                resetGlobalFlag();
+                exitProjection();
+            }
             return false;
         }
 
@@ -993,9 +997,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             ShowMessage.showToast(mContext, "视频播放失败");
             LogFileUtil.write("视频播放失败:" + mMediaPath);
-            AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
-            resetGlobalFlag();
-            exitProjection();
+            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+                AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
+                resetGlobalFlag();
+                exitProjection();
+            }
             return false;
         }
 
