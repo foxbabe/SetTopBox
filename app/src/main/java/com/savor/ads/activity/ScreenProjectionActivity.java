@@ -983,7 +983,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         public boolean onMediaComplete(int index, boolean isLast) {
             LogUtils.w("activity onMediaComplete " + this.hashCode());
 
-            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) ||
+                    (mVideoPptConfig != null && mVideoPptConfig.getDuration() <= 0 && isLast)) {
                 AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
                 resetGlobalFlag();
                 exitProjection();
@@ -997,7 +998,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             ShowMessage.showToast(mContext, "视频播放失败");
             LogFileUtil.write("视频播放失败:" + mMediaPath);
-            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) ||
+                    (mVideoPptConfig != null && mVideoPptConfig.getDuration() <= 0 && isLast)) {
                 AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
                 resetGlobalFlag();
                 exitProjection();

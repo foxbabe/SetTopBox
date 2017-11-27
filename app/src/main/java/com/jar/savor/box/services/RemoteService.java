@@ -1284,105 +1284,105 @@ public class RemoteService extends Service {
                     String[] temp = range.split("-");
                     start = Long.parseLong(temp[0]);
 //                    long end = Long.parseLong(temp[1]);
-                }
 
-                File videoFile = new File(deviceIdDirPath + fileName);
+                    File videoFile = new File(deviceIdDirPath + fileName);
 
-                for (Part part : request.getParts()) {
-                    switch (part.getName()) {
-                        case "fileUpload":
-                            // 存文件
-                            RandomAccessFile raf = new RandomAccessFile(videoFile, "rw");
-                            raf.seek(start);
-                            byte[] byteBuffer = new byte[1024];
-                            int len = 0;
-                            // 注意，part.getInputStream()切记不要多次调用
-                            InputStream inputStream = part.getInputStream();
-                            while ((len = inputStream.read(byteBuffer)) > 0) {
-                                raf.write(byteBuffer, 0, len);
-                            }
-                            raf.close();
-                            part.delete();
-                            break;
+                    for (Part part : request.getParts()) {
+                        switch (part.getName()) {
+                            case "fileUpload":
+                                // 存文件
+                                RandomAccessFile raf = new RandomAccessFile(videoFile, "rw");
+                                raf.seek(start);
+                                byte[] byteBuffer = new byte[1024];
+                                int len = 0;
+                                // 注意，part.getInputStream()切记不要多次调用
+                                InputStream inputStream = part.getInputStream();
+                                while ((len = inputStream.read(byteBuffer)) > 0) {
+                                    raf.write(byteBuffer, 0, len);
+                                }
+                                raf.close();
+                                part.delete();
+                                break;
 //                        case "fileName":
 //                            fileName = StringUtils.inputStreamToString(part.getInputStream());
 //                            part.delete();
 //                            break;
-                        case "pptName":
-                            pptName = StringUtils.inputStreamToString(part.getInputStream());
-                            part.delete();
-                            break;
-                        default:
-                            part.delete();
-                    }
-                }
-
-                if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName)) {
-                    if (isFileEnd) {
-                        // 查找、读取幻灯片配置
-
-                        String configJson = FileUtils.read(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg");
-                        PptVideoRequestVo reqVo = null;
-                        if (!TextUtils.isEmpty(configJson)) {
-                            reqVo = new Gson().fromJson(configJson, PptVideoRequestVo.class);
+                            case "pptName":
+                                pptName = StringUtils.inputStreamToString(part.getInputStream());
+                                part.delete();
+                                break;
+                            default:
+                                part.delete();
                         }
+                    }
 
-                        if (reqVo != null) {
-                            boolean isAllExist = true;
-                            for (PptVideo pptVideo : reqVo.getVideos()) {
-                                if (fileName.equals(pptVideo.getName())) {
-                                    pptVideo.setExist(1);
-                                    FileUtils.write(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg", new Gson().toJson(reqVo));
-                                }
+                    if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName)) {
+                        if (isFileEnd) {
+                            // 查找、读取幻灯片配置
 
-                                if (pptVideo.getExist() != 1) {
-                                    isAllExist = false;
-                                }
+                            String configJson = FileUtils.read(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg");
+                            PptVideoRequestVo reqVo = null;
+                            if (!TextUtils.isEmpty(configJson)) {
+                                reqVo = new Gson().fromJson(configJson, PptVideoRequestVo.class);
                             }
 
-                            object = new BaseResponse();
-                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-
-                            if (isAllExist) {
-                                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
-                                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
-
-                                    // 通知上一个投屏者已被抢投
-                                    if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
-                                            !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
-                                        AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                            if (reqVo != null) {
+                                boolean isAllExist = true;
+                                for (PptVideo pptVideo : reqVo.getVideos()) {
+                                    if (fileName.equals(pptVideo.getName())) {
+                                        pptVideo.setExist(1);
+                                        FileUtils.write(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg", new Gson().toJson(reqVo));
                                     }
 
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
-                                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
-
-                                    RemoteService.listener.showVideoPpt(deviceId, reqVo, isNewDevice);
-
-                                    object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                                } else {
-                                    if (isWebReq || GlobalValues.IS_LOTTERY) {
-                                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                        if (GlobalValues.IS_LOTTERY) {
-                                            object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                                        } else {
-                                            object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                                        }
-                                    } else {
-                                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
-                                        object.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                    if (pptVideo.getExist() != 1) {
+                                        isAllExist = false;
                                     }
                                 }
+
+                                object = new BaseResponse();
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                                if (isAllExist) {
+                                    if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                                        boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                                        // 通知上一个投屏者已被抢投
+                                        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
+                                                !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
+                                            AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
+                                        }
+
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                        GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                                        AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                                        RemoteService.listener.showVideoPpt(deviceId, reqVo, isNewDevice);
+
+                                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                                    } else {
+                                        if (isWebReq || GlobalValues.IS_LOTTERY) {
+                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                            if (GlobalValues.IS_LOTTERY) {
+                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                                            } else {
+                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                                            }
+                                        } else {
+                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
+                                            object.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                        }
+                                    }
+                                }
+                            } else {
+                                object = new BaseResponse();
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                             }
                         } else {
                             object = new BaseResponse();
-                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                         }
-                    } else {
-                        object = new BaseResponse();
-                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                     }
                 }
             }
