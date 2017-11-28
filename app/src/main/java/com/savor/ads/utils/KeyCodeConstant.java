@@ -10,35 +10,35 @@ public class KeyCodeConstant {
      * 播放、暂停
      * （停止 按钮）
      */
-    public static final int KEY_CODE_PLAY_PAUSE = 4126;
+    public static final int KEY_CODE_PLAY_PAUSE = 88;
     /**
      * 信息预览弹窗
      * （ASPECT 按钮）
      */
-    public static final int KEY_CODE_SHOW_INFO = 4131;
+    public static final int KEY_CODE_SHOW_INFO = 165;
     /**
      * 上一条广告
      * （快退 按钮）
      */
-    public static final int KEY_CODE_PREVIOUS_ADS = 4132;
+    public static final int KEY_CODE_PREVIOUS_ADS = 2004;
     /**
      * 下一条广告
      * （快进 按钮）
      */
-    public static final int KEY_CODE_NEXT_ADS = 4133;
+    public static final int KEY_CODE_NEXT_ADS = 87;
     /**
-     * 输入模式切换。广告模式下直接切到电视，电视模式下切换输入源
+     * 电视模式下切换输入源
      * （电视/广播 按钮）
      */
-    public static final int KEY_CODE_CHANGE_SIGNAL = 4127;
+    public static final int KEY_CODE_CHANGE_SIGNAL = 178;
     /**
      * 切换 广告/电视 模式
      */
-    public static final int KEY_CODE_CHANGE_MODE = 174;
+    public static final int KEY_CODE_CHANGE_MODE = 2003;
     /**
      * 显示二维码（节目表 按钮）
      */
-    public static final int KEY_CODE_SHOW_QRCODE = 225;
+    public static final int KEY_CODE_SHOW_QRCODE = 2018;
     /**
      * 后退（退出 按钮）
      */
@@ -68,12 +68,12 @@ public class KeyCodeConstant {
      * 应用设置
      * （HOME 按钮）
      */
-    public static final int KEY_CODE_SETTING = 4101;
+    public static final int KEY_CODE_SETTING = 2006;
     /**
      * 弹出电视频道列表
      * （确定 按钮）
      */
-    public static final int KEY_CODE_CHANNEL_LIST = 66;
+    public static final int KEY_CODE_CHANNEL_LIST = 169;
     /**
      * 切换电视输入源为AV IN
      * （电脑 按钮）
@@ -93,11 +93,11 @@ public class KeyCodeConstant {
      * 上传频道信息
      * （频道+ 按钮）
      */
-    public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 4128;
+    public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 166;
     /**
      * 上传心跳
      */
-    public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
+    public static final int KEY_CODE_MANUAL_HEARTBEAT = 2005;
     /**
      * 改变分辨率
      * TODO: 值待定
