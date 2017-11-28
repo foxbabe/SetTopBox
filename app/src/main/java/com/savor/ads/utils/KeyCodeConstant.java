@@ -30,11 +30,11 @@ public class KeyCodeConstant {
      * 电视模式下切换输入源
      * （电视/广播 按钮）
      */
-    public static final int KEY_CODE_CHANGE_SIGNAL = 178;
+    public static final int KEY_CODE_CHANGE_SIGNAL = 183;
     /**
      * 切换 广告/电视 模式
      */
-    public static final int KEY_CODE_CHANGE_MODE = 2003;
+    public static final int KEY_CODE_CHANGE_MODE = 2016;
     /**
      * 显示二维码（节目表 按钮）
      */
@@ -63,22 +63,22 @@ public class KeyCodeConstant {
      * 系统设置
      * （菜单 按钮）
      */
-    public static final int KEY_CODE_SYSTEM_SETTING = 4129;
+    public static final int KEY_CODE_SYSTEM_SETTING = 2006;
     /**
      * 应用设置
      * （HOME 按钮）
      */
-    public static final int KEY_CODE_SETTING = 2006;
+    public static final int KEY_CODE_SETTING = 169;
     /**
      * 弹出电视频道列表
      * （确定 按钮）
      */
-    public static final int KEY_CODE_CHANNEL_LIST = 169;
+    public static final int KEY_CODE_CHANNEL_LIST = 23;
     /**
      * 切换电视输入源为AV IN
      * （电脑 按钮）
      */
-    public static final int KEY_CODE_AV_IN = 183;
+    public static final int KEY_CODE_AV_IN = 185;
     /**
      * 切换电视输入源为ANT IN
      * （电视 按钮）
@@ -88,7 +88,7 @@ public class KeyCodeConstant {
      * 切换电视输入源为HDMI IN
      * （电影 按钮）
      */
-    public static final int KEY_CODE_HDMI_IN = 185;
+    public static final int KEY_CODE_HDMI_IN = 186;
     /**
      * 上传频道信息
      * （频道+ 按钮）
@@ -100,7 +100,6 @@ public class KeyCodeConstant {
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 2005;
     /**
      * 改变分辨率
-     * TODO: 值待定
      */
-    public static final int KEY_CODE_CHANGE_RESOLUTION = 666;
+    public static final int KEY_CODE_CHANGE_RESOLUTION = 90;
 }
