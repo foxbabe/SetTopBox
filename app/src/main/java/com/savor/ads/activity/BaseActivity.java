@@ -399,6 +399,10 @@ public abstract class BaseActivity extends Activity {
                 manualHeartbeat();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_SHOW_APP_INSTALLED:
+                gotoAppBrowser();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -411,6 +415,11 @@ public abstract class BaseActivity extends Activity {
 
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    private void gotoAppBrowser() {
+        Intent intent = new Intent(this, AppBrowserActivity.class);
         startActivity(intent);
     }
 

@@ -102,4 +102,8 @@ public class KeyCodeConstant {
      * 改变分辨率
      */
     public static final int KEY_CODE_CHANGE_RESOLUTION = 90;
+    /**
+     * 调起已装应用浏览页
+     */
+    public static final int KEY_CODE_SHOW_APP_INSTALLED = 2003;
 }
