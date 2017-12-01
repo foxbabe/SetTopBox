@@ -49,6 +49,7 @@ public class TvPlayerActivity extends BaseActivity {
 //    private SurfaceHolder mSurfaceHolder;
 //    private boolean mIsSurfaceCreated;
     private TvView mTvView;
+    private TextView mNoChannleTipsTv;
     private RelativeLayout mChannelTipRl;
     private TextView mChannelNumberTv;
     private TextView mChannelNameTv;
@@ -157,6 +158,7 @@ public class TvPlayerActivity extends BaseActivity {
         mChannelTipRl = (RelativeLayout) findViewById(R.id.rl_channel_tip);
         mChannelNameTv = (TextView) findViewById(R.id.tv_channel_name);
         mChannelNumberTv = (TextView) findViewById(R.id.tv_channel_number);
+        mNoChannleTipsTv = (TextView) findViewById(R.id.tv_no_channel_tips);
     }
 
     private void setView() {
@@ -217,9 +219,9 @@ public class TvPlayerActivity extends BaseActivity {
                     public void run() {
                         mChannelTipRl.setVisibility(View.GONE);
                         ShowMessage.showToast(mContext, "未获取到频道信息");
+                        mNoChannleTipsTv.setVisibility(View.VISIBLE);
                     }
                 });
-                mTvOperate.switchATVChannel(mTvView, -1);
             } else {
                 initCurrentProgram();
             }
@@ -261,9 +263,18 @@ public class TvPlayerActivity extends BaseActivity {
             mCurrentProgramIndex = 0;
             id = mChannelList.get(0).getId();
         }
-        mTvOperate.switchATVChannel(mTvView, id);
+        if (id != -1) {
+            mTvOperate.switchATVChannel(mTvView, id);
 
-        showChannelTips();
+            showChannelTips();
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mNoChannleTipsTv.setVisibility(View.VISIBLE);
+                }
+            });
+        }
     }
 
     public void autoTurning() {
@@ -299,7 +310,7 @@ public class TvPlayerActivity extends BaseActivity {
             if (mChannelList == null || mChannelList.size() == 0) {
                 mChannelTipRl.setVisibility(View.GONE);
                 ShowMessage.showToastLong(mContext, "未获取到频道信息");
-                mTvOperate.switchATVChannel(mTvView, -1);
+                mNoChannleTipsTv.setVisibility(View.VISIBLE);
             } else {
                 initCurrentProgram();
             }
@@ -373,6 +384,7 @@ public class TvPlayerActivity extends BaseActivity {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                mNoChannleTipsTv.setVisibility(View.GONE);
                 mChannelTipRl.setVisibility(View.VISIBLE);
                 mChannelNumberTv.setText(String.format("%03d", (mSession.getTvCurrentChannelNumber())));
                 mChannelNameTv.setText(finalName);
@@ -442,7 +454,6 @@ public class TvPlayerActivity extends BaseActivity {
             //切换到电视TV输入源
             case KeyCodeConstant.KEY_CODE_ANT_IN:
                 switchInputSource(0);
-                showChannelTips();
                 handled = true;
                 break;
             //切换到HDMI输入源
@@ -578,11 +589,17 @@ public class TvPlayerActivity extends BaseActivity {
                     }
                 }
             }
-            // 如果切换到电视模式的话，恢复频道为保存的值
-            mTvOperate.switchATVChannel(mTvView, id);
+            if (id != -1) {
+                // 如果切换到电视模式的话，恢复频道为保存的值
+                mTvOperate.switchATVChannel(mTvView, id);
+                showChannelTips();
+            } else {
+                mNoChannleTipsTv.setVisibility(View.VISIBLE);
+            }
         } else {
             // 如果切换到非电视模式的话，隐藏频道提示
             mChannelTipRl.setVisibility(View.GONE);
+            mNoChannleTipsTv.setVisibility(View.GONE);
             mHandler.removeCallbacks(mHideChannelTipRunnable);
         }
     }

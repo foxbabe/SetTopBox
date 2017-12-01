@@ -33,11 +33,7 @@ public class GiecTVOperator implements ITVOperator {
 
     @Override
     public void switchATVChannel(TvView tvView, int channelId) {
-        if (channelId < 0) {
-            tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUriForPassthroughInput(ConstantValues.INPUT_ID_ATV));
-        } else {
-            tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
-        }
+        tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
     }
 
     @Override
@@ -69,7 +65,7 @@ public class GiecTVOperator implements ITVOperator {
 
                 switch (event.type) {
                     case TvControlManager.EVENT_SCAN_PROGRESS:
-                        Log.d(TAG, "onEvent:" + event.precent + "%\tfreq[" + event.freq + "] lock[" + event.lock + "] strength[" + event.strength + "] quality[" + event.quality + "]");
+                        Log.d(TAG, "onEvent:" + event.precent + "%\tfreq[" + event.freq + "] mode[" + event.mode + "] lock[" + event.lock + "] strength[" + event.strength + "] quality[" + event.quality + "]");
 
                         int isNewProgram = 0;
                         if ((event.mode == TVChannelParams.MODE_ANALOG) && (event.lock == 0x11)) { //trick here
