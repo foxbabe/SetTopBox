@@ -5,11 +5,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.GridView;
 
 import com.savor.ads.R;
 import com.savor.ads.adapter.AppBrowserAdapter;
 import com.savor.ads.bean.AppBean;
+import com.savor.ads.utils.KeyCodeConstant;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,5 +71,16 @@ public class AppBrowserActivity extends BaseActivity {
             }
         }
         return localArrayList;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean handled = false;
+        switch (keyCode) {
+            case KeyCodeConstant.KEY_CODE_SHOW_APP_INSTALLED:
+                handled = true;
+                break;
+        }
+        return handled || super.onKeyDown(keyCode, event);
     }
 }

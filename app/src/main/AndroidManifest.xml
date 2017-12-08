@@ -185,7 +185,8 @@
             android:name=".activity.LotteryActivity"
             android:launchMode="singleTask">
         </activity>
-        <activity android:name=".activity.AppBrowserActivity">
+        <activity android:name=".activity.AppBrowserActivity"
+                  android:launchMode="singleTask">
         </activity>
     </application>
 
