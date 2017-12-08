@@ -979,7 +979,7 @@ public class RemoteService extends Service {
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                    RemoteService.listener.showPpt(deviceId, req, isNewDevice);
+                    RemoteService.listener.showPpt(req, isNewDevice);
                 } else {
                     if (isWebReq || GlobalValues.IS_LOTTERY) {
                         pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -1002,7 +1002,7 @@ public class RemoteService extends Service {
                             GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                             AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                            RemoteService.listener.showPpt(deviceId, req, true);
+                            RemoteService.listener.showPpt(req, true);
                         } else if (forceProject == -1) {
                             pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                             if (GlobalValues.IS_LOTTERY) {
@@ -1099,7 +1099,7 @@ public class RemoteService extends Service {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                                RemoteService.listener.showPpt(deviceId, reqVo, isNewDevice);
+                                RemoteService.listener.showPpt(reqVo, isNewDevice);
 
                                 object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                             } else {
@@ -1203,7 +1203,7 @@ public class RemoteService extends Service {
                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                        RemoteService.listener.showVideoPpt(deviceId, pptVideoRequestVo, isNewDevice);
+                        RemoteService.listener.showVideoPpt(pptVideoRequestVo, isNewDevice);
                     } else {
                         if (isWebReq || GlobalValues.IS_LOTTERY) {
                             pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -1226,7 +1226,7 @@ public class RemoteService extends Service {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                                RemoteService.listener.showVideoPpt(deviceId, pptVideoRequestVo, true);
+                                RemoteService.listener.showVideoPpt(pptVideoRequestVo, true);
                             } else if (forceProject == -1) {
                                 pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                                 if (GlobalValues.IS_LOTTERY) {
@@ -1358,7 +1358,7 @@ public class RemoteService extends Service {
                                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                                        RemoteService.listener.showVideoPpt(deviceId, reqVo, isNewDevice);
+                                        RemoteService.listener.showVideoPpt(reqVo, isNewDevice);
 
                                         object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                                     } else {

@@ -12,12 +12,26 @@ package cn.savor.small.netty;
 
 
 import android.content.Context;
+import android.database.SQLException;
+import android.text.TextUtils;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.jar.savor.box.vo.BaseResponse;
+import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.RstrSpecialty;
+import com.savor.ads.callback.ProjectOperationListener;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -77,39 +91,230 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 break;
             case SERVER_ORDER_REQ:
                 List<String> contentMsg = msg.getContent();
-                String order = "";
-                String connectCode = "";
-                for (int i = 0; i < contentMsg.size(); i++) {
-                    String tmp = contentMsg.get(i);
-                    if (i == 0) {
-                        order = tmp;
-                    } else if (i == 1) {
+
+                MessageBean response = new MessageBean();
+                response.setCmd(MessageBean.Action.CLIENT_ORDER_RESP);
+                response.setSerialnumber(msg.getSerialnumber());
+                response.setContent(new ArrayList<String>());
+
+                if (contentMsg != null && contentMsg.size() > 1) {
+                    String order = contentMsg.get(0);
+                    String params = contentMsg.get(1);
+                    response.getContent().add(order);
+
+                    if (ConstantValues.NETTY_SHOW_QRCODE_COMMAND.equals(order)) {
+                        // 呼玛
+                        String connectCode = "";
                         try {
-                            InnerBean bean = new Gson().fromJson(tmp, new TypeToken<InnerBean>(){}.getType());
+                            InnerBean bean = new Gson().fromJson(params, new TypeToken<InnerBean>() {
+                            }.getType());
                             connectCode = bean.getConnectCode();
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
                         }
+
+                        if (callback != null) {
+                            callback.onReceiveServerMessage(order, connectCode);
+                        }
+//                        ArrayList<String> contList = new ArrayList<String>();
+//                        String xContent = "我收到了.数据包..回应下";
+//                        contList.add(xContent);
+//                        response.setContent(contList);
+                        response.setIp(AppUtils.getLocalIPAddress());
+                        response.setMac(session.getEthernetMac());
+                    } else if (ConstantValues.NETTY_SHOW_SPECIALTY_COMMAND.equals(order)) {
+                        // 特色菜
+                        handleSpecialty(params, response);
+                    } else if (ConstantValues.NETTY_SHOW_WELCOME_COMMAND.equals(order)) {
+                        // 欢迎词
+                        handleGreeting(params, response);
+                    } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
+                        // 宣传片
+                        handleAdv(params, response);
                     }
                 }
-                if (callback != null) {
-                    callback.onReceiveServerMessage(order, connectCode);
-                }
-                MessageBean message = new MessageBean();
-                message.setCmd(MessageBean.Action.CLIENT_ORDER_RESP);
-                ArrayList<String> contList = new ArrayList<String>();
-                String xContent = "我收到了.数据包..回应下";
-                contList.add(xContent);
-                message.setContent(contList);
-                message.setIp(AppUtils.getLocalIPAddress());
-                message.setMac(session.getEthernetMac());
-                ctx.writeAndFlush(message);
+                ctx.writeAndFlush(response);
                 break;
             default:
                 break;
         }
     }
 
+    private void handleSpecialty(String json, MessageBean response) {
+        try {
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+            String deviceId = jsonObject.get("deviceId").getAsString();
+            String deviceName = jsonObject.get("deviceName").getAsString();
+            String specialtyIds = jsonObject.get("specialtyId").getAsString();
+            int interval = jsonObject.get("interval").getAsInt();
+
+            String[] ids = specialtyIds.split(",");
+            String failedIds = "";
+            ArrayList<String> paths = new ArrayList<>();
+            for (int i = 0; i < ids.length; i++) {
+                String id = ids[i].trim();
+
+                String selection = DBHelper.MediaDBInfo.FieldName.FOOD_ID + "=?";
+                String[] selectionArgs = new String[]{id};
+                List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(selection, selectionArgs);
+
+                if (specialties != null && specialties.size() > 0) {
+                    paths.add(specialties.get(0).getMedia_path());
+                } else {
+                    failedIds += id + ",";
+                }
+            }
+
+            BaseResponse resp = new BaseResponse();
+            if (!TextUtils.isEmpty(failedIds)) {
+                failedIds = failedIds.substring(0, failedIds.length() - 1);
+            }
+
+            if (paths.size() > 0) {
+                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
+                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                    if (TextUtils.isEmpty(failedIds)) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                        resp.setInfo("投屏成功");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                        resp.setInfo(failedIds);
+                    }
+                    ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
+                } else {
+                    if (GlobalValues.IS_LOTTERY) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    }
+                }
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未发现任何对应的特色菜");
+            }
+            response.getContent().add(new Gson().toJson(resp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleGreeting(String json, MessageBean response) {
+        try {
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+            String deviceId = jsonObject.get("deviceId").getAsString();
+            String deviceName = jsonObject.get("deviceName").getAsString();
+            String words = jsonObject.get("word").getAsString();
+            int template = jsonObject.get("templateId").getAsInt();
+
+            BaseResponse resp = new BaseResponse();
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
+                AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("投屏成功");
+
+                ProjectOperationListener.getInstance(mContext).showGreeting(words, template, isNewDevice);
+            } else {
+                if (GlobalValues.IS_LOTTERY) {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                } else {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                }
+            }
+
+            response.getContent().add(new Gson().toJson(resp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleAdv(String json, MessageBean response) {
+        try {
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+            String deviceId = jsonObject.get("deviceId").getAsString();
+            String deviceName = jsonObject.get("deviceName").getAsString();
+            String videoIds = jsonObject.get("vid").getAsString();
+
+            String[] ids = videoIds.split(",");
+            String failedIds = "";
+            ArrayList<String> paths = new ArrayList<>();
+            for (int i = 0; i < ids.length; i++) {
+                String id = ids[i].trim();
+
+                String selection = null;
+                String[] selectionArgs = null;
+                if (!"-1".equals(id)) {
+                    selection = DBHelper.MediaDBInfo.FieldName.VID + "=?";
+                    selectionArgs = new String[]{id};
+                }
+                List<PlayListBean> videos = DBHelper.get(mContext).findPlayListByWhere(selection, selectionArgs);
+
+                if (videos != null && videos.size() > 0) {
+                    paths.add(videos.get(0).getMediaPath());
+                } else {
+                    failedIds += id + ",";
+                }
+            }
+
+            if (!TextUtils.isEmpty(failedIds)) {
+                failedIds = failedIds.substring(0, failedIds.length() - 1);
+            }
+
+            BaseResponse resp = new BaseResponse();
+            if (paths.size() > 0) {
+                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
+                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                    if (TextUtils.isEmpty(failedIds)) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                        resp.setInfo("投屏成功");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                        resp.setInfo(failedIds);
+                    }
+                    ProjectOperationListener.getInstance(mContext).showAdv(paths, isNewDevice);
+                } else {
+                    if (GlobalValues.IS_LOTTERY) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    }
+                }
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未发现任何对应的宣传片");
+            }
+
+            response.getContent().add(new Gson().toJson(resp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
