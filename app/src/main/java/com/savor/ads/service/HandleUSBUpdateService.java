@@ -237,7 +237,7 @@ public class HandleUSBUpdateService extends Service {
      */
     private boolean isDownloadCompleted(String path, String md5) throws Exception {
         if (AppUtils.isFileExist(path)) {
-            String realMd5 = AppUtils.getMD5Method(new File(path));
+            String realMd5 = AppUtils.getEasyMd5(new File(path));
             if (!TextUtils.isEmpty(md5) && md5.equals(realMd5)) {
                 return true;
             }
@@ -271,7 +271,7 @@ public class HandleUSBUpdateService extends Service {
                 if (!TextUtils.isEmpty(bean.getMd5()) &&
                         !TextUtils.isEmpty(bean.getMediaPath()) &&
                         mediaFile.exists()) {
-                    if (!bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                    if (!bean.getMd5().equals(AppUtils.getEasyMd5(mediaFile))) {
                         fileCheck = true;
 
                         TechnicalLogReporter.md5Failed(this, bean.getVid());
