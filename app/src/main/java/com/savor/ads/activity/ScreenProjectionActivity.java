@@ -60,6 +60,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_PROJECT_ACTION = "extra_project_action";
     public static final String EXTRA_PPT_CONFIG = "extra_ppt_config";
     public static final String EXTRA_VIDEO_PPT_CONFIG = "extra_video_ppt_config";
+    public static final String EXTRA_SPECIALTY_LIST = "extra_specialty_list";
+    public static final String EXTRA_SPECIALTY_INTERVAL = "extra_specialty_interval";
+    public static final String EXTRA_GREETING_WORD = "extra_greeting_word";
+    public static final String EXTRA_GREETING_TEMPLATE = "extra_greeting_template";
+    public static final String EXTRA_ADV_LIST = "extra_adv_list";
     public static final String EXTRA_IS_NEW_DEVICE = "extra_is_new_device";
 
     /**
@@ -154,13 +159,20 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private Runnable mPPTPlayNextRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mPptVp != null && mPptAdapter.getCount() > 0 && mPptConfig != null) {
+            if (mPptVp != null && mPptAdapter.getCount() > 0) {
                 int newIndex = mPptVp.getCurrentItem() + 1;
                 if (newIndex >= mPptAdapter.getCount()) {
                     newIndex = 0;
                 }
 
-                if (mPptConfig.getDuration() <= 0 && newIndex == 0) {
+                int duration = 0;
+                if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
+                    if (mPptConfig != null) {
+                        duration = mPptConfig.getDuration();
+                    }
+                }
+
+                if (duration <= 0 && newIndex == 0) {
                     mHandler.post(mPPTPlayFinishRunnable);
                 } else {
                     mPptVp.setCurrentItem(newIndex, newIndex != 0);
@@ -191,6 +203,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private TextView mVolumeTv;
     private ProgressBar mVolumePb;
     private ViewPager mPptVp;
+    private RelativeLayout mGreetingRl;
+    private TextView mGreetingTv;
     /**
      * 图片旋转角度
      */
@@ -217,6 +231,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private PptRequestVo mPptConfig;
     private PptVpAdapter mPptAdapter;
     private PptVideoRequestVo mVideoPptConfig;
+    private ArrayList<String> mSpecialtyFileList;
+    private int mSpecialtyInterval;
+    private String mGreetingWords;
+    private int mGreetingTemplate;
+    private ArrayList<String> mAdvFileList;
     private int[] mPptImgStates;
 
     @Override
@@ -244,6 +263,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mVolumeTv = (TextView) findViewById(R.id.tv_volume);
         mVolumePb = (ProgressBar) findViewById(R.id.pb_volume);
         mPptVp = (ViewPager) findViewById(R.id.vp_images);
+        mGreetingRl = (RelativeLayout) findViewById(R.id.rl_greeting);
+        mGreetingTv = (TextView) findViewById(R.id.tv_greeting_words);
     }
 
     private void setView() {
@@ -305,6 +326,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
         mVideoPptConfig = (PptVideoRequestVo) bundle.getSerializable(EXTRA_VIDEO_PPT_CONFIG);
+        mSpecialtyFileList = (ArrayList<String>) bundle.getSerializable(EXTRA_SPECIALTY_LIST);
+        mSpecialtyInterval = bundle.getInt(EXTRA_SPECIALTY_INTERVAL);
+        mGreetingWords = bundle.getString(EXTRA_GREETING_WORD);
+        mGreetingTemplate = bundle.getInt(EXTRA_GREETING_TEMPLATE);
+        mAdvFileList = (ArrayList<String>) bundle.getSerializable(EXTRA_ADV_LIST);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
             mProjectAction.onActionEnd();
@@ -314,10 +340,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private void exitProjection() {
         LogUtils.e("will exitProjection " + this.hashCode());
         mIsBeenStopped = true;
-        if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType) ||
-                ConstantValues.PROJECT_TYPE_VIDEO.equals(mProjectType)) {
-            mSavorVideoView.release();
-        }
+
         finish();
         LogUtils.w("finish done " + this.hashCode());
     }
@@ -366,6 +389,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.setVisibility(View.VISIBLE);
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
@@ -379,6 +403,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.setLooping(false);
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
@@ -392,6 +417,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.release();
             mImageArea.setVisibility(View.VISIBLE);
             mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
@@ -427,11 +453,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.setVisibility(View.GONE);
             mSavorVideoView.release();
             mImageArea.setVisibility(View.GONE);
-
+            mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
-            mPptAdapter.setDataSource(mPptConfig.getImages());
+            mPptAdapter.setSourceType(1);
+            mPptAdapter.setPptDataSource(mPptConfig.getImages());
             if (mPptVp.getChildCount() > 0) {
                 mPptVp.setCurrentItem(0);
             }
@@ -446,6 +473,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mSavorVideoView.setLooping(true);
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
 
@@ -460,19 +488,80 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             if (mVideoPptConfig.getDuration() > 0) {
                 mHandler.postDelayed(mPPTPlayFinishRunnable, mVideoPptConfig.getDuration() * 1000);
             }
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+            // 餐厅端特色菜
+            mSavorVideoView.setVisibility(View.GONE);
+            mSavorVideoView.release();
+            mImageArea.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.VISIBLE);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+//            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mPptAdapter.setSourceType(2);
+            mPptAdapter.setSpecialtyDataSource(mSpecialtyFileList);
+            if (mPptVp.getChildCount() > 0) {
+                mPptVp.setCurrentItem(0);
+            }
+            mPptImgStates = new int[mSpecialtyFileList.size()];
+
+//            if (mPptConfig.getDuration() > 0) {
+//                mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
+//            }
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_GREETING.equals(mProjectType)) {
+            // 餐厅端投欢迎语
+            mSavorVideoView.setVisibility(View.GONE);
+            mSavorVideoView.release();
+            mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.VISIBLE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+
+            int bgResId = 0;
+            switch (mGreetingTemplate) {
+                case 1:
+                    bgResId = R.mipmap.bg_greeting_01;
+                    break;
+                case 2:
+                    bgResId = R.mipmap.bg_greeting_02;
+                    break;
+                case 3:
+                    bgResId = R.mipmap.bg_greeting_03;
+                    break;
+                case 4:
+                    bgResId = R.mipmap.bg_greeting_04;
+                    break;
+                case 5:
+                    bgResId = R.mipmap.bg_greeting_05;
+                    break;
+                case 6:
+                    bgResId = R.mipmap.bg_greeting_06;
+                    break;
+                case 7:
+                    bgResId = R.mipmap.bg_greeting_07;
+                    break;
+                case 8:
+                    bgResId = R.mipmap.bg_greeting_08;
+                    break;
+            }
+            mGreetingRl.setBackgroundResource(bgResId);
+            mGreetingTv.setText(mGreetingWords);
+
+            mHandler.postDelayed(mExitProjectionRunnable, 60000 * 2);
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_ADV.equals(mProjectType)) {
+            // 餐厅端点播宣传片
+            mSavorVideoView.setVisibility(View.VISIBLE);
+            mSavorVideoView.setLooping(true);
+            mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.GONE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+
+            mSavorVideoView.setMediaFiles(mAdvFileList, 0, 0);
         }
 
-        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
-                    mPptConfig.getInterval(), mInnerType, "", "", "");
-        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
-                    -1, mInnerType, "", "", "");
-        } else {
+        if (!mProjectType.startsWith("rstr_")) {
             if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                         String.valueOf(System.currentTimeMillis()), "start", mType, mMediaId,
@@ -506,17 +595,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
         handleBundleData(bundle);
 
-        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && lastPptConfig != null) {
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "break", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(lastPptConfig.getDuration()), lastPptConfig.getImages().size(),
-                    lastPptConfig.getInterval(), mInnerType, "", "", "");
-        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
-                    -1, mInnerType, "", "", "");
-        } else {
+        if (!mProjectType.startsWith("rstr_")) {
             // 新的投屏来时，给上一次投屏记一次end（由于投图片存在大小图的问题，这里作区分只有小图来时才记end）
             if (!ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) || mIsThumbnail) {
                 LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
@@ -585,6 +664,15 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         } else if (ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType)) {
             mType = "projection";
             mInnerType = "v-ppt";
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+            mType = "projection";
+            mInnerType = "specialty";
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_GREETING.equals(mProjectType)) {
+            mType = "projection";
+            mInnerType = "greeting";
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_ADV.equals(mProjectType)) {
+            mType = "projection";
+            mInnerType = "adv";
         }
     }
 
@@ -934,17 +1022,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mHandler.removeCallbacksAndMessages(null);
 
         // 记录业务日志
-        if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mType, GlobalValues.LAST_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(mPptConfig.getDuration()), mPptConfig.getImages().size(),
-                    mPptConfig.getInterval(), mInnerType, "", "", "");
-        } else if(ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) && mVideoPptConfig != null){
-            LogReportUtil.get(mContext).sendRstrLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mType, GlobalValues.CURRENT_PROJECT_DEVICE_ID,
-                    mSession.getVersionName(), String.valueOf(mVideoPptConfig.getDuration()), mVideoPptConfig.getVideos().size(),
-                    -1, mInnerType, "", "", "");
-        } else {
+        if (!mProjectType.startsWith("rstr_")) {
             LogReportUtil.get(mContext).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "end", mType, mMediaId, GlobalValues.LAST_PROJECT_DEVICE_ID,
                     mSession.getVersionName(), mSession.getAdsPeriod(), mSession.getVodPeriod(), mInnerType);
@@ -983,7 +1061,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         public boolean onMediaComplete(int index, boolean isLast) {
             LogUtils.w("activity onMediaComplete " + this.hashCode());
 
-            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+            if (isLast && (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) ||
+                    (mVideoPptConfig != null && mVideoPptConfig.getDuration() <= 0))) {
                 AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
                 resetGlobalFlag();
                 exitProjection();
@@ -997,7 +1076,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
             ShowMessage.showToast(mContext, "视频播放失败");
             LogFileUtil.write("视频播放失败:" + mMediaPath);
-            if (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) || isLast) {
+            if (isLast && (!ConstantValues.PROJECT_TYPE_RSTR_VIDEO_PPT.equals(mProjectType) ||
+                    (mVideoPptConfig != null && mVideoPptConfig.getDuration() <= 0))) {
                 AppApi.notifyStop(mContext, ScreenProjectionActivity.this, 2, "");
                 resetGlobalFlag();
                 exitProjection();
@@ -1038,18 +1118,23 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
     @Override
     public void onLoadDone(int position, boolean success) {
-        if (mPptConfig == null) {
-            return;
-        }
 
         if (mPptImgStates != null && mPptImgStates.length > position) {
             mPptImgStates[position] = success ? 1 : -1;
         }
 
         if (mPptVp.getCurrentItem() == position) {
+            // 由于ViewPager的预加载机制，这里类似的逻辑在OnPageSelected和这里各写一遍
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             if (success) {
-                mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+
+                int interval = 0;
+                if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
+                    interval = mPptConfig.getInterval() * 1000;
+                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+                    interval = mSpecialtyInterval * 1000;
+                }
+                mHandler.postDelayed(mPPTPlayNextRunnable, interval);
             } else {
                 ShowMessage.showToast(mContext, "图片加载失败，自动播放下一张");
                 mHandler.post(mPPTPlayNextRunnable);
@@ -1068,7 +1153,13 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             if (mPptImgStates[position] == 1) {
                 // 图片加载结束
                 mHandler.removeCallbacks(mPPTPlayNextRunnable);
-                mHandler.postDelayed(mPPTPlayNextRunnable, mPptConfig.getInterval() * 1000);
+                int interval = 0;
+                if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
+                    interval = mPptConfig.getInterval() * 1000;
+                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+                    interval = mSpecialtyInterval * 1000;
+                }
+                mHandler.postDelayed(mPPTPlayNextRunnable, interval);
             } else if (mPptImgStates[position] == -1) {
                 // 图片加载失败
                 ShowMessage.showToast(mContext, "图片加载失败，自动播放下一张");

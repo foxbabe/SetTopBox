@@ -116,6 +116,7 @@ public class FileUtils {
         return content;
     }
 
+
     /**
      * 读取文件的内容
      * @param file 想要读取的文件对象
@@ -142,24 +143,42 @@ public class FileUtils {
         return cfgList;
     }
 
-    public static String readFileToStr(File file){
+    public static String readFileToStr(File file) {
         BufferedReader br = null;
         StringBuffer jsonContent = new StringBuffer();
-        try{
+        try {
             String string = null;
             br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
-            while((string = br.readLine())!=null){//使用readLine方法，一次读一行
+            while ((string = br.readLine()) != null) {//使用readLine方法，一次读一行
                 jsonContent.append(string);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if (br != null){
-                try{
+        } finally {
+            if (br != null) {
+                try {
                     br.close();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
             }
         }
         return jsonContent.toString();
+    }
+    public static byte[] readByte(String filePath) {
+        byte[] buffer = null;
+        File file = new File(filePath);
+        if (file.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                int length = fileInputStream.available();
+
+                buffer = new byte[length];
+                fileInputStream.read(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return buffer;
+
     }
 }

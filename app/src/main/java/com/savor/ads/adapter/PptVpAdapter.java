@@ -32,6 +32,13 @@ public class PptVpAdapter extends PagerAdapter {
     private HashMap<Integer, View> mViewList;
 
     private ImageLoadCallback imageLoadCallback;
+    private ArrayList<String> specialtyImages;
+    /**
+     * 数据源类型：
+     * 1：幻灯片
+     * 2：特色菜
+     */
+    private int mSourceType = 1;
 
     public PptVpAdapter(Context mContext, ArrayList<PptImage> pptImages, ImageLoadCallback imageLoadCallback) {
         this.mContext = mContext;
@@ -42,15 +49,18 @@ public class PptVpAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        if (pptImages == null) {
-            return 0;
+        if (1 == mSourceType) {
+            if (pptImages == null) {
+                return 0;
+            } else {
+                return pptImages.size();
+            }
         } else {
-//            if (pptImages.size() == 1) {
-//                return 1;
-//            } else {
-//                return Integer.MAX_VALUE;
-//            }
-            return pptImages.size();
+            if (specialtyImages == null) {
+                return 0;
+            } else {
+                return specialtyImages.size();
+            }
         }
     }
 
@@ -67,9 +77,14 @@ public class PptVpAdapter extends PagerAdapter {
                 null);
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
         final RelativeLayout loadingRl = (RelativeLayout) view.findViewById(R.id.rl_loading_tip);
-        String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID +
-                File.separator + pptImages.get(position).getName();
         loadingRl.setVisibility(View.VISIBLE);
+        String path = null;
+        if (1 == mSourceType) {
+            path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID +
+                    File.separator + pptImages.get(position).getName();
+        } else {
+            path = specialtyImages.get(position);
+        }
         GlideImageLoader.loadImage(mContext, path, imageView, 0, 0, new RequestListener() {
             @Override
             public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
@@ -100,10 +115,22 @@ public class PptVpAdapter extends PagerAdapter {
         return POSITION_NONE;
     }
 
-    public void setDataSource(ArrayList<PptImage> pptImages) {
+    public void setPptDataSource(ArrayList<PptImage> pptImages) {
         this.pptImages = pptImages;
+        this.specialtyImages = null;
         mViewList.clear();
         notifyDataSetChanged();
+    }
+
+    public void setSpecialtyDataSource(ArrayList<String> specialtyImages) {
+        this.specialtyImages = specialtyImages;
+        this.pptImages = null;
+        mViewList.clear();
+        notifyDataSetChanged();
+    }
+
+    public void setSourceType(int sourceType) {
+        mSourceType = sourceType;
     }
 
     public interface ImageLoadCallback {

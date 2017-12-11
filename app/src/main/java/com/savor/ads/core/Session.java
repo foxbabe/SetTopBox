@@ -118,15 +118,15 @@ public class Session {
     private String adsNextPeriod;
     /**下一期宣传片期号*/
     private String advNextPeriod;
+    /**特色菜期号*/
+    private String specialtyPeriod;
+    /**下载中特色菜期号*/
+    private String downloadingSpecialtyPeriod;
 
 
     private ArrayList<VersionInfo> mVodVersion;
     private ArrayList<VersionInfo> mDownloadingVodVersion;
 
-    //当从电视切换到广告播放以后，最后电视停留的频道号
-    private String TVLastChannel;
-    //log版本
-    private String logVersionCode;
     //点播视频期号
     private String multicastMediaPeriod;
     private String vodPeriod;
@@ -238,8 +238,6 @@ public class Session {
         adsPeriod = mPreference.loadStringKey(P_APP_ADS_MEIDA_PERIOD,"");
         adsDownloadPeriod = mPreference.loadStringKey(P_APP_ADS_DOWNLOAD_MEIDA_PERIOD, "");
 
-        TVLastChannel = mPreference.loadStringKey(P_APP_TVLASTCHANNEL, null);
-        logVersionCode = mPreference.loadStringKey(P_APP_LOGVERSIONCODE, null);
         multicastMediaPeriod = mPreference.loadStringKey(P_APP_MULTICASTMEDIAPERIOD, "");
         startTime = mPreference.loadStringKey(P_APP_STARTTIME, null);
         lastStartTime = mPreference.loadStringKey(P_APP_LASTSTARTTIME, null);
@@ -328,10 +326,7 @@ public class Session {
                 || P_APP_ADV_NEXT_MEDIA_PERIOD.equals(key)
                 || P_APP_ADS_MEIDA_PERIOD.equals(key)
                 || P_APP_ADS_DOWNLOAD_MEIDA_PERIOD.equals(key)
-                || P_APP_TVLASTCHANNEL.equals(key)
-                || P_APP_LOGVERSIONCODE.equals(key)
                 || P_APP_MULTICASTMEDIAPERIOD.equals(key)
-
                 || P_APP_STARTTIME.equals(key)
                 || P_APP_LASTSTARTTIME.equals(key)
                 || P_APP_ETHERNET_MAC.equals(key)
@@ -342,8 +337,13 @@ public class Session {
                 || P_APP_LOADING_PATH.equals(key)
                 || P_APP_SPLASH_VERSION.equals(key)
                 || P_APP_LOADING_VERSION.equals(key)
-                || P_APP_USB_DRIVER_PATH.equals(key)) {
+                || P_APP_USB_DRIVER_PATH.equals(key)
+                || P_APP_SPECIALTY_PERIOD.equals(key)
+                || P_APP_DOWNLOADING_SPECIALTY_PERIOD.equals(key)
+                || P_APP_LOADING_VERSION.equals(key)) {
+
             mPreference.saveStringKey(key, (String) updateItem.second);
+
         } else if (P_APP_VOLUME.equals(key) ||
                 P_APP_PROJECT_VOLUME.equals(key) ||
                 P_APP_VOD_VOLUME.equals(key) ||
@@ -810,24 +810,6 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_VOD_VERSION, mDownloadingVodVersion));
     }
 
-    public String getTVLastChannel() {
-        return TVLastChannel;
-    }
-
-    public void setTVLastChannel(String TVLastChannel) {
-        this.TVLastChannel = TVLastChannel;
-        writePreference(new Pair<String, Object>(P_APP_TVLASTCHANNEL, TVLastChannel));
-    }
-
-    public String getLogVersionCode() {
-        return logVersionCode;
-    }
-
-    public void setLogVersionCode(String logVersionCode) {
-        this.logVersionCode = logVersionCode;
-        writePreference(new Pair<String, Object>(P_APP_LOGVERSIONCODE, logVersionCode));
-    }
-
     public String getMulticastMediaPeriod() {
         return multicastMediaPeriod == null ? "" : multicastMediaPeriod;
     }
@@ -979,6 +961,7 @@ public class Session {
         }
     }
 
+
     public String getUsbPath() {
         return usbPath;
     }
@@ -994,7 +977,29 @@ public class Session {
 
     public void setStandalone(boolean standalone) {
         this.standalone = standalone;
-        writePreference(new Pair<String, Object>(P_APP_STAND_ALONE,standalone));
+        writePreference(new Pair<String, Object>(P_APP_STAND_ALONE, standalone));
+    }
+    public String getSpecialtyPeriod() {
+        return specialtyPeriod;
+    }
+
+    public void setSpecialtyPeriod(String specialtyPeriod) {
+        if (TextUtils.isEmpty(this.specialtyPeriod) || !this.specialtyPeriod.equals(specialtyPeriod)) {
+            this.specialtyPeriod = specialtyPeriod;
+            writePreference(new Pair<String, Object>(P_APP_SPECIALTY_PERIOD, specialtyPeriod));
+        }
+    }
+
+    public String getDownloadingSpecialtyPeriod() {
+        return downloadingSpecialtyPeriod;
+    }
+
+    public void setDownloadingSpecialtyPeriod(String downloadingSpecialtyPeriod) {
+        if (TextUtils.isEmpty(this.downloadingSpecialtyPeriod) || !this.downloadingSpecialtyPeriod.equals(downloadingSpecialtyPeriod)) {
+            this.downloadingSpecialtyPeriod = downloadingSpecialtyPeriod;
+            writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_SPECIALTY_PERIOD, downloadingSpecialtyPeriod));
+        }
+
     }
 
     //轮播播放声音
@@ -1036,10 +1041,10 @@ public class Session {
     public static final String P_APP_VOD_VERSION = "com.savor.ads.vod_version";
     /** 下载中点播期号KEY*/
     public static final String P_APP_DOWNLOADING_VOD_VERSION = "com.savor.ads.downloading_vod_version";
-    //当从电视切换到广告后，要记录一下最后停留的电视台频道号
-    public static final String P_APP_TVLASTCHANNEL = "com.savor.ads.TVLastChannel";
-    //记录日志版本
-    public static final String P_APP_LOGVERSIONCODE = "com.savor.ads.logVersionCode";
+    /** 当前特色菜期号KEY*/
+    public static final String P_APP_SPECIALTY_PERIOD = "com.savor.ads.specialty_period";
+    /** 下载中特色菜期号KEY*/
+    public static final String P_APP_DOWNLOADING_SPECIALTY_PERIOD = "com.savor.ads.downloading_specialty_period";
     //点播视频期号
     public static final String P_APP_MULTICASTMEDIAPERIOD = "com.savor.ads.multicastMediaPeriod";
 //    public static final String P_APP_MULTICASTDOWNLOADINGPERIOD = "com.savor.ads.multicastDownloadPeriod";

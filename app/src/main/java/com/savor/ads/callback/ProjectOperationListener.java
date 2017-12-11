@@ -1,7 +1,7 @@
 package com.savor.ads.callback;
 
 import android.app.Activity;
-import android.app.Application;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.jar.savor.box.interfaces.OnRemoteOperationListener;
@@ -21,17 +21,20 @@ import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
 import com.savor.ads.bean.AwardTime;
-import com.savor.ads.bean.OnDemandBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectionManager;
+import com.savor.ads.projection.action.AdvAction;
+import com.savor.ads.projection.action.GreetingAction;
 import com.savor.ads.projection.action.ImageAction;
 import com.savor.ads.projection.action.PlayAction;
 import com.savor.ads.projection.action.PptAction;
 import com.savor.ads.projection.action.RotateAction;
 import com.savor.ads.projection.action.SeekAction;
 import com.savor.ads.projection.action.ShowEggAction;
+import com.savor.ads.projection.action.SpecialtyAction;
 import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.projection.action.VideoAction;
 import com.savor.ads.projection.action.VideoPptAction;
@@ -46,6 +49,7 @@ import com.savor.ads.utils.LogUtils;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -56,9 +60,17 @@ import java.util.UUID;
  */
 
 public class ProjectOperationListener implements OnRemoteOperationListener {
-    private final Application mContext;
+    private final Context mContext;
 
-    public ProjectOperationListener(Application context) {
+    private static ProjectOperationListener instance;
+    public static ProjectOperationListener getInstance(Context context) {
+        if (instance == null) {
+            instance = new ProjectOperationListener(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    private ProjectOperationListener(Context context) {
         mContext = context;
     }
 
@@ -94,7 +106,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //                            String md5 = bean.getMd5();
 //                            File file = new File(filePath);
 //                            if (file.exists()) {
-//                                String vodMd5 = AppUtils.getMD5Method(file);
+//                                String vodMd5 = AppUtils.getEasyMd5(file);
 //                                if (!vodMd5.equals(md5)) {
 ////                                    file.delete();
 ////                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
@@ -124,7 +136,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //                            String md5 = bean.getMd5();
 //                            File file = new File(filePath);
 //                            if (file.exists()) {
-//                                String vodMd5 = AppUtils.getMD5Method(file);
+//                                String vodMd5 = AppUtils.getEasyMd5(file);
 //                                if (!vodMd5.equals(md5)) {
 //                                    file.delete();
 //                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,
@@ -205,7 +217,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 String md5 = bean.getMd5();
                 File file = new File(filePath);
                 if (file.exists()) {
-                    String vodMd5 = AppUtils.getMD5Method(file);
+                    String vodMd5 = AppUtils.getEasyMd5(file);
                     if (!vodMd5.equals(md5)) {
 //                                    file.delete();
 //                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
@@ -227,19 +239,19 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             }
         } else {
             // 普通点播视频点播
-            List<OnDemandBean> list = dbHelper.findMutlicastMediaLibByWhere(DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{mediaName});
+            List<MediaLibBean> list = dbHelper.findMutlicastMediaLibByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
 
             if (list != null && !list.isEmpty()) {
-                OnDemandBean bean = list.get(0);
-                String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getTitle();
+                MediaLibBean bean = list.get(0);
+                String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getName();
                 String md5 = bean.getMd5();
                 File file = new File(filePath);
                 if (file.exists()) {
-                    String vodMd5 = AppUtils.getMD5Method(file);
+                    String vodMd5 = AppUtils.getEasyMd5(file);
                     if (!vodMd5.equals(md5)) {
                         file.delete();
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,
-                                DBHelper.MediaDBInfo.FieldName.TITLE + "=?", new String[]{url});
+                                DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
 
                         localResult.setInfo("该点播视频无法播放，请稍后再试");
                         vodCheckPass = false;
@@ -250,7 +262,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                 }
 
                 url = filePath;
-                vid = bean.getVodId();
+                vid = bean.getVid();
             } else {
                 localResult.setInfo("没有找到点播视频！");
                 vodCheckPass = false;
@@ -267,32 +279,6 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
             localResult.setInfo("加载成功！");
 
-//            // 跳转或将参数设置到ScreenProjectionActivity
-//            Bundle data = new Bundle();
-//            data.putString(ScreenProjectionActivity.EXTRA_URL, url);
-//            data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_VIDEO_VOD);
-//            data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, vid);
-//            data.putInt(ScreenProjectionActivity.EXTRA_VIDEO_POSITION, position);
-//            data.putBoolean(ScreenProjectionActivity.EXTRA_IS_FROM_WEB, isFromWeb);
-//
-//            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-//            if (activity instanceof ScreenProjectionActivity && !((ScreenProjectionActivity) activity).isBeenStopped()) {
-//                LogUtils.e("Listener will setNewProjection");
-//                ((ScreenProjectionActivity) activity).setNewProjection(data);
-//            } else {
-//                if (ActivitiesManager.getInstance().getCurrentActivity() == null) {
-//                    LogUtils.e("Listener will startActivity in new task");
-//                    Intent intent = new Intent(mContext, ScreenProjectionActivity.class);
-//                    intent.putExtras(data);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    mContext.startActivity(intent);
-//                } else {
-//                    LogUtils.e("Listener will startActivity in " + activity.toString());
-//                    Intent intent = new Intent(activity, ScreenProjectionActivity.class);
-//                    intent.putExtras(data);
-//                    activity.startActivity(intent);
-//                }
-//            }
             VodAction vodAction = new VodAction(mContext, vid, url, position, isFromWeb, isNewDevice);
             ProjectionManager.getInstance().enqueueAction(vodAction);
         } else {
@@ -351,15 +337,33 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public void showPpt(String deviceId, PptRequestVo currentPptRequest, boolean isNewDevice) {
+    public void showPpt(PptRequestVo currentPptRequest, boolean isNewDevice) {
         PptAction imageAction = new PptAction(mContext, currentPptRequest, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(imageAction);
     }
 
     @Override
-    public void showVideoPpt(String deviceId, PptVideoRequestVo currentPptRequest, boolean isNewDevice) {
+    public void showVideoPpt(PptVideoRequestVo currentPptRequest, boolean isNewDevice) {
         VideoPptAction imageAction = new VideoPptAction(mContext, currentPptRequest, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(imageAction);
+    }
+
+    @Override
+    public void showSpecialty(ArrayList<String> mediaPath, int interval, boolean isNewDevice) {
+        SpecialtyAction specialtyAction = new SpecialtyAction(mContext, mediaPath, interval, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(specialtyAction);
+    }
+
+    @Override
+    public void showGreeting(String word, int template, boolean isNewDevice) {
+        GreetingAction greetingAction = new GreetingAction(mContext, word, template, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(greetingAction);
+    }
+
+    @Override
+    public void showAdv(ArrayList<String> mediaPath, boolean isNewDevice) {
+        AdvAction advAction = new AdvAction(mContext, mediaPath, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(advAction);
     }
 
     @Override
