@@ -104,6 +104,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
                     if (ConstantValues.NETTY_SHOW_QRCODE_COMMAND.equals(order)) {
                         // 呼玛
+                        LogUtils.d("Netty command: show code " + params);
                         String connectCode = "";
                         try {
                             InnerBean bean = new Gson().fromJson(params, new TypeToken<InnerBean>() {
@@ -124,12 +125,15 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         response.setMac(session.getEthernetMac());
                     } else if (ConstantValues.NETTY_SHOW_SPECIALTY_COMMAND.equals(order)) {
                         // 特色菜
+                        LogUtils.d("Netty command: show specialty " + params);
                         handleSpecialty(params, response);
                     } else if (ConstantValues.NETTY_SHOW_WELCOME_COMMAND.equals(order)) {
                         // 欢迎词
+                        LogUtils.d("Netty command: show greeting " + params);
                         handleGreeting(params, response);
                     } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
                         // 宣传片
+                        LogUtils.d("Netty command: show adv " + params);
                         handleAdv(params, response);
                     }
                 }
@@ -172,11 +176,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
             if (paths.size() > 0) {
                 if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        GlobalValues.IS_RSTR_PROJECTION) {
                     boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = true;
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
@@ -189,11 +195,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                     }
                     ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
                 } else {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     if (GlobalValues.IS_LOTTERY) {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                     } else {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                     }
                 }
@@ -217,11 +222,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
             BaseResponse resp = new BaseResponse();
             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    GlobalValues.IS_RSTR_PROJECTION) {
                 boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                GlobalValues.IS_RSTR_PROJECTION = true;
                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
@@ -230,11 +237,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
                 ProjectOperationListener.getInstance(mContext).showGreeting(words, template, isNewDevice);
             } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 if (GlobalValues.IS_LOTTERY) {
-                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                 } else {
-                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                 }
             }
@@ -280,11 +286,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             BaseResponse resp = new BaseResponse();
             if (paths.size() > 0) {
                 if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        GlobalValues.IS_RSTR_PROJECTION) {
                     boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = true;
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
@@ -297,11 +305,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                     }
                     ProjectOperationListener.getInstance(mContext).showAdv(paths, isNewDevice);
                 } else {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     if (GlobalValues.IS_LOTTERY) {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                     } else {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                     }
                 }

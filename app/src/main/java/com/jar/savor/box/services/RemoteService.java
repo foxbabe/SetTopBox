@@ -437,6 +437,7 @@ public class RemoteService extends Service {
 
                             GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                             GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                            GlobalValues.IS_RSTR_PROJECTION = false;
                             GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                             AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                         }
@@ -491,6 +492,7 @@ public class RemoteService extends Service {
                     if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                         GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                        GlobalValues.IS_RSTR_PROJECTION = false;
                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                     }
@@ -836,6 +838,7 @@ public class RemoteService extends Service {
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                     GlobalValues.IS_LOTTERY = true;
+                    GlobalValues.IS_RSTR_PROJECTION = false;
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                 }
@@ -958,14 +961,9 @@ public class RemoteService extends Service {
             FileUtils.write(path + AppUtils.getMD5(req.getName()) + ".cfg", new Gson().toJson(req));
 
             if (isAllExist) {
-
-                try {
-                    forceProject = Integer.parseInt(request.getParameter("force"));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
                 if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        GlobalValues.IS_RSTR_PROJECTION) {
                     boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                     // 通知上一个投屏者已被抢投
@@ -976,44 +974,17 @@ public class RemoteService extends Service {
 
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = true;
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
                     RemoteService.listener.showPpt(req, isNewDevice);
                 } else {
-                    if (isWebReq || GlobalValues.IS_LOTTERY) {
-                        pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                        if (GlobalValues.IS_LOTTERY) {
-                            pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                        } else {
-                            pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                        }
+                    pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    if (GlobalValues.IS_LOTTERY) {
+                        pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                     } else {
-                        if (forceProject == 1) {
-
-                            // 通知上一个投屏者已被抢投
-                            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
-                                    !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
-                                AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
-                            }
-
-                            GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                            GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                            GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
-                            AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
-
-                            RemoteService.listener.showPpt(req, true);
-                        } else if (forceProject == -1) {
-                            pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                            if (GlobalValues.IS_LOTTERY) {
-                                pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                            } else {
-                                pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                            }
-                        } else {
-                            pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
-                            pptResponse.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
-                        }
+                        pptResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                     }
                 }
             }
@@ -1085,7 +1056,8 @@ public class RemoteService extends Service {
 
                         if (isAllExist1) {
                             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                    GlobalValues.IS_RSTR_PROJECTION ) {
                                 boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                                 // 通知上一个投屏者已被抢投
@@ -1096,6 +1068,7 @@ public class RemoteService extends Service {
 
                                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                GlobalValues.IS_RSTR_PROJECTION = true;
                                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
@@ -1103,16 +1076,11 @@ public class RemoteService extends Service {
 
                                 object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                             } else {
-                                if (isWebReq || GlobalValues.IS_LOTTERY) {
-                                    object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                    if (GlobalValues.IS_LOTTERY) {
-                                        object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                                    } else {
-                                        object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                                    }
+                                object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                if (GlobalValues.IS_LOTTERY) {
+                                    object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                                 } else {
-                                    object.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
-                                    object.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                    object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                                 }
                             }
                         }
@@ -1182,14 +1150,9 @@ public class RemoteService extends Service {
                 FileUtils.write(pathPptVideo + AppUtils.getMD5(pptVideoRequestVo.getName()) + ".v-cfg", new Gson().toJson(pptVideoRequestVo));
 
                 if (isAllVideoExist) {
-
-                    try {
-                        forceProject = Integer.parseInt(request.getParameter("force"));
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                    }
                     if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                            GlobalValues.IS_RSTR_PROJECTION) {
                         boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                         // 通知上一个投屏者已被抢投
@@ -1200,44 +1163,17 @@ public class RemoteService extends Service {
 
                         GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                        GlobalValues.IS_RSTR_PROJECTION = true;
                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
                         RemoteService.listener.showVideoPpt(pptVideoRequestVo, isNewDevice);
                     } else {
-                        if (isWebReq || GlobalValues.IS_LOTTERY) {
-                            pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                            if (GlobalValues.IS_LOTTERY) {
-                                pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                            } else {
-                                pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                            }
+                        pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        if (GlobalValues.IS_LOTTERY) {
+                            pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                         } else {
-                            if (forceProject == 1) {
-
-                                // 通知上一个投屏者已被抢投
-                                if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_IP) &&
-                                        !GlobalValues.CURRENT_PROJECT_DEVICE_IP.equals(deviceId)) {
-                                    AppApi.notifyStop(RemoteService.this, this, 1, deviceName);
-                                }
-
-                                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                                GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
-                                AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
-
-                                RemoteService.listener.showVideoPpt(pptVideoRequestVo, true);
-                            } else if (forceProject == -1) {
-                                pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                if (GlobalValues.IS_LOTTERY) {
-                                    pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                                } else {
-                                    pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                                }
-                            } else {
-                                pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
-                                pptVideoResponse.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
-                            }
+                            pptVideoResponse.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                         }
                     }
                 }
@@ -1344,7 +1280,8 @@ public class RemoteService extends Service {
 
                                 if (isAllExist) {
                                     if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+                                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                                            GlobalValues.IS_RSTR_PROJECTION) {
                                         boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                                         // 通知上一个投屏者已被抢投
@@ -1355,6 +1292,7 @@ public class RemoteService extends Service {
 
                                         GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                                         GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                                        GlobalValues.IS_RSTR_PROJECTION = true;
                                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
@@ -1362,16 +1300,11 @@ public class RemoteService extends Service {
 
                                         object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                                     } else {
-                                        if (isWebReq || GlobalValues.IS_LOTTERY) {
-                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                                            if (GlobalValues.IS_LOTTERY) {
-                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                                            } else {
-                                                object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                                            }
+                                        object.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                                        if (GlobalValues.IS_LOTTERY) {
+                                            object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                                         } else {
-                                            object.setResult(ConstantValues.SERVER_RESPONSE_CODE_ANOTHER_PROJECT);
-                                            object.setInfo(GlobalValues.CURRENT_PROJECT_DEVICE_NAME);
+                                            object.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                                         }
                                     }
                                 }
@@ -1407,6 +1340,7 @@ public class RemoteService extends Service {
                 RemoteService.listener.rstrStop();
                 stopResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
 
+                GlobalValues.IS_RSTR_PROJECTION = false;
                 GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
             } else {
                 stopResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -1473,6 +1407,7 @@ public class RemoteService extends Service {
                 if (object.getResult() == ConstantValues.SERVER_RESPONSE_CODE_SUCCESS) {
                     GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                     GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = false;
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                 }
@@ -1546,6 +1481,7 @@ public class RemoteService extends Service {
 
                             GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                             GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                            GlobalValues.IS_RSTR_PROJECTION = false;
                             GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                             AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
                         }
