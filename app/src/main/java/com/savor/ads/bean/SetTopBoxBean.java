@@ -29,6 +29,8 @@ public class SetTopBoxBean implements Serializable{
     private RoomBean room;
     //所在酒楼信息
     private BoiteBean boite;
+    /**U盘更新媒体库*/
+    private ArrayList<MediaLibBean> playlist;
     /**媒体库*/
     private ArrayList<PlayListCategoryItem> playbill_list;
     /** 发布时间*/
@@ -120,6 +122,14 @@ public class SetTopBoxBean implements Serializable{
 
     public void setPub_time(String pub_time) {
         this.pub_time = pub_time;
+    }
+
+    public ArrayList<MediaLibBean> getPlaylist() {
+        return playlist;
+    }
+
+    public void setPlaylist(ArrayList<MediaLibBean> playlist) {
+        this.playlist = playlist;
     }
 
     public ArrayList<PlayListCategoryItem> getPlaybill_list() {

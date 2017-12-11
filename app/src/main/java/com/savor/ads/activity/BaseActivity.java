@@ -21,9 +21,11 @@ import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
+import com.savor.ads.service.HandleUSBUpdateService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
@@ -103,6 +105,7 @@ public abstract class BaseActivity extends Activity {
             String usbPath = intent.getDataString();
             if (intent.getAction().equals("android.intent.action.MEDIA_MOUNTED") && usbPath.contains("usb")) {//U盘插入
                 String pathString = usbPath.split("file://")[1];
+                mSession.setUsbPath(pathString);
                 insertUSB(pathString);
             } else if (intent.getAction().equals("android.intent.action.MEDIA_REMOVED") && usbPath.contains("usb")) {
                 //U盘拔出
@@ -326,11 +329,20 @@ public abstract class BaseActivity extends Activity {
      */
     private void insertUSB(String pathString) {
         ShowMessage.showToast(mContext, "U盘已插入，正在读取...");
-
+        String cfgPath = pathString + File.separator
+                + ConstantValues.USB_FILE_HOTEL_PATH + File.separator
+                + mSession.getBoiteId() + File.separator
+                + ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
+        File cfgFile = new File(cfgPath);
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
         //指定存放图片的文件夹不存在的情况
-        if (!file.exists()) {
+        if (!TextUtils.isEmpty(mSession.getBoiteId())&&cfgFile.exists()){
+            Intent intent = new Intent(this,HandleUSBUpdateService.class);
+            intent.putExtra("cfgFile",cfgFile);
+            startService(intent);
+            return;
+        }else if (!file.exists()) {
             ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
             return;
         }

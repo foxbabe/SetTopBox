@@ -1,11 +1,15 @@
 package com.savor.ads.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2016/12/17.
@@ -36,7 +40,7 @@ public class FileUtils {
     /**
      * 复制单个文件
      */
-    public static void copyFile(String oldPath, String newPath) {
+    public static void copyFile(String oldPath, String newPath) throws Exception{
         InputStream inStream = null;
         FileOutputStream fs = null;
         try {
@@ -58,7 +62,7 @@ public class FileUtils {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new Exception();
         } finally {
             if (inStream != null) {
                 try {
@@ -110,5 +114,52 @@ public class FileUtils {
             }
         }
         return content;
+    }
+
+    /**
+     * 读取文件的内容
+     * @param file 想要读取的文件对象
+     * @return 返回文件内容
+     */
+    public static List<String> readFile(File file){
+        BufferedReader br = null;
+        List<String> cfgList = new ArrayList<>();
+        try{
+            String string = null;
+            br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            while((string = br.readLine())!=null){//使用readLine方法，一次读一行
+                cfgList.add(string);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            if (br != null){
+                try{
+                    br.close();
+                }catch (Exception e){}
+            }
+        }
+        return cfgList;
+    }
+
+    public static String readFileToStr(File file){
+        BufferedReader br = null;
+        StringBuffer jsonContent = new StringBuffer();
+        try{
+            String string = null;
+            br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            while((string = br.readLine())!=null){//使用readLine方法，一次读一行
+                jsonContent.append(string);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            if (br != null){
+                try{
+                    br.close();
+                }catch (Exception e){}
+            }
+        }
+        return jsonContent.toString();
     }
 }

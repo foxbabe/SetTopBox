@@ -50,6 +50,31 @@ public class ConstantValues {
 
     public static final String USB_FILE_PATH = "redian";
 
+    /**U盘安装酒楼文件夹目录*/
+    public static final String USB_FILE_HOTEL_PATH = "savor";
+    public static final String USB_FILE_HOTEL_MEDIA_PATH = "media";
+    /**U盘安装酒楼配置文件*/
+    public static final String USB_FILE_HOTEL_UPDATE_CFG = "update.cfg";
+    /**U盘安装酒楼配置文件-获取电视列表*/
+    public static final String USB_FILE_HOTEL_GET_CHANNEL = "get_channel";
+    /**U盘安装酒楼配置文件-上传电视列表*/
+    public static final String USB_FILE_HOTEL_SET_CHANNEL = "set_channel";
+    /**U盘安装酒楼配置文件-拉取日志文件*/
+    public static final String USB_FILE_HOTEL_GET_LOG = "get_log";
+    /**U盘安装酒楼配置文件-拉取备份日志文件*/
+    public static final String USB_FILE_HOTEL_GET_LOGED = "get_loged";
+    /**U盘安装酒楼配置文件-更新视频*/
+    public static final String USB_FILE_HOTEL_UPDATE_MEIDA = "update_media";
+    /**U盘安装酒楼配置文件-更新版本*/
+    public static final String USB_FILE_HOTEL_UPDATE_APK = "update_apk";
+    /**U盘安装酒楼配置文件-更新视频json文件*/
+    public static final String USB_FILE_HOTEL_UPDATE_JSON = "playlist.json";
+    /**U盘安装酒楼配置文件-更新宣传片目录*/
+    public static final String USB_FILE_HOTEL_UPDATE_ADV= "adv";
+    /**U盘安装酒楼配置文件-日志提取目录*/
+    public static final String USB_FILE_LOG_PATH = "log";
+    /**U盘安装酒楼配置文件-单机日志标志*/
+    public static final String STANDALONE="standalone";
     /** 广告下载完成广播Action*/
     public static final String ADS_DOWNLOAD_COMPLETE_ACCTION = "com.savor.ads.ads_download_complete";
 
