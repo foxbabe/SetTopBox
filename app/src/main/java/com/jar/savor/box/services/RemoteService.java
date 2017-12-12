@@ -1221,7 +1221,8 @@ public class RemoteService extends Service {
                     start = Long.parseLong(temp[0]);
 //                    long end = Long.parseLong(temp[1]);
 
-                    File videoFile = new File(deviceIdDirPath + fileName);
+                    // 临时文件
+                    File videoFile = new File(deviceIdDirPath + "tmp_" + fileName);
 
                     for (Part part : request.getParts()) {
                         switch (part.getName()) {
@@ -1254,6 +1255,9 @@ public class RemoteService extends Service {
 
                     if (!TextUtils.isEmpty(pptName) && !TextUtils.isEmpty(fileName)) {
                         if (isFileEnd) {
+                            // 将临时文件重命名为真实文件
+                            videoFile.renameTo(new File(deviceIdDirPath + fileName));
+
                             // 查找、读取幻灯片配置
 
                             String configJson = FileUtils.read(deviceIdDirPath + AppUtils.getMD5(pptName) + ".v-cfg");
