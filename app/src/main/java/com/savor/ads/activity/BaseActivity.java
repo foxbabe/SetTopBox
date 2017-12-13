@@ -28,6 +28,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -410,15 +411,18 @@ public abstract class BaseActivity extends Activity {
         boolean handled = false;
         switch (keyCode) {
             case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
+            case KeyCodeConstantGiec.KEY_CODE_SYSTEM_SETTING:
                 LogFileUtil.write("will gotoSystemSetting");
                 gotoSystemSetting();
                 handled = true;
                 break;
             case KeyCodeConstant.KEY_CODE_SETTING:
+            case KeyCodeConstantGiec.KEY_CODE_SETTING:
                 gotoSetting();
                 handled = true;
                 break;
             case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
+            case KeyCodeConstantGiec.KEY_CODE_MANUAL_HEARTBEAT:
                 manualHeartbeat();
                 handled = true;
                 break;

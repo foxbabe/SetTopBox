@@ -95,6 +95,10 @@
             android:name=".activity.TvPlayerActivity"
             android:launchMode="singleTask">
         </activity>
+        <activity
+            android:name=".activity.TvPlayerGiecActivity"
+            android:launchMode="singleTask">
+        </activity>
         <!-- 投屏类播放页面 -->
         <activity android:name=".activity.ScreenProjectionActivity">
         </activity>
@@ -128,6 +132,9 @@
         </service>
 
         <activity android:name=".activity.LotteryActivity"
+                  android:launchMode="singleTask">
+        </activity>
+        <activity android:name=".activity.AppBrowserActivity"
                   android:launchMode="singleTask">
         </activity>
     </application>

@@ -19,6 +19,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -194,37 +195,43 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         boolean handled = false;
         switch (keyCode) {
             // 后退
-            case KeyCodeConstant.KEY_CODE_BACK:
+            case KeyEvent.KEYCODE_BACK:
 //                handleBack();
                 handled = true;
                 break;
             // 切换到电视模式
             case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
+            case KeyCodeConstantGiec.KEY_CODE_CHANGE_MODE:
                 switchToTvPlayer();
                 handled = true;
                 break;
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
+            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
                 ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;
             // 暂停、继续播放
             case KeyCodeConstant.KEY_CODE_PLAY_PAUSE:
+            case KeyCodeConstantGiec.KEY_CODE_PLAY_PAUSE:
                 mSavorVideoView.togglePlay();
                 handled = true;
                 break;
             // 上一条
             case KeyCodeConstant.KEY_CODE_PREVIOUS_ADS:
+            case KeyCodeConstantGiec.KEY_CODE_PREVIOUS_ADS:
                 mSavorVideoView.playPrevious();
                 handled = true;
                 break;
             // 下一条
             case KeyCodeConstant.KEY_CODE_NEXT_ADS:
+            case KeyCodeConstantGiec.KEY_CODE_NEXT_ADS:
                 mSavorVideoView.playNext();
                 handled = true;
                 break;
             // 机顶盒信息
             case KeyCodeConstant.KEY_CODE_SHOW_INFO:
+            case KeyCodeConstantGiec.KEY_CODE_SHOW_INFO:
                 // 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
                 showBoxInfo();
                 handled = true;

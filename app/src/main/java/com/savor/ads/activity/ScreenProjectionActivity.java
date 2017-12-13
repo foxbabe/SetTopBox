@@ -40,6 +40,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -975,7 +976,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
         switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_BACK:
+            case KeyEvent.KEYCODE_BACK:
                 AppApi.notifyStop(this, this, 2, "");
                 resetGlobalFlag();
                 exitProjection();
@@ -983,6 +984,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 break;
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
+            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
                 ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;

@@ -26,6 +26,7 @@ import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogUtils;
 
 import java.text.SimpleDateFormat;
@@ -451,7 +452,7 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
         switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_BACK:
+            case KeyEvent.KEYCODE_BACK:
                 AppApi.notifyStop(this, this, 2, "");
                 resetGlobalFlag();
                 exitLottery();
@@ -459,6 +460,7 @@ public class LotteryActivity extends BaseActivity implements ApiRequestListener 
                 break;
             // 呼出二维码
             case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
+            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
                 ((SavorApplication) getApplication()).showQrCodeWindow(null);
                 handled = true;
                 break;

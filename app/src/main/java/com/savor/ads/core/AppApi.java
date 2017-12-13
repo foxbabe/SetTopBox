@@ -13,6 +13,7 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.tvlibrary.AtvChannel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -80,12 +82,14 @@ public class AppApi {
         SP_GET_ADS_DATA_FROM_JSON,
         SP_GET_ON_DEMAND_DATA_FROM_JSON,
         SP_GET_TV_MATCH_DATA_FROM_JSON,
+        SP_GET_TV_MATCH_DATA_FROM_GIEC_JSON,
         SP_GET_UPGRADE_INFO_JSON,
         SP_GET_LOGO_DOWN,
         SP_GET_LOADING_IMG_DOWN,
         SP_GET_UPGRADEDOWN,
         CP_GET_HEARTBEAT_PLAIN,
         SP_POST_UPLOAD_PROGRAM_JSON,
+        SP_POST_UPLOAD_PROGRAM_GIEC_JSON,
         CP_GET_SP_IP_JSON,
         SP_GET_BOX_INIT_JSON,
         CP_GET_PRIZE_JSON,
@@ -107,9 +111,11 @@ public class AppApi {
             put(Action.SP_GET_ADS_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/ads/config");
             put(Action.SP_GET_ON_DEMAND_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/demand/config");
             put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
+            put(Action.SP_GET_TV_MATCH_DATA_FROM_GIEC_JSON,SP_BASE_URL+"small/tvListNew/api/stb/tv_getCommands");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
             put(Action.CP_GET_HEARTBEAT_PLAIN, BuildConfig.BASE_URL + "Heartbeat/Report/index");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
+            put(Action.SP_POST_UPLOAD_PROGRAM_GIEC_JSON, SP_BASE_URL + "small/tvListNew/api/stb/tv_commands");
             put(Action.CP_GET_SP_IP_JSON, BuildConfig.BASE_URL + "basedata/ipinfo/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
             put(Action.CP_GET_PRIZE_JSON, BuildConfig.BASE_URL + "Award/Award/getAwardInfo");
@@ -211,7 +217,16 @@ public class AppApi {
     public static void getTVMatchDataFromSmallPlatform(Context context, ApiRequestListener handler) {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_TV_MATCH_DATA_FROM_JSON, handler, params).get();
+    }
 
+    /**
+     * 获取小平台电视频道数据
+     * @param context
+     * @param handler
+     */
+    public static void getGiecTVMatchDataFromSmallPlatform(Context context, ApiRequestListener handler) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        new AppServiceOk(context, Action.SP_GET_TV_MATCH_DATA_FROM_GIEC_JSON, handler, params).get();
     }
 
     /**
@@ -308,6 +323,14 @@ public class AppApi {
         List<AtvProgramInfo> programInfo = Arrays.asList(programs);
         final HashMap<String, Object> params = new HashMap<>();
         params.put("data", programInfo);
+        new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
+    }
+
+    public static void uploadProgram(Context context, ApiRequestListener handler, ArrayList<AtvChannel> programs) {
+        if (programs == null || programs.size() <= 0)
+            return;
+        final HashMap<String, Object> params = new HashMap<>();
+        params.put("data", programs);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
     }
 
