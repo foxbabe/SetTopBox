@@ -39,6 +39,8 @@ public class GlobalValues {
     public volatile static String LAST_PROJECT_ID;
     /** 是否是抽奖*/
     public volatile static boolean IS_LOTTERY;
+    /** 是否是餐厅端投屏*/
+    public volatile static boolean IS_RSTR_PROJECTION;
 
 
     public static volatile boolean IS_BOX_BUSY = false;
