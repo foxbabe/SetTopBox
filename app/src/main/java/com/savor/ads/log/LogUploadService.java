@@ -75,7 +75,7 @@ public class LogUploadService {
                         /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
                             logMonth = split[2].substring(0, 6);
                         } else */if (split.length == 2||split.length==3) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            logMonth = split[1].substring(0, 6);
+                            logMonth = split[1].substring(0, 6);               //单机：FCD5D900B8B6_2017061415_standalone.blog
                         } else {
                             file.delete();
                             continue;

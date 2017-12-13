@@ -266,7 +266,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getExternalSDCardPath();
+        String path = getSDCardPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {

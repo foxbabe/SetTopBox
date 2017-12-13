@@ -38,6 +38,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 是否混淆
+            minifyEnabled false
+            zipAlignEnabled false
+            // 移除无用的resource文件
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
         release {
             // 是否混淆
             minifyEnabled false

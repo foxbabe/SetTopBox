@@ -62,11 +62,6 @@ public class HandleUSBUpdateService extends Service {
     GsonBuilder builder = new GsonBuilder();
     Gson gson = builder.create();
 
-
-    private boolean isProduceLog = false;
-
-    private boolean isProCompleted = false;  //节目是否下载完毕
-    private String mProCompletedPeriod;
     private File cfgFile;
     private List<String> cfgList = new ArrayList<>();
     @Override
@@ -149,13 +144,14 @@ public class HandleUSBUpdateService extends Service {
             ShowMessage.showToast(context,"当前期号和U盘期号一致");
             return;
         }
-        if (setTopBoxBean.getRoom()!=null){
-            roomBean = setTopBoxBean.getRoom();
-        }
+        //TODO:包间信息
+//        if (setTopBoxBean.getRoom()!=null){
+//            roomBean = setTopBoxBean.getRoom();
+//        }
         if (setTopBoxBean.getBoite()!=null){
             boiteBean = setTopBoxBean.getBoite();
         }
-        List<MediaLibBean> mediaLibBeans = setTopBoxBean.getPlaylist();
+        List<MediaLibBean> mediaLibBeans = setTopBoxBean.getPlay_list();
         if (mediaLibBeans!=null&&mediaLibBeans.size()>0){
             dbHelper.deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
             String usbMediaRootPath = session.getUsbPath()
