@@ -396,8 +396,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         completedCount++;
 
                         // 入库
-                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
-                        String[] selectionArgs = new String[]{mediaLib.getName()};
+                        String selection = DBHelper.MediaDBInfo.FieldName.FOOD_ID + "=? ";
+                        String[] selectionArgs = new String[]{mediaLib.getFood_id()};
                         List<RstrSpecialty> list = dbHelper.findSpecialtyByWhere(selection, selectionArgs);
                         mediaLib.setMedia_path(path);
                         if (list != null && list.size() > 1) {
