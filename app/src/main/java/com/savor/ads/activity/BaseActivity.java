@@ -401,8 +401,13 @@ public abstract class BaseActivity extends Activity {
         TechnicalLogReporter.sdcardRemoved(this);
         //SD移除时跳到TV页
         if (this instanceof AdsPlayerActivity) {
-            Intent intent = new Intent(this, TvPlayerActivity.class);
-            startActivity(intent);
+            if (AppUtils.isMstar()) {
+                Intent intent = new Intent(this, TvPlayerActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+                startActivity(intent);
+            }
         }
     }
 

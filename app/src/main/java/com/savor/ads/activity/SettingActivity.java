@@ -117,11 +117,19 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void gotoTvSearch() {
-        ActivitiesManager.getInstance().popSpecialActivity(TvPlayerActivity.class);
-        Intent intent = new Intent();
-        intent.setClass(this, TvPlayerActivity.class);
-        intent.putExtra(TvPlayerActivity.EXTRA_IS_AUTO_SEARCHING, true);
-        startActivity(intent);
+        if (AppUtils.isMstar()) {
+            ActivitiesManager.getInstance().popSpecialActivity(TvPlayerActivity.class);
+            Intent intent = new Intent();
+            intent.setClass(this, TvPlayerActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_IS_AUTO_SEARCHING, true);
+            startActivity(intent);
+        } else {
+            ActivitiesManager.getInstance().popSpecialActivity(TvPlayerGiecActivity.class);
+            Intent intent = new Intent();
+            intent.setClass(this, TvPlayerGiecActivity.class);
+            intent.putExtra(TvPlayerGiecActivity.EXTRA_IS_AUTO_SEARCHING, true);
+            startActivity(intent);
+        }
     }
 
 

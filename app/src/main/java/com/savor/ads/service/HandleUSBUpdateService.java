@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.BoiteBean;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.MediaLibBean;
@@ -27,6 +28,7 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.TechnicalLogReporter;
+import com.savor.ads.utils.tv.TvOperate;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,10 +87,10 @@ public class HandleUSBUpdateService extends Service {
                     for (String str: cfgList){
                         switch (str){
                             case ConstantValues.USB_FILE_HOTEL_GET_CHANNEL:
-
+                                readChannelList();
                                 break;
                             case ConstantValues.USB_FILE_HOTEL_SET_CHANNEL:
-
+                                writeChannelList();
                                 break;
                             case ConstantValues.USB_FILE_HOTEL_GET_LOG:
                                 getLogToUSBDriver(log);
@@ -115,6 +117,25 @@ public class HandleUSBUpdateService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void readChannelList() {
+        if (AppUtils.isMstar()) {
+            AtvProgramInfo[] programs = new TvOperate().getAllProgramInfo();
+            // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
+            if (programs != null && programs.length > 0) {
+                for (AtvProgramInfo program : programs) {
+                    program.setChennalNum(program.getChennalNum() + 1);
+                }
+            }
+
+            String channelJson = new Gson().toJson(programs);
+//            FileUtils.write("", channelJson);
+        }
+    }
+
+    private void writeChannelList() {
+
     }
 
     /**
