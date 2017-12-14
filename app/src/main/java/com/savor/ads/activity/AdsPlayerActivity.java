@@ -83,8 +83,13 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getExternalSDCardPath());
         // 未发现SD卡时跳到TV
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
-            Intent intent = new Intent(this, TvPlayerActivity.class);
-            startActivity(intent);
+            if (AppUtils.isMstar()) {
+                Intent intent = new Intent(this, TvPlayerActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+                startActivity(intent);
+            }
             finish();
         } else {
             mPlayList = GlobalValues.PLAY_LIST;
@@ -249,9 +254,15 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             vid = mPlayList.get(mCurrentPlayingIndex).getVid();
         }
         mIsGoneToTv = true;
-        Intent intent = new Intent(this, TvPlayerActivity.class);
-        intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
-        startActivity(intent);
+        if (AppUtils.isMstar()) {
+            Intent intent = new Intent(this, TvPlayerActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
+            startActivity(intent);
+        }
     }
 
     private void deleteOldMedia() {

@@ -1,8 +1,10 @@
 package com.savor.tvlibrary;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.tv.TvContract;
 import android.media.tv.TvView;
+import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -31,11 +33,13 @@ public class GiecTVOperator implements ITVOperator {
 //        TvControlManager.getInstance().StartTv();
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void switchATVChannel(TvView tvView, int channelId) {
         tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void autoTuning(final AutoTurningCallback turningCallback) {
         final String TAG = "autoTurning";
@@ -183,6 +187,7 @@ public class GiecTVOperator implements ITVOperator {
         dbHelper.mappingChannelFromSysDb();
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void setSignalSource(TvView tvView, TVSignal signal) {
         switch (signal) {
@@ -198,6 +203,7 @@ public class GiecTVOperator implements ITVOperator {
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void exitTv(TvView tvView) {
         TvControlManager.getInstance().StopTv();

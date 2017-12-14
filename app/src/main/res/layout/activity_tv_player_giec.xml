@@ -5,7 +5,7 @@
     android:id="@+id/activity_tv_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.savor.ads.activity.TvPlayerActivity">
+    tools:context="com.savor.ads.activity.TvPlayerGiecActivity">
 
     <android.media.tv.TvView
         android:id="@+id/tvView"
