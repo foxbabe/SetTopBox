@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -58,7 +59,7 @@ public abstract class BaseActivity extends Activity {
 
     protected boolean mIsGoneToSystemSetting;
     private AudioSkin mAudioSkin;
-
+    private String usbPath0="/storage/udisk0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +86,12 @@ public abstract class BaseActivity extends Activity {
      * 注册广播，判断sd卡以及U盘挂载状态
      */
     public void registerListener() {
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
@@ -103,9 +109,10 @@ public abstract class BaseActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             LogUtils.e("BroadcastReceiver: " + intent.getAction());
-            String usbPath = intent.getDataString();
+            String usbPath = intent.getDataString().split("file://")[1];
+            String usbPath1 = intent.getData().getPath();
             if (intent.getAction().equals("android.intent.action.MEDIA_MOUNTED") && usbPath.contains("usb")) {//U盘插入
-                String pathString = usbPath.split("file://")[1];
+                 String pathString = usbPath.split("file://")[1];
                 mSession.setUsbPath(pathString);
                 insertUSB(pathString);
             } else if (intent.getAction().equals("android.intent.action.MEDIA_REMOVED") && usbPath.contains("usb")) {
@@ -115,6 +122,14 @@ public abstract class BaseActivity extends Activity {
 
             String action = intent.getAction();
             String path = intent.getData().getPath();
+            if (action.equals(UsbManager.ACTION_USB_ACCESSORY_ATTACHED)
+                    ||action.equals(UsbManager.ACTION_USB_ACCESSORY_DETACHED)){
+
+            }
+            if (action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+                    ||action.equals(UsbManager.ACTION_USB_DEVICE_DETACHED)){
+
+            }
             if (Intent.ACTION_MEDIA_REMOVED.equals(action)
                     || Intent.ACTION_MEDIA_UNMOUNTED.equals(action)
                     || Intent.ACTION_MEDIA_BAD_REMOVAL.equals(action)) {
@@ -332,10 +347,14 @@ public abstract class BaseActivity extends Activity {
      */
     private void insertUSB(String pathString) {
         ShowMessage.showToast(mContext, "U盘已插入，正在读取...");
+        mSession.setBoiteId("84");
+        mSession.setUsbPath(pathString);
+        mSession.setStandalone(true);
         String cfgPath = pathString + File.separator
                 + ConstantValues.USB_FILE_HOTEL_PATH + File.separator
                 + mSession.getBoiteId() + File.separator
                 + ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
+
         File cfgFile = new File(cfgPath);
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
@@ -408,7 +427,7 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        boolean handled = false;
+         boolean handled = false;
         switch (keyCode) {
             case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
             case KeyCodeConstantGiec.KEY_CODE_SYSTEM_SETTING:
@@ -425,6 +444,9 @@ public abstract class BaseActivity extends Activity {
             case KeyCodeConstantGiec.KEY_CODE_MANUAL_HEARTBEAT:
                 manualHeartbeat();
                 handled = true;
+                break;
+            case 2009:
+                insertUSB(usbPath0);
                 break;
         }
         return handled || super.onKeyDown(keyCode, event);

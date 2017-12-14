@@ -97,7 +97,7 @@ public class ConstantValues {
     /**U盘安装酒楼配置文件-更新版本*/
     public static final String USB_FILE_HOTEL_UPDATE_APK = "update_apk";
     /**U盘安装酒楼配置文件-更新视频json文件*/
-    public static final String USB_FILE_HOTEL_UPDATE_JSON = "playlist.json";
+    public static final String USB_FILE_HOTEL_UPDATE_JSON = "play_list.json";
     /**U盘安装酒楼配置文件-更新宣传片目录*/
     public static final String USB_FILE_HOTEL_UPDATE_ADV= "adv";
     /**U盘安装酒楼配置文件-日志提取目录*/

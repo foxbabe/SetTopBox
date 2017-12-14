@@ -140,10 +140,10 @@ public class HandleUSBUpdateService extends Service {
         if (setTopBoxBean==null){
             return;
         }
-        if (setTopBoxBean.getPeriod().equals(session.getProPeriod())){
-            ShowMessage.showToast(context,"当前期号和U盘期号一致");
-            return;
-        }
+//        if (setTopBoxBean.getPeriod().equals(session.getProPeriod())){
+//            ShowMessage.showToast(context,"当前期号和U盘期号一致");
+//            return;
+//        }
         //TODO:包间信息
 //        if (setTopBoxBean.getRoom()!=null){
 //            roomBean = setTopBoxBean.getRoom();
@@ -177,8 +177,8 @@ public class HandleUSBUpdateService extends Service {
                         usbMeidaPath = usbAdvRootPath+bean.getName();
 
                     }else{
-                        localPath = localRootPath+bean.getChinese_name()+".mp4";
-                        usbMeidaPath = usbMediaRootPath + bean.getChinese_name()+".mp4";
+                        localPath = localRootPath+bean.getChinese_name()+"."+bean.getSurfix();
+                        usbMeidaPath = usbMediaRootPath + bean.getChinese_name()+"."+bean.getSurfix();
                     }
                     try {
                         boolean isDownloaded = false;
@@ -191,7 +191,7 @@ public class HandleUSBUpdateService extends Service {
                         }
                         if (isDownloaded){
                             PlayListBean play = new PlayListBean();
-                            play.setPeriod(bean.getPeriod());
+                            play.setPeriod(setTopBoxBean.getPeriod());
                             play.setDuration(bean.getDuration());
                             play.setMd5(bean.getMd5());
                             play.setVid(bean.getVid());

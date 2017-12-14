@@ -614,7 +614,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 //            open();
                 if (session.isStandalone()){
                     // 拼接查询条件
-                    selection = MediaDBInfo.FieldName.PERIOD ;
+                    selection = MediaDBInfo.FieldName.PERIOD + "=?";
                     args = new String[]{session.getProPeriod()};
                 }else{
                     // 拼接查询条件
