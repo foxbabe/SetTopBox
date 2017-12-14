@@ -22,7 +22,7 @@ public class GreetingService extends Service {
     public static final String EXTRA_TEMPLATE = "extra_template";
 
     public static final int DURATION = 1000 * 10;
-    public static final int INTERVAL = 1000 * 60 * 3;
+    public static final int INTERVAL = 1000 * 60 * 10;
     public static final int MAX_COUNT = 6;
 
     private String deviceId;
