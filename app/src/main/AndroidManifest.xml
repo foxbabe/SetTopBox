@@ -127,9 +127,16 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".activity.LotteryActivity"
-                  android:launchMode="singleTask">
+        <activity
+            android:name=".activity.LotteryActivity"
+            android:launchMode="singleTask">
         </activity>
+
+        <service
+            android:name=".service.GreetingService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

@@ -355,8 +355,8 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public void showGreeting(String word, int template, boolean isNewDevice) {
-        GreetingAction greetingAction = new GreetingAction(mContext, word, template, isNewDevice);
+    public void showGreeting(String word, int template, int duration, boolean isNewDevice) {
+        GreetingAction greetingAction = new GreetingAction(mContext, word, template, duration, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(greetingAction);
     }
 
