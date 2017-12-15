@@ -23,15 +23,17 @@ public class GreetingAction extends ProjectionActionBase implements Serializable
     private transient Context mContext;
     private String mWords;
     private int mTemplate;
+    private int mDuration;
     private boolean mIsNewDevice;
 
-    public GreetingAction(Context context, String words, int template, boolean isNewDevice) {
+    public GreetingAction(Context context, String words, int template, int duration, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         this.mContext = context;
         this.mWords = words;
         this.mTemplate = template;
+        this.mDuration = duration;
         this.mIsNewDevice = isNewDevice;
     }
 
@@ -44,6 +46,7 @@ public class GreetingAction extends ProjectionActionBase implements Serializable
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_RSTR_GREETING);
         data.putSerializable(ScreenProjectionActivity.EXTRA_GREETING_WORD, mWords);
         data.putInt(ScreenProjectionActivity.EXTRA_GREETING_TEMPLATE, mTemplate);
+        data.putInt(ScreenProjectionActivity.EXTRA_GREETING_DURATION, mDuration);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, mIsNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();

@@ -1655,6 +1655,6 @@ public class AppUtils {
     }
 
     public static boolean isMstar() {
-        return Build.MODEL.contains("Mstar");
+        return Build.MODEL.contains("MStar");
     }
 }
