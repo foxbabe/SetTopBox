@@ -216,7 +216,7 @@ public class HandleUSBUpdateService extends Service {
                             play.setDuration(bean.getDuration());
                             play.setMd5(bean.getMd5());
                             play.setVid(bean.getVid());
-                            play.setMedia_name(bean.getName());
+                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
                             play.setMedia_type(bean.getType());
                             play.setOrder(bean.getOrder());
                             play.setSurfix(bean.getSurfix());
@@ -370,8 +370,8 @@ public class HandleUSBUpdateService extends Service {
                             if (new File(usbLogFilePath).exists()){
                                 zipFile.delete();
                                 if (storageFile.equals(AppUtils.StorageFile.log)){
-                                    File logedFile = new File(AppUtils.getFilePath(context, AppUtils.StorageFile.loged));
-                                    file.renameTo(new File(logedFile + file.getName()));
+                                    String logedPath = AppUtils.getFilePath(context, AppUtils.StorageFile.loged);
+                                    file.renameTo(new File(logedPath + file.getName()));
                                 }
                             }
                         }
