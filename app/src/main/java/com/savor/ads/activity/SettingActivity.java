@@ -10,8 +10,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.savor.ads.R;
@@ -19,6 +21,7 @@ import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.customview.IPEditText;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.ShellUtils;
@@ -27,12 +30,18 @@ public class SettingActivity extends BaseActivity {
 
     private ViewGroup mBaseLl;
     private ViewGroup mEditIpLl;
+    private ViewGroup mUseVirtualVp;
+    private RelativeLayout mServerIpRl;
+    private Switch mUseVirtualSwitch;
     private TextView mServerIpTv;
     private IPEditText mIPEditText;
     private Button mConfirmBtn;
 
     private String mServerIp;
     private boolean mIsEditIp;
+    private AlertDialog mModifyIpDialog;
+    private AlertDialog mUseVirtualDialog;
+    private AlertDialog mNotUseVirtualDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,20 +49,41 @@ public class SettingActivity extends BaseActivity {
         setContentView(R.layout.activity_setting);
         mBaseLl = (ViewGroup) findViewById(R.id.ll_base);
         mEditIpLl = (ViewGroup) findViewById(R.id.ll_edit_ip);
+        mUseVirtualVp = (ViewGroup) findViewById(R.id.rl_use_virtual);
+        mServerIpRl = (RelativeLayout) findViewById(R.id.rl_server_ip);
+        mUseVirtualSwitch = (Switch) findViewById(R.id.use_switch);
         mServerIpTv = (TextView) findViewById(R.id.tv_server_ip);
         mIPEditText = (IPEditText) findViewById(R.id.et_ip);
         mConfirmBtn = (Button) findViewById(R.id.btn_ok);
 
-        if (mSession.getServerInfo() != null) {
-            mServerIp = mSession.getServerInfo().getServerIp();
-        }
+        mUseVirtualSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mServerIpRl.setFocusable(false);
+                } else {
+                    mServerIpRl.setFocusable(true);
+                }
+            }
+        });
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        mServerIpTv.setText(mServerIp);
+        if (mSession.isUseVirtualSp()) {
+            mServerIpTv.setText(ConstantValues.VIRTUAL_SP_HOST);
+            mUseVirtualSwitch.setChecked(true);
+            mServerIpRl.setFocusable(false);
+        } else {
+            mUseVirtualSwitch.setChecked(false);
+            if (mSession.getServerInfo() != null) {
+                mServerIp = mSession.getServerInfo().getServerIp();
+            }
+            mServerIpTv.setText(mServerIp);
+            mServerIpRl.setFocusable(true);
+        }
         mBaseLl.requestFocus();
 
         if (!TextUtils.isEmpty(mServerIp)) {
@@ -101,31 +131,27 @@ public class SettingActivity extends BaseActivity {
     public void doModifyIp(View v) {
         final String serverIp = mIPEditText.getText();
 
-        AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
-                .setTitle("提示")
-                .setMessage("修改服务器地址后需要重启系统，是否确定修改？")
-                .setNegativeButton("是", new DialogInterface.OnClickListener() {
+        if (mModifyIpDialog == null) {
+            mModifyIpDialog = new AlertDialog.Builder(SettingActivity.this)
+                    .setTitle("提示")
+                    .setMessage("修改服务器地址后需要重启系统，是否确定修改？")
+                    .setNegativeButton("是", new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (!TextUtils.isEmpty(serverIp)) {
-                            mSession.setServerInfo(new ServerInfo(serverIp.trim(), 3));
-                        } else {
-                            mSession.setServerInfo(null);
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!TextUtils.isEmpty(serverIp)) {
+                                mSession.setServerInfo(new ServerInfo(serverIp.trim(), 3));
+                            } else {
+                                mSession.setServerInfo(null);
+                            }
+
+                            ShellUtils.reboot();
                         }
-
-                        ShellUtils.reboot();
-                    }
-                })
-                .setPositiveButton("否", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .create();
-        dialog.show();
+                    })
+                    .setPositiveButton("否", null)
+                    .create();
+        }
+        mModifyIpDialog.show();
     }
 
     /**
@@ -149,6 +175,57 @@ public class SettingActivity extends BaseActivity {
     public void goSearch(View v) {
         gotoTvSearch();
         finish();
+    }
+
+    /**
+     * @param v
+     */
+    public void switchUseVirtual(View v) {
+        if (mSession.isUseVirtualSp()) {
+            if (mUseVirtualDialog == null) {
+                mUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
+                        .setTitle("提示")
+                        .setMessage("确定使用真实小平台?")
+                        .setNegativeButton("是", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                mSession.setUseVirtualSp(false);
+                                mUseVirtualSwitch.setChecked(false);
+
+                                mSession.setServerInfo(null);
+
+                                ShellUtils.reboot();
+                            }
+                        })
+                        .setPositiveButton("否", null)
+                        .create();
+            }
+            mUseVirtualDialog.show();
+        } else {
+            if (mUseVirtualDialog == null) {
+                mUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
+                        .setTitle("提示")
+                        .setMessage("确定使用虚拟小平台:" + ConstantValues.VIRTUAL_SP_HOST + "?")
+                        .setNegativeButton("是", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                mSession.setUseVirtualSp(true);
+                                mUseVirtualSwitch.setChecked(true);
+
+                                mSession.setServerInfo(new ServerInfo(ConstantValues.VIRTUAL_SP_HOST, 3));
+
+                                ShellUtils.reboot();
+                            }
+                        })
+                        .setPositiveButton("否", null)
+                        .create();
+            }
+            mUseVirtualDialog.show();
+        }
     }
 
     @Override

@@ -108,4 +108,21 @@ public class FileUtils {
         }
         return content;
     }
+
+    public static byte[] readByte(String filePath) {
+        byte[] buffer = null;
+        File file = new File(filePath);
+        if (file.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                int length = fileInputStream.available();
+
+                buffer = new byte[length];
+                fileInputStream.read(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return buffer;
+    }
 }

@@ -55,7 +55,7 @@ public class SavorApplication extends MultiDexApplication {
 
 
     private void startScreenProjectionService() {
-        mConnection = ServiceUtil.registerService(new ProjectOperationListener(this));
+        mConnection = ServiceUtil.registerService(ProjectOperationListener.getInstance(this));
 //        bindService(new Intent(ServiceUtil.ACTION_REMOTE_SERVICE), connection, Service.BIND_AUTO_CREATE);
         bindService(new Intent(this, RemoteService.class), mConnection, Service.BIND_AUTO_CREATE);
     }

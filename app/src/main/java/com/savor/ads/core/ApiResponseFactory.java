@@ -21,10 +21,8 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.savor.ads.bean.OnDemandListBean;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
-import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.UpgradeInfo;
 import com.savor.ads.utils.DesUtils;
@@ -158,17 +156,6 @@ public class ApiResponseFactory {
             return result;
         }
         switch (action) {
-            case SP_GET_PROGRAM_DATA_FROM_JSON:
-                result = gson.fromJson(info, new TypeToken<SetTopBoxBean>() {
-                }.getType());
-                break;
-            case SP_GET_ON_DEMAND_DATA_FROM_JSON:
-                result = gson.fromJson(info, new TypeToken<OnDemandListBean>() {
-                }.getType());
-                break;
-            case SP_POST_UPLOAD_LOG_JSON:
-                result = key;
-                break;
             case SP_GET_UPGRADE_INFO_JSON:
                 result = gson.fromJson(info, new TypeToken<UpgradeInfo>() {
                 }.getType());

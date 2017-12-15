@@ -186,8 +186,14 @@
             android:launchMode="singleTask">
         </activity>
         <activity android:name=".activity.AppBrowserActivity"
-                  android:launchMode="singleTask">
+            android:launchMode="singleTask">
         </activity>
+
+        <service
+            android:name=".service.GreetingService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

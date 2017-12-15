@@ -14,6 +14,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.StatFs;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.view.View;
@@ -153,10 +154,10 @@ public class AppUtils {
          * 抽奖记录
          */
         lottery,
-        /**
-         * 幻灯片所用图片
-         */
+        /**幻灯片所用图片*/
         ppt,
+        /**特色菜目录*/
+        specialty,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -305,6 +306,10 @@ public class AppUtils {
         if (!targetPptFile.exists()) {
             targetPptFile.mkdir();
         }
+        File specialtyFile = new File(path + File.separator, "specialty");
+        if (!specialtyFile.exists()) {
+            specialtyFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -322,6 +327,8 @@ public class AppUtils {
             path = targetLotteryFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.ppt) {
             path = targetPptFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.specialty) {
+            path = specialtyFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
@@ -392,8 +399,8 @@ public class AppUtils {
     }
 
 
-    public static String getMD5Method(File f) {
-        //下面生成图片的md5加密
+    public static String getEasyMd5(File f) {
+        InputStream in = null;
         byte[] frontb = null;
         byte[] backb = null;
         byte[] newb1 = null;
@@ -1498,6 +1505,13 @@ public class AppUtils {
             ssid = Session.get(context).getBoxName();
         }
         return ssid;
+    }
+
+    public static long getAvailableExtSize() {
+        StatFs stat = new StatFs(getSDCardPath());
+        long blockSize = stat.getBlockSize();
+        long blocks = stat.getAvailableBlocks();
+        return blockSize * blocks;
     }
 
     public static String findSpecifiedPeriodByType(ArrayList<VersionInfo> versionList, String type) {
