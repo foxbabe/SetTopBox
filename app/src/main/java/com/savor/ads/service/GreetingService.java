@@ -6,8 +6,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 
+import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
@@ -40,7 +42,9 @@ public class GreetingService extends Service {
             mCount++;
             LogUtils.d("will show greeting in service, current count is " + mCount);
 
-            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) &&
+                    ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity &&
+                    !GlobalValues.IS_BOX_BUSY) {
                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                 GlobalValues.IS_RSTR_PROJECTION = true;
@@ -63,6 +67,11 @@ public class GreetingService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         deviceId = intent.getStringExtra(EXTRA_DEVICE_ID);
         deviceName = intent.getStringExtra(EXTRA_DEVICE_NAME);
@@ -77,14 +86,9 @@ public class GreetingService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        mHandler.removeCallbacks(mRunnable);
-        return super.onUnbind(intent);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
+        mHandler.removeCallbacks(mRunnable);
         LogUtils.d("GreetingService is destroy");
     }
 }
