@@ -40,18 +40,14 @@ public class GreetingService extends Service {
             mCount++;
             LogUtils.d("will show greeting in service, current count is " + mCount);
 
-            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                    GlobalValues.IS_RSTR_PROJECTION) {
-                boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
-
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID)) {
                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                 GlobalValues.IS_RSTR_PROJECTION = true;
                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = "1.1.1.1";
                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                ProjectOperationListener.getInstance(GreetingService.this).showGreeting(words, template, DURATION, isNewDevice);
+                ProjectOperationListener.getInstance(GreetingService.this).showGreeting(words, template, DURATION, false);
             }
 
             if (mCount >= MAX_COUNT) {
