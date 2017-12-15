@@ -26,10 +26,8 @@ import com.savor.ads.service.HandleUSBUpdateService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -87,18 +85,18 @@ public abstract class BaseActivity extends Activity {
      */
     public void registerListener() {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
-        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         intentFilter.addDataScheme("file");
 
@@ -108,43 +106,36 @@ public abstract class BaseActivity extends Activity {
     private BroadcastReceiver recevierListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LogUtils.e("BroadcastReceiver: " + intent.getAction());
-            String usbPath = intent.getDataString().split("file://")[1];
-            String usbPath1 = intent.getData().getPath();
-            if (intent.getAction().equals("android.intent.action.MEDIA_MOUNTED") && usbPath.contains("usb")) {//U盘插入
-                 String pathString = usbPath.split("file://")[1];
-                mSession.setUsbPath(pathString);
-                insertUSB(pathString);
-            } else if (intent.getAction().equals("android.intent.action.MEDIA_REMOVED") && usbPath.contains("usb")) {
-                //U盘拔出
-                removeUSB(usbPath.split("file://")[1]);
+            LogUtils.d("BroadcastReceiver: " + intent.getAction());
+            if (intent.getAction() == null) {
+                return;
             }
 
-            String action = intent.getAction();
             String path = intent.getData().getPath();
-            if (action.equals(UsbManager.ACTION_USB_ACCESSORY_ATTACHED)
-                    ||action.equals(UsbManager.ACTION_USB_ACCESSORY_DETACHED)){
-
-            }
-            if (action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-                    ||action.equals(UsbManager.ACTION_USB_DEVICE_DETACHED)){
-
-            }
-            if (Intent.ACTION_MEDIA_REMOVED.equals(action)
-                    || Intent.ACTION_MEDIA_UNMOUNTED.equals(action)
-                    || Intent.ACTION_MEDIA_BAD_REMOVAL.equals(action)) {
-                if (path.contains("/mnt/extsd")) {//sd 卡拔除
-                    handleSDCardRemoved();
-                }
-            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                if (path.contains("/mnt/extsd")) {
-                    handleMediaMounted();
-                }
+            String usbPath = intent.getDataString().split("file://")[1];
+            switch (intent.getAction()) {
+                case Intent.ACTION_MEDIA_MOUNTED:
+                    if (path.contains("/mnt/extsd")) {
+                        handleExtsdMounted();
+                    } else if (path.contains("usb")) {
+                        handleUdiskMounted(path);
+                    }
+                    break;
+                case Intent.ACTION_MEDIA_UNMOUNTED:
+                case Intent.ACTION_MEDIA_REMOVED:
+                case Intent.ACTION_MEDIA_BAD_REMOVAL:
+                    if (path.contains("/mnt/extsd")) {//sd 卡拔除
+                        handleExtsdRemoved();
+                    } else if (path.contains("usb")) {
+                        //U盘拔出
+                        handleUdiskRemoved(path);
+                    }
+                    break;
             }
         }
     };
 
-    private void handleMediaMounted() {
+    private void handleExtsdMounted() {
         TechnicalLogReporter.sdcardMounted(this);
         checkAndClearCache();
 
@@ -345,26 +336,11 @@ public abstract class BaseActivity extends Activity {
      *
      * @param pathString
      */
-    private void insertUSB(String pathString) {
+    private void handleUdiskMounted(String pathString) {
         ShowMessage.showToast(mContext, "U盘已插入，正在读取...");
-        mSession.setBoiteId("84");
-        mSession.setUsbPath(pathString);
-        mSession.setStandalone(true);
-        String cfgPath = pathString + File.separator
-                + ConstantValues.USB_FILE_HOTEL_PATH + File.separator
-                + mSession.getBoiteId() + File.separator
-                + ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
-
-        File cfgFile = new File(cfgPath);
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
-        //指定存放图片的文件夹不存在的情况
-        if (!TextUtils.isEmpty(mSession.getBoiteId())&&cfgFile.exists()){
-            Intent intent = new Intent(this,HandleUSBUpdateService.class);
-            intent.putExtra("cfgFile",cfgFile);
-            startService(intent);
-            return;
-        }else if (!file.exists()) {
+        if (!file.exists()) {
             ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
             return;
         }
@@ -407,7 +383,7 @@ public abstract class BaseActivity extends Activity {
     /**
      * USB拔出
      */
-    private void removeUSB(String pathString) {
+    private void handleUdiskRemoved(String pathString) {
         ShowMessage.showToast(mContext, "U盘已拔出");
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         if (this instanceof UsbImageViewerActivity && imagesPath.equals(((UsbImageViewerActivity) this).getCurrentUsbPath())) {
@@ -416,7 +392,7 @@ public abstract class BaseActivity extends Activity {
     }
 
 
-    private void handleSDCardRemoved() {
+    private void handleExtsdRemoved() {
         TechnicalLogReporter.sdcardRemoved(this);
         //SD移除时跳到TV页
         if (this instanceof AdsPlayerActivity) {
@@ -433,26 +409,26 @@ public abstract class BaseActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
          boolean handled = false;
-        switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
-            case KeyCodeConstantGiec.KEY_CODE_SYSTEM_SETTING:
-                LogFileUtil.write("will gotoSystemSetting");
-                gotoSystemSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_SETTING:
-            case KeyCodeConstantGiec.KEY_CODE_SETTING:
-                gotoSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
-            case KeyCodeConstantGiec.KEY_CODE_MANUAL_HEARTBEAT:
-                manualHeartbeat();
-                handled = true;
-                break;
-            case 2009:
-                insertUSB(usbPath0);
-                break;
+        if (keyCode == KeyCode.KEY_CODE_SYSTEM_SETTING) {
+            LogFileUtil.write("will gotoSystemSetting");
+            gotoSystemSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SETTING) {
+            gotoSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_MANUAL_HEARTBEAT) {
+            manualHeartbeat();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_APP_INSTALLED) {
+            gotoAppBrowser();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_UDISK_UPDATE) {
+            handleUsbUpdate();
+            handled = true;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -466,6 +442,29 @@ public abstract class BaseActivity extends Activity {
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
         startActivity(intent);
+    }
+
+    private void gotoAppBrowser() {
+        Intent intent = new Intent(this, AppBrowserActivity.class);
+        startActivity(intent);
+    }
+
+    private void handleUsbUpdate() {
+        mSession.setBoiteId("84");
+        mSession.setUsbPath(usbPath0);
+        mSession.setStandalone(true);
+        String cfgPath = usbPath0 + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
+
+        File cfgFile = new File(cfgPath);
+        //指定存放图片的文件夹不存在的情况
+        if (!TextUtils.isEmpty(mSession.getBoiteId()) && cfgFile.exists()) {
+            Intent intent = new Intent(this, HandleUSBUpdateService.class);
+            intent.putExtra("cfgFile", cfgFile);
+            startService(intent);
+        }
     }
 
     private void manualHeartbeat() {

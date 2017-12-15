@@ -11,8 +11,13 @@
 package cn.savor.small.netty;
 
 
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.SQLException;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.widget.TextView;
 
@@ -29,6 +34,7 @@ import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
+import com.savor.ads.service.GreetingService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
@@ -235,7 +241,19 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 resp.setInfo("投屏成功");
 
-                ProjectOperationListener.getInstance(mContext).showGreeting(words, template, isNewDevice);
+                ProjectOperationListener.getInstance(mContext).showGreeting(words, template, 1000 * 60 * 2, isNewDevice);
+
+                Intent intent = new Intent(mContext, GreetingService.class);
+                intent.putExtra(GreetingService.EXTRA_DEVICE_ID, deviceId);
+                intent.putExtra(GreetingService.EXTRA_DEVICE_NAME, deviceName);
+                intent.putExtra(GreetingService.EXTRA_WORDS, words);
+                intent.putExtra(GreetingService.EXTRA_TEMPLATE, template);
+                try {
+                    mContext.unbindService(connection);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                mContext.bindService(intent, connection, Service.BIND_AUTO_CREATE);
             } else {
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 if (GlobalValues.IS_LOTTERY) {
@@ -250,6 +268,18 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             e.printStackTrace();
         }
     }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private void handleAdv(String json, MessageBean response) {
         try {

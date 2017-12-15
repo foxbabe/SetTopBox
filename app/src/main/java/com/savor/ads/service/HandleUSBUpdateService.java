@@ -29,8 +29,12 @@ import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.tv.TvOperate;
+import com.savor.tvlibrary.AtvChannel;
+import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,17 +124,61 @@ public class HandleUSBUpdateService extends Service {
     }
 
     private void readChannelList() {
-        if (AppUtils.isMstar()) {
-            AtvProgramInfo[] programs = new TvOperate().getAllProgramInfo();
-            // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
-            if (programs != null && programs.length > 0) {
-                for (AtvProgramInfo program : programs) {
-                    program.setChennalNum(program.getChennalNum() + 1);
+        LogUtils.d("start readChannelList");
+        try {
+            if (AppUtils.isMstar()) {
+                File csvFile = new File("/mnt/usb/sda4/savor/" + session.getBoiteId() + File.separator + ConstantValues.USB_FILE_CHANNEL_EDIT_DATA);
+                if (csvFile.exists()) {
+                    csvFile.delete();
                 }
-            }
+                FileWriter fileWriter = new FileWriter(csvFile, true);
+                AtvProgramInfo[] programs = new TvOperate().getAllProgramInfo();
+                // 服务器改成返回ChennalNum从1开始，这里统一加1后再上传
+                if (programs != null) {
+                    LogUtils.d("Got channels count " + programs.length);
+                    for (int i = 0; i < programs.length; i++) {
+                        AtvProgramInfo program = programs[i];
+                        program.setChennalNum(program.getChennalNum() + 1);
 
-            String channelJson = new Gson().toJson(programs);
-//            FileUtils.write("", channelJson);
+                        fileWriter.write(program.getChennalNum() + "," + program.getChannelName() + "," + program.getChennalNum());
+                        fileWriter.flush();
+                        if (i < programs.length - 1) {
+                            fileWriter.write("\r\n");
+                            fileWriter.flush();
+                        }
+                    }
+                }
+                fileWriter.close();
+
+                String channelJson = new Gson().toJson(programs);
+                FileUtils.write("/storage/udisk0/" + ConstantValues.USB_FILE_CHANNEL_RAW_DATA, channelJson);
+            } else {
+                File csvFile = new File("/storage/udisk0/"+ ConstantValues.USB_FILE_CHANNEL_EDIT_DATA);
+                if (csvFile.exists()) {
+                    csvFile.delete();
+                }
+                FileWriter fileWriter = new FileWriter(csvFile, true);
+                ArrayList<AtvChannel> programs = TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC).getSysChannels();
+                if (programs != null) {
+                    LogUtils.d("Got channels count " + programs.size());
+                    for (int i = 0; i < programs.size(); i++) {
+                        AtvChannel program = programs.get(i);
+
+                        fileWriter.write(program.getChannelNum() + "," + program.getChannelName() + "," + program.getChannelNum());
+                        fileWriter.flush();
+                        if (i < programs.size() - 1) {
+                            fileWriter.write("\r\n");
+                            fileWriter.flush();
+                        }
+                    }
+                }
+                fileWriter.close();
+
+                String channelJson = new Gson().toJson(programs);
+                FileUtils.write("/storage/udisk0/" + ConstantValues.USB_FILE_CHANNEL_RAW_DATA, channelJson);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -113,13 +113,12 @@ public class TvDBHelper extends SQLiteOpenHelper {
     }
 
     ArrayList<AtvChannel> getSysChannels() {
-        ArrayList<AtvChannel> channels = null;
+        ArrayList<AtvChannel> channels = new ArrayList<>();
         Cursor cursor = null;
         SQLiteDatabase db = getReadableDatabase();
         try {
             cursor = mContext.getContentResolver().query(TvContract.Channels.CONTENT_URI, null, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
-                channels = new ArrayList<>();
                 int i = 0;
                 do {
                     AtvChannel bean = new AtvChannel();

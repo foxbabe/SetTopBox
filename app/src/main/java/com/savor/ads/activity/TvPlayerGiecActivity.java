@@ -22,8 +22,7 @@ import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.AtvChannel;
@@ -430,78 +429,72 @@ public class TvPlayerGiecActivity extends BaseActivity {
             return true;
 
         boolean handled = false;
-        switch (keyCode) {
-            // 呼出二维码
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow(null);
-                handled = true;
-                break;
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_INFO:
-                // 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
-                showBoxInfo();
-                handled = true;
-                break;
+        if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
+            ((SavorApplication) getApplication()).showQrCodeWindow(null);
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_INFO) {// 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
+            showBoxInfo();
+            handled = true;
+
             // 切换信号源
-            case KeyCodeConstantGiec.KEY_CODE_CHANGE_SIGNAL:
-                switchInputSource();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_CHANGE_SIGNAL) {
+            switchInputSource();
+            handled = true;
+
             // 切换到广告模式
-            case KeyCodeConstantGiec.KEY_CODE_CHANGE_MODE:
-                gotoAdsPlayer();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_CHANGE_MODE) {
+            gotoAdsPlayer();
+            handled = true;
+
             //切换到电视TV输入源
-            case KeyEvent.KEYCODE_PROG_GREEN:
-                switchInputSource(0);
-                handled = true;
-                break;
+        } else if (keyCode == KeyEvent.KEYCODE_PROG_GREEN) {
+            switchInputSource(0);
+            handled = true;
+
             //切换到HDMI输入源
-            case KeyEvent.KEYCODE_PROG_YELLOW:
-                switchInputSource(1);
-                handled = true;
-                break;
+        } else if (keyCode == KeyEvent.KEYCODE_PROG_YELLOW) {
+            switchInputSource(1);
+            handled = true;
+
             //切换到AV输入源
-            case KeyEvent.KEYCODE_PROG_BLUE:
-                switchInputSource(2);
-                handled = true;
-                break;
+        } else if (keyCode == KeyEvent.KEYCODE_PROG_BLUE) {
+            switchInputSource(2);
+            handled = true;
+
             // 上传频道列表
-            case KeyCodeConstant.KEY_CODE_UPLOAD_CHANNEL_INFO:
-            case KeyCodeConstantGiec.KEY_CODE_UPLOAD_CHANNEL_INFO:
-                if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
-                    uploadProgram();
-                    handled = true;
-                }
-                break;
-            // 上一台
-            case KeyEvent.KEYCODE_DPAD_UP:
-                if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
-                    mCurrentProgramIndex = (mCurrentProgramIndex - 1 + mChannelList.size()) % mChannelList.size();
-                    changeChannel(mChannelList.get(mCurrentProgramIndex));
-                    handled = true;
-                }
-                break;
-            // 下一台
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
-                    mCurrentProgramIndex = (mCurrentProgramIndex + 1) % mChannelList.size();
-                    changeChannel(mChannelList.get(mCurrentProgramIndex));
-                    handled = true;
-                }
-                break;
-            // 频道列表
-            case KeyCodeConstant.KEY_CODE_CHANNEL_LIST:
-            case KeyCodeConstantGiec.KEY_CODE_CHANNEL_LIST:
-                if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
-                    showChannelListDialog();
-                    handled = true;
-                }
-                break;
-            case KeyEvent.KEYCODE_BACK:
-                // 屏蔽后退
+        } else if (keyCode == KeyCode.KEY_CODE_UPLOAD_CHANNEL_INFO) {
+            if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
+                uploadProgram();
                 handled = true;
-                break;
+            }
+
+            // 上一台
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
+                mCurrentProgramIndex = (mCurrentProgramIndex - 1 + mChannelList.size()) % mChannelList.size();
+                changeChannel(mChannelList.get(mCurrentProgramIndex));
+                handled = true;
+            }
+
+            // 下一台
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
+                mCurrentProgramIndex = (mCurrentProgramIndex + 1) % mChannelList.size();
+                changeChannel(mChannelList.get(mCurrentProgramIndex));
+                handled = true;
+            }
+
+            // 频道列表
+        } else if (keyCode == KeyCode.KEY_CODE_CHANNEL_LIST) {
+            if (mSession.getTvInputSource() == 0 && mChannelList != null && mChannelList.size() > 0) {
+                showChannelListDialog();
+                handled = true;
+            }
+
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {// 屏蔽后退
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
     }

@@ -275,7 +275,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getSDCardPath();
+        String path = getExternalSDCardPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {
@@ -1655,6 +1655,6 @@ public class AppUtils {
     }
 
     public static boolean isMstar() {
-        return Build.MODEL.contains("Mstar");
+        return Build.MODEL.contains("MStar");
     }
 }

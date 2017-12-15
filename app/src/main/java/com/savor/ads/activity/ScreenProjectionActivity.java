@@ -39,8 +39,7 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -65,6 +64,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_SPECIALTY_INTERVAL = "extra_specialty_interval";
     public static final String EXTRA_GREETING_WORD = "extra_greeting_word";
     public static final String EXTRA_GREETING_TEMPLATE = "extra_greeting_template";
+    public static final String EXTRA_GREETING_DURATION = "extra_greeting_duration";
     public static final String EXTRA_ADV_LIST = "extra_adv_list";
     public static final String EXTRA_IS_NEW_DEVICE = "extra_is_new_device";
 
@@ -236,6 +236,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private int mSpecialtyInterval;
     private String mGreetingWords;
     private int mGreetingTemplate;
+    private int mGreetingDuration;
     private ArrayList<String> mAdvFileList;
     private int[] mPptImgStates;
 
@@ -331,6 +332,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSpecialtyInterval = bundle.getInt(EXTRA_SPECIALTY_INTERVAL);
         mGreetingWords = bundle.getString(EXTRA_GREETING_WORD);
         mGreetingTemplate = bundle.getInt(EXTRA_GREETING_TEMPLATE);
+        mGreetingDuration = bundle.getInt(EXTRA_GREETING_DURATION);
         mAdvFileList = (ArrayList<String>) bundle.getSerializable(EXTRA_ADV_LIST);
         mProjectAction = (ProjectionActionBase) bundle.getSerializable(EXTRA_PROJECT_ACTION);
         if (mProjectAction != null) {
@@ -548,7 +550,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setBackgroundResource(bgResId);
             mGreetingTv.setText(mGreetingWords);
 
-            mHandler.postDelayed(mExitProjectionRunnable, 60000 * 2);
+            mHandler.postDelayed(mExitProjectionRunnable, mGreetingDuration);
         } else if (ConstantValues.PROJECT_TYPE_RSTR_ADV.equals(mProjectType)) {
             // 餐厅端点播宣传片
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -975,19 +977,17 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                AppApi.notifyStop(this, this, 2, "");
-                resetGlobalFlag();
-                exitProjection();
-                handled = true;
-                break;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            AppApi.notifyStop(this, this, 2, "");
+            resetGlobalFlag();
+            exitProjection();
+            handled = true;
+
             // 呼出二维码
-            case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow(null);
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
+            ((SavorApplication) getApplication()).showQrCodeWindow(null);
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
     }
