@@ -11,8 +11,7 @@ import android.widget.GridView;
 import com.savor.ads.R;
 import com.savor.ads.adapter.AppBrowserAdapter;
 import com.savor.ads.bean.AppBean;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -77,10 +76,9 @@ public class AppBrowserActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_APP_INSTALLED:
-                handled = true;
-                break;
+        if (keyCode == KeyCode.KEY_CODE_SHOW_APP_INSTALLED) {
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
     }

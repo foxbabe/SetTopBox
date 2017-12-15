@@ -29,8 +29,7 @@ import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TimeCalibrateHelper;
@@ -291,13 +290,11 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_SHOW_INFO:
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_INFO:
-                showBoxInfo();
-                return true;
-            case KeyEvent.KEYCODE_BACK:
-                return true;
+        if (keyCode == KeyCode.KEY_CODE_SHOW_INFO) {
+            showBoxInfo();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

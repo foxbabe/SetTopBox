@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.savor.ads.R;
 import com.savor.ads.utils.DensityUtil;
-import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCode;
 
 /**
  * Created by zhanghq on 2016/12/12.
@@ -56,11 +56,10 @@ public class TvChannelSearchingDialog extends Dialog {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_BACK:
-                dismiss();
-                handled = true;
-                break;
+        if (keyCode == KeyCode.KEY_CODE_BACK) {
+            dismiss();
+            handled = true;
+
         }
         if (getContext() instanceof Activity) {
             return handled || ((Activity) getContext()).onKeyDown(keyCode, event);

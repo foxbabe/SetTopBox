@@ -39,8 +39,7 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -978,19 +977,17 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                AppApi.notifyStop(this, this, 2, "");
-                resetGlobalFlag();
-                exitProjection();
-                handled = true;
-                break;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            AppApi.notifyStop(this, this, 2, "");
+            resetGlobalFlag();
+            exitProjection();
+            handled = true;
+
             // 呼出二维码
-            case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-            case KeyCodeConstantGiec.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow(null);
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
+            ((SavorApplication) getApplication()).showQrCodeWindow(null);
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
     }

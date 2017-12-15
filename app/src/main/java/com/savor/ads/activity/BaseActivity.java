@@ -27,8 +27,7 @@ import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
-import com.savor.ads.utils.KeyCodeConstantGiec;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -86,18 +85,18 @@ public abstract class BaseActivity extends Activity {
      */
     public void registerListener() {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
-        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         intentFilter.addDataScheme("file");
 
@@ -119,9 +118,7 @@ public abstract class BaseActivity extends Activity {
                     if (path.contains("/mnt/extsd")) {
                         handleExtsdMounted();
                     } else if (path.contains("usb")) {
-                        String pathString = usbPath.split("file://")[1];
-                        mSession.setUsbPath(pathString);
-                        handleUdiskMounted(pathString);
+                        handleUdiskMounted(path);
                     }
                     break;
                 case Intent.ACTION_MEDIA_UNMOUNTED:
@@ -131,7 +128,7 @@ public abstract class BaseActivity extends Activity {
                         handleExtsdRemoved();
                     } else if (path.contains("usb")) {
                         //U盘拔出
-                        handleUdiskRemoved(usbPath.split("file://")[1]);
+                        handleUdiskRemoved(path);
                     }
                     break;
             }
@@ -412,26 +409,26 @@ public abstract class BaseActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
          boolean handled = false;
-        switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
-            case KeyCodeConstantGiec.KEY_CODE_SYSTEM_SETTING:
-                LogFileUtil.write("will gotoSystemSetting");
-                gotoSystemSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_SETTING:
-            case KeyCodeConstantGiec.KEY_CODE_SETTING:
-                gotoSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
-            case KeyCodeConstantGiec.KEY_CODE_MANUAL_HEARTBEAT:
-                manualHeartbeat();
-                handled = true;
-                break;
-            case 2009:
-                handleUsbUpdate();
-                break;
+        if (keyCode == KeyCode.KEY_CODE_SYSTEM_SETTING) {
+            LogFileUtil.write("will gotoSystemSetting");
+            gotoSystemSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SETTING) {
+            gotoSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_MANUAL_HEARTBEAT) {
+            manualHeartbeat();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_APP_INSTALLED) {
+            gotoAppBrowser();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_UDISK_UPDATE) {
+            handleUsbUpdate();
+            handled = true;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -444,6 +441,11 @@ public abstract class BaseActivity extends Activity {
 
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    private void gotoAppBrowser() {
+        Intent intent = new Intent(this, AppBrowserActivity.class);
         startActivity(intent);
     }
 
