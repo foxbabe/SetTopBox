@@ -65,7 +65,7 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
+    android.applicationVariants.all { variant ->
 //        variant.outputs.each { output ->
 //            def outputFile = output.outputFile
 //            if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
@@ -82,6 +82,7 @@ android {
             }
         }
     }
+    buildToolsVersion '26.0.2'
 }
 
 dependencies {
