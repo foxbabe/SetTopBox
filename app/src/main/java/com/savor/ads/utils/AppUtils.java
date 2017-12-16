@@ -14,6 +14,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.StatFs;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.view.View;
@@ -158,6 +159,8 @@ public class AppUtils {
         face,
         /**幻灯片所用图片*/
         ppt,
+        /**特色菜目录*/
+        specialty,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -297,6 +300,10 @@ public class AppUtils {
         if (!targetPptFile.exists()) {
             targetPptFile.mkdir();
         }
+        File specialtyFile = new File(path + File.separator, "specialty");
+        if (!specialtyFile.exists()) {
+            specialtyFile.mkdir();
+        }
         File targetFaceFile = new File(path + File.separator, "face");
         if (!targetFaceFile.exists()) {
             targetFaceFile.mkdir();
@@ -318,6 +325,8 @@ public class AppUtils {
             path = targetLotteryFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.ppt) {
             path = targetPptFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.specialty) {
+            path = specialtyFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.face) {
             path = targetFaceFile.getAbsolutePath() + File.separator;
         }
@@ -390,9 +399,7 @@ public class AppUtils {
     }
 
 
-    public static String getMD5Method(File f) {
-        //下面生成图片的md5加密
-//        StringBuilder allTex = new StringBuilder();
+    public static String getEasyMd5(File f) {
         InputStream in = null;
         byte[] frontb = null;
         byte[] backb = null;
@@ -1050,60 +1057,60 @@ public class AppUtils {
     }
 
 
-    /**
-     * 获取当前系统日期时间
-     *
-     * @param format "all"获取年月日加时间
-     *               "date"只获取当前年月日
-     *               "time"只获取当前时间
-     * @return
-     */
-    public static String getTime(String format) {
-        Time t = new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
-        t.setToNow(); // 取得系统时间。
-        String monthM = "";
-        String monthDayM = "";
-        String hourM = "";
-        String minuteM = "";
-        if (t.month + 1 < 10) {
-            monthM = "0" + (t.month + 1);
-        } else
-            monthM = "" + (t.month + 1);
-        if (t.monthDay < 10) {
-            monthDayM = "0" + t.monthDay;
-        } else
-            monthDayM = "" + t.monthDay;
-        if (t.hour < 10) {
-            hourM = "0" + t.hour;
-        } else {
-            hourM = "" + t.hour;
-        }
-
-        if (t.minute < 10) {
-            minuteM = "0" + t.minute;
-        } else {
-            minuteM = "" + t.minute;
-        }
-        String time = null;
-        switch (format) {
-            case "all":
-                time = "" + t.year + monthM + monthDayM + hourM + minuteM;
-                break;
-            case "date":
-                time = "" + t.year + monthM + monthDayM;
-                break;
-            case "hour":
-                time = "" + t.year + monthM + monthDayM + hourM;
-                break;
-            case "time":
-                time = "" + hourM + minuteM;
-                break;
-            case "month":
-                time = "" + t.year + monthM;
-                break;
-        }
-        return time;
-    }
+//    /**
+//     * 获取当前系统日期时间
+//     *
+//     * @param format "all"获取年月日加时间
+//     *               "date"只获取当前年月日
+//     *               "time"只获取当前时间
+//     * @return
+//     */
+//    public static String getTime(String format) {
+//        Time t = new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
+//        t.setToNow(); // 取得系统时间。
+//        String monthM = "";
+//        String monthDayM = "";
+//        String hourM = "";
+//        String minuteM = "";
+//        if (t.month + 1 < 10) {
+//            monthM = "0" + (t.month + 1);
+//        } else
+//            monthM = "" + (t.month + 1);
+//        if (t.monthDay < 10) {
+//            monthDayM = "0" + t.monthDay;
+//        } else
+//            monthDayM = "" + t.monthDay;
+//        if (t.hour < 10) {
+//            hourM = "0" + t.hour;
+//        } else {
+//            hourM = "" + t.hour;
+//        }
+//
+//        if (t.minute < 10) {
+//            minuteM = "0" + t.minute;
+//        } else {
+//            minuteM = "" + t.minute;
+//        }
+//        String time = null;
+//        switch (format) {
+//            case "all":
+//                time = "" + t.year + monthM + monthDayM + hourM + minuteM;
+//                break;
+//            case "hour":
+//                time = "" + t.year + monthM + monthDayM + hourM;
+//                break;
+//            case "date":
+//                time = "" + t.year + monthM + monthDayM;
+//                break;
+//            case "month":
+//                time = "" + t.year + monthM;
+//                break;
+//            case "time":
+//                time = "" + hourM + minuteM;
+//                break;
+//        }
+//        return time;
+//    }
 
     /**
      * wifi IP
@@ -1594,7 +1601,7 @@ public class AppUtils {
     public static boolean checkPlayTime(Context context) {
         boolean canPlayNext = false;
         Session session = Session.get(context);
-        String pubTime = session.getNextAdvertMediaPubTime();
+        String pubTime = session.getProNextMediaPubTime();
         if (!TextUtils.isEmpty(pubTime)) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
@@ -1603,9 +1610,14 @@ public class AppUtils {
                     LogUtils.d("checkPlayTime 已到达发布时间，将更新期号");
                     LogFileUtil.write("checkPlayTime 已到达发布时间，将更新期号");
                     canPlayNext = true;
-                    session.setPlayListVersion(session.getNextPlayListVersion());
-                    session.setNextPlayListVersion(null);
-                    session.setNextAdvertMediaPubTime(null);
+
+
+                    session.setProPeriod(session.getProNextPeriod());
+                    session.setProNextPeriod(null);
+                    session.setProNextMediaPubTime(null);
+
+                    session.setAdvPeriod(session.getAdvNextPeriod());
+                    session.setAdvNextPeriod(null);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -1623,11 +1635,17 @@ public class AppUtils {
         return ssid;
     }
 
+    public static long getAvailableExtSize() {
+        StatFs stat = new StatFs(getExternalSDCardPath());
+        long blockSize = stat.getBlockSize();
+        long blocks = stat.getAvailableBlocks();
+        return blockSize * blocks;
+    }
+
     public static String findSpecifiedPeriodByType(ArrayList<VersionInfo> versionList, String type) {
         String period = "";
         if (versionList != null && type != null) {
-            for (VersionInfo versionInfo :
-                    versionList) {
+            for (VersionInfo versionInfo : versionList) {
                 if (type.equals(versionInfo.getType())) {
                     period = versionInfo.getVersion();
                     break;

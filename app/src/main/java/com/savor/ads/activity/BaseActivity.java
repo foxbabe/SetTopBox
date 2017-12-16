@@ -15,6 +15,9 @@ import android.view.KeyEvent;
 
 import com.mstar.tv.service.skin.AudioSkin;
 import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
+import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
@@ -30,7 +33,11 @@ import com.savor.ads.utils.TechnicalLogReporter;
 import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -145,7 +152,7 @@ public abstract class BaseActivity extends Activity {
         }
     }
 
-    protected void fillPlayList() {
+    public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
         if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
@@ -154,14 +161,66 @@ public abstract class BaseActivity extends Activity {
             if (playList != null && !playList.isEmpty()) {
                 for (int i = 0; i < playList.size(); i++) {
                     PlayListBean bean = playList.get(i);
+
+                    // 特殊处理ads数据
+                    if (bean.getMedia_type().equals(ConstantValues.ADS)) {
+                        String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
+                                + "=? ";
+                        String[] selectionArgs = new String[]{bean.getLocation_id()};
+                        List<PlayListBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
+                        if (list != null && !list.isEmpty()) {
+                            for (PlayListBean item :
+                                    list) {
+                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                Date startDate = null;
+                                Date endDate = null;
+                                try {
+                                    startDate = format.parse(item.getStart_date());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                try {
+                                    endDate = format.parse(item.getEnd_date());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Date now = new Date();
+                                if (startDate != null && endDate != null &&
+                                        now.after(startDate) && now.before(endDate)) {
+                                    bean.setVid(item.getVid());
+                                    bean.setDuration(item.getDuration());
+                                    bean.setMd5(item.getMd5());
+                                    bean.setMedia_name(item.getMedia_name());
+                                    bean.setMediaPath(item.getMediaPath());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     File mediaFile = new File(bean.getMediaPath());
-                    if (TextUtils.isEmpty(bean.getMd5()) ||
-                            TextUtils.isEmpty(bean.getMediaPath()) ||
-                            !mediaFile.exists() ||
-                            !bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
-                        LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
-                        // 媒体文件校验失败时删除
-                        playList.remove(i);
+                    boolean fileCheck = false;
+                    if (!TextUtils.isEmpty(bean.getMd5()) &&
+                            !TextUtils.isEmpty(bean.getMediaPath()) &&
+                            mediaFile.exists()) {
+                        if (!bean.getMd5().equals(AppUtils.getEasyMd5(mediaFile))) {
+                            fileCheck = true;
+
+                            TechnicalLogReporter.md5Failed(this, bean.getVid());
+                        }
+                    } else {
+                        fileCheck = true;
+                    }
+
+                    if (fileCheck) {
+                        if (!TextUtils.isEmpty(bean.getVid())) {
+                            LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                        }
+                        // 校验失败时将文件路径置空，下面会删除掉为空的项
+                        bean.setMediaPath(null);
+                        if (mediaFile.exists()) {
+                            mediaFile.delete();
+                        }
 
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
@@ -173,12 +232,6 @@ public abstract class BaseActivity extends Activity {
                                         DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
                                 new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
-
-                        if (mediaFile.exists()) {
-                            mediaFile.delete();
-                        }
-
-                        TechnicalLogReporter.md5Failed(this, bean.getVid());
                     }
                 }
 
@@ -186,7 +239,13 @@ public abstract class BaseActivity extends Activity {
             }
 
             if (playList != null && !playList.isEmpty()) {
-                GlobalValues.PLAY_LIST = playList;
+                ArrayList<PlayListBean> list = new ArrayList<>();
+                for (PlayListBean bean : playList) {
+                    if (!TextUtils.isEmpty(bean.getMediaPath())) {
+                        list.add(bean);
+                    }
+                }
+                GlobalValues.PLAY_LIST = list;
             } else {
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {
@@ -205,7 +264,7 @@ public abstract class BaseActivity extends Activity {
                 }
             }
         } else {
-            LogFileUtil.writeApInfo("跳转轮播，未找到SD卡！");
+            LogFileUtil.writeKeyLogInfo("跳转轮播，未找到SD卡！");
             ShowMessage.showToast(mContext, "未发现SD卡");
         }
     }
@@ -347,6 +406,10 @@ public abstract class BaseActivity extends Activity {
                 gotoSetting();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
+                manualHeartbeat();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -360,6 +423,31 @@ public abstract class BaseActivity extends Activity {
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
         startActivity(intent);
+    }
+
+    private void manualHeartbeat() {
+        ShowMessage.showToast(this, "开始上报心跳");
+        AppApi.heartbeat(this, new ApiRequestListener() {
+            @Override
+            public void onSuccess(AppApi.Action method, Object obj) {
+                ShowMessage.showToast(mContext, "上报心跳成功");
+            }
+
+            @Override
+            public void onError(AppApi.Action method, Object obj) {
+                String msg = "";
+                if (obj instanceof ResponseErrorMessage) {
+                    ResponseErrorMessage errorMessage = (ResponseErrorMessage) obj;
+                    msg = errorMessage.getMessage();
+                }
+                ShowMessage.showToast(mContext, "上报心跳失败 " + msg);
+            }
+
+            @Override
+            public void onNetworkFailed(AppApi.Action method) {
+                ShowMessage.showToast(mContext, "上报心跳失败，网络异常");
+            }
+        });
     }
 
     protected void setVolume(int volume) {

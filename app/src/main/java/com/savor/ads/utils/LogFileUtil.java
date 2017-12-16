@@ -16,18 +16,18 @@ public class LogFileUtil {
 
     private static final String LOG_FILE_NAME = "savor_log.txt";
     private static final String EXCEPTION_FILE_NAME = "savor_exception.txt";
-    private static final String AP_FILE_NAME = "savor_ap.txt";
+    private static final String KEY_LOG_FILE_NAME = "savor_key_log.txt";
     private static final String BOOT_DIR_NAME = "savor_boot";
     private static final int BOOT_LOG_MAX_LENGTH = 1024 * 1024 * 2;
     private static String mLogFilePath;
     private static String mExceptionFilePath;
-    private static String mApFilePath;
+    private static String mKeyLogFilePath;
     private static String mBootDirPath;
 
     public static void init() {
         mLogFilePath = AppUtils.getSDCardPath() + File.separator + LOG_FILE_NAME;
         mExceptionFilePath = AppUtils.getSDCardPath() + File.separator + EXCEPTION_FILE_NAME;
-        mApFilePath = AppUtils.getSDCardPath() + File.separator + AP_FILE_NAME;
+        mKeyLogFilePath = AppUtils.getSDCardPath() + File.separator + KEY_LOG_FILE_NAME;
         mBootDirPath = AppUtils.getSDCardPath() + File.separator + BOOT_DIR_NAME;
         File file = new File(mLogFilePath);
         if (file.exists()) {
@@ -48,7 +48,7 @@ public class LogFileUtil {
             }
         }
 
-        File apFile = new File(mApFilePath);
+        File apFile = new File(mKeyLogFilePath);
         if (!apFile.exists()) {
             try {
                 apFile.createNewFile();
@@ -116,10 +116,10 @@ public class LogFileUtil {
         }
     }
 
-    public static void writeApInfo(String msg) {
+    public static void writeKeyLogInfo(String msg) {
         FileWriter fileWriter = null;
         try {
-            fileWriter = new FileWriter(mApFilePath, true);
+            fileWriter = new FileWriter(mKeyLogFilePath, true);
         } catch (IOException e) {
             e.printStackTrace();
         }

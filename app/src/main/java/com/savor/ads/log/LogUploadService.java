@@ -119,7 +119,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile()) {
 
-                    if (name.contains(AppUtils.getTime("date"))) {
+                    if (name.contains(AppUtils.getCurTime("yyyyMMdd"))) {
                         continue;
                     }
                     final String archive = path + ".zip";
@@ -161,7 +161,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile() && file.length() > 0) {
 
-                    if (name.contains(AppUtils.getTime("date"))) {
+                    if (name.contains(AppUtils.getCurTime("yyyyMMdd"))) {
                         continue;
                     }
                     final String archive = path + ".zip";
@@ -177,7 +177,7 @@ public class LogUploadService {
                                 BuildConfig.OSS_BUCKET_NAME,
                                 oss_file_path,
                                 object_key,
-                                new LogUploadService.UploadResult() {
+                                new LogUploadService.UploadCallback() {
                                     @Override
                                     public void isSuccessOSSUpload(boolean flag) {
                                         if (flag) {
@@ -207,7 +207,7 @@ public class LogUploadService {
                         continue;
                     }
                     final String time = split[1].substring(0, 10);
-                    if (time.equals(AppUtils.getTime("hour"))) {
+                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
                         continue;
                     }
                     final String archivePath = path + ".zip";
@@ -277,7 +277,7 @@ public class LogUploadService {
             return;
         }
         String filepath = AppUtils.getFilePath(context, AppUtils.StorageFile.log) + fileName;
-        String currentTime = AppUtils.getTime("hour");
+        String currentTime = AppUtils.getCurTime("yyyyMMddHH");
         if (!time.equals(currentTime) && new File(filepath).exists()) {
             String deskPath = AppUtils.getFilePath(context, AppUtils.StorageFile.loged);
             new File(filepath).renameTo(new File(deskPath + fileName));

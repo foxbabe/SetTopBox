@@ -505,7 +505,7 @@
 
                     <TextView
                         style="@style/box_info_item_label"
-                        android:text="当前酒楼片源"
+                        android:text="下载酒楼片源"
                         />
 
                     <TextView

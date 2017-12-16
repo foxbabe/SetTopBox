@@ -559,15 +559,15 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
             public void run() {
                 if (cameraInst != null) {
                     LogUtils.d("Will stop and release camera");
-                    LogFileUtil.writeApInfo("Will stop and release camera");
+                    LogFileUtil.writeKeyLogInfo("Will stop and release camera");
                     try {
                         cameraInst.setPreviewCallback(null);
                         LogUtils.d("Will stopPreview");
-                        LogFileUtil.writeApInfo("Will stopPreview");
+                        LogFileUtil.writeKeyLogInfo("Will stopPreview");
                         cameraInst.stopPreview();
 //                        cameraInst.unlock();
                         LogUtils.d("Will release");
-                        LogFileUtil.writeApInfo("Will release");
+                        LogFileUtil.writeKeyLogInfo("Will release");
                         cameraInst.release();
                         cameraInst = null;
                     } catch (Exception e) {
@@ -576,7 +576,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                 }
                 if (facepp != null) {
                     LogUtils.d("Will release facepp");
-                    LogFileUtil.writeApInfo("Will release facepp");
+                    LogFileUtil.writeKeyLogInfo("Will release facepp");
                     facepp.release();
                     facepp = null;
                 }

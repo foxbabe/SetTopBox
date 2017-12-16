@@ -32,7 +32,7 @@ public class KeyCodeConstant {
      */
     public static final int KEY_CODE_CHANGE_SIGNAL = 4127;
     /**
-     * 小遥控的切换按钮
+     * 切换 广告/电视 模式
      */
     public static final int KEY_CODE_CHANGE_MODE = 174;
     /**
@@ -95,8 +95,7 @@ public class KeyCodeConstant {
      */
     public static final int KEY_CODE_UPLOAD_CHANNEL_INFO = 4128;
     /**
-     * 切换 广告/电视 模式
-     * （咨询 按钮）
+     * 上传心跳
      */
-    public static final int KEY_CODE_SWITCH_ADS_TV = 127;
+    public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
 }

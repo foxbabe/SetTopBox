@@ -41,7 +41,7 @@ public class TechnicalLogReporter {
      */
     public static void md5Failed(Context context, String vid) {
         LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()), Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
-                String.valueOf(System.currentTimeMillis()), "check_failed", "md5", "",
+                String.valueOf(System.currentTimeMillis()), "check_failed", "md5", vid,
                 "", Session.get(context).getVersionName(), Session.get(context).getAdsPeriod(),
                 Session.get(context).getVodPeriod(), "");
     }

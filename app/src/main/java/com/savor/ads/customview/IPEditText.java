@@ -1,10 +1,13 @@
 package com.savor.ads.customview;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -12,296 +15,169 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.savor.ads.R;
-import com.savor.ads.utils.LogUtils;
 
 public class IPEditText extends LinearLayout {
 
-	private EditText mFirstIP;
-	private EditText mSecondIP;
-	private EditText mThirdIP;
-	private EditText mFourthIP;
+    private EditText mFirstIPTv;
+    private EditText mSecondIPTv;
+    private EditText mThirdIPTv;
+    private EditText mFourthIPTv;
 
-	private String mText1;
-	private String mText2;
-	private String mText3;
-	private String mText4;
+    public IPEditText(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
-//	private SharedPreferences mPreferences;
+        LayoutInflater.from(context).inflate(R.layout.custom_my_edittext, this);
+        mFirstIPTv = (EditText) findViewById(R.id.ip_first);
+        mSecondIPTv = (EditText) findViewById(R.id.ip_second);
+        mThirdIPTv = (EditText) findViewById(R.id.ip_third);
+        mFourthIPTv = (EditText) findViewById(R.id.ip_fourth);
+    }
 
-	public IPEditText(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		/**
-		 * 初始化控件
-		 */
-		View view = LayoutInflater.from(context).inflate(R.layout.custom_my_edittext, this);
-		mFirstIP = (EditText)findViewById(R.id.ip_first);
-		mSecondIP = (EditText)findViewById(R.id.ip_second);
-		mThirdIP = (EditText)findViewById(R.id.ip_third);
-		mFourthIP = (EditText)findViewById(R.id.ip_fourth);
-//		mPreferences = context.getSharedPreferences("config_IP", Context.MODE_PRIVATE);
-		OperatingEditText(context);
-	}
+    private int focusedIndex;
 
-	/**
-	 * 获得EditText中的内容,当每个Edittext的字符达到三位时,自动跳转到下一个EditText,当用户点击.时,
-	 * 下一个EditText获得焦点
-	 */
-	private void OperatingEditText(final Context context) {
-		mFirstIP.addTextChangedListener(new TextWatcher() {
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, @Nullable Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-									  int count) {
+        if (gainFocus) {
+            switch (focusedIndex) {
+                case 0:
+                    mFirstIPTv.requestFocus();
+                    break;
+                case 1:
+                    mSecondIPTv.requestFocus();
+                    break;
+                case 2:
+                    mThirdIPTv.requestFocus();
+                    break;
+                case 3:
+                    mFourthIPTv.requestFocus();
+                    break;
+            }
+        }
+    }
 
-				/**
-				 * 获得EditTe输入内容,做判断,如果大于255,提示不合法,当数字为合法的三位数下一个EditText获得焦点,
-				 * 用户点击啊.时,下一个EditText获得焦点
-				 */
-				if (s != null && s.length() > 0) {
-					if ((s.length() <= 2) || (s.length() > 2)) {
-						if(s.length() <= 2) {
-							mText1 = s.toString().trim();
-						} else {
-							mText1 = s.toString().trim();
-							LogUtils.i("第一个edittext为"+mText1);
-							try {
-								if (Integer.parseInt(mText1) > 255) {
-                                    Toast.makeText(context, "每一段IP不能大于255",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-								mSecondIP.setFocusable(true);
-								mSecondIP.requestFocus();
-							} catch (NumberFormatException e) {
-								e.printStackTrace();
-							}
-						}
-//						Editor editor = mPreferences.edit();
-//						editor.putInt("IP_FIRST", mText1.length());
-//						editor.commit();
-					}
-				}else {
-					mText1 = s.toString().trim();
-				}
-//				if(start == 0 && s.length() == 0) {
-//					mText1 = s.toString().trim();
-//				}
-			}
+    public void setListener() {
+        mFirstIPTv.setOnFocusChangeListener(mOnEtFocusChangeListener);
+        mSecondIPTv.setOnFocusChangeListener(mOnEtFocusChangeListener);
+        mThirdIPTv.setOnFocusChangeListener(mOnEtFocusChangeListener);
+        mFourthIPTv.setOnFocusChangeListener(mOnEtFocusChangeListener);
 
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-										  int after) {
+        mFirstIPTv.addTextChangedListener(mTextWatcher);
+        mSecondIPTv.addTextChangedListener(mTextWatcher);
+        mThirdIPTv.addTextChangedListener(mTextWatcher);
+        mFourthIPTv.addTextChangedListener(mTextWatcher);
 
-			}
+    }
 
-			@Override
-			public void afterTextChanged(Editable s) {
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-			}
-		});
+        }
 
-		mSecondIP.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-									  int count) {
-				/**
-				 * 获得EditTe输入内容,做判断,如果大于255,提示不合法,当数字为合法的三位数下一个EditText获得焦点,
-				 * 用户点击啊.时,下一个EditText获得焦点
-				 */
-				if (s != null && s.length() > 0) {
-					if ((s.length() <= 2) || (s.length() > 2)) {
-						if(s.length() <= 2) {
-							mText2 = s.toString().trim();
-						} else {
-							mText2 = s.toString().trim();
-							try {
-								if (Integer.parseInt(mText2) > 255) {
-                                    Toast.makeText(context, "每一段IP不能大于255",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-								mThirdIP.setFocusable(true);
-								mThirdIP.requestFocus();
-							} catch (NumberFormatException e) {
-								e.printStackTrace();
-							}
-						}
-//						Editor editor = mPreferences.edit();
-//						editor.putInt("IP_SECOND", mText2.length());
-//						editor.commit();
-					}
-				}else {
-					mText2 = s.toString().trim();
-					mFirstIP.setFocusable(true);
-					mFirstIP.requestFocus();
-					mFirstIP.setSelection(mFirstIP.getText().length());
-				}
-
-				/**
-				 * 当用户需要删除时,此时的EditText为空时,上一个EditText获得焦点
-				 */
-//				if(!"".equals(mSecondIP.getText().toString())) {
-//				if (start == 0 && s.length() == 0) {
-//					mText2 = s.toString().trim();
-//					mFirstIP.setFocusable(true);
-//					mFirstIP.requestFocus();
-//					mFirstIP.setSelection(mPreferences.getInt("IP_FIRST", 0));
-//				}
-//				}
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-										  int after) {
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-
-			}
-		});
-
-
-		mThirdIP.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-									  int count) {
-				/**
-				 * 获得EditTe输入内容,做判断,如果大于255,提示不合法,当数字为合法的三位数下一个EditText获得焦点,
-				 * 用户点击啊.时,下一个EditText获得焦点
-				 */
-				if (s != null && s.length() > 0) {
-					if ((s.length() <= 2) || (s.length() > 2)) {
-						if(s.length() <= 2) {
-							mText3 = s.toString().trim();
-						} else {
-							mText3 = s.toString().trim();
-							try {
-								if (Integer.parseInt(mText3) > 255) {
-                                    Toast.makeText(context, "每一段IP不能大于255",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-								mFourthIP.setFocusable(true);
-								mFourthIP.requestFocus();
-							} catch (NumberFormatException e) {
-								e.printStackTrace();
-							}
-						}
-//						Editor editor = mPreferences.edit();
-//						editor.putInt("IP_THIRD", mText3.length());
-//						editor.commit();
-					}
-				}else {
-					mText3 = s.toString().trim();
-					mSecondIP.setFocusable(true);
-					mSecondIP.requestFocus();
-					mSecondIP.setSelection(mSecondIP.getText().length());
-				}
-
-
-				/**
-				 * 当用户需要删除时,此时的EditText为空时,上一个EditText获得焦点
-				 */
-//				if (start == 0 && s.length() == 0) {
-//					mText3 = s.toString().trim();
-//					mSecondIP.setFocusable(true);
-//					mSecondIP.requestFocus();
-//					mSecondIP.setSelection(mPreferences.getInt("IP_SECOND", 0));
-//				}
-			}
-
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-										  int after) {
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-
-			}
-		});
-
-		mFourthIP.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-									  int count) {
-				/**
-				 * 获得EditTe输入内容,做判断,如果大于255,提示不合法,当数字为合法的三位数下一个EditText获得焦点,
-				 * 用户点击啊.时,下一个EditText获得焦点
-				 */
-				if (s != null && s.length() > 0) {
-					mText4 = s.toString().trim();
-					try {
-						if (Integer.parseInt(mText4) > 255) {
-                            Toast.makeText(context, "每一段IP不能大于255", Toast.LENGTH_SHORT)
-                            .show();
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            int focusOrientation = 0;
+            if (s != null && s.length() > 0) {
+                if (s.length() > 2) {
+                    String text = s.toString().trim();
+                    try {
+                        if (Integer.parseInt(text) > 255) {
+                            Toast.makeText(getContext(), "每一段IP不能大于255",
+                                    Toast.LENGTH_SHORT).show();
                             return;
+                        } else {
+                            if (count > 0) {
+                                focusOrientation = 1;
+                            }
                         }
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-					}
-//					Editor editor = mPreferences.edit();
-//					editor.putInt("IP_FOURTH", mText4.length());
-//					editor.commit();
-				}else  {
-					mText4 = s.toString().trim();
-					mThirdIP.setFocusable(true);
-					mThirdIP.requestFocus();
-					mThirdIP.setSelection(mThirdIP.getText().length());
-				}
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                focusOrientation = -1;
+            }
 
-				/**
-				 * 当用户需要删除时,此时的EditText为空时,上一个EditText获得焦点
-				 */
-//				if (start == 0 && s.length() == 0) {
-//					mText4 = s.toString().trim();
-//					mThirdIP.setFocusable(true);
-//					mThirdIP.requestFocus();
-//					mThirdIP.setSelection(mPreferences.getInt("IP_THIRD", 0));
-//				}
-			}
+            switch (focusedIndex) {
+                case 0:
+                    if (focusOrientation > 0) {
+                        mSecondIPTv.requestFocus();
+                    }
+                    break;
+                case 1:
+                    if (focusOrientation > 0) {
+                        mThirdIPTv.requestFocus();
+                    } else if (focusOrientation < 0) {
+                        mFirstIPTv.requestFocus();
+                        mFirstIPTv.setSelection(mFirstIPTv.getText().length());
+                    }
+                    break;
+                case 2:
+                    if (focusOrientation > 0) {
+                        mFourthIPTv.requestFocus();
+                    } else if (focusOrientation < 0) {
+                        mSecondIPTv.requestFocus();
+                        mSecondIPTv.setSelection(mSecondIPTv.getText().length());
+                    }
+                    break;
+                case 3:
+                    if (focusOrientation < 0) {
+                        mThirdIPTv.requestFocus();
+                        mThirdIPTv.setSelection(mThirdIPTv.getText().length());
+                    }
+                    break;
+            }
+        }
 
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-										  int after) {
+        @Override
+        public void afterTextChanged(Editable s) {
 
-			}
+        }
+    };
 
-			@Override
-			public void afterTextChanged(Editable s) {
+    private OnFocusChangeListener mOnEtFocusChangeListener = new OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+                switch (v.getId()) {
+                    case R.id.ip_first:
+                        focusedIndex = 0;
+                        break;
+                    case R.id.ip_second:
+                        focusedIndex = 1;
+                        break;
+                    case R.id.ip_third:
+                        focusedIndex = 2;
+                        break;
+                    case R.id.ip_fourth:
+                        focusedIndex = 3;
+                        break;
+                }
+            }
+        }
+    };
 
-			}
-		});
-	}
+    public String getText() {
+        String first = mFirstIPTv.getText().toString().trim();
+        String second = mSecondIPTv.getText().toString().trim();
+        String third = mThirdIPTv.getText().toString().trim();
+        String fourth = mFourthIPTv.getText().toString().trim();
 
-	public String getText(Context context) {
-		if (TextUtils.isEmpty(mText1) || TextUtils.isEmpty(mText2)
-				|| TextUtils.isEmpty(mText3) || TextUtils.isEmpty(mText4)) {
-			Toast.makeText(context, "请输入合法的ip地址", Toast.LENGTH_SHORT).show();
-			return "";
-		}
-		
-//		Editor edit = mPreferences.edit();
-//		edit.putString("firstIP", mText1);
-//		edit.putString("secondIP", mText2);
-//		edit.putString("thirdIP", mText3);
-//		edit.putString("fourthIP", mText4);
-//		edit.commit();
-		
-		return mText1 + "." + mText2 + "." + mText3 + "." + mText4;
-	}
-	
-	public void setText(String firstIP, String secondIP, String thirdIP, String fourthIP) {
-		mFirstIP.setText(firstIP);
-		mSecondIP.setText(secondIP);
-		mThirdIP.setText(thirdIP);
-		mFourthIP.setText(fourthIP);
-	}
+        if (TextUtils.isEmpty(first) || TextUtils.isEmpty(second)
+                || TextUtils.isEmpty(third) || TextUtils.isEmpty(fourth)) {
+            Toast.makeText(getContext(), "请输入合法的ip地址", Toast.LENGTH_SHORT).show();
+            return "";
+        }
+
+        return first + "." + second + "." + third + "." + fourth;
+    }
+
+    public void setText(String firstIP, String secondIP, String thirdIP, String fourthIP) {
+        mFirstIPTv.setText(firstIP);
+        mSecondIPTv.setText(secondIP);
+        mThirdIPTv.setText(thirdIP);
+        mFourthIPTv.setText(fourthIP);
+    }
 }

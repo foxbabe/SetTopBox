@@ -299,10 +299,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         startActivity(intent);
     }
 
-    public void onNewPeriodCome() {
-        mNeedPlayNewer = true;
-    }
-
     private void deleteOldMedia() {
         new Thread(new Runnable() {
             @Override
@@ -311,7 +307,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 LogUtils.d("删除多余视频");
 
                 // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
-                if (mSession.getPlayListVersion() == null || mSession.getPlayListVersion().isEmpty()) {
+                if (mSession.getProPeriod() == null ) {
                     return;
                 }
 
@@ -333,7 +329,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                             String[] selectionArgs = new String[]{file.getName()};
 
                             if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null &&
-                                    dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null) {
+                                    dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findAdsByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findNewAdsByWhere(selection, selectionArgs) == null) {
                                 file.delete();
                                 LogUtils.d("删除文件===================" + file.getName());
                             }
@@ -362,7 +360,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
 
         // 新一期下载完成时重新获取播放列表开始播放
-        if (/*isLast && */mNeedPlayNewer) {
+        if (isLast && mNeedPlayNewer) {
             mNeedPlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
@@ -380,7 +378,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     @Override
     public boolean onMediaError(int index, boolean isLast) {
         // 新一期下载完成时重新获取播放列表开始播放
-        if (/*isLast && */mNeedPlayNewer) {
+        if (isLast && mNeedPlayNewer) {
             mNeedPlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
