@@ -29,6 +29,8 @@ import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
+import com.savor.tvlibrary.OutputResolution;
+import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -125,9 +127,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getExternalSDCardPath());
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getSDCardPath());
         // 未发现SD卡时跳到TV
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getSDCardPath())) {
             Intent intent = new Intent(this, TvPlayerActivity.class);
             startActivity(intent);
             finish();
@@ -226,17 +228,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         super.onPause();
     }
 
-    void handleBack() {
-        mSavorVideoView.release();
-        finish();
-
-//        if (NettyClient.get() != null) {
-//            NettyClient.get().disConnect();
-//        }
-//        ((SavorApplication) getApplication()).stopScreenProjectionService();
-//        System.exit(0);
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 禁止进入页面后马上操作
@@ -247,7 +238,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         switch (keyCode) {
             // 后退
             case KeyCodeConstant.KEY_CODE_BACK:
-//                handleBack();
                 handled = true;
                 break;
             // 切换到电视模式
@@ -281,8 +271,32 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 showBoxInfo();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_CHANGE_RESOLUTION:
+                changeResolution();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
+    }
+
+    int resolutionIndex = 0;
+    private void changeResolution() {
+        OutputResolution resolution = OutputResolution.values()[(resolutionIndex++) % OutputResolution.values().length];
+        TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC)
+                .switchResolution(resolution);
+        String msg = "1080P";
+        switch (resolution) {
+            case RESOLUTION_1080p:
+                msg = "1080P";
+                break;
+            case RESOLUTION_720p:
+                msg = "720P";
+                break;
+            case RESOLUTION_480p:
+                msg = "480P";
+                break;
+        }
+        ShowMessage.showToast(getApplicationContext(), msg);
     }
 
     /**

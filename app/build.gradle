@@ -15,7 +15,7 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017121505
+        versionCode 2017121905
         versionName "1.1.9"
 
         multiDexEnabled true
@@ -65,7 +65,7 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
+    android.applicationVariants.all { variant ->
 //        variant.outputs.each { output ->
 //            def outputFile = output.outputFile
 //            if (outputFile != null && outputFile.name.endsWith('.apk') && 'release'.equals(variant.buildType.name)) {
@@ -82,6 +82,7 @@ android {
             }
         }
     }
+    buildToolsVersion '26.0.2'
 }
 
 dependencies {
@@ -97,6 +98,7 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.android.support:multidex:1.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile project(':tvlibrary')
     compile(name: 'MGFaceppSDK-0.4.7', ext: 'aar')
     compile(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
 }

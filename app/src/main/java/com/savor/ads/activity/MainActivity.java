@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.savor.ads.R;
+import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
@@ -67,7 +68,7 @@ public class MainActivity extends BaseActivity {
 
         registerDownloadReceiver();
 
-        // 清楚Glide图片缓存
+        // 清除Glide图片缓存
         GlideImageLoader.clearCache(mContext, true, true);
 
         mHandler.postDelayed(new Runnable() {
@@ -96,7 +97,7 @@ public class MainActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             LogUtils.d("收到下载完成广播");
             if (mIsLagElapse && ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity) {
-                // 停留时间已到却仍未调到Ads的话，这里做跳转
+                // 停留时间已到却仍未跳到Ads的话，这里做跳转
                 gotoAdsActivity();
             }
         }
@@ -106,23 +107,6 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mDownloadCompleteReceiver);
-    }
-
-//    private boolean mIsFirstResume = true;
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (!mIsFirstResume) {
-//            fillPlayList();
-//
-//            // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
-//            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-//                Intent intent = new Intent(this, AdsPlayerActivity.class);
-//                startActivity(intent);
-//            }
-//        }
-//        mIsFirstResume = false;
     }
 
     @Override
@@ -156,6 +140,8 @@ public class MainActivity extends BaseActivity {
         startUploadLogService();
 
         startMulticatSendService();
+
+        ((SavorApplication) getApplication()).acquireWakelock();
     }
 
     /**
@@ -288,12 +274,8 @@ public class MainActivity extends BaseActivity {
             main_imgIv.setImageResource(R.mipmap.bg_splash);
         }
 
-        if (mAudioManager != null) {
-            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
-        }
-        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
-        timeCalibrateHelper.startCalibrateTime();
-
+//        TimeCalibrateHelper timeCalibrateHelper = new TimeCalibrateHelper();
+//        timeCalibrateHelper.startCalibrateTime();
     }
 
 

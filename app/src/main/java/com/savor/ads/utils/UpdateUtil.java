@@ -1,9 +1,14 @@
 package com.savor.ads.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.RecoverySystem;
 import android.text.TextUtils;
+import android.util.Log;
 
 
+import com.amlogic.update.OtaUpgradeUtils;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.UpgradeInfo;
 import com.savor.ads.bean.UpgradeResult;
@@ -20,13 +25,17 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-public class UpdateUtil implements ApiRequestListener {
+public class UpdateUtil implements ApiRequestListener ,OtaUpgradeUtils.ProgressListener{
 
+    private static final String TAG = "UpdateUtil";
     private UpgradeInfo upgradeInfo = null;
     private static Context mContext = null;
     Session session = null;
     ServerInfo serverInfo;
-
+    //系统升级
+    private GiecUpdateSystem utils;
+    int UpdateMode;
+    private OtaUpgradeUtils mUpdateUtils;
     /**
      * 更新apk
      *
@@ -43,43 +52,46 @@ public class UpdateUtil implements ApiRequestListener {
         if (serverInfo != null) {
             AppApi.upgradeInfo(mContext, UpdateUtil.this, session.getVersionCode());
         }
+//        File file = new File(AppUtils.getSDCardPath()+"txlx_t962e_r321-ota-20171114.zip");
+//        updateRom(file);
     }
 
-    private static boolean updateRom(File file) {
-
-        boolean isflag = false;
-        try {
-            String sourcePath = file.getPath();
-            Process proc = Runtime.getRuntime().exec("su");
-            DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
-            try {
-
-                String catCommand = "cat " + sourcePath + " > /cache/download/update_signed.zip\n";
-                dos.writeBytes(catCommand);
-                dos.flush();
-                dos.writeBytes("exit\n");
-                dos.flush();
-                isflag = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                dos.close();
-            }
-
-            try {
-                proc.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            proc.destroy();
-        } catch (IOException e) {
-            e.printStackTrace();
+    /**
+     * 升级系统rom
+     * @param file
+     */
+    private  void updateRom(final File file) {
+        if (file==null||!file.exists()){
+            return;
         }
-        return isflag;
-
+        utils=new GiecUpdateSystem(mContext);
+        mUpdateUtils = new OtaUpgradeUtils(mContext);
+        UpdateMode = utils.createAmlScript(file.getAbsolutePath(),false,false);
+        if (utils != null) {
+            utils.write2File();
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                utils.copyBKFile();
+                mUpdateUtils.setDeleteSource(false);
+                mUpdateUtils.upgrade(file,UpdateUtil.this, UpdateMode);
+            }
+        }).start();
     }
-
+    //如果系统非root，应该怎么升级哪？
+    private static void updateApkNotSystem(File file){
+        if (file.length() <= 0) {
+            file.delete();
+            LogFileUtil.writeException(new Throwable("apk update fatal, updateapksamples.apk length is 0"));
+            return;
+        }
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.setDataAndType(Uri.parse("file://" + file.getAbsolutePath()),
+                "application/vnd.android.package-archive");
+        mContext.startActivity(i);
+    }
     private static void updateApk(File file) {
         if (file.length() <= 0) {
             file.delete();
@@ -88,54 +100,54 @@ public class UpdateUtil implements ApiRequestListener {
         }
 
         boolean isflag = false;
+        Process proc = null;
+        String tempPath = "/system/priv-app/savormedia/temp.apk";
+        String targetPath = "/system/priv-app/savormedia/savormedia.apk";
         try {
-            Process proc = Runtime.getRuntime().exec("su");
-            DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
+            proc = Runtime.getRuntime().exec("su");
             try {
-                dos.writeBytes("mount -o remount rw /system\n");
+                DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
+                dos.writeBytes("mount -o remount,rw /system\n");
                 dos.flush();
-                String catCommand = "cat " + file.getPath() + " > /system/app/1.apk\n";
+
+                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
                 dos.writeBytes(catCommand);
                 dos.flush();
+                Thread.sleep(2000);
 
-                Thread.sleep(5000);
-                File file1 = new File("/system/app/1.apk");
+                file.delete();
+
+                File file1 = new File(tempPath);
                 if (file1.length() > 0) {
-                    dos.writeBytes("rm -r " + file.getPath() +"\n");
-                    dos.flush();
-                    dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
+
+                    dos.writeBytes("mv " + tempPath + " " + targetPath + "\n");
                     dos.flush();
                     Thread.sleep(1000);
-//                        dos.writeBytes("reboot\n");
-//                        dos.flush();
+
+                    dos.writeBytes("chmod 755 " + targetPath + "\n");
+                    dos.flush();
+                    Thread.sleep(1000);
                     isflag = true;
                 } else {
-                    file.delete();
                     file1.delete();
-                    LogFileUtil.writeException(new Throwable("apk update fatal, 1.apk length is 0"));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                dos.close();
-            }
-
-            try {
-                proc.waitFor();
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
-
-            proc.destroy();
-
-            if (isflag) {
-                ShellUtils.reboot();
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (proc != null) {
+                try {
+                    proc.destroy();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (isflag) {
+            ShellUtils.reboot();
         }
     }
 
@@ -201,6 +213,31 @@ public class UpdateUtil implements ApiRequestListener {
 
     @Override
     public void onNetworkFailed(AppApi.Action method) {
+
+    }
+
+    @Override
+    public void onProgress(int i) {
+
+    }
+
+    @Override
+    public void onVerifyFailed(int i, Object o) {
+
+    }
+
+    @Override
+    public void onCopyProgress(int i) {
+
+    }
+
+    @Override
+    public void onCopyFailed(int i, Object o) {
+
+    }
+
+    @Override
+    public void onStopProgress(int i) {
 
     }
 }

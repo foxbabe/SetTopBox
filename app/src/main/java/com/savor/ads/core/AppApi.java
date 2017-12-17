@@ -1,25 +1,18 @@
 package com.savor.ads.core;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.google.gson.Gson;
 import com.savor.ads.BuildConfig;
-import com.savor.ads.bean.AtvProgramInfo;
-import com.savor.ads.bean.AtvProgramRequestBean;
+import com.savor.tvlibrary.AtvChannel;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -106,10 +99,10 @@ public class AppApi {
             put(Action.SP_GET_ADV_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/adv/config");
             put(Action.SP_GET_ADS_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/ads/config");
             put(Action.SP_GET_ON_DEMAND_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/demand/config");
-            put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
+            put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvListNew/api/stb/tv_getCommands");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
             put(Action.CP_GET_HEARTBEAT_PLAIN, BuildConfig.BASE_URL + "Heartbeat/Report/index");
-            put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
+            put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvListNew/api/stb/tv_commands");
             put(Action.CP_GET_SP_IP_JSON, BuildConfig.BASE_URL + "basedata/ipinfo/getIp");
             put(Action.SP_GET_BOX_INIT_JSON, SP_BASE_URL + "small/api/download/init");
             put(Action.CP_GET_PRIZE_JSON, BuildConfig.BASE_URL + "Award/Award/getAwardInfo");
@@ -244,7 +237,7 @@ public class AppApi {
      */
     public static void downVersion(String url,Context context, ApiRequestListener handler,int type){
         try{
-            String target= AppUtils.getExternalSDCardPath();//AppUtils.getSDCardPath();
+            String target= AppUtils.getSDCardPath();
             if (TextUtils.isEmpty(target)) {
                 LogFileUtil.write("External SD is not exist, download canceled");
                 return;
@@ -302,12 +295,11 @@ public class AppApi {
         new AppServiceOk(context, Action.CP_GET_SP_IP_JSON, handler, params).get();
     }
 
-    public static void uploadProgram(Context context, ApiRequestListener handler, AtvProgramInfo[] programs) {
-        if (programs == null || programs.length <= 0)
+    public static void uploadProgram(Context context, ApiRequestListener handler, ArrayList<AtvChannel> programs) {
+        if (programs == null || programs.size() <= 0)
             return;
-        List<AtvProgramInfo> programInfo = Arrays.asList(programs);
         final HashMap<String, Object> params = new HashMap<>();
-        params.put("data", programInfo);
+        params.put("data", programs);
         new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
     }
 

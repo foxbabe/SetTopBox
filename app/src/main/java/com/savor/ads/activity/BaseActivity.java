@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
-import com.mstar.tv.service.skin.AudioSkin;
 import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
@@ -54,7 +53,6 @@ public abstract class BaseActivity extends Activity {
     private Handler mHandler = new Handler();
 
     protected boolean mIsGoneToSystemSetting;
-    private AudioSkin mAudioSkin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +62,6 @@ public abstract class BaseActivity extends Activity {
         mSession = Session.get(mContext);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         LogFileUtil.write("BaseActivity onCreate this is " + this.toString());
-
-        mAudioSkin = new AudioSkin(this);
-        mAudioSkin.connect(null);
     }
 
 
@@ -154,7 +149,7 @@ public abstract class BaseActivity extends Activity {
 
     public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (!TextUtils.isEmpty(AppUtils.getSDCardPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
             ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
 
@@ -286,10 +281,6 @@ public abstract class BaseActivity extends Activity {
         if (mBoxInfoDialog != null && mBoxInfoDialog.isShowing()) {
             mBoxInfoDialog.dismiss();
         }
-        if (mAudioSkin != null) {
-            mAudioSkin.disconnect();
-            mAudioSkin = null;
-        }
     }
 
 
@@ -410,6 +401,10 @@ public abstract class BaseActivity extends Activity {
                 manualHeartbeat();
                 handled = true;
                 break;
+            case KeyCodeConstant.KEY_CODE_SHOW_APP_INSTALLED:
+                gotoAppBrowser();
+                handled = true;
+                break;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -422,6 +417,11 @@ public abstract class BaseActivity extends Activity {
 
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    private void gotoAppBrowser() {
+        Intent intent = new Intent(this, AppBrowserActivity.class);
         startActivity(intent);
     }
 
@@ -451,19 +451,15 @@ public abstract class BaseActivity extends Activity {
     }
 
     protected void setVolume(int volume) {
-        if (mAudioSkin != null) {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            LogUtils.d("System volume:" + audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM));
+            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM);
             if (volume > 100)
                 volume = 100;
             else if (volume < 0)
                 volume = 0;
-            mAudioSkin.setVolume(volume);
+            audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, volume * maxVolume / 100, 0);
         }
-    }
-
-    protected int getVolume() {
-        if (mAudioSkin != null) {
-            return mAudioSkin.getVolume();
-        }
-        return -1;
     }
 }

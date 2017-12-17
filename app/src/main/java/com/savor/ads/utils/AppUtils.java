@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -102,7 +103,7 @@ public class AppUtils {
     public static final String BoxlogedDir = "loged/";
     public static final String BoxMediaDir = "media/";
     public static final String BoxMulticast = "multicast/";
-    public static final String BoxLotteryDir= "lottery/";
+    public static final String BoxLotteryDir = "lottery/";
     // UTF-8 encoding
     private static final String ENCODING_UTF8 = "UTF-8";
 
@@ -166,8 +167,6 @@ public class AppUtils {
     private static TrustManager[] trustAllCerts;
     private static StorageMode storageMode;
 
-    /** SDCard是否可用 **/
-
     /**
      * SDCard的根路径
      **/
@@ -176,12 +175,13 @@ public class AppUtils {
     public static final int NOCONNECTION = 0;
     public static final int WIFI = 1;
     public static final int MOBILE = 2;
+    public static final int ETHERNET = 3;
 
     /**
      * 返回手机连接网络类型
      *
      * @param context
-     * @return 0： 无连接  1：wifi  2： mobile
+     * @return 0： 无连接  1：wifi  2： mobile   3: ethernet
      */
     public static int getNetworkType(Context context) {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -189,7 +189,17 @@ public class AppUtils {
         int networkType = NOCONNECTION;
         if (networkInfo != null) {
             int type = networkInfo.getType();
-            networkType = type == ConnectivityManager.TYPE_WIFI ? WIFI : MOBILE;
+            switch (type) {
+                case ConnectivityManager.TYPE_WIFI:
+                    networkType = WIFI;
+                    break;
+                case ConnectivityManager.TYPE_ETHERNET:
+                    networkType = ETHERNET;
+                    break;
+                default:
+                    networkType = MOBILE;
+                    break;
+            }
         }
         return networkType;
     }
@@ -215,54 +225,54 @@ public class AppUtils {
         return SDCardPath;
     }
 
-    //获取外部存储卡地址
-    public static String getExternalSDCardPath() {
-        if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)){
-            return EXTERNAL_SDCARD_PATH;
-        }
-        String sdcard_path = null;
-        String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
-        LogUtils.d(sd_default);
-        if (sd_default.endsWith("/")) {
-            sd_default = sd_default.substring(0, sd_default.length() - 1);
-        }
-        // 得到路径
-        try {
-            Runtime runtime = Runtime.getRuntime();
-            Process proc = runtime.exec("mount");
-            InputStream is = proc.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            String line;
-            BufferedReader br = new BufferedReader(isr);
-            while ((line = br.readLine()) != null) {
-                if (line.contains("secure"))
-                    continue;
-                if (line.contains("asec"))
-                    continue;
-                if (line.contains("fat") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
-                        }
-                        sdcard_path = columns[1];
-                    }
-                } else if (line.contains("fuse") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
-                        }
-                        sdcard_path = columns[1];
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        EXTERNAL_SDCARD_PATH = sdcard_path;
-        return sdcard_path;
-    }
+//    //获取外部存储卡地址
+//    public static String getExternalSDCardPath() {
+//        if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)){
+//            return EXTERNAL_SDCARD_PATH;
+//        }
+//        String sdcard_path = null;
+//        String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
+//        LogUtils.d(sd_default);
+//        if (sd_default.endsWith("/")) {
+//            sd_default = sd_default.substring(0, sd_default.length() - 1);
+//        }
+//        // 得到路径
+//        try {
+//            Runtime runtime = Runtime.getRuntime();
+//            Process proc = runtime.exec("mount");
+//            InputStream is = proc.getInputStream();
+//            InputStreamReader isr = new InputStreamReader(is);
+//            String line;
+//            BufferedReader br = new BufferedReader(isr);
+//            while ((line = br.readLine()) != null) {
+//                if (line.contains("secure"))
+//                    continue;
+//                if (line.contains("asec"))
+//                    continue;
+//                if (line.contains("fat") && line.contains("/mnt/")) {
+//                    String columns[] = line.split(" ");
+//                    if (columns != null && columns.length > 1) {
+//                        if (sd_default.trim().equals(columns[1].trim())) {
+//                            continue;
+//                        }
+//                        sdcard_path = columns[1];
+//                    }
+//                } else if (line.contains("fuse") && line.contains("/mnt/")) {
+//                    String columns[] = line.split(" ");
+//                    if (columns != null && columns.length > 1) {
+//                        if (sd_default.trim().equals(columns[1].trim())) {
+//                            continue;
+//                        }
+//                        sdcard_path = columns[1];
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        EXTERNAL_SDCARD_PATH = sdcard_path;
+//        return sdcard_path;
+//    }
 
     /**
      * @param context
@@ -270,7 +280,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getExternalSDCardPath();
+        String path = getSDCardPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {
@@ -292,8 +302,8 @@ public class AppUtils {
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
-        File targetLotteryFile = new File(path + File.separator,BoxLotteryDir);
-        if (!targetLotteryFile.exists()){
+        File targetLotteryFile = new File(path + File.separator, BoxLotteryDir);
+        if (!targetLotteryFile.exists()) {
             targetLotteryFile.mkdir();
         }
         File targetPptFile = new File(path + File.separator, "ppt");
@@ -431,24 +441,17 @@ public class AppUtils {
             System.arraycopy(frontb, 0, newb1, 0, frontb.length);
             newb2 = new byte[backb.length];
             System.arraycopy(backb, 0, newb2, 0, backb.length);
-//            newb = new byte[frontb.length + backb.length];
-//            System.arraycopy(frontb, 0, newb, 0, frontb.length);
-//            System.arraycopy(backb, 0, newb, frontb.length, backb.length);
+
+            stream.close();
         } catch (Exception e1) {
             e1.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e1) {
-                }
-            }
         }
+
         // 调取md5方法，生成一个md5串
         String md5Vod1 = MD5(newb1);
         String md5Vod2 = MD5(newb2);
 
-        String md5Vod = getMD5(md5Vod1+md5Vod2);
+        String md5Vod = getMD5(md5Vod1 + md5Vod2);
         return md5Vod;
     }
 
@@ -1163,49 +1166,17 @@ public class AppUtils {
      * @return
      */
     public static String getEthernetMacAddr() {
-        String cmd = "busybox ifconfig eth0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ethernetMac = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            if (!TextUtils.isEmpty(line)) {
-                result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                        .replaceAll(":", "");
+            NetworkInterface inter = NetworkInterface.getByName("eth0");
+            if (inter != null) {
+                byte[] buf = inter.getHardwareAddress();
+                ethernetMac = ethernetMac + StringUtils.toHexString(buf, true);
             }
-        } catch (NullPointerException e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ethernetMac;
     }
 
     /**
@@ -1214,52 +1185,21 @@ public class AppUtils {
      * @return
      */
     public static String getEthernetIP() {
-        String cmd = "busybox ifconfig eth0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ip = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            while (line != null) {
-                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
-                    result = line.substring(line.indexOf("addr:") + 5);
-                    result = result.substring(0, result.indexOf(" ")).trim();
-                    break;
+            NetworkInterface inter = NetworkInterface.getByName("eth0");
+            if (inter != null) {
+                for (Enumeration<InetAddress> enumIpAddr = inter.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        ip = inetAddress.getHostAddress();
+                    }
                 }
-                line = reader.readLine();
             }
-
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ip;
     }
 
     /**
@@ -1268,47 +1208,17 @@ public class AppUtils {
      * @return
      */
     public static String getWlanMacAddr() {
-        String cmd = "busybox ifconfig wlan0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ethernetMac = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            if (!TextUtils.isEmpty(line)) {
-                result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                        .replaceAll(":", "");
+            NetworkInterface inter = NetworkInterface.getByName("wlan0");
+            if (inter != null) {
+                byte[] buf = inter.getHardwareAddress();
+                ethernetMac = ethernetMac + StringUtils.toHexString(buf, true);
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ethernetMac;
     }
 
     /**
@@ -1317,51 +1227,21 @@ public class AppUtils {
      * @return
      */
     public static String getWlanIP() {
-        String cmd = "busybox ifconfig wlan0";
-        Process process = null;
-        InputStream is = null;
-        BufferedReader reader = null;
-        String result = "";
+        String ip = "";
         try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            while (line != null) {
-                if (!TextUtils.isEmpty(line) && line.trim().startsWith("inet ")) {
-                    result = line.substring(line.indexOf("addr:") + 5);
-                    result = result.substring(0, result.indexOf(" ")).trim();
-                    break;
+            NetworkInterface inter = NetworkInterface.getByName("wlan0");
+            if (inter != null) {
+                for (Enumeration<InetAddress> enumIpAddr = inter.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        ip = inetAddress.getHostAddress();
+                    }
                 }
-                line = reader.readLine();
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return result;
+        return ip;
     }
 
     //检查redian文件夹下是否有图有真相
@@ -1403,7 +1283,6 @@ public class AppUtils {
             zOutStream.flush();
             zOutStream.close();
         } catch (Exception e) {
-            // TODO: handle exception
             LogUtils.e(e.toString());
             return false;
         } finally {
@@ -1413,7 +1292,6 @@ public class AppUtils {
                     zOutStream = null;
                 }
             } catch (Exception e2) {
-                // TODO: handle exception
                 LogUtils.e(e2.toString());
             }
         }
@@ -1421,29 +1299,28 @@ public class AppUtils {
     }
 
     /**
-     *
      * @param context
      * @param serverVersion
      * @param type：1是rom升级，2是apk升级
      * @return
      */
-    public static boolean needUpdate(Context context,String serverVersion,int type){
+    public static boolean needUpdate(Context context, String serverVersion, int type) {
         Session session = Session.get(context);
-        if (serverVersion == null){
+        if (serverVersion == null) {
             return false;
         }
         String localVersion = null;
-        if (type ==1){
+        if (type == 1) {
             String rom = session.getRomVersion();
-            if (!TextUtils.isEmpty(rom)){
-                localVersion = rom.replace("V","").trim();
-            }else{
+            if (!TextUtils.isEmpty(rom)) {
+                localVersion = rom.replace("V", "").trim();
+            } else {
                 return false;
             }
-        }else{
+        } else {
             localVersion = session.getVersionName();
         }
-        if (!TextUtils.isEmpty(serverVersion)&&!localVersion.equals(serverVersion)){
+        if (!TextUtils.isEmpty(serverVersion) && !localVersion.equals(serverVersion)) {
             return true;
         }
         return false;
@@ -1480,6 +1357,7 @@ public class AppUtils {
         }
         return state;
     }
+
     public static boolean setWifiApEnabled(Context context, boolean enabled) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (enabled) { // disable WiFi in any case
@@ -1545,7 +1423,7 @@ public class AppUtils {
             reader = new BufferedReader(
                     new InputStreamReader(is));
             String line = null;
-            while ((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.contains("wlan0") && line.contains("proto kernel")) {
                     result = line.substring(line.lastIndexOf(" ") + 1).trim();
@@ -1586,7 +1464,7 @@ public class AppUtils {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         try {
             Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
-            WifiConfiguration wifiConfig = (WifiConfiguration)method.invoke(wifiManager);
+            WifiConfiguration wifiConfig = (WifiConfiguration) method.invoke(wifiManager);
             return wifiConfig.SSID;
         } catch (Exception e) {
             return null;
@@ -1595,6 +1473,7 @@ public class AppUtils {
 
     /**
      * 检测是否可播放下一期
+     *
      * @param context
      * @return
      */
@@ -1628,15 +1507,18 @@ public class AppUtils {
     }
 
     public static String getShowingSSID(Context context) {
-        String ssid = AppUtils.getWifiName(context);
-        if (TextUtils.isEmpty(ssid)) {
+        int connectionType = AppUtils.getNetworkType(context);
+        String ssid = null;
+        if (AppUtils.WIFI == connectionType) {
+            ssid = AppUtils.getWifiName(context);
+        } else if (AppUtils.ETHERNET == connectionType) {
             ssid = Session.get(context).getBoxName();
         }
         return ssid;
     }
 
     public static long getAvailableExtSize() {
-        StatFs stat = new StatFs(getExternalSDCardPath());
+        StatFs stat = new StatFs(getSDCardPath());
         long blockSize = stat.getBlockSize();
         long blocks = stat.getAvailableBlocks();
         return blockSize * blocks;

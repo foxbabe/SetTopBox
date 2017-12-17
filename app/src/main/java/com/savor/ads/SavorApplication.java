@@ -1,8 +1,10 @@
 package com.savor.ads;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.PowerManager;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
@@ -23,6 +25,7 @@ public class SavorApplication extends MultiDexApplication {
 
     private QrCodeWindowManager mQrCodeWindowManager;
     private ServiceConnection mConnection;
+    private PowerManager.WakeLock mWakeLock;
 
     @Override
     public void onCreate() {
@@ -60,6 +63,21 @@ public class SavorApplication extends MultiDexApplication {
     public void stopScreenProjectionService() {
         if (mConnection != null) {
             unbindService(mConnection);
+        }
+    }
+
+    public void acquireWakelock() {
+        if (mWakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, this.getClass().getCanonicalName());
+            mWakeLock.acquire();
+        }
+    }
+
+    public void releaseWakelock() {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
+            mWakeLock = null;
         }
     }
 }

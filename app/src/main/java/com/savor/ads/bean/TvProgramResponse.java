@@ -1,5 +1,7 @@
 package com.savor.ads.bean;
 
+import com.savor.tvlibrary.AtvChannel;
+
 import java.util.ArrayList;
 
 /**
@@ -8,15 +10,15 @@ import java.util.ArrayList;
 
 public class TvProgramResponse {
 
-    private ArrayList<AtvProgramInfo> tvChannelList;
+    private ArrayList<AtvChannel> tvChannelList;
 
     private int lockingChannelNum;
 
-    public ArrayList<AtvProgramInfo> getTvChannelList() {
+    public ArrayList<AtvChannel> getTvChannelList() {
         return tvChannelList;
     }
 
-    public void setTvChannelList(ArrayList<AtvProgramInfo> tvChannelList) {
+    public void setTvChannelList(ArrayList<AtvChannel> tvChannelList) {
         this.tvChannelList = tvChannelList;
     }
 

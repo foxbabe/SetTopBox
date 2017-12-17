@@ -462,38 +462,6 @@ public class Session {
     }
 
     /**
-     * boxId当前指的就是机顶盒有线的Mac地址
-     */
-    public static String getWiredMacAddr() {
-        String cmd = "busybox ifconfig eth0";
-        Process process = null;
-        InputStream is = null;
-        try {
-            process = Runtime.getRuntime().exec(cmd);
-            is = process.getInputStream();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(is));
-            String line = reader.readLine();
-            return line.substring(line.indexOf("HWaddr") + 6).trim()
-                    .replaceAll(":", "");
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "";
-    }
-
-
-    /**
      * 返回设备相关信息
      */
     public String getDeviceInfo() {

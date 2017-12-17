@@ -7,7 +7,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.savor.ads.R;
-import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.tvlibrary.AtvChannel;
 
 import java.util.ArrayList;
 
@@ -18,10 +18,10 @@ import java.util.ArrayList;
 
 public class ChannelListAdapter extends BaseAdapter {
 
-    private ArrayList<AtvProgramInfo> mChannels;
+    private ArrayList<AtvChannel> mChannels;
     private Context mContext;
 
-    public ChannelListAdapter(Context context, ArrayList<AtvProgramInfo> channels) {
+    public ChannelListAdapter(Context context, ArrayList<AtvChannel> channels) {
         mContext = context;
         mChannels = channels;
     }
@@ -52,7 +52,7 @@ public class ChannelListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.mChannelTv.setText(String.format("%03d %s", mChannels.get(position).getChennalNum(), mChannels.get(position).getChannelName()));
+        viewHolder.mChannelTv.setText(String.format("%03d %s", mChannels.get(position).getChannelNum(), mChannels.get(position).getChannelName()));
         return convertView;
     }
 

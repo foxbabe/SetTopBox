@@ -25,7 +25,7 @@ public class SaveFileData {
     protected static SharedPreferences.Editor editor;
 
     public SaveFileData(Context context, String name) {
-        settings = context.getSharedPreferences(name, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        settings = context.getSharedPreferences(name, Context.MODE_PRIVATE);
         editor = settings.edit();
     }
 

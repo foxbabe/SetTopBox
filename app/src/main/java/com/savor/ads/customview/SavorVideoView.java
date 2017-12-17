@@ -237,33 +237,29 @@ public class SavorVideoView extends RelativeLayout {
             mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                    LogUtils.v(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
 
                     // 播放器状态不对时getDuration报错，也没必要处理播放、暂停了，这里直接return
                     if (mPlayState == MediaPlayerState.IDLE || mPlayState == MediaPlayerState.INITIALIZED ||
                             mPlayState == MediaPlayerState.PREPARING || mPlayState == MediaPlayerState.ERROR)
                         return;
 
-                    int currentPercent = mp.getCurrentPosition() * 100 / mp.getDuration();
-                    LogUtils.v(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
+                    double currentPercent = mp.getCurrentPosition() * 100.0 / mp.getDuration();
                     if (percent != 100 && currentPercent >= percent - 1) {
                         // 缓冲部分不足时，暂停播放并显示进度圈
                         if (mIfShowLoading) {
                             mProgressBar.setVisibility(VISIBLE);
                         }
-                        if (mPlayState == MediaPlayerState.STARTED) {
-                            pauseInner();
-                        }
+//                        if (mPlayState == MediaPlayerState.STARTED) {
+//                            pauseInner();
+//                        }
                     } else {
                         // 缓冲好时，继续播放并隐藏进度圈
                         if (mIfShowLoading) {
                             mProgressBar.setVisibility(GONE);
                         }
-                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
-                            playInner();
-                        }
+//                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
+//                            playInner();
+//                        }
                     }
                 }
             });
@@ -672,21 +668,21 @@ public class SavorVideoView extends RelativeLayout {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            removeCallbacks(mPrepareTimeoutRunnable);
+
+            if (mPlayStateCallback != null) {
+                mPlayStateCallback.onMediaPause(mCurrentFileIndex);
+            }
+//        mMediaPlayer.reset();
+//        mPlayState = MediaPlayerState.IDLE;
+            release();
         }
     }
 
     public void onStop() {
         LogUtils.w(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-
-        removeCallbacks(mPrepareTimeoutRunnable);
-
-        if (mPlayStateCallback != null) {
-            mPlayStateCallback.onMediaPause(mCurrentFileIndex);
-        }
-//        mMediaPlayer.reset();
-//        mPlayState = MediaPlayerState.IDLE;
-        release();
     }
 
     /**
@@ -719,6 +715,7 @@ public class SavorVideoView extends RelativeLayout {
                     stopInner();
 
                     if (mMediaPlayer != null) {
+                        mMediaPlayer.reset();
                         mMediaPlayer.release();
                     }
                     mPlayState = MediaPlayerState.END;

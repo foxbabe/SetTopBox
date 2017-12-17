@@ -178,7 +178,6 @@ public class SettingActivity extends BaseActivity {
     }
 
     /**
-     *
      * @param v
      */
     public void switchUseVirtual(View v) {
