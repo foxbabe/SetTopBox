@@ -183,10 +183,4 @@ public class BoxInfoDialog extends Dialog {
         mTvVolumeTv.setText(String.valueOf(session.getTvVolume()));
 
     }
-
-    @Override
-    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
-
-        return super.onKeyDown(keyCode, event);
-    }
 }

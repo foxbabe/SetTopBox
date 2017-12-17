@@ -53,23 +53,27 @@ public class HandleUSBUpdateService extends Service {
 
     private Context context;
     private Session session;
-    /**节目数据*/
+    /**
+     * 节目数据
+     */
     private SetTopBoxBean setTopBoxBean;
 
     /**
      * 接口返回的盒子信息
      */
     private BoxInitBean boxInitBean;
-    /**酒楼信息*/
+    /**
+     * 酒楼信息
+     */
     private BoiteBean boiteBean;
-    /**包间信息*/
+    /**
+     * 包间信息
+     */
     private RoomBean roomBean;
     private DBHelper dbHelper;
     GsonBuilder builder = new GsonBuilder();
     Gson gson = builder.create();
 
-    private File cfgFile;
-    private List<String> cfgList = new ArrayList<>();
     @Override
     public void onCreate() {
         super.onCreate();
@@ -82,14 +86,17 @@ public class HandleUSBUpdateService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LogUtils.d("==========into onStartCommand method=========");
         LogFileUtil.write("HandleUSBUpdateService onStartCommand");
-        cfgFile = (File) intent.getSerializableExtra("cfgFile");
         new Thread(new Runnable() {
             @Override
             public void run() {
-                cfgList = FileUtils.readFile(cfgFile);
-                if (cfgList!=null&&cfgList.size()>0){
-                    for (String str: cfgList){
-                        switch (str){
+                String cfgPath = session.getUsbPath() + File.separator +
+                        ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                        session.getBoiteId() + File.separator +
+                        ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
+                List<String> cfgList = FileUtils.readFile(new File(cfgPath));
+                if (cfgList != null && cfgList.size() > 0) {
+                    for (String str : cfgList) {
+                        switch (str) {
                             case ConstantValues.USB_FILE_HOTEL_GET_CHANNEL:
                                 readChannelList();
                                 break;
@@ -123,7 +130,8 @@ public class HandleUSBUpdateService extends Service {
         return null;
     }
 
-    private void readChannelList() {
+    private boolean readChannelList() {
+        boolean isSuccess = true;
         LogUtils.d("start readChannelList");
         try {
             if (AppUtils.isMstar()) {
@@ -151,9 +159,9 @@ public class HandleUSBUpdateService extends Service {
                 fileWriter.close();
 
                 String channelJson = new Gson().toJson(programs);
-                FileUtils.write("/storage/udisk0/" + ConstantValues.USB_FILE_CHANNEL_RAW_DATA, channelJson);
+                FileUtils.write(session.getUsbPath() + ConstantValues.USB_FILE_CHANNEL_RAW_DATA, channelJson);
             } else {
-                File csvFile = new File("/storage/udisk0/"+ ConstantValues.USB_FILE_CHANNEL_EDIT_DATA);
+                File csvFile = new File(session.getUsbPath() + ConstantValues.USB_FILE_CHANNEL_EDIT_DATA);
                 if (csvFile.exists()) {
                     csvFile.delete();
                 }
@@ -179,7 +187,9 @@ public class HandleUSBUpdateService extends Service {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            isSuccess = false;
         }
+        return isSuccess;
     }
 
     private void writeChannelList() {
@@ -189,24 +199,24 @@ public class HandleUSBUpdateService extends Service {
     /**
      * 处理节目单视频
      */
-   private void handleProgramMediaData(){
-       String jsonPath = session.getUsbPath()
-               +File.separator
-               + ConstantValues.USB_FILE_HOTEL_PATH
-               + File.separator
-               + session.getBoiteId()
-               + File.separator
-               + ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
-       File jsonFile = new File(jsonPath);
-       if (!jsonFile.exists()) {
-        return;
-       }
+    private void handleProgramMediaData() {
+        String jsonPath = session.getUsbPath()
+                + File.separator
+                + ConstantValues.USB_FILE_HOTEL_PATH
+                + File.separator
+                + session.getBoiteId()
+                + File.separator
+                + ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            return;
+        }
         String jsonContent = FileUtils.readFileToStr(jsonFile);
-        if (!TextUtils.isEmpty(jsonContent)){
+        if (!TextUtils.isEmpty(jsonContent)) {
             setTopBoxBean = gson.fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
             }.getType());
         }
-        if (setTopBoxBean==null){
+        if (setTopBoxBean == null) {
             return;
         }
 //        if (setTopBoxBean.getPeriod().equals(session.getProPeriod())){
@@ -217,48 +227,48 @@ public class HandleUSBUpdateService extends Service {
 //        if (setTopBoxBean.getRoom()!=null){
 //            roomBean = setTopBoxBean.getRoom();
 //        }
-        if (setTopBoxBean.getBoite()!=null){
+        if (setTopBoxBean.getBoite() != null) {
             boiteBean = setTopBoxBean.getBoite();
         }
         List<MediaLibBean> mediaLibBeans = setTopBoxBean.getPlay_list();
-        if (mediaLibBeans!=null&&mediaLibBeans.size()>0){
+        if (mediaLibBeans != null && mediaLibBeans.size() > 0) {
             dbHelper.deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
             String usbMediaRootPath = session.getUsbPath()
-                    +File.separator
-                    +ConstantValues.USB_FILE_HOTEL_MEDIA_PATH
-                    +File.separator;
+                    + File.separator
+                    + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH
+                    + File.separator;
             String usbAdvRootPath = session.getUsbPath()
-                    +File.separator
-                    +ConstantValues.USB_FILE_HOTEL_PATH
-                    +File.separator
-                    +session.getBoiteId()
-                    +File.separator
-                    +ConstantValues.USB_FILE_HOTEL_UPDATE_ADV
-                    +File.separator;
+                    + File.separator
+                    + ConstantValues.USB_FILE_HOTEL_PATH
+                    + File.separator
+                    + session.getBoiteId()
+                    + File.separator
+                    + ConstantValues.USB_FILE_HOTEL_UPDATE_ADV
+                    + File.separator;
             String localRootPath = AppUtils.getFilePath(context, AppUtils.StorageFile.media);
             int completedCount = 0;     // 下载成功个数
-            while (completedCount!=mediaLibBeans.size()){
-                for (MediaLibBean bean:mediaLibBeans){
+            while (completedCount != mediaLibBeans.size()) {
+                for (MediaLibBean bean : mediaLibBeans) {
                     String localPath = null;
                     String usbMeidaPath = null;
-                    if (bean.getType().equals(ConstantValues.ADV)){
-                        localPath = localRootPath+bean.getName();
-                        usbMeidaPath = usbAdvRootPath+bean.getName();
+                    if (bean.getType().equals(ConstantValues.ADV)) {
+                        localPath = localRootPath + bean.getName();
+                        usbMeidaPath = usbAdvRootPath + bean.getName();
 
-                    }else{
-                        localPath = localRootPath+bean.getChinese_name()+"."+bean.getSurfix();
-                        usbMeidaPath = usbMediaRootPath + bean.getChinese_name()+"."+bean.getSurfix();
+                    } else {
+                        localPath = localRootPath + bean.getChinese_name() + "." + bean.getSurfix();
+                        usbMeidaPath = usbMediaRootPath + bean.getChinese_name() + "." + bean.getSurfix();
                     }
                     try {
                         boolean isDownloaded = false;
-                        if (isDownloadCompleted(localPath,bean.getMd5())){
+                        if (isDownloadCompleted(localPath, bean.getMd5())) {
                             isDownloaded = true;
 
-                        }else{
+                        } else {
                             new File(localPath).delete();
-                            FileUtils.copyFile(usbMeidaPath,localPath);
+                            FileUtils.copyFile(usbMeidaPath, localPath);
                         }
-                        if (isDownloaded){
+                        if (isDownloaded) {
                             PlayListBean play = new PlayListBean();
                             play.setPeriod(setTopBoxBean.getPeriod());
                             play.setDuration(bean.getDuration());
@@ -275,14 +285,14 @@ public class HandleUSBUpdateService extends Service {
                                 completedCount++;
                             }
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
-                        ShowMessage.showToast(context,usbMeidaPath+"出错");
+                        ShowMessage.showToast(context, usbMeidaPath + "出错");
                     }
 
                 }
             }
-            if (completedCount==mediaLibBeans.size()){
+            if (completedCount == mediaLibBeans.size()) {
                 dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, DBHelper.MediaDBInfo.TableName.PLAYLIST);
                 session.setProPeriod(setTopBoxBean.getPeriod());
                 session.setAdvPeriod(setTopBoxBean.getPeriod());
@@ -290,7 +300,7 @@ public class HandleUSBUpdateService extends Service {
                 notifyToPlay();
             }
         }
-   }
+    }
 
     /**
      * 文件是否下载完成判定
@@ -321,6 +331,7 @@ public class HandleUSBUpdateService extends Service {
 
     /**
      * 生成播放列表
+     *
      * @return
      */
     private boolean fillPlayList() {
@@ -384,23 +395,23 @@ public class HandleUSBUpdateService extends Service {
     /**
      * 将日志拷贝到U盘
      */
-    private void getLogToUSBDriver(AppUtils.StorageFile storageFile){
+    private void getLogToUSBDriver(AppUtils.StorageFile storageFile) {
         File[] files = new File(AppUtils.getFilePath(context, storageFile)).listFiles();
-        if (files!=null&&files.length>0){
+        if (files != null && files.length > 0) {
             String usbLogPath = session.getUsbPath()
                     + File.separator
                     + ConstantValues.USB_FILE_LOG_PATH
                     + File.separator;
-            for (File file:files){
+            for (File file : files) {
                 if (!file.getName().endsWith(".blog")) {
                     file.delete();
                     continue;
                 }
                 String name = file.getName();
                 String path = file.getPath();
-                if (file.isFile()){
+                if (file.isFile()) {
                     String[] split = name.split("_");
-                    if (split.length!=3){
+                    if (split.length != 3) {
                         continue;
                     }
                     String time = split[1].substring(0, 10);
@@ -411,13 +422,13 @@ public class HandleUSBUpdateService extends Service {
                     File zipFile = new File(archivePath);
                     try {
                         AppUtils.zipFile(file, zipFile, zipFile.getName());
-                        if (zipFile.exists()){
+                        if (zipFile.exists()) {
 
-                           String usbLogFilePath = usbLogPath + zipFile.getName();
-                            FileUtils.copyFile(zipFile.getPath(),usbLogFilePath);
-                            if (new File(usbLogFilePath).exists()){
+                            String usbLogFilePath = usbLogPath + zipFile.getName();
+                            FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
+                            if (new File(usbLogFilePath).exists()) {
                                 zipFile.delete();
-                                if (storageFile.equals(AppUtils.StorageFile.log)){
+                                if (storageFile.equals(AppUtils.StorageFile.log)) {
                                     File logedFile = new File(AppUtils.getFilePath(context, AppUtils.StorageFile.loged));
                                     file.renameTo(new File(logedFile + file.getName()));
                                 }
@@ -437,7 +448,7 @@ public class HandleUSBUpdateService extends Service {
     /**
      * 更新APK版本
      */
-    private void toUpdateApk(){
+    private void toUpdateApk() {
 
     }
 }
