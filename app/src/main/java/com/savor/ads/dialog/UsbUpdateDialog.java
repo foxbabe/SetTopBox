@@ -220,6 +220,16 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                     }
                 });
             }
+
+            @Override
+            public void onActionProgress(final int index,final String msg) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mActionTvList.get(index).setText(msg);
+                    }
+                });
+            }
         });
 
         new Thread(new Runnable() {
