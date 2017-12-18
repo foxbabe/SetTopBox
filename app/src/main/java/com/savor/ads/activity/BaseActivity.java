@@ -470,8 +470,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     }
 
     private void handleUsbUpdate() {
-        mSession.setBoiteId("84");
-        mSession.setStandalone(true);
+//        mSession.setBoiteId("84");
 
         if (!TextUtils.isEmpty(mSession.getBoiteId())) {
             if (checkAndSetUsbPath()) {
@@ -485,7 +484,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                 ShowMessage.showToast(this, "未发现可执行U盘目录");
             }
         } else {
-            if (mInputBoiteIdDialog != null) {
+            if (mInputBoiteIdDialog == null) {
                 mInputBoiteIdDialog = new InputBoiteIdDialog(this, this);
             }
 
@@ -559,6 +558,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     @Override
     public void onBoiteIdCheckPass() {
+        mSession.setStandalone(true);
         handleUsbUpdate();
     }
 }

@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="请先输入机顶盒所在酒楼ID"
+        android:text="请输入机顶盒所在酒楼ID"
+        android:textColor="#333333"
         android:textSize="40sp"/>
 
     <LinearLayout
@@ -22,9 +23,10 @@
 
         <EditText
             android:id="@+id/tv_boite_id"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:hint="请输入酒楼ID"
+            android:hint="酒楼ID"
+            android:inputType="number"
             android:textSize="30sp"/>
 
         <Button

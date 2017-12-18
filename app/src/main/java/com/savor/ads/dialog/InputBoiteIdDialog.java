@@ -13,10 +13,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.R;
 import com.savor.ads.bean.BoiteBean;
 import com.savor.ads.core.Session;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.FileUtils;
@@ -65,8 +67,8 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
         Window window = getWindow(); // 得到对话框
         window.getDecorView().setPadding(0, 0, 0, 0);
         WindowManager.LayoutParams wl = window.getAttributes();
-        wl.width = DensityUtil.dip2px(getContext(), 350);
-        wl.height = DensityUtil.dip2px(getContext(), 150);
+        wl.width = DensityUtil.dip2px(getContext(), 700);
+        wl.height = DensityUtil.dip2px(getContext(), 300);
         wl.gravity = Gravity.CENTER;
         window.setAttributes(wl);
     }
@@ -86,13 +88,17 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
     public void show() {
         super.show();
 
-
-        File hotelListFile = new File(mSession.getUsbPath() +
+        mSaveBtn.requestFocus();
+        File hotelListFile = new File(mSession.getUsbPath() + File.separator +
                 ConstantValues.USB_FILE_HOTEL_LIST_JSON);
         if (hotelListFile.exists()) {
             String str = FileUtils.read(hotelListFile.getPath());
             if (!TextUtils.isEmpty(str)) {
-                mBoiteList = new Gson().fromJson(str, new TypeToken<ArrayList<BoiteBean>>(){}.getType());
+                try {
+                    mBoiteList = new Gson().fromJson(str, new TypeToken<ArrayList<BoiteBean>>(){}.getType());
+                } catch (JsonSyntaxException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
