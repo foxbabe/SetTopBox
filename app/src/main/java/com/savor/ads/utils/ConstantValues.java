@@ -96,6 +96,8 @@ public class ConstantValues {
     public static final String USB_FILE_HOTEL_UPDATE_MEIDA = "update_media";
     /**U盘安装酒楼配置文件-更新版本*/
     public static final String USB_FILE_HOTEL_UPDATE_APK = "update_apk";
+    /**U盘安装酒楼配置文件-更新LOGO*/
+    public static final String USB_FILE_HOTEL_UPDATE_LOGO = "update_logo";
     /**U盘安装酒楼配置文件-更新视频json文件*/
     public static final String USB_FILE_HOTEL_UPDATE_JSON = "play_list.json";
     /**U盘安装酒楼配置文件-更新宣传片目录*/
@@ -108,10 +110,6 @@ public class ConstantValues {
     public static final String USB_FILE_CHANNEL_EDIT_DATA = "channel.csv";
     /**U盘安装-酒楼列表文件*/
     public static final String USB_FILE_HOTEL_LIST_JSON = "hotel.json";
-    /**U盘安装-更新的APK文件*/
-    public static final String USB_FILE_APK_FILE = "savormedia.apk";
-    /**U盘安装-更新的APK文件MD5值目录*/
-    public static final String USB_FILE_APK_MD5_FILE = "savormedia.md5";
     /**U盘安装酒楼配置文件-单机日志标志*/
     public static final String STANDALONE="standalone";
     /** 广告下载完成广播Action*/

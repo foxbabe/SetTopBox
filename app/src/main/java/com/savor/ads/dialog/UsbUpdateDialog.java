@@ -118,6 +118,9 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_APK:
                         actionTv.setText("更新应用");
                         break;
+                    case ConstantValues.USB_FILE_HOTEL_UPDATE_LOGO:
+                        actionTv.setText("更新LOGO");
+                        break;
                     default:
                         isKnownAction = false;
                         break;
@@ -207,6 +210,8 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
 
             @Override
             public void onAllComplete() {
+                // 执行过一次U盘更新则认为已经是单机版
+                mSession.setStandalone(true);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.MediaLibBean;
@@ -35,10 +34,7 @@ public class UsbUpdateHandler {
     Context mContext;
     ProgressCallback mCallback;
     List<String> cfgList;
-    /**
-     * 节目数据
-     */
-    private SetTopBoxBean setTopBoxBean;
+
     private final Session mSession;
 
     public UsbUpdateHandler(Context context, List<String> cfgList, ProgressCallback callback) {
@@ -107,6 +103,13 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = updateApk();
+                        break;
+                    case ConstantValues.USB_FILE_HOTEL_UPDATE_LOGO:
+                        if (mCallback != null) {
+                            mCallback.onStart(i);
+                        }
+                        isKnownAction = true;
+                        isSuccess = updateLogo();
                         break;
                     default:
                         isKnownAction = false;
@@ -291,6 +294,7 @@ public class UsbUpdateHandler {
             return false;
         }
         String jsonContent = FileUtils.readFileToStr(jsonFile);
+        SetTopBoxBean setTopBoxBean = null;
         if (!TextUtils.isEmpty(jsonContent)) {
             setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
             }.getType());
@@ -537,34 +541,47 @@ public class UsbUpdateHandler {
      */
     private boolean updateApk() {
         boolean isSuccess = true;
+        String jsonPath = mSession.getUsbPath() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            LogUtils.w("update apk but play_list file not exist");
+            LogFileUtil.write("update apk but play_list file not exist");
+            return false;
+        }
+        String jsonContent = FileUtils.readFileToStr(jsonFile);
+        SetTopBoxBean setTopBoxBean = null;
+        if (!TextUtils.isEmpty(jsonContent)) {
+            setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
+            }.getType());
+        }
+        if (setTopBoxBean == null || setTopBoxBean.getVersion() == null) {
+            LogUtils.w("update apk but play_list file json format error");
+            LogFileUtil.write("update apk but play_list file json format error");
+            return false;
+        }
+
         File apkFile = new File(mSession.getUsbPath() +
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                 mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_APK_FILE);
-        File md5File = new File(mSession.getUsbPath() +
-                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_APK_MD5_FILE);
+                setTopBoxBean.getVersion().getApk_name());
         if (!apkFile.exists()) {
             LogFileUtil.write("Update apk but apk file not exits");
             LogUtils.w("Update apk but apk file not exits");
             return false;
         }
-        if (!md5File.exists()) {
-            LogFileUtil.write("Update apk but md5 file not exits");
-            LogUtils.w("Update apk but md5 file not exits");
-            return false;
-        }
 
-        String md5Str = FileUtils.read(md5File.getPath());
+        String md5Str = setTopBoxBean.getVersion().getApkMd5();
         if (apkFile.length() <= 0) {
             LogFileUtil.write("Update apk but apk file is empty");
             LogUtils.w("Update apk but apk file is empty");
             return false;
         }
         if (TextUtils.isEmpty(md5Str) || TextUtils.isEmpty(md5Str.trim())) {
-            LogFileUtil.write("Update apk but md5 file is empty");
-            LogUtils.w("Update apk but md5 file is empty");
+            LogFileUtil.write("Update apk but md5 is empty");
+            LogUtils.w("Update apk but md5 is empty");
             return false;
         }
 
@@ -583,6 +600,79 @@ public class UsbUpdateHandler {
         } catch (IOException e) {
             e.printStackTrace();
             isSuccess = false;
+        }
+        return isSuccess;
+    }
+
+    private boolean updateLogo() {
+        boolean isSuccess = true;
+        String jsonPath = mSession.getUsbPath() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            LogUtils.w("update logo but play_list file not exist");
+            LogFileUtil.write("update logo but play_list file not exist");
+            return false;
+        }
+        String jsonContent = FileUtils.readFileToStr(jsonFile);
+        SetTopBoxBean setTopBoxBean = null;
+        if (!TextUtils.isEmpty(jsonContent)) {
+            setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
+            }.getType());
+        }
+        if (setTopBoxBean == null || setTopBoxBean.getVersion() == null) {
+            LogUtils.w("update logo but play_list file json format error");
+            LogFileUtil.write("update logo but play_list file json format error");
+            return false;
+        }
+
+        File logoFile = new File(mSession.getUsbPath() +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                setTopBoxBean.getVersion().getLogo_name());
+        if (!logoFile.exists()) {
+            LogFileUtil.write("Update logo but logo file not exits");
+            LogUtils.w("Update logo but logo file not exits");
+            return false;
+        }
+
+        String md5Str = setTopBoxBean.getVersion().getLogo_md5();
+        if (logoFile.length() <= 0) {
+            LogFileUtil.write("Update logo but logo file is empty");
+            LogUtils.w("Update logo but logo file is empty");
+            return false;
+        }
+        if (TextUtils.isEmpty(md5Str) || TextUtils.isEmpty(md5Str.trim())) {
+            LogFileUtil.write("Update logo but md5 is empty");
+            LogUtils.w("Update logo but md5 is empty");
+            return false;
+        }
+
+        byte[] fRead = new byte[0];
+        String md5Value = null;
+        try {
+            fRead = org.apache.commons.io.FileUtils.readFileToByteArray(logoFile);
+            md5Value = AppUtils.getMD5(fRead);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
+        if (md5Value != null && md5Value.equals(md5Str)) {
+            try {
+                File file = new File(AppUtils.getSDCardPath(), mSession.getSplashPath());
+                if (file.exists()) {
+                    file.delete();
+                }
+                String newPath = "/Pictures/" + logoFile.getName();
+                FileUtils.copyFile(logoFile.getAbsolutePath(), AppUtils.getSDCardPath() + newPath);
+                mSession.setSplashPath(newPath);
+                mSession.setSplashVersion(setTopBoxBean.getVersion().getLogo_version());
+            } catch (Exception e) {
+                e.printStackTrace();
+                isSuccess = false;
+            }
         }
         return isSuccess;
     }

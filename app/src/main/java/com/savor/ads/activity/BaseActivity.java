@@ -470,8 +470,6 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     }
 
     private void handleUsbUpdate() {
-//        mSession.setBoiteId("84");
-
         if (!TextUtils.isEmpty(mSession.getBoiteId())) {
             if (checkAndSetUsbPath()) {
                 if (mUsbUpdateDialog == null) {
@@ -558,7 +556,6 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     @Override
     public void onBoiteIdCheckPass() {
-        mSession.setStandalone(true);
         handleUsbUpdate();
     }
 }
