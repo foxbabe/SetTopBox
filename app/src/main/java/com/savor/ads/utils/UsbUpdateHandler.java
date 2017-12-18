@@ -515,8 +515,8 @@ public class UsbUpdateHandler {
                             if (new File(usbLogFilePath).exists()) {
                                 zipFile.delete();
                                 if (storageFile.equals(AppUtils.StorageFile.log)) {
-                                    File logedFile = new File(AppUtils.getFilePath(mContext, AppUtils.StorageFile.loged));
-                                    file.renameTo(new File(logedFile + file.getName()));
+                                    String logedPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.loged);
+                                    file.renameTo(new File(logedPath + file.getName()));
                                 }
                             }
                         }
