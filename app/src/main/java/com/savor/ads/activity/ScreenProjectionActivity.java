@@ -311,7 +311,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        projectTipAnimateIn();
+        if (mIsNewDevice) {
+            projectTipAnimateIn();
+            mUUID = null;
+        } else {
+            mProjectTipTv.setVisibility(View.GONE);
+        }
     }
 
     private void handleBundleData(Bundle bundle) {
@@ -369,6 +374,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
         animation.setDuration(1000);
         animation.setFillAfter(true);
+        mProjectTipTv.setVisibility(View.VISIBLE);
         mProjectTipTv.startAnimation(animation);
     }
 
@@ -395,6 +401,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -409,6 +416,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -450,6 +458,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageView.setScaleX(1);
                 mImageView.setScaleY(1);
                 rotatePicture();
+
+                rescheduleToExit(true);
             }
         } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
             // 餐厅端幻灯片
@@ -460,6 +470,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mPptVp.setVisibility(View.VISIBLE);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
             mPptAdapter.setSourceType(1);
             mPptAdapter.setPptDataSource(mPptConfig.getImages());
             if (mPptVp.getChildCount() > 0) {
@@ -479,6 +490,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             String basePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID + File.separator;
@@ -499,7 +511,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
-//            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
             mPptAdapter.setSourceType(2);
             mPptAdapter.setSpecialtyDataSource(mSpecialtyFileList);
             if (mPptVp.getChildCount() > 0) {
@@ -519,6 +532,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.VISIBLE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
 
             int bgResId = 0;
             switch (mGreetingTemplate) {
@@ -560,6 +574,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
 
             mSavorVideoView.setMediaFiles(mAdvFileList, 0, 0);
         }
@@ -578,11 +593,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mProjectTipTv.setVisibility(View.VISIBLE);
         } else {
             mProjectTipTv.setVisibility(View.GONE);
-        }
-
-        // 只有是投图片时才开始计划定时退出投屏
-        if (ConstantValues.PROJECT_TYPE_PICTURE.equals(mProjectType) && mIsThumbnail) {
-            rescheduleToExit(true);
         }
     }
 

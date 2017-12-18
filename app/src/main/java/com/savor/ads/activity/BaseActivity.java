@@ -22,6 +22,8 @@ import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
+import com.savor.ads.dialog.InputBoiteIdDialog;
+import com.savor.ads.dialog.UsbUpdateDialog;
 import com.savor.ads.service.HandleUSBUpdateService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
@@ -45,19 +47,21 @@ import java.util.List;
 /**
  * Created by zhanghq on 2016/6/23.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends Activity implements InputBoiteIdDialog.Callback {
 
     protected Activity mContext;
     protected Session mSession;
     public AudioManager mAudioManager = null;
 
     private BoxInfoDialog mBoxInfoDialog;
+    private UsbUpdateDialog mUsbUpdateDialog;
+    private InputBoiteIdDialog mInputBoiteIdDialog;
 
     private Handler mHandler = new Handler();
 
     protected boolean mIsGoneToSystemSetting;
     private AudioSkin mAudioSkin;
-    private String usbPath0="/storage/udisk0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,20 +119,36 @@ public abstract class BaseActivity extends Activity {
             String usbPath = intent.getDataString().split("file://")[1];
             switch (intent.getAction()) {
                 case Intent.ACTION_MEDIA_MOUNTED:
-                    if (path.contains("/mnt/extsd")) {
-                        handleExtsdMounted();
-                    } else if (path.contains("usb")) {
-                        handleUdiskMounted(path);
+                    if (AppUtils.isMstar()) {
+                        if (path.contains("/mnt/extsd")) {
+                            handleExtsdMounted();
+                        } else if (path.contains("usb")) {
+                            mSession.setUsbPath(usbPath);
+                            handleUdiskMounted(path);
+                        }
+                    } else {
+                        if (path.contains("storage/") && path.contains("-")) {
+                            mSession.setUsbPath(usbPath);
+                            handleUdiskMounted(path);
+                        }
                     }
                     break;
                 case Intent.ACTION_MEDIA_UNMOUNTED:
                 case Intent.ACTION_MEDIA_REMOVED:
                 case Intent.ACTION_MEDIA_BAD_REMOVAL:
-                    if (path.contains("/mnt/extsd")) {//sd 卡拔除
-                        handleExtsdRemoved();
-                    } else if (path.contains("usb")) {
-                        //U盘拔出
-                        handleUdiskRemoved(path);
+                    if (AppUtils.isMstar()) {
+                        if (path.contains("/mnt/extsd")) {//sd 卡拔除
+                            handleExtsdRemoved();
+                        } else if (path.contains("usb")) {
+                            //U盘拔出
+                            mSession.setUsbPath(null);
+                            handleUdiskRemoved(path);
+                        }
+                    } else {
+                        if (path.contains("storage/") && path.contains("-")) {
+                            mSession.setUsbPath(null);
+                            handleUdiskRemoved(path);
+                        }
                     }
                     break;
             }
@@ -156,7 +176,7 @@ public abstract class BaseActivity extends Activity {
         if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
             dateStr = lastStartStr.split(" ")[0];
         }
-        LogFileUtil.write("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
+        LogFileUtil.write("checkAndClearCache curTimeStr=" + curTimeStr + " lastDateStr=" + dateStr);
         if (!curTimeStr.equals(dateStr)) {
             AppUtils.clearPptTmpFiles(this);
         }
@@ -408,7 +428,7 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-         boolean handled = false;
+        boolean handled = false;
         if (keyCode == KeyCode.KEY_CODE_SYSTEM_SETTING) {
             LogFileUtil.write("will gotoSystemSetting");
             gotoSystemSetting();
@@ -451,20 +471,48 @@ public abstract class BaseActivity extends Activity {
 
     private void handleUsbUpdate() {
         mSession.setBoiteId("84");
-        mSession.setUsbPath(usbPath0);
         mSession.setStandalone(true);
-        String cfgPath = usbPath0 + File.separator +
-                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_HOTEL_UPDATE_CFG;
 
-        File cfgFile = new File(cfgPath);
-        //指定存放图片的文件夹不存在的情况
-        if (!TextUtils.isEmpty(mSession.getBoiteId()) && cfgFile.exists()) {
-            Intent intent = new Intent(this, HandleUSBUpdateService.class);
-            intent.putExtra("cfgFile", cfgFile);
-            startService(intent);
+        if (!TextUtils.isEmpty(mSession.getBoiteId())) {
+            if (checkAndSetUsbPath()) {
+                if (mUsbUpdateDialog == null) {
+                    mUsbUpdateDialog = new UsbUpdateDialog(this);
+                }
+                if (!mUsbUpdateDialog.isShowing()) {
+                    mUsbUpdateDialog.show();
+                }
+            } else {
+                ShowMessage.showToast(this, "未发现可执行U盘目录");
+            }
+        } else {
+            if (mInputBoiteIdDialog != null) {
+                mInputBoiteIdDialog = new InputBoiteIdDialog(this, this);
+            }
+
+            if (!mInputBoiteIdDialog.isShowing()) {
+                mInputBoiteIdDialog.show();
+            }
         }
+    }
+
+    private boolean checkAndSetUsbPath() {
+        boolean hasEligibleUdisk = false;
+        if (AppUtils.isMstar()) {
+
+        } else {
+            String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
+            for (String path : possiblePaths) {
+                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists() &&
+                        new File(path + ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                                mSession.getBoiteId() + File.separator +
+                                ConstantValues.USB_FILE_HOTEL_UPDATE_CFG).exists()) {
+                    mSession.setUsbPath(path);
+                    hasEligibleUdisk = true;
+                    break;
+                }
+            }
+        }
+        return hasEligibleUdisk;
     }
 
     private void manualHeartbeat() {
@@ -507,5 +555,10 @@ public abstract class BaseActivity extends Activity {
             return mAudioSkin.getVolume();
         }
         return -1;
+    }
+
+    @Override
+    public void onBoiteIdCheckPass() {
+        handleUsbUpdate();
     }
 }

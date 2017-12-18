@@ -124,9 +124,6 @@ public class TvChannelListDialog extends Dialog {
             handled = true;
 
         }
-        if (getContext() instanceof Activity) {
-            return handled || ((Activity) getContext()).onKeyDown(keyCode, event);
-        }
         return handled || super.onKeyDown(keyCode, event);
     }
 

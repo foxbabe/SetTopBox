@@ -106,6 +106,12 @@ public class ConstantValues {
     public static final String USB_FILE_CHANNEL_RAW_DATA = "channel_raw";
     /**U盘安装-频道信息编辑数据*/
     public static final String USB_FILE_CHANNEL_EDIT_DATA = "channel.csv";
+    /**U盘安装-酒楼列表文件*/
+    public static final String USB_FILE_HOTEL_LIST_JSON = "hotel.json";
+    /**U盘安装-更新的APK文件*/
+    public static final String USB_FILE_APK_FILE = "savormedia.apk";
+    /**U盘安装-更新的APK文件MD5值目录*/
+    public static final String USB_FILE_APK_MD5_FILE = "savormedia.md5";
     /**U盘安装酒楼配置文件-单机日志标志*/
     public static final String STANDALONE="standalone";
     /** 广告下载完成广播Action*/

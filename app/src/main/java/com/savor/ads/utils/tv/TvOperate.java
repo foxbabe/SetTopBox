@@ -245,106 +245,20 @@ public class TvOperate {
 
     }
 
-    private AtvProgramInfo readDatabase(int index) {
-
-        AtvProgramInfo p = new AtvProgramInfo();
-
-
-        AtvScanManager asm = AtvManager.getAtvScanManager();
-        AudioManager am = TvManager.getAudioManager();
-
-        try {
-            //	asm.getProgramControl(EnumSetProgramCtrl.E_SET_CURRENT_PROGRAM_NUMBER, 0, 0);
-            //	asm.setProgramControl(EnumSetProgramCtrl.E_RESET_CHANNEL_DATA, 0, 0);
-
-            //asm.setProgramControl(EnumSetProgramCtrl.E_SET_CURRENT_PROGRAM_NUMBER, p.chennalNum, 0);
-            p.setAudioStandard(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_AUDIO_STANDARD, index));
-            p.setFreq(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_PROGRAM_PLL_DATA, index));
-            p.setVideoStandard(asm.getAtvProgramInfo(AtvScanManager.EnumGetProgramInfo.E_GET_VIDEO_STANDARD_OF_PROGRAM, index));
-            p.setChannelName(asm.getAtvStationName(index));
-            p.setChennalNum(index);
-
-
-        } catch (TvCommonException e) {
-            e.printStackTrace();
-        }
-
-
-        return p;
-
-    }
-
-    public void readWriteTest() {
-        AtvProgramInfo[] oldlist = getAllProgramInfo();
-        ArrayList<AtvProgramInfo> newlist = new ArrayList<AtvProgramInfo>(Arrays.asList(oldlist));
-        AtvProgramInfo p = getProgramInfo(6);
-        p.setChennalNum(newlist.size());
-        newlist.add(p);
-
-//		for (AtvProgramInfo info : newlist) {
-//			LogUtils.i(("chennalNum=" + info.chennalNum);
-//			LogUtils.i(("name=" + info.channelName);
-//			LogUtils.i(("freq=" + info.freq);
-//			LogUtils.i(("videosystem=" + info.videoStandard);
-//			LogUtils.i(("audiosystem=" + info.audioStandard);
-//		}
-
-        writeToDatabase(newlist.toArray(new AtvProgramInfo[newlist.size()]));
-    }
-
     public void updateProgram(Context context, TvProgramResponse programResponse) {
-//        JSONArray roomList = null;
-//        JSONObject jsonObj = null;
-//        LogUtils.i("tx", "list " + list);
-//
-//
-//        JSONObject jsonObject = null;
-//
-//
-//        try {
-//            jsonObject = new JSONObject(list);
-//        } catch (JSONException e2) {
-//            e2.printStackTrace();
-//        }
-//
-//
-//        try {
-//            roomList = jsonObject.getJSONArray("channelInfo");
-//            // roomList = new JSONArray(list1);
-//            LogUtils.i("tx", "roomList size " + roomList.length());
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        if (roomList.length() <= 0)
-//            return;
         if (programResponse == null || programResponse.getTvChannelList() == null || programResponse.getTvChannelList().isEmpty())
             return;
-//        ArrayList<AtvProgramInfo> newlist = new ArrayList<AtvProgramInfo>();
-//        for (int i = 0; i < roomList.length(); i++) {
-//
-//            try {
-//                jsonObj = roomList.getJSONObject(i);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//            AtvProgramInfo p = new AtvProgramInfo();//getProgramInfo(0);
-//            String chennalNum = jsonObj.optString("chennalNum");
-//            String freq = jsonObj.optString("freq");
-//            String audioStandard = jsonObj.optString("audioStandard");
-//            String videoStandard = jsonObj.optString("videoStandard");
-//            p.setChennalNum(Integer.parseInt(chennalNum) - 1);
-//            p.setFreq(Integer.parseInt(freq));
-//            p.setChannelName(jsonObj.optString("channelName"));
-//            p.setAudioStandard(Integer.parseInt(audioStandard));
-//            p.setVideoStandard(Integer.parseInt(videoStandard));
-//
-//            newlist.add(p);
-//        }
-//        writeToDatabase(newlist.toArray(new AtvProgramInfo[newlist.size()]));
-//        String defNum = jsonObject.optString("defaultNum");
 
         writeToDatabase(programResponse.getTvChannelList().toArray(new AtvProgramInfo[programResponse.getTvChannelList().size()]));
         Session.get(context).setTvDefaultChannelNumber(programResponse.getLockingChannelNum());
+    }
+
+    public void updateProgram(Context context, AtvProgramInfo[] programInfos) {
+        if (programInfos == null || programInfos.length <= 0)
+            return;
+
+        writeToDatabase(programInfos);
+        Session.get(context).setTvDefaultChannelNumber(0);
     }
 
     public TvOsType.EnumInputSource getCurrentInputSource() {

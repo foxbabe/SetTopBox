@@ -6,8 +6,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 
+import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
@@ -40,18 +42,16 @@ public class GreetingService extends Service {
             mCount++;
             LogUtils.d("will show greeting in service, current count is " + mCount);
 
-            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                    GlobalValues.IS_RSTR_PROJECTION) {
-                boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
-
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) &&
+                    ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity &&
+                    !GlobalValues.IS_BOX_BUSY) {
                 GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
                 GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
                 GlobalValues.IS_RSTR_PROJECTION = true;
                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = "1.1.1.1";
                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                ProjectOperationListener.getInstance(GreetingService.this).showGreeting(words, template, DURATION, isNewDevice);
+                ProjectOperationListener.getInstance(GreetingService.this).showGreeting(words, template, DURATION, false);
             }
 
             if (mCount >= MAX_COUNT) {
@@ -64,6 +64,11 @@ public class GreetingService extends Service {
     };
 
     public GreetingService() {
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
     }
 
     @Override
@@ -81,14 +86,9 @@ public class GreetingService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        mHandler.removeCallbacks(mRunnable);
-        return super.onUnbind(intent);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
+        mHandler.removeCallbacks(mRunnable);
         LogUtils.d("GreetingService is destroy");
     }
 }

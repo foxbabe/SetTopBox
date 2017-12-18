@@ -173,7 +173,7 @@ public class TvDBHelper extends SQLiteOpenHelper {
                     do {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(FieldName.CHANNEL_ID, cursor.getInt(cursor.getColumnIndex(TvContract.Channels._ID)));
-                        contentValues.put(FieldName.CHANNEL_NAME, "P-" + ++i);
+                        contentValues.put(FieldName.CHANNEL_NAME, cursor.getString(cursor.getColumnIndex(TvContract.Channels.COLUMN_DISPLAY_NAME)));
 
                         db.insert(TableName.ATV_CHANNEL, null, contentValues);
                     } while (cursor.moveToNext());
