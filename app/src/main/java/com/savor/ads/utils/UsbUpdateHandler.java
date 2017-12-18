@@ -544,23 +544,14 @@ public class UsbUpdateHandler {
         File apkFile = new File(mSession.getUsbPath() +
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                 mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_APK_FILE);
-        File md5File = new File(mSession.getUsbPath() +
-                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_APK_MD5_FILE);
+                setTopBoxBean.getVersion().getApk_name());
         if (!apkFile.exists()) {
             LogFileUtil.write("Update apk but apk file not exits");
             LogUtils.w("Update apk but apk file not exits");
             return false;
         }
-        if (!md5File.exists()) {
-            LogFileUtil.write("Update apk but md5 file not exits");
-            LogUtils.w("Update apk but md5 file not exits");
-            return false;
-        }
 
-        String md5Str = FileUtils.read(md5File.getPath());
+        String md5Str = setTopBoxBean.getVersion().getApkMd5();
         if (apkFile.length() <= 0) {
             LogFileUtil.write("Update apk but apk file is empty");
             LogUtils.w("Update apk but apk file is empty");
