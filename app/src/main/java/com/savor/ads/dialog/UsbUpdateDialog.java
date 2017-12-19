@@ -42,6 +42,8 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
     private Context mContext;
     private List<String> mActionList;
 
+    private boolean mIsProcessing;
+
     private Handler mHandler = new Handler();
 
     public UsbUpdateDialog(Context context) {
@@ -152,9 +154,12 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
         if (keyCode == KeyCode.KEY_CODE_BACK) {
-            dismiss();
+            if (!mIsProcessing) {
+                dismiss();
+            } else {
+                ShowMessage.showToast(mContext, "正在处理中，请稍候");
+            }
             handled = true;
-
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -163,9 +168,14 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
-                dismiss();
+                if (!mIsProcessing) {
+                    dismiss();
+                } else {
+                    ShowMessage.showToast(mContext, "正在处理中，请稍候");
+                }
                 break;
             case R.id.btn_ok:
+                mIsProcessing = true;
                 mConfirmBtn.setEnabled(false);
                 mCancelBtn.setEnabled(false);
                 mUpdateTipsTv.setText("机顶盒更新中，切勿关机！！！");
@@ -212,6 +222,7 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
             public void onAllComplete() {
                 // 执行过一次U盘更新则认为已经是单机版
                 mSession.setStandalone(true);
+                mIsProcessing = false;
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
