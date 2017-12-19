@@ -87,14 +87,14 @@ public class UsbUpdateHandler {
                             mCallback.onStart(i);
                         }
                         isKnownAction = true;
-                        isSuccess = getLogToUSBDriver(log);
+                        isSuccess = getLogToUSBDriver(log,i);
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOGED:
                         if (mCallback != null) {
                             mCallback.onStart(i);
                         }
                         isKnownAction = true;
-                        isSuccess = getLogToUSBDriver(loged);
+                        isSuccess = getLogToUSBDriver(loged,i);
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_MEIDA:
                         if (mCallback != null) {
@@ -345,7 +345,7 @@ public class UsbUpdateHandler {
                         usbMeidaPath = usbMediaRootPath + bean.getChinese_name() + "." + bean.getSurfix();
                     }
                     try {
-                        mCallback.onActionProgress(i,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+i+1+"个");
+                        mCallback.onActionProgress(index,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+i+1+"个");
                         boolean isDownloaded = false;
                         if (isDownloadCompleted(localPath, bean.getMd5())) {
                             isDownloaded = true;
@@ -484,7 +484,7 @@ public class UsbUpdateHandler {
     /**
      * 将日志拷贝到U盘
      */
-    private boolean getLogToUSBDriver(AppUtils.StorageFile storageFile) {
+    private boolean getLogToUSBDriver(AppUtils.StorageFile storageFile,int index) {
         boolean isSuccess = true;
         File[] files = new File(AppUtils.getFilePath(mContext, storageFile)).listFiles();
         if (files != null && files.length > 0) {
@@ -492,7 +492,9 @@ public class UsbUpdateHandler {
                     + File.separator
                     + ConstantValues.USB_FILE_LOG_PATH
                     + File.separator;
-            for (File file : files) {
+            for (int i =0;i<files.length;i++) {
+                File file = files[i];
+                mCallback.onActionProgress(index,"总共:"+files.length+"个日志，正在提取第"+i+1+"个");
                 if (!file.getName().endsWith(".blog")) {
                     file.delete();
                     continue;
