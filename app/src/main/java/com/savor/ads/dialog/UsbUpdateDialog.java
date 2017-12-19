@@ -166,11 +166,16 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                 dismiss();
                 break;
             case R.id.btn_ok:
-                mConfirmBtn.setEnabled(false);
-                mCancelBtn.setEnabled(false);
-                mUpdateTipsTv.setText("机顶盒更新中，切勿关机！！！");
-                mUpdateTipsTv.setTextColor(0xFFFF0000);
-                doAction();
+                if (mActionList!=null&&mActionList.size()>0){
+                    mConfirmBtn.setEnabled(false);
+                    mCancelBtn.setEnabled(false);
+                    mUpdateTipsTv.setText("机顶盒更新中，切勿关机！！！");
+                    mUpdateTipsTv.setTextColor(0xFFFF0000);
+                    doAction();
+                }else{
+                    mUpdateTipsTv.setText("请检查你的update.cfg文件，没有可执行功能!!!");
+                }
+
                 break;
         }
     }

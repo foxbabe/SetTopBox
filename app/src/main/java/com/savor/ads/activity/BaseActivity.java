@@ -520,10 +520,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         } else {
             String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
             for (String path : possiblePaths) {
-                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists() &&
-                        new File(path + ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                                mSession.getBoiteId() + File.separator +
-                                ConstantValues.USB_FILE_HOTEL_UPDATE_CFG).exists()) {
+                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists()) {
                     mSession.setUsbPath(path);
                     hasEligibleUdisk = true;
                     break;

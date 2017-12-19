@@ -582,4 +582,8 @@ public class UsbUpdateHandler {
         }
         return isSuccess;
     }
+
+
+
+
 }
