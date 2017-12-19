@@ -1627,11 +1627,15 @@ public class AppUtils {
     }
 
     public static String getShowingSSID(Context context) {
-        String ssid = AppUtils.getWifiName(context);
-        if (TextUtils.isEmpty(ssid)) {
-            ssid = Session.get(context).getBoxName();
+        if (isMstar()) {
+            String ssid = AppUtils.getWifiName(context);
+            if (TextUtils.isEmpty(ssid)) {
+                ssid = Session.get(context).getBoxName();
+            }
+            return ssid;
+        } else {
+            return Session.get(context).getBoxName();
         }
-        return ssid;
     }
 
     public static long getAvailableExtSize() {

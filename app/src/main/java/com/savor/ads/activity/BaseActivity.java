@@ -22,6 +22,7 @@ import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
+import com.savor.ads.dialog.FileCopyDialog;
 import com.savor.ads.dialog.InputBoiteIdDialog;
 import com.savor.ads.dialog.UsbUpdateDialog;
 import com.savor.ads.service.HandleUSBUpdateService;
@@ -56,6 +57,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     private BoxInfoDialog mBoxInfoDialog;
     private UsbUpdateDialog mUsbUpdateDialog;
     private InputBoiteIdDialog mInputBoiteIdDialog;
+    private FileCopyDialog mFileCopyDialog;
 
     private Handler mHandler = new Handler();
 
@@ -449,6 +451,9 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         } else if (keyCode == KeyCode.KEY_CODE_UDISK_UPDATE) {
             handleUsbUpdate();
             handled = true;
+        } else if (keyCode == KeyCode.KEY_CODE_UDISK_COPY) {
+            handleUsbCopy();
+            handled = true;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -470,8 +475,8 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     }
 
     private void handleUsbUpdate() {
-        if (!TextUtils.isEmpty(mSession.getBoiteId())) {
-            if (checkAndSetUsbPath()) {
+        if (checkAndSetUsbPath()) {
+            if (!TextUtils.isEmpty(mSession.getBoiteId())) {
                 if (mUsbUpdateDialog == null) {
                     mUsbUpdateDialog = new UsbUpdateDialog(this);
                 }
@@ -479,16 +484,33 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                     mUsbUpdateDialog.show();
                 }
             } else {
-                ShowMessage.showToast(this, "未发现可执行U盘目录");
+                if (mInputBoiteIdDialog == null) {
+                    mInputBoiteIdDialog = new InputBoiteIdDialog(this, this);
+                }
+
+                if (!mInputBoiteIdDialog.isShowing()) {
+                    mInputBoiteIdDialog.show();
+                }
             }
         } else {
-            if (mInputBoiteIdDialog == null) {
-                mInputBoiteIdDialog = new InputBoiteIdDialog(this, this);
-            }
+            ShowMessage.showToast(this, "未发现可执行U盘目录");
+        }
+    }
 
-            if (!mInputBoiteIdDialog.isShowing()) {
-                mInputBoiteIdDialog.show();
+    private void handleUsbCopy() {
+        if (checkAndSetUsbPath()) {
+            File mediaFile = new File(mSession.getUsbPath() + "media/");
+            File multicastFile = new File(mSession.getUsbPath() + "multicast/");
+            if (!mediaFile.exists() && !multicastFile.exists()) {
+                ShowMessage.showToast(this, "未发现可执行U盘目录");
+            } else {
+                if (mFileCopyDialog == null) {
+                    mFileCopyDialog = new FileCopyDialog(this);
+
+                }
             }
+        } else {
+            ShowMessage.showToast(this, "未发现可执行U盘目录");
         }
     }
 

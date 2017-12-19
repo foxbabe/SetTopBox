@@ -110,4 +110,8 @@ public class KeyCode {
      * U盘更新
      */
     public static int KEY_CODE_UDISK_UPDATE = 2009;
+    /**
+     * U盘更新
+     */
+    public static int KEY_CODE_UDISK_COPY = 2011;
 }
