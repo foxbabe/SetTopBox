@@ -135,7 +135,7 @@ public class FileCopyDialog extends Dialog {
                     for (int i1 = 0; i1 < listFiles.length; i1++) {
                         File file = listFiles[i1];
                         mHandler.sendMessage(mHandler.obtainMessage(1, "开始拷贝multicast/" + file.getName() +
-                                "(" + (i + 1) + "/" + listFiles.length + ")"));
+                                "(" + (i1 + 1) + "/" + listFiles.length + ")"));
                         boolean isSuccess = true;
                         File dstFile = new File(sdMulticastFile, file.getName());
                         try {
