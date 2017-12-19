@@ -545,7 +545,6 @@ public class UsbUpdateHandler {
         boolean isSuccess = true;
         File apkFile = new File(mSession.getUsbPath() +
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                mSession.getBoiteId() + File.separator +
                 setTopBoxBean.getVersion().getApk_name());
         if (!apkFile.exists()) {
             LogFileUtil.write("Update apk but apk file not exits");
