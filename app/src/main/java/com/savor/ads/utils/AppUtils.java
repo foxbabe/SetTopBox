@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -217,7 +216,7 @@ public class AppUtils {
     }
 
     //获取外部存储卡地址
-    public static String getExternalSDCardPath() {
+    public static String getMainMediaPath() {
         if (AppUtils.isMstar()) {
             if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)) {
                 return EXTERNAL_SDCARD_PATH;
@@ -275,7 +274,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getExternalSDCardPath();
+        String path = getMainMediaPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {
@@ -1639,7 +1638,7 @@ public class AppUtils {
     }
 
     public static long getAvailableExtSize() {
-        StatFs stat = new StatFs(getExternalSDCardPath());
+        StatFs stat = new StatFs(getMainMediaPath());
         long blockSize = stat.getBlockSize();
         long blocks = stat.getAvailableBlocks();
         return blockSize * blocks;

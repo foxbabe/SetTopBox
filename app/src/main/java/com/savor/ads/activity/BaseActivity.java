@@ -6,9 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -25,7 +23,6 @@ import com.savor.ads.dialog.BoxInfoDialog;
 import com.savor.ads.dialog.FileCopyDialog;
 import com.savor.ads.dialog.InputBoiteIdDialog;
 import com.savor.ads.dialog.UsbUpdateDialog;
-import com.savor.ads.service.HandleUSBUpdateService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -186,7 +183,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
             ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
 
@@ -506,7 +503,9 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
             } else {
                 if (mFileCopyDialog == null) {
                     mFileCopyDialog = new FileCopyDialog(this);
-
+                }
+                if (!mFileCopyDialog.isShowing()) {
+                    mFileCopyDialog.show();
                 }
             }
         } else {

@@ -125,7 +125,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     // 循环检查SD卡、网络、小平台信息的情况直到可用
                     do {
                         LogFileUtil.write("HandleMediaDataService will check server info and network");
-                        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath()) &&
+                        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) &&
                                 AppUtils.isNetworkAvailable(context) &&
                                 session.getServerInfo() != null) {
                             break;

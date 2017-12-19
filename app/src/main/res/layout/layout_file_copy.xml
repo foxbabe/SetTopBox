@@ -30,8 +30,7 @@
                 android:id="@+id/tv_tips"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#555555"
-                android:text="开始复制1234.mp4"/>
+                android:textColor="#555555"/>
         <!--</LinearLayout>-->
     </ScrollView>
 </RelativeLayout>

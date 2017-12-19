@@ -81,9 +81,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getExternalSDCardPath());
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             if (AppUtils.isMstar()) {
                 Intent intent = new Intent(this, TvPlayerActivity.class);
                 startActivity(intent);
