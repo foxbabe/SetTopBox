@@ -345,7 +345,7 @@ public class UsbUpdateHandler {
                         usbMeidaPath = usbMediaRootPath + bean.getChinese_name() + "." + bean.getSurfix();
                     }
                     try {
-                        mCallback.onActionProgress(index,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+i+1+"个");
+                        mCallback.onActionProgress(index,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+(i+1)+"个");
                         boolean isDownloaded = false;
                         if (isDownloadCompleted(localPath, bean.getMd5())) {
                             isDownloaded = true;
@@ -359,7 +359,7 @@ public class UsbUpdateHandler {
                             play.setDuration(bean.getDuration());
                             play.setMd5(bean.getMd5());
                             play.setVid(bean.getVid());
-                            play.setMedia_name(bean.getName());
+                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
                             play.setMedia_type(bean.getType());
                             play.setOrder(bean.getOrder());
                             play.setSurfix(bean.getSurfix());
@@ -494,7 +494,7 @@ public class UsbUpdateHandler {
                     + File.separator;
             for (int i =0;i<files.length;i++) {
                 File file = files[i];
-                mCallback.onActionProgress(index,"总共:"+files.length+"个日志，正在提取第"+i+1+"个");
+                mCallback.onActionProgress(index,"总共:"+files.length+"个日志，正在提取第"+(i+1)+"个");
                 if (!file.getName().endsWith(".blog")) {
                     file.delete();
                     continue;
