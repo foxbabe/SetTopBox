@@ -61,6 +61,10 @@ public class UsbUpdateHandler {
 
     public void execute() {
         if (cfgList != null && cfgList.size() > 0) {
+            boolean haveCfg = initConfig();
+            if (!haveCfg){
+                return;
+            }
             for (int i = 0; i < cfgList.size(); i++) {
                 boolean isKnownAction = true;
                 String str = cfgList.get(i);
@@ -88,6 +92,11 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = getLogToUSBDriver(log,i);
+                        if (isSuccess){
+                            msg = "单机版日志文件提取完成";
+                        }else{
+                            msg = "单机版日志文件提取失败";
+                        }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOGED:
                         if (mCallback != null) {
@@ -95,6 +104,11 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = getLogToUSBDriver(loged,i);
+                        if (isSuccess){
+                            msg = "单机版历史日志文件提取完成";
+                        }else{
+                            msg = "单机版历史日志文件提取失败";
+                        }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_MEIDA:
                         if (mCallback != null) {
@@ -102,6 +116,11 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = handleProgramMediaData(i);
+                        if(isSuccess&&setTopBoxBean!=null&&setTopBoxBean.getPlay_list()!=null){
+                            msg = "总共:"+setTopBoxBean.getPlay_list().size()+"个视频，已全部更新完成";
+                        }else{
+                            msg = "视频更新失败，请重试!!";
+                        }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_APK:
                         if (mCallback != null) {
@@ -126,6 +145,28 @@ public class UsbUpdateHandler {
         }
     }
 
+    private boolean initConfig(){
+        String jsonPath = mSession.getUsbPath() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            LogUtils.w("update media but play_list file not exist");
+            LogFileUtil.write("update media but play_list file not exist");
+            return false;
+        }
+        String jsonContent = FileUtils.readFileToStr(jsonFile);
+        if (!TextUtils.isEmpty(jsonContent)) {
+            setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
+            }.getType());
+        }
+        if (setTopBoxBean!=null){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     private boolean readChannelList() {
         boolean isSuccess = true;
@@ -283,21 +324,7 @@ public class UsbUpdateHandler {
      */
     private boolean handleProgramMediaData(int index) {
         boolean isSuccess = true;
-        String jsonPath = mSession.getUsbPath() + File.separator +
-                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                mSession.getBoiteId() + File.separator +
-                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
-        File jsonFile = new File(jsonPath);
-        if (!jsonFile.exists()) {
-            LogUtils.w("update media but play_list file not exist");
-            LogFileUtil.write("update media but play_list file not exist");
-            return false;
-        }
-        String jsonContent = FileUtils.readFileToStr(jsonFile);
-        if (!TextUtils.isEmpty(jsonContent)) {
-            setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
-            }.getType());
-        }
+
         if (setTopBoxBean == null) {
             LogUtils.w("update media but play_list file json format error");
             LogFileUtil.write("update media but play_list file json format error");
@@ -316,7 +343,6 @@ public class UsbUpdateHandler {
 //            }
         List<MediaLibBean> mediaLibBeans = setTopBoxBean.getPlay_list();
         if (mediaLibBeans != null && mediaLibBeans.size() > 0) {
-            DBHelper.get(mContext).deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
             String usbMediaRootPath = mSession.getUsbPath()
                     + File.separator
                     + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH
@@ -332,6 +358,7 @@ public class UsbUpdateHandler {
             String localRootPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media);
             int completedCount = 0;     // 下载成功个数
             while (completedCount != mediaLibBeans.size()) {
+                DBHelper.get(mContext).deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
                 for (int i =0;i<mediaLibBeans.size();i++) {
                     MediaLibBean bean = mediaLibBeans.get(i);
                     String localPath = null;
@@ -353,13 +380,20 @@ public class UsbUpdateHandler {
                             new File(localPath).delete();
                             FileUtils.copyFile(usbMeidaPath, localPath);
                         }
+                        if (!isDownloaded&&isDownloadCompleted(localPath, bean.getMd5())){
+                            isDownloaded = true;
+                        }
                         if (isDownloaded) {
                             PlayListBean play = new PlayListBean();
                             play.setPeriod(setTopBoxBean.getPeriod());
                             play.setDuration(bean.getDuration());
                             play.setMd5(bean.getMd5());
                             play.setVid(bean.getVid());
-                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
+                            if (bean.getType().equals(ConstantValues.ADV)) {
+                                play.setMedia_name(bean.getName());
+                            }else{
+                                play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
+                            }
                             play.setMedia_type(bean.getType());
                             play.setOrder(bean.getOrder());
                             play.setSurfix(bean.getSurfix());

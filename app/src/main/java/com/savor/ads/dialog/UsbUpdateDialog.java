@@ -109,10 +109,10 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                         actionTv.setText("写入电视节目");
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOG:
-                        actionTv.setText("读取log日志");
+                        actionTv.setText("提取log日志");
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOGED:
-                        actionTv.setText("读取loged日志");
+                        actionTv.setText("提取loged日志");
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_MEIDA:
                         actionTv.setText("更新视频节目");
@@ -184,6 +184,7 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                     mUpdateTipsTv.setTextColor(0xFFFF0000);
                     doAction();
                 }else{
+                    mUpdateTipsTv.setTextColor(0xFF5C5CCD);
                     mUpdateTipsTv.setText("请检查你的update.cfg文件，没有可执行功能!!!");
                 }
 
@@ -207,12 +208,13 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
             }
 
             @Override
-            public void onActionComplete(final int index, final boolean success, String msg) {
+            public void onActionComplete(final int index, final boolean success, final String msg) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         if (index < mActionTvList.size()) {
                             if (success) {
+                                mActionTvList.get(index).setText(msg);
                                 mActionTvList.get(index).setTextColor(0xFF00FF00);
                                 mActionProgressBarList.get(index).setVisibility(View.GONE);
                             } else {
