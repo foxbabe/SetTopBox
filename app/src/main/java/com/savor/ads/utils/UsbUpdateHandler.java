@@ -2,6 +2,7 @@ package com.savor.ads.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
@@ -128,6 +129,21 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = updateApk();
+                        if (!isSuccess){
+                            msg = "应用更新失败！！！";
+                        }
+                        break;
+                    case ConstantValues.USB_FILE_HOTEL_UPDATE_LOGO:
+                        if (mCallback != null) {
+                            mCallback.onStart(i);
+                        }
+                        isKnownAction = true;
+                        isSuccess = updateLogo();
+                        if (isSuccess){
+                            msg = "LGGO更新成功,重启生效！！！";
+                        }else{
+                            msg = "LGGO更新失败,请联系热点张海强！！！";
+                        }
                         break;
                     default:
                         isKnownAction = false;
@@ -520,30 +536,45 @@ public class UsbUpdateHandler {
      */
     private boolean getLogToUSBDriver(AppUtils.StorageFile storageFile,int index) {
         boolean isSuccess = true;
+        List<File> fileList = new ArrayList<>();
         File[] files = new File(AppUtils.getFilePath(mContext, storageFile)).listFiles();
         if (files != null && files.length > 0) {
+            for (File file:files){
+                String name = file.getName();
+                String path = file.getPath();
+                if (!name.endsWith(".blog")) {
+                    file.delete();
+                    continue;
+                }
+                String[] split = name.split("_");
+                if (split.length != 3) {
+                    continue;
+                }
+                String time = split[1].substring(0, 10);
+                if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
+                    continue;
+                }
+                if (file.isFile()
+                        &&file.getName().split("_").length==3
+                        &&file.getName().contains(ConstantValues.STANDALONE)){
+                    fileList.add(file);
+                }
+            }
+        }
+
+        if (fileList!=null&&fileList.size()>0){
             String usbLogPath = mSession.getUsbPath()
                     + File.separator
                     + ConstantValues.USB_FILE_LOG_PATH
                     + File.separator;
-            for (int i =0;i<files.length;i++) {
-                File file = files[i];
-                mCallback.onActionProgress(index,"总共:"+files.length+"个日志，正在提取第"+(i+1)+"个");
-                if (!file.getName().endsWith(".blog")) {
-                    file.delete();
-                    continue;
-                }
+            for (int i =0;i<fileList.size();i++) {
+                File file = fileList.get(i);
+                mCallback.onActionProgress(index,"总共:"+fileList.size()+"个日志，正在提取第"+(i+1)+"个");
+
                 String name = file.getName();
                 String path = file.getPath();
                 if (file.isFile()) {
-                    String[] split = name.split("_");
-                    if (split.length != 3) {
-                        continue;
-                    }
-                    String time = split[1].substring(0, 10);
-                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
-                        continue;
-                    }
+
                     String archivePath = path + ".zip";
                     File zipFile = new File(archivePath);
                     try {
@@ -567,8 +598,10 @@ public class UsbUpdateHandler {
 
                 }
             }
-
         }
+
+
+
         return isSuccess;
     }
 
@@ -577,7 +610,7 @@ public class UsbUpdateHandler {
      */
     private boolean updateApk() {
         boolean isSuccess = true;
-        File apkFile = new File(mSession.getUsbPath() +
+        File apkFile = new File(mSession.getUsbPath() +File.separator+
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                 setTopBoxBean.getVersion().getApk_name());
         if (!apkFile.exists()) {
@@ -617,7 +650,60 @@ public class UsbUpdateHandler {
         return isSuccess;
     }
 
+    /**
+     * 更新酒楼LOGO
+     * @return
+     */
+    private boolean updateLogo(){
+        boolean isSuccess = true;
+        File logoFile = new File(mSession.getUsbPath() +File.separator+
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId()+File.separator +
+                setTopBoxBean.getVersion().getLogo_name());
+        if (!logoFile.exists()) {
+            LogFileUtil.write("Update logo but logo file not exits");
+            LogUtils.w("Update logo but logo file not exits");
+            return false;
+        }
 
+        String md5Str = setTopBoxBean.getVersion().getLogo_md5();
+        if (logoFile.length() <= 0) {
+            LogFileUtil.write("Update logo but logo file is empty");
+            LogUtils.w("Update logo but logo file is empty");
+            return false;
+        }
+        if (TextUtils.isEmpty(md5Str) || TextUtils.isEmpty(md5Str.trim())) {
+            LogFileUtil.write("Update logo but md5 file is empty");
+            LogUtils.w("Update logo but md5 file is empty");
+            return false;
+        }
+
+        try {
+            if (md5Str.equals(AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(logoFile)))) {
+                String newPath = AppUtils.getSDCardPath()+"/Pictures/" + logoFile.getName();
+                FileUtils.copyFile(logoFile.getAbsolutePath(),newPath);
+                File logo = new File(newPath);
+                if (md5Str.equals(AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(logo)))){
+                    isSuccess = true;
+                    mSession.setSplashPath("/Pictures/" + logoFile.getName());
+                    mSession.setSplashVersion(setTopBoxBean.getVersion().getLogo_version());
+                }else{
+                    LogFileUtil.write("copy end logo but logo md5 value is not match");
+                    LogUtils.w("copy end logo but logo md5 value is not match");
+                    isSuccess = false;
+                }
+            } else {
+                LogFileUtil.write("Update logo but logo md5 value is not match");
+                LogUtils.w("Update logo but logo md5 value is not match");
+                isSuccess = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            isSuccess = false;
+        }
+
+        return isSuccess;
+    }
 
 
 }

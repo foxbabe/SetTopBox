@@ -154,7 +154,7 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
                 dos.flush();
                 Thread.sleep(2000);
 
-                file.delete();
+//                file.delete();
 
                 File file1 = new File(tempPath);
                 if (file1.length() > 0) {
