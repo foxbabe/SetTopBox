@@ -83,6 +83,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     private boolean isSuccess;
     float confidence;
     float pitch, yaw, roll;
+    private SurfaceTexture mSurfaceTexture;
 
     public FaceDetectService() {
         super();
@@ -230,7 +231,8 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
             }
 
             try {
-                cameraInst.setPreviewTexture(new SurfaceTexture(66));
+                mSurfaceTexture = new SurfaceTexture(66);
+                cameraInst.setPreviewTexture(mSurfaceTexture);
                 cameraInst.setPreviewCallback(this);
                 cameraInst.startPreview();
             } catch (Exception e) {
@@ -265,11 +267,11 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         parameters.setPreviewSize(previewSize.width, previewSize.height);
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);// 连续对焦
-        } else {
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);// 连续对焦
+//        } else {
+//            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+//        }
 
         //控制图像的正确显示方向
         setDisplayOrientation(parameters, cameraInst);
@@ -423,6 +425,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
     @Override
     public void onPreviewFrame(final byte[] data, Camera camera) {
+        Log.d("-------Eye--------", "onPreviewFrame");
         if (isSuccess)
             return;
         isSuccess = true;
@@ -445,6 +448,8 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                     confidence = 0.0f;
 
                     int[] pointColors = new int[faces.length];
+
+                    Log.d("-------Eye--------", "face count=" +faces.length);
                     if (faces.length >= 0) {
                         String vid = null;
                         Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
@@ -574,6 +579,12 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                         e.printStackTrace();
                     }
                 }
+
+                if (mSurfaceTexture != null) {
+                    mSurfaceTexture.release();
+                    mSurfaceTexture = null;
+                }
+
                 if (facepp != null) {
                     LogUtils.d("Will release facepp");
                     LogFileUtil.writeKeyLogInfo("Will release facepp");

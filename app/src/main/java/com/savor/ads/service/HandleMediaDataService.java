@@ -141,9 +141,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
                     }
 
-                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                    // 异步更新apk、rom
-                    new UpdateUtil(context);
+//                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+//                    // 异步更新apk、rom
+//                    new UpdateUtil(context);
 
                     getPrizeInfo();
 
