@@ -178,6 +178,7 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
         if (!foundMatchRoom) {
             ShowMessage.showToast(mContext, "请输入合法的酒楼ID");
         } else {
+            mSession.setStandalone(true);
             mSession.setBoiteId(boiteId);
             mSession.setBoiteName(boiteName);
             mSession.setRoomId(roomId);

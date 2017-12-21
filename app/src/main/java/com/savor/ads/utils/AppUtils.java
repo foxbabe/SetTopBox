@@ -26,6 +26,7 @@ import com.savor.ads.core.Session;
 
 import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -54,6 +55,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -1377,34 +1380,47 @@ public class AppUtils {
         return isImageFile;
     }
 
-    public static boolean zipFile(File srcFile, File destFile, String comment) throws Exception {
+    public static boolean zipFile(File srcFile, File zipFile, String comment) throws Exception {
+//        BufferedInputStream in = null;
+
         ZipOutputStream zOutStream = null;
-        if (srcFile == null || destFile == null) return false;
+        if (srcFile == null || zipFile == null) return false;
 
         long fileSize = srcFile.length();
         if (!srcFile.exists()) {
             return false;
         }
         try {
-            if (destFile.exists()) {
-                destFile.delete();
+            if (zipFile.exists()) {
+                zipFile.delete();
             }
-            boolean flag = destFile.createNewFile();
-            zOutStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destFile), (int) fileSize / 2));
+            // 创建字节输入流对象
+//            in = new BufferedInputStream(new FileInputStream(srcFile));//文件输入流
+            boolean flag = zipFile.createNewFile();
+            zOutStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
             ZipEntry en = new ZipEntry(srcFile.getName());
             en.setSize(srcFile.length());
             zOutStream.putNextEntry(en);
             zOutStream.setComment(comment);
+            // 向压缩文件中输出数据
+//            int temp = 0;
+//            while ((temp = in.read())!=-1) {//读取内容
+//                zOutStream.write(temp);//压缩输出
+//            }
             byte[] byFile = FileUtils.readFileToByteArray(srcFile);
             zOutStream.write(byFile);
             zOutStream.flush();
-            zOutStream.close();
+            zOutStream.closeEntry();
+
         } catch (Exception e) {
             // TODO: handle exception
             LogUtils.e(e.toString());
             return false;
         } finally {
             try {
+//                if (in!=null){
+//                    in.close();
+//                }
                 if (zOutStream != null) {
                     zOutStream.close();
                     zOutStream = null;

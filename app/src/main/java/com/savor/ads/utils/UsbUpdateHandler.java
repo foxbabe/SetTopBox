@@ -188,7 +188,7 @@ public class UsbUpdateHandler {
         boolean isSuccess = true;
         LogUtils.d("start readChannelList");
         try {
-            File csvFile = new File(mSession.getUsbPath() +
+            File csvFile = new File(mSession.getUsbPath() +File.separator+
                     ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                     mSession.getBoiteId() + File.separator +
                     ConstantValues.USB_FILE_CHANNEL_EDIT_DATA);
@@ -535,7 +535,7 @@ public class UsbUpdateHandler {
      * 将日志拷贝到U盘
      */
     private boolean getLogToUSBDriver(AppUtils.StorageFile storageFile,int index) {
-        boolean isSuccess = true;
+        boolean isSuccess = false;
         List<File> fileList = new ArrayList<>();
         File[] files = new File(AppUtils.getFilePath(mContext, storageFile)).listFiles();
         if (files != null && files.length > 0) {
@@ -563,33 +563,43 @@ public class UsbUpdateHandler {
         }
 
         if (fileList!=null&&fileList.size()>0){
-            String usbLogPath = mSession.getUsbPath()
-                    + File.separator
-                    + ConstantValues.USB_FILE_LOG_PATH
-                    + File.separator;
+            String usbLogPath = null;
             for (int i =0;i<fileList.size();i++) {
                 File file = fileList.get(i);
                 mCallback.onActionProgress(index,"总共:"+fileList.size()+"个日志，正在提取第"+(i+1)+"个");
 
-                String name = file.getName();
                 String path = file.getPath();
                 if (file.isFile()) {
-
+                    File sourceFile = new File(path);
                     String archivePath = path + ".zip";
                     File zipFile = new File(archivePath);
                     try {
-                        AppUtils.zipFile(file, zipFile, zipFile.getName());
+                        AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
                         if (zipFile.exists()) {
-
-                            String usbLogFilePath = usbLogPath + zipFile.getName();
-                            FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
-                            if (new File(usbLogFilePath).exists()) {
-                                zipFile.delete();
-                                if (storageFile.equals(AppUtils.StorageFile.log)) {
+                            if (storageFile.equals(log)){
+                                usbLogPath = mSession.getUsbPath()
+                                        + File.separator
+                                        + ConstantValues.USB_FILE_LOG_PATH
+                                        + File.separator;
+                                String usbLogFilePath = usbLogPath + zipFile.getName();
+                                FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
+                                if (new File(usbLogFilePath).exists()) {
+                                    zipFile.delete();
                                     String logedPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.loged);
-                                    file.renameTo(new File(logedPath + file.getName()));
+                                    sourceFile.renameTo(new File(logedPath + sourceFile.getName()));
+                                }
+                            }else{
+                                usbLogPath = mSession.getUsbPath()
+                                        + File.separator
+                                        + ConstantValues.USB_FILE_LOGED_PATH
+                                        + File.separator;
+                                String usbLogFilePath = usbLogPath + zipFile.getName();
+                                FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
+                                if (new File(usbLogFilePath).exists()) {
+                                    zipFile.delete();
                                 }
                             }
+
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -598,6 +608,7 @@ public class UsbUpdateHandler {
 
                 }
             }
+            isSuccess =true;
         }
 
 

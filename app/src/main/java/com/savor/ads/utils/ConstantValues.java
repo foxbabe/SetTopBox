@@ -104,6 +104,7 @@ public class ConstantValues {
     public static final String USB_FILE_HOTEL_UPDATE_ADV= "adv";
     /**U盘安装酒楼配置文件-日志提取目录*/
     public static final String USB_FILE_LOG_PATH = "log";
+    public static final String USB_FILE_LOGED_PATH = "loged";
     /**U盘安装-频道信息原数据*/
     public static final String USB_FILE_CHANNEL_RAW_DATA = "channel_raw";
     /**U盘安装-频道信息编辑数据*/

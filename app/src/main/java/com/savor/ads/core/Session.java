@@ -350,7 +350,8 @@ public class Session {
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
                 P_APP_SWITCHTIME.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
-        } else if (P_APP_USE_VIRTUAL_SP.equals(key)) {
+        } else if (P_APP_USE_VIRTUAL_SP.equals(key)||
+                P_APP_STAND_ALONE.equals(key)) {
             mPreference.saveBooleanKey(key, (boolean) updateItem.second);
         } else {
             String string = ObjectToString(updateItem.second);
