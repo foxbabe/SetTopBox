@@ -119,6 +119,8 @@ public class UsbUpdateHandler {
                         isSuccess = handleProgramMediaData(i);
                         if(isSuccess&&setTopBoxBean!=null&&setTopBoxBean.getPlay_list()!=null){
                             msg = "总共:"+setTopBoxBean.getPlay_list().size()+"个视频，已全部更新完成";
+                        }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+                            msg = "机顶盒期号与U盘内期号相同,无需更新";
                         }else{
                             msg = "视频更新失败，请重试!!";
                         }
@@ -140,9 +142,11 @@ public class UsbUpdateHandler {
                         isKnownAction = true;
                         isSuccess = updateLogo();
                         if (isSuccess){
-                            msg = "LGGO更新成功,重启生效！！！";
+                            msg = "LOGO更新成功,重启生效！！！";
+                        }else if(mSession.getSplashVersion().equals(setTopBoxBean.getVersion().getLogo_version())){
+                            msg = "LOGO已经是最新的啦，么么哒!!!";
                         }else{
-                            msg = "LGGO更新失败,请联系热点张海强！！！";
+                            msg = "LOGO更新失败,请联系热点张海强！！！";
                         }
                         break;
                     default:
@@ -346,10 +350,9 @@ public class UsbUpdateHandler {
             LogFileUtil.write("update media but play_list file json format error");
             return false;
         }
-//        if (setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
-//            ShowMessage.showToast(mContext,"当前期号和U盘期号一致");
-//            return;
-//        }
+        if (setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+            return false;
+        }
         //TODO:包间信息
 //        if (setTopBoxBean.getRoom()!=null){
 //            roomBean = setTopBoxBean.getRoom();
@@ -676,7 +679,13 @@ public class UsbUpdateHandler {
             LogUtils.w("Update logo but logo file not exits");
             return false;
         }
-
+        if (setTopBoxBean!=null
+                &&setTopBoxBean.getVersion()!=null
+                &&mSession.getSplashVersion().equals(setTopBoxBean.getVersion().getLogo_version())){
+            LogFileUtil.write("Update logo but logo file is exits");
+            LogUtils.w("Update logo but logo file is exits");
+            return false;
+        }
         String md5Str = setTopBoxBean.getVersion().getLogo_md5();
         if (logoFile.length() <= 0) {
             LogFileUtil.write("Update logo but logo file is empty");
@@ -698,6 +707,14 @@ public class UsbUpdateHandler {
                     isSuccess = true;
                     mSession.setSplashPath("/Pictures/" + logoFile.getName());
                     mSession.setSplashVersion(setTopBoxBean.getVersion().getLogo_version());
+                    File[] files = new File(AppUtils.getSDCardPath()+"/Pictures/").listFiles();
+                    if (files!=null&&files.length>1){
+                        for (File file:files){
+                            if (!file.getName().equals(logoFile.getName())){
+                                file.delete();
+                            }
+                        }
+                    }
                 }else{
                     LogFileUtil.write("copy end logo but logo md5 value is not match");
                     LogUtils.w("copy end logo but logo md5 value is not match");

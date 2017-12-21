@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -218,6 +219,9 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
                                 mActionTvList.get(index).setTextColor(0xFF00FF00);
                                 mActionProgressBarList.get(index).setVisibility(View.GONE);
                             } else {
+                                if (!TextUtils.isEmpty(msg)){
+                                    mActionTvList.get(index).setText(msg);
+                                }
                                 mActionTvList.get(index).setTextColor(0xFFFF0000);
                                 mActionProgressBarList.get(index).setVisibility(View.GONE);
                             }
