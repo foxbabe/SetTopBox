@@ -29,7 +29,7 @@ public class AppApi {
     /**
      * 小平台地址（默认值是一个假数据，获取到真实的小平台地址后会被重置）
      */
-	public static String SP_BASE_URL = "http://192.168.1.2/";
+    public static String SP_BASE_URL = "http://192.168.1.2/";
 
     private static String PHONE_BASE_URL = "http://192.168.0.1:8080/";
 
@@ -72,7 +72,7 @@ public class AppApi {
     /**
      * Action-自定义行为 注意：自定义后缀必须为以下结束 _FORM:该请求是Form表单请求方式 _JSON:该请求是Json字符串
      * _XML:该请求是XML请求描述文件
-     * CP_前缀标识云平台接口；SP_前缀标识小平台接口
+     * CP_前缀标识云平台接口；SP_前缀标识小平台接口；PH_前缀标识移动端接口
      */
     public static enum Action {
         SP_GET_PROGRAM_DATA_FROM_JSON,
@@ -80,7 +80,6 @@ public class AppApi {
         SP_GET_ADS_DATA_FROM_JSON,
         SP_GET_ON_DEMAND_DATA_FROM_JSON,
         SP_GET_TV_MATCH_DATA_FROM_JSON,
-        SP_POST_UPLOAD_LOG_JSON,
         SP_GET_UPGRADE_INFO_JSON,
         SP_GET_LOGO_DOWN,
         SP_GET_LOADING_IMG_DOWN,
@@ -92,6 +91,7 @@ public class AppApi {
         CP_GET_PRIZE_JSON,
         CP_REPORT_LOTTERY_JSON,
         PH_NOTIFY_STOP_JSON,
+        SP_GET_SPECIALTY_JSON,
     }
 
 
@@ -107,7 +107,6 @@ public class AppApi {
             put(Action.SP_GET_ADS_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/ads/config");
             put(Action.SP_GET_ON_DEMAND_DATA_FROM_JSON,SP_BASE_URL+"small/api/download/demand/config");
             put(Action.SP_GET_TV_MATCH_DATA_FROM_JSON,SP_BASE_URL+"small/tvList/api/stb/tv_getCommands");
-            put(Action.SP_POST_UPLOAD_LOG_JSON,SP_BASE_URL+"small/log/upload-file");
             put(Action.SP_GET_UPGRADE_INFO_JSON,SP_BASE_URL+"small/api/download/apk/config");
             put(Action.CP_GET_HEARTBEAT_PLAIN, BuildConfig.BASE_URL + "Heartbeat/Report/index");
             put(Action.SP_POST_UPLOAD_PROGRAM_JSON, SP_BASE_URL + "small/tvList/api/stb/tv_commands");
@@ -116,6 +115,7 @@ public class AppApi {
             put(Action.CP_GET_PRIZE_JSON, BuildConfig.BASE_URL + "Award/Award/getAwardInfo");
             put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
             put(Action.PH_NOTIFY_STOP_JSON, PHONE_BASE_URL + "stopProjection");
+            put(Action.SP_GET_SPECIALTY_JSON, SP_BASE_URL + "small/api/download/recommend/config");
         }
     };
 
@@ -175,14 +175,39 @@ public class AppApi {
         return new AppServiceOk(context, Action.SP_GET_ADS_DATA_FROM_JSON, handler, params).syncGet();
     }
 
-    //处理小平台点播数据
+    /**
+     * 获取小平台点播数据
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @return
+     * @throws IOException
+     */
     public static String getOnDemandDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ON_DEMAND_DATA_FROM_JSON, handler, params).syncGet();
-
     }
-    //处理小平台电视频道数据
+
+    /**
+     * 获取小平台特色菜数据
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @return
+     * @throws IOException
+     */
+    public static String getSpecialtyFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("boxMac",boxMac);
+        return new AppServiceOk(context, Action.SP_GET_SPECIALTY_JSON, handler, params).syncGet();
+    }
+
+    /**
+     * 获取小平台电视频道数据
+     * @param context
+     * @param handler
+     */
     public static void getTVMatchDataFromSmallPlatform(Context context, ApiRequestListener handler) {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_TV_MATCH_DATA_FROM_JSON, handler, params).get();

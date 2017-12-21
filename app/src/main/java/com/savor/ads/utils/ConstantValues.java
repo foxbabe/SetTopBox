@@ -18,12 +18,29 @@ public class ConstantValues {
     public static final int SERVER_RESPONSE_CODE_PROJECT_ID_CHECK_FAILED = 3;
     /** 他人正在投屏，供抢投方判断弹窗*/
     public static final int SERVER_RESPONSE_CODE_ANOTHER_PROJECT = 4;
+    /** 批量点播但资源未全部找到*/
+    public static final int SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE = 5;
 
 
     /**
      * 显示二维码指令
      */
     public static final String NETTY_SHOW_QRCODE_COMMAND = "call-tdc";
+
+    /**
+     * 展示特色菜指令
+     */
+    public static final String NETTY_SHOW_SPECIALTY_COMMAND = "call-specialty";
+
+    /**
+     * 展示欢迎词指令
+     */
+    public static final String NETTY_SHOW_WELCOME_COMMAND = "call-word";
+
+    /**
+     * 播放宣传片指令
+     */
+    public static final String NETTY_SHOW_ADV_COMMAND = "call-adv";
 
     /**
      * 投屏类型:图片
@@ -33,6 +50,22 @@ public class ConstantValues {
      * 投屏类型:餐厅端，幻灯片
      */
     public static final String PROJECT_TYPE_RSTR_PPT = "rstr_ppt";
+    /**
+     * 投屏类型:餐厅端，视频幻灯片
+     */
+    public static final String PROJECT_TYPE_RSTR_VIDEO_PPT = "rstr_video_ppt";
+    /**
+     * 投屏类型:餐厅端，特色菜
+     */
+    public static final String PROJECT_TYPE_RSTR_SPECIALTY = "rstr_video_specialty";
+    /**
+     * 投屏类型:餐厅端，欢迎词
+     */
+    public static final String PROJECT_TYPE_RSTR_GREETING = "rstr_video_greeting";
+    /**
+     * 投屏类型:餐厅端，宣传片
+     */
+    public static final String PROJECT_TYPE_RSTR_ADV = "rstr_video_adv";
     /**
      * 投屏类型:视频
      */
@@ -70,5 +103,12 @@ public class ConstantValues {
     public static final String ADV = "adv";
     /**节目单-广告*/
     public static final String ADS = "ads";
+    /**特色菜*/
+    public static final String RECOMMEND = "recommend";
 
+    /** 虚拟小平台地址*/
+    public static final String VIRTUAL_SP_HOST = "v-small.littlehotspot.com";
+
+    /**外置SD卡至少保留的可用空间*/
+    public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
 }

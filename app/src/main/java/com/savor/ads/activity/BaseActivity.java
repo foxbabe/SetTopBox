@@ -203,7 +203,7 @@ public abstract class BaseActivity extends Activity {
                     if (!TextUtils.isEmpty(bean.getMd5()) &&
                             !TextUtils.isEmpty(bean.getMediaPath()) &&
                             mediaFile.exists()) {
-                        if (!bean.getMd5().equals(AppUtils.getMD5Method(mediaFile))) {
+                        if (!bean.getMd5().equals(AppUtils.getEasyMd5(mediaFile))) {
                             fileCheck = true;
 
                             TechnicalLogReporter.md5Failed(this, bean.getVid());
@@ -213,7 +213,9 @@ public abstract class BaseActivity extends Activity {
                     }
 
                     if (fileCheck) {
-                        LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                        if (!TextUtils.isEmpty(bean.getVid())) {
+                            LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                        }
                         // 校验失败时将文件路径置空，下面会删除掉为空的项
                         bean.setMediaPath(null);
                         if (mediaFile.exists()) {
@@ -262,7 +264,7 @@ public abstract class BaseActivity extends Activity {
                 }
             }
         } else {
-            LogFileUtil.writeApInfo("跳转轮播，未找到SD卡！");
+            LogFileUtil.writeKeyLogInfo("跳转轮播，未找到SD卡！");
             ShowMessage.showToast(mContext, "未发现SD卡");
         }
     }

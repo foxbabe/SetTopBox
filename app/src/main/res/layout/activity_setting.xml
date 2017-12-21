@@ -2,118 +2,184 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_setting"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@mipmap/bg_setting"
     tools:context="com.savor.ads.activity.SettingActivity">
+
     <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="280px"
+        android:id="@+id/ll_base"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginBottom="85px"
-        android:layout_marginLeft="192px"
-        android:layout_marginTop="85px"
-        android:background="@mipmap/bg_list"
-        android:orientation="vertical" >
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        android:paddingBottom="30dp"
+        android:paddingTop="50dp"
+        android:visibility="visible">
 
-        <ListView
-            android:id="@+id/setlistView1"
-            android:layout_width="280px"
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="72px"
-            android:divider="@mipmap/set_item_sep"
-            android:listSelector="@mipmap/bg_set_focus" >
-        </ListView>
-    </LinearLayout>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:text="机顶盒设置"
+            android:textColor="@android:color/white"
+            android:textSize="35sp"/>
 
-    <TabHost
-        android:id="@+id/tabhost"
-        android:layout_width="600px"
-        android:layout_height="550px"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/linearLayout1"
-        android:layout_marginRight="193px" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ScrollView
+            android:layout_width="420dp"
             android:layout_height="match_parent"
-            android:orientation="vertical" >
+            android:descendantFocusability="afterDescendants">
 
-            <TabWidget
-                android:id="@android:id/tabs"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible" >
-            </TabWidget>
-
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
+                android:orientation="vertical">
                 <RelativeLayout
-                    android:id="@+id/tab3"
+                    android:id="@+id/rl_use_virtual"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@mipmap/sout_setbg"
-                    android:visibility="gone">
+                    android:layout_height="70dp"
+                    android:background="@drawable/selector_setting_tab"
+                    android:focusable="true"
+                    android:onClick="switchUseVirtual"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="20dp">
 
-                    <Button
-                        android:id="@+id/button1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
+                    <Switch
+                        android:id="@+id/use_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_centerVertical="true"
-                        android:background="@drawable/btn_squed"
-                        android:nextFocusLeft="@id/setlistView1"
-                        android:onClick="sou_qued" />
-                </RelativeLayout>
+                        android:text="使用虚拟小平台"
+                        android:checked="false"
+                        android:focusable="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"/>
 
-                <RelativeLayout
-                    android:id="@+id/tab4"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@mipmap/server_bg" >
-
-                    <Button
-                        android:id="@+id/serbutton"
+                    <!--<ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/serurl"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="70px"
-                        android:background="@drawable/btn_qued"
-                        android:nextFocusLeft="@id/setlistView1"
-                        android:nextFocusUp="@id/serurl"
-                        android:onClick="ser_qued" />
-
-                    <com.savor.ads.customview.IPEditText
-                        android:id="@+id/serurl"
-                        android:layout_width="400px"
-                        android:layout_height="60px"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="192px"
-                        android:nextFocusDown="@id/serbutton"
-                        android:nextFocusLeft="@id/setlistView1" >
-                        <requestFocus />
-                    </com.savor.ads.customview.IPEditText>
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@mipmap/ic_arrow_right"/>-->
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/tab1"
+                    android:id="@+id/rl_server_ip"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@mipmap/video_setbg" >
+                    android:layout_height="70dp"
+                    android:background="@drawable/selector_setting_tab"
+                    android:focusable="true"
+                    android:onClick="showIpDialog"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="小平台地址"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"/>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_server_ip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:text="192.168.2.22"
+                            android:textColor="@android:color/white"
+                            android:textSize="20sp"/>
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/ic_arrow_right"/>
+                    </LinearLayout>
+
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/tab2"
+                    android:id="@+id/rl_search"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@mipmap/dians_setbg" >
+                    android:layout_height="70dp"
+                    android:background="@drawable/selector_setting_tab"
+                    android:focusable="true"
+                    android:onClick="goSearch"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="自动搜台"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@mipmap/ic_arrow_right"/>
                 </RelativeLayout>
-            </FrameLayout>
-        </LinearLayout>
-    </TabHost>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/ll_edit_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="30dp"
+        android:paddingTop="50dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_title1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:text="设置小平台地址"
+            android:textColor="@android:color/white"
+            android:textSize="35sp"/>
+
+        <com.savor.ads.customview.IPEditText
+            android:id="@+id/et_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_ip"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/selector_btn_bg"
+            android:onClick="doModifyIp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:paddingTop="8dp"
+            android:text="保存"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"/>
+    </RelativeLayout>
 </RelativeLayout>
