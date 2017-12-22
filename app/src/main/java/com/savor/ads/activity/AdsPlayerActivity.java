@@ -492,26 +492,26 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     int mCurrentFaceCount = 0;
     @Override
     public void onFaceChange(ConcurrentHashMap<Integer, FaceLogBean> watchingFaces) {
-        int count = 0;
-        if (watchingFaces != null) {
-            count = watchingFaces.values().size();
-        }
-        final int diff = count - mCurrentFaceCount;
-        mCurrentFaceCount = count;
-        mFaceLl.post(new Runnable() {
-            @Override
-            public void run() {
-                if (diff > 0) {
-                    for (int i = 0; i < Math.abs(diff); i++) {
-                        View view = View.inflate(mContext, R.layout.item_face_layout, null);
-                        mFaceLl.addView(view);
-                    }
-                } else if (diff < 0 && mFaceLl.getChildCount() >= Math.abs(diff)) {
-                    for (int i = 0; i < Math.abs(diff); i++) {
-                        mFaceLl.removeViewAt(0);
-                    }
-                }
-            }
-        });
+//        int count = 0;
+//        if (watchingFaces != null) {
+//            count = watchingFaces.values().size();
+//        }
+//        final int diff = count - mCurrentFaceCount;
+//        mCurrentFaceCount = count;
+//        mFaceLl.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (diff > 0) {
+//                    for (int i = 0; i < Math.abs(diff); i++) {
+//                        View view = View.inflate(mContext, R.layout.item_face_layout, null);
+//                        mFaceLl.addView(view);
+//                    }
+//                } else if (diff < 0 && mFaceLl.getChildCount() >= Math.abs(diff)) {
+//                    for (int i = 0; i < Math.abs(diff); i++) {
+//                        mFaceLl.removeViewAt(0);
+//                    }
+//                }
+//            }
+//        });
     }
 }
