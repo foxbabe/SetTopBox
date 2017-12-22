@@ -2,11 +2,9 @@ package com.savor.ads.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.MediaLibBean;
@@ -18,9 +16,11 @@ import com.savor.ads.utils.tv.TvOperate;
 import com.savor.tvlibrary.AtvChannel;
 import com.savor.tvlibrary.TVOperatorFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -205,7 +205,9 @@ public class UsbUpdateHandler {
             if (csvFile.exists()) {
                 csvFile.delete();
             }
-            FileWriter fileWriter = new FileWriter(csvFile, true);
+//            FileWriter fileWriter = new FileWriter(csvFile, true);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(csvFile), "GBK");
+            BufferedWriter fileWriter = new BufferedWriter(outputStreamWriter);
             String channelJson;
             if (AppUtils.isMstar()) {
                 AtvProgramInfo[] programs = new TvOperate().getAllProgramInfo();
@@ -280,7 +282,7 @@ public class UsbUpdateHandler {
         }
 
         String rawStr = FileUtils.read(rawFile.getPath());
-        String csvStr = FileUtils.read(csvFile.getPath());
+        String csvStr = FileUtils.read(csvFile.getPath(), "GBK");
         if (TextUtils.isEmpty(rawStr) || TextUtils.isEmpty(rawStr.trim())) {
             LogFileUtil.write("Write channel but channel raw file is empty");
             LogUtils.w("Write channel but channel raw file is empty");
