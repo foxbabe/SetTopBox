@@ -1,6 +1,7 @@
 package com.savor.ads.bean;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 包间实体
@@ -16,7 +17,8 @@ public class RoomBean implements Serializable{
     private String room_num;
     //包间类型
     private String room_type;
-
+    /**通过MAC循环匹配盒子那个包间*/
+    private List<BoxBean> box_list;
     public String getRoom_id() {
         return room_id;
     }
@@ -47,5 +49,13 @@ public class RoomBean implements Serializable{
 
     public void setRoom_name(String room_name) {
         this.room_name = room_name;
+    }
+
+    public List<BoxBean> getBox_list() {
+        return box_list;
+    }
+
+    public void setBox_list(List<BoxBean> box_list) {
+        this.box_list = box_list;
     }
 }

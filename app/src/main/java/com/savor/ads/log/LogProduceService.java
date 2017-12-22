@@ -8,6 +8,7 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -20,6 +21,9 @@ public class LogProduceService {
 	private String logTime=null;
 	private LogReportUtil logReportUtil = null;
 	private Session session;
+	private File file;
+	//单机版
+	private String standalone="standalone";
 	public LogProduceService (Context context){
 		this.mContext = context;
 		session = Session.get(context);
@@ -101,12 +105,18 @@ public class LogProduceService {
 	private String makeLog(LogReportParam mparam){
 		String boxId="";
 		String logHour = "";
+		String end = "";
 		if ("poweron".equals(mparam.getAction())){
 			boxId = mparam.getBoxId();
 			logHour = mparam.getLogHour();
 		}else {
 			boxId = session.getEthernetMac();
 			logHour = logTime;
+		}
+		if (file.getName().contains("standalone")){
+			end = ",standalone"+"\r\n";
+		}else {
+			end = "\r\n";
 		}
 		String ret = mparam.getUUid() + ","
 					+ mparam.getHotel_id() + ","
@@ -122,7 +132,7 @@ public class LogProduceService {
 					+ mparam.getCustom() + ","
 					+ boxId + ","
 					+ logHour
-					+ "\r\n";
+					+ end;
 		return ret;
 	}
 
@@ -165,7 +175,13 @@ public class LogProduceService {
 //			}
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
 			logTime = AppUtils.getCurTime("yyyyMMddHH");
-			mLogWriter = new FileWriter(path + boxMac + "_" + logTime + ".blog",true);
+			if (session.isStandalone()){
+				mLogWriter = new FileWriter(path + boxMac + "_" + logTime +"_"+standalone+".blog",true);
+				file = new File(path + boxMac + "_" + logTime + "_" +standalone +".blog");
+			}else {
+				mLogWriter = new FileWriter(path + boxMac + "_" + logTime + ".blog",true);
+				file = new File(path + boxMac + "_" + logTime + ".blog");
+			}
 		} catch (Exception e2) {
 			e2.printStackTrace();
 			LogFileUtil.writeException(e2);

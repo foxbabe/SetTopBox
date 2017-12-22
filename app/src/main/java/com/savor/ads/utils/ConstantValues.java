@@ -79,6 +79,40 @@ public class ConstantValues {
 
     public static final String USB_FILE_PATH = "redian";
 
+    /**U盘安装酒楼文件夹目录*/
+    public static final String USB_FILE_HOTEL_PATH = "savor";
+    public static final String USB_FILE_HOTEL_MEDIA_PATH = "media";
+    /**U盘安装酒楼配置文件*/
+    public static final String USB_FILE_HOTEL_UPDATE_CFG = "update.cfg";
+    /**U盘安装酒楼配置文件-获取电视列表*/
+    public static final String USB_FILE_HOTEL_GET_CHANNEL = "get_channel";
+    /**U盘安装酒楼配置文件-上传电视列表*/
+    public static final String USB_FILE_HOTEL_SET_CHANNEL = "set_channel";
+    /**U盘安装酒楼配置文件-拉取日志文件*/
+    public static final String USB_FILE_HOTEL_GET_LOG = "get_log";
+    /**U盘安装酒楼配置文件-拉取备份日志文件*/
+    public static final String USB_FILE_HOTEL_GET_LOGED = "get_loged";
+    /**U盘安装酒楼配置文件-更新视频*/
+    public static final String USB_FILE_HOTEL_UPDATE_MEIDA = "update_media";
+    /**U盘安装酒楼配置文件-更新版本*/
+    public static final String USB_FILE_HOTEL_UPDATE_APK = "update_apk";
+    /**U盘安装酒楼配置文件-更新LOGO*/
+    public static final String USB_FILE_HOTEL_UPDATE_LOGO = "update_logo";
+    /**U盘安装酒楼配置文件-更新视频json文件*/
+    public static final String USB_FILE_HOTEL_UPDATE_JSON = "play_list.json";
+    /**U盘安装酒楼配置文件-更新宣传片目录*/
+    public static final String USB_FILE_HOTEL_UPDATE_ADV= "adv";
+    /**U盘安装酒楼配置文件-日志提取目录*/
+    public static final String USB_FILE_LOG_PATH = "log";
+    public static final String USB_FILE_LOGED_PATH = "loged";
+    /**U盘安装-频道信息原数据*/
+    public static final String USB_FILE_CHANNEL_RAW_DATA = "channel_raw";
+    /**U盘安装-频道信息编辑数据*/
+    public static final String USB_FILE_CHANNEL_EDIT_DATA = "channel.csv";
+    /**U盘安装-酒楼列表文件*/
+    public static final String USB_FILE_HOTEL_LIST_JSON = "hotel.json";
+    /**U盘安装酒楼配置文件-单机日志标志*/
+    public static final String STANDALONE="standalone";
     /** 广告下载完成广播Action*/
     public static final String ADS_DOWNLOAD_COMPLETE_ACCTION = "com.savor.ads.ads_download_complete";
 

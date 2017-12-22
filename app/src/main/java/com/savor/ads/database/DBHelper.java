@@ -608,20 +608,22 @@ public class DBHelper extends SQLiteOpenHelper {
         if (!TextUtils.isEmpty(session.getProPeriod())
                 && !TextUtils.isEmpty(session.getAdvPeriod())) {
             try {
-                //            open();
                 // 拼接查询条件
-                String selection = MediaDBInfo.FieldName.PERIOD + "=? OR " + MediaDBInfo.FieldName.PERIOD + "=?";
-                String[] args = new String[]{session.getProPeriod(), session.getAdvPeriod()};
-//                ArrayList<VersionInfo> playListVersion = Session.get(mContext).getPlayListVersion();
-//                for (int i = 0; i < playListVersion.size(); i++) {
-//                    VersionInfo version = playListVersion.get(i);
-//                    if (i != 0) {
-//                        selection += " or ";
-//                    }
-//                    selection += "(" + MediaDBInfo.FieldName.PERIOD + "=? and " + MediaDBInfo.FieldName.MEDIATYPE + "=?)";
-//                    args[i * 2] = version.getVersion();
-//                    args[i * 2 + 1] = version.getType();
-//                }
+                String selection = null;
+                String[] args = null;
+                //            open();
+                if (session.isStandalone()){
+                    // 拼接查询条件
+                    selection = MediaDBInfo.FieldName.PERIOD + "=?";
+                    args = new String[]{session.getProPeriod()};
+                }else{
+                    // 拼接查询条件
+                    selection = MediaDBInfo.FieldName.PERIOD + "=? OR " + MediaDBInfo.FieldName.PERIOD + "=?";
+                    args = new String[]{session.getProPeriod(), session.getAdvPeriod()};
+                }
+
+
+
 
                 cursor = db.query(MediaDBInfo.TableName.PLAYLIST, null, selection, args, null, null, MediaDBInfo.FieldName.ADS_ORDER);
                 if (cursor != null && cursor.moveToFirst()) {

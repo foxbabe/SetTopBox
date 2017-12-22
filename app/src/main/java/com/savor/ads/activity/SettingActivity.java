@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -23,7 +22,6 @@ import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.ShellUtils;
 
 public class SettingActivity extends BaseActivity {
@@ -110,7 +108,7 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (!TextUtils.isEmpty(AppUtils.getSDCardPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
             Intent intent = new Intent();
             intent.setClass(this, AdsPlayerActivity.class);
             startActivity(intent);
@@ -119,11 +117,19 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void gotoTvSearch() {
-        ActivitiesManager.getInstance().popSpecialActivity(TvPlayerActivity.class);
-        Intent intent = new Intent();
-        intent.setClass(this, TvPlayerActivity.class);
-        intent.putExtra(TvPlayerActivity.EXTRA_IS_AUTO_SEARCHING, true);
-        startActivity(intent);
+        if (AppUtils.isMstar()) {
+            ActivitiesManager.getInstance().popSpecialActivity(TvPlayerActivity.class);
+            Intent intent = new Intent();
+            intent.setClass(this, TvPlayerActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_IS_AUTO_SEARCHING, true);
+            startActivity(intent);
+        } else {
+            ActivitiesManager.getInstance().popSpecialActivity(TvPlayerGiecActivity.class);
+            Intent intent = new Intent();
+            intent.setClass(this, TvPlayerGiecActivity.class);
+            intent.putExtra(TvPlayerGiecActivity.EXTRA_IS_AUTO_SEARCHING, true);
+            startActivity(intent);
+        }
     }
 
 
@@ -183,8 +189,8 @@ public class SettingActivity extends BaseActivity {
      */
     public void switchUseVirtual(View v) {
         if (mSession.isUseVirtualSp()) {
-            if (mUseVirtualDialog == null) {
-                mUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
+            if (mNotUseVirtualDialog == null) {
+                mNotUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
                         .setTitle("提示")
                         .setMessage("确定使用真实小平台?")
                         .setNegativeButton("是", new DialogInterface.OnClickListener() {
@@ -203,7 +209,7 @@ public class SettingActivity extends BaseActivity {
                         .setPositiveButton("否", null)
                         .create();
             }
-            mUseVirtualDialog.show();
+            mNotUseVirtualDialog.show();
         } else {
             if (mUseVirtualDialog == null) {
                 mUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
@@ -234,16 +240,16 @@ public class SettingActivity extends BaseActivity {
         boolean handled = false;
         if (mIsEditIp) {
             switch (keyCode) {
-                case KeyCodeConstant.KEY_CODE_UP:
+                case KeyEvent.KEYCODE_DPAD_UP:
                     handled = true;
                     mIPEditText.requestFocus();
                     break;
-                case KeyCodeConstant.KEY_CODE_DOWN:
+                case KeyEvent.KEYCODE_DPAD_DOWN:
                     handled = true;
                     mConfirmBtn.requestFocus();
                     break;
-                case KeyCodeConstant.KEY_CODE_LEFT:
-                case KeyCodeConstant.KEY_CODE_RIGHT:
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
                     if (mConfirmBtn.isFocused()) {
                         handled = true;
                     }

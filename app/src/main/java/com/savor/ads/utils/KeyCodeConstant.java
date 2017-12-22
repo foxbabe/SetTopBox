@@ -98,4 +98,8 @@ public class KeyCodeConstant {
      * 上传心跳
      */
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
+    /**
+     * U盘更新
+     */
+    public static int KEY_CODE_UDISK_UPDATE = 165;
 }

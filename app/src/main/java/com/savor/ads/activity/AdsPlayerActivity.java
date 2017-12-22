@@ -18,10 +18,12 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
+import com.savor.tvlibrary.OutputResolution;
+import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -79,11 +81,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getExternalSDCardPath()=" + AppUtils.getExternalSDCardPath());
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
-            Intent intent = new Intent(this, TvPlayerActivity.class);
-            startActivity(intent);
+        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
+            if (AppUtils.isMstar()) {
+                Intent intent = new Intent(this, TvPlayerActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+                startActivity(intent);
+            }
             finish();
         } else {
             mPlayList = GlobalValues.PLAY_LIST;
@@ -192,45 +199,65 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             return true;
 
         boolean handled = false;
-        switch (keyCode) {
-            // 后退
-            case KeyCodeConstant.KEY_CODE_BACK:
-//                handleBack();
-                handled = true;
-                break;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {//                handleBack();
+            handled = true;
+
             // 切换到电视模式
-            case KeyCodeConstant.KEY_CODE_CHANGE_MODE:
-                switchToTvPlayer();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_CHANGE_MODE) {
+            switchToTvPlayer();
+            handled = true;
+
             // 呼出二维码
-            case KeyCodeConstant.KEY_CODE_SHOW_QRCODE:
-                ((SavorApplication) getApplication()).showQrCodeWindow(null);
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
+            ((SavorApplication) getApplication()).showQrCodeWindow(null);
+            handled = true;
+
             // 暂停、继续播放
-            case KeyCodeConstant.KEY_CODE_PLAY_PAUSE:
-                mSavorVideoView.togglePlay();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_PLAY_PAUSE) {
+            mSavorVideoView.togglePlay();
+            handled = true;
+
             // 上一条
-            case KeyCodeConstant.KEY_CODE_PREVIOUS_ADS:
-                mSavorVideoView.playPrevious();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_PREVIOUS_ADS) {
+            mSavorVideoView.playPrevious();
+            handled = true;
+
             // 下一条
-            case KeyCodeConstant.KEY_CODE_NEXT_ADS:
-                mSavorVideoView.playNext();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_NEXT_ADS) {
+            mSavorVideoView.playNext();
+            handled = true;
+
             // 机顶盒信息
-            case KeyCodeConstant.KEY_CODE_SHOW_INFO:
-                // 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
-                showBoxInfo();
-                handled = true;
-                break;
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_INFO) {// 对话框弹出后会获得焦点，所以这里不需要处理重复点击重复显示的问题
+            showBoxInfo();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_CHANGE_RESOLUTION) {
+            changeResolution();
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
+    }
+
+    int resolutionIndex = 0;
+    private void changeResolution() {
+        OutputResolution resolution = OutputResolution.values()[(resolutionIndex++) % OutputResolution.values().length];
+        TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC)
+                .switchResolution(resolution);
+        String msg = "1080P";
+        switch (resolution) {
+            case RESOLUTION_1080p:
+                msg = "1080P";
+                break;
+            case RESOLUTION_720p:
+                msg = "720P";
+                break;
+            case RESOLUTION_480p:
+                msg = "480P";
+                break;
+        }
+        ShowMessage.showToast(getApplicationContext(), msg);
     }
 
     /**
@@ -242,9 +269,15 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             vid = mPlayList.get(mCurrentPlayingIndex).getVid();
         }
         mIsGoneToTv = true;
-        Intent intent = new Intent(this, TvPlayerActivity.class);
-        intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
-        startActivity(intent);
+        if (AppUtils.isMstar()) {
+            Intent intent = new Intent(this, TvPlayerActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+            intent.putExtra(TvPlayerActivity.EXTRA_LAST_VID, vid);
+            startActivity(intent);
+        }
     }
 
     private void deleteOldMedia() {

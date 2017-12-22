@@ -15,13 +15,11 @@ import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.savor.ads.R;
-import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.log.LogProduceService;
 import com.savor.ads.log.LogUploadService;
-import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.service.HandleMediaDataService;
 import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
@@ -31,18 +29,12 @@ import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
-import com.savor.ads.utils.GlobalValues;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.TimeCalibrateHelper;
 
-import java.util.Date;
-
 import cn.savor.small.netty.NettyClient;
-
-import static com.savor.ads.utils.KeyCodeConstant.KEY_CODE_BACK;
-import static com.savor.ads.utils.KeyCodeConstant.KEY_CODE_SHOW_INFO;
 
 /**
  * Created by Administrator on 2016/12/6.
@@ -298,12 +290,11 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KEY_CODE_SHOW_INFO:
-                showBoxInfo();
-                return true;
-            case KEY_CODE_BACK:
-                return true;
+        if (keyCode == KeyCode.KEY_CODE_SHOW_INFO) {
+            showBoxInfo();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

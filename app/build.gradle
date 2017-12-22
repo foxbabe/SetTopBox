@@ -15,8 +15,8 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2017121505
-        versionName "1.1.9"
+        versionCode 2017122101
+        versionName "1.2.0"
 
         multiDexEnabled true
     }
@@ -38,6 +38,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 是否混淆
+            minifyEnabled false
+            zipAlignEnabled false
+            // 移除无用的resource文件
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
         release {
             // 是否混淆
             minifyEnabled false
@@ -98,4 +107,5 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.android.support:multidex:1.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile project(':tvlibrary')
 }

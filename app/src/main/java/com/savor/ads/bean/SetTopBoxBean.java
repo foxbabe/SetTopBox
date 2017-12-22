@@ -25,14 +25,18 @@ public class SetTopBoxBean implements Serializable{
     private String position;
     //盒子描述
     private String description;
-    //所在包间信息
-    private RoomBean room;
+    /**通过MAC匹配所在包间*/
+    private List<RoomBean> room_info;
     //所在酒楼信息
     private BoiteBean boite;
+    /**U盘更新媒体库*/
+    private ArrayList<MediaLibBean> play_list;
     /**媒体库*/
     private ArrayList<PlayListCategoryItem> playbill_list;
     /** 发布时间*/
     private String pub_time;
+
+    private UpgradeInfo version;
 
     public String getBox_id() {
         return box_id;
@@ -98,12 +102,12 @@ public class SetTopBoxBean implements Serializable{
         this.description = description;
     }
 
-    public RoomBean getRoom() {
-        return room;
+    public List<RoomBean> getRoom_info() {
+        return room_info;
     }
 
-    public void setRoom(RoomBean room) {
-        this.room = room;
+    public void setRoom_info(List<RoomBean> room_info) {
+        this.room_info = room_info;
     }
 
     public BoiteBean getBoite() {
@@ -122,11 +126,27 @@ public class SetTopBoxBean implements Serializable{
         this.pub_time = pub_time;
     }
 
+    public ArrayList<MediaLibBean> getPlay_list() {
+        return play_list;
+    }
+
+    public void setPlay_list(ArrayList<MediaLibBean> play_list) {
+        this.play_list = play_list;
+    }
+
     public ArrayList<PlayListCategoryItem> getPlaybill_list() {
         return playbill_list;
     }
 
     public void setPlaybill_list(ArrayList<PlayListCategoryItem> playbill_list) {
         this.playbill_list = playbill_list;
+    }
+
+    public UpgradeInfo getVersion() {
+        return version;
+    }
+
+    public void setVersion(UpgradeInfo version) {
+        this.version = version;
     }
 }

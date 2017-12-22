@@ -9,8 +9,10 @@ public class OSSValues {
     //用阿里云提供的AccessKeyId， AccessKeySecret构造一个凭证提供器
     public static final String accessKeyId = "LTAIsKCXU4aSpATx";
     public static final String accessKeySecret = "u6E8Pnuda4JIvzm3iwHg77GcCBgTc8";
-    //日志上传路径
+    //网络日志上传路径
     public static final String uploadFilePath = "log/box/";
+    //单机日志上传路径
+    public static final String uploadStandaloneFilePath = "log/box-stand_alone/";
     //抽奖结果上传路径
     public static final String uploadLotteryPath = "lottery/box/";
 

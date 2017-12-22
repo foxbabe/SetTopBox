@@ -25,6 +25,7 @@ import com.savor.ads.bean.RstrSpecialtyResult;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.bean.SetTopBoxBean;
+import com.savor.ads.bean.TvProgramGiecResponse;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.ApiRequestListener;
@@ -43,6 +44,8 @@ import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.UpdateUtil;
 import com.savor.ads.utils.tv.TvOperate;
+import com.savor.tvlibrary.ITVOperator;
+import com.savor.tvlibrary.TVOperatorFactory;
 import com.tvos.common.TvManager;
 import com.tvos.common.exception.TvCommonException;
 
@@ -122,7 +125,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     // 循环检查SD卡、网络、小平台信息的情况直到可用
                     do {
                         LogFileUtil.write("HandleMediaDataService will check server info and network");
-                        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath()) &&
+                        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) &&
                                 AppUtils.isNetworkAvailable(context) &&
                                 session.getServerInfo() != null) {
                             break;
@@ -136,11 +139,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     } while (true);
 
                     // 检测剩余存储空间
-                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
-                        // 存储空间不足
-                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
-                        LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
-                    }
+//                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+//                        // 存储空间不足
+//                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
+//                        LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
+//                    }
 
                     LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
                     // 异步更新apk、rom
@@ -437,7 +440,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     }
 
     private void getTVMatchDataFromSmallPlatform() {
-        AppApi.getTVMatchDataFromSmallPlatform(this, this);
+        if (AppUtils.isMstar()) {
+            AppApi.getTVMatchDataFromSmallPlatform(this, this);
+        } else {
+            AppApi.getGiecTVMatchDataFromSmallPlatform(this, this);
+        }
     }
 
     @Nullable
@@ -454,6 +461,14 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     TvProgramResponse response = (TvProgramResponse) obj;
                     TvOperate mtv = new TvOperate();
                     mtv.updateProgram(context, response);
+                }
+                break;
+            case SP_GET_TV_MATCH_DATA_FROM_GIEC_JSON:
+                if (obj instanceof TvProgramGiecResponse) {
+                    TvProgramGiecResponse response = (TvProgramGiecResponse) obj;
+                    ITVOperator tvOperate = TVOperatorFactory.getTVOperator(getApplicationContext(), TVOperatorFactory.TVType.GIEC);
+                    tvOperate.setAtvChannels(response.getTvChannelList());
+                    session.setTvDefaultChannelNumber(response.getLockingChannelNum());
                 }
                 break;
             case SP_GET_LOGO_DOWN:

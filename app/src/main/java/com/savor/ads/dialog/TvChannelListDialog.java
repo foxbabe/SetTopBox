@@ -17,7 +17,7 @@ import com.savor.ads.R;
 import com.savor.ads.adapter.ChannelListAdapter;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.core.Session;
-import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCode;
 
 import java.util.ArrayList;
 
@@ -106,28 +106,23 @@ public class TvChannelListDialog extends Dialog {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
+        if (keyCode == KeyCode.KEY_CODE_UP) {
+            mChannelsLv.setSelection(mChannelsLv.getSelectedItemPosition() - 1 < 0 ?
+                    mChannels.size() - 1 : mChannelsLv.getSelectedItemPosition() - 1);
+            delayHide();
+            handled = true;
 
-            case KeyCodeConstant.KEY_CODE_UP:
-                mChannelsLv.setSelection(mChannelsLv.getSelectedItemPosition() - 1 < 0 ?
-                        mChannels.size() - 1 : mChannelsLv.getSelectedItemPosition() - 1);
-                delayHide();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_DOWN:
-                mChannelsLv.setSelection(mChannelsLv.getSelectedItemPosition() + 1 >= mChannelsLv.getCount() ?
-                        0 : mChannelsLv.getSelectedItemPosition() + 1);
-                delayHide();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_BACK:
-                mHandler.removeCallbacks(mHideChannelListRunnable);
-                dismiss();
-                handled = true;
-                break;
-        }
-        if (getContext() instanceof Activity) {
-            return handled || ((Activity) getContext()).onKeyDown(keyCode, event);
+        } else if (keyCode == KeyCode.KEY_CODE_DOWN) {
+            mChannelsLv.setSelection(mChannelsLv.getSelectedItemPosition() + 1 >= mChannelsLv.getCount() ?
+                    0 : mChannelsLv.getSelectedItemPosition() + 1);
+            delayHide();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_BACK) {
+            mHandler.removeCallbacks(mHideChannelListRunnable);
+            dismiss();
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
     }

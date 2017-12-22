@@ -184,7 +184,10 @@ public class Session {
     private PrizeInfo mPrizeInfo;
     /** 是否使用虚拟小平台*/
     private boolean mUseVirtualSp;
-
+    /**单机版U盘目录*/
+    private String usbPath;
+    /**是否是单机版机顶盒*/
+    private boolean standalone=false;
     private Session(Context context) {
 
         mContext = context;
@@ -261,6 +264,7 @@ public class Session {
         setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
         mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
         mUseVirtualSp = mPreference.loadBooleanKey(P_APP_USE_VIRTUAL_SP, false);
+        standalone = mPreference.loadBooleanKey(P_APP_STAND_ALONE,false);
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -331,10 +335,13 @@ public class Session {
                 || P_APP_SPLASH_PATH.equals(key)
                 || P_APP_LOADING_PATH.equals(key)
                 || P_APP_SPLASH_VERSION.equals(key)
+                || P_APP_LOADING_VERSION.equals(key)
                 || P_APP_SPECIALTY_PERIOD.equals(key)
                 || P_APP_DOWNLOADING_SPECIALTY_PERIOD.equals(key)
                 || P_APP_LOADING_VERSION.equals(key)) {
+
             mPreference.saveStringKey(key, (String) updateItem.second);
+
         } else if (P_APP_VOLUME.equals(key) ||
                 P_APP_PROJECT_VOLUME.equals(key) ||
                 P_APP_VOD_VOLUME.equals(key) ||
@@ -343,7 +350,8 @@ public class Session {
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
                 P_APP_SWITCHTIME.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
-        } else if (P_APP_USE_VIRTUAL_SP.equals(key)) {
+        } else if (P_APP_USE_VIRTUAL_SP.equals(key)||
+                P_APP_STAND_ALONE.equals(key)) {
             mPreference.saveBooleanKey(key, (boolean) updateItem.second);
         } else {
             String string = ObjectToString(updateItem.second);
@@ -952,6 +960,23 @@ public class Session {
         }
     }
 
+
+    public String getUsbPath() {
+        return usbPath;
+    }
+
+    public void setUsbPath(String usbPath) {
+        this.usbPath = usbPath;
+    }
+
+    public boolean isStandalone() {
+        return standalone;
+    }
+
+    public void setStandalone(boolean standalone) {
+        this.standalone = standalone;
+        writePreference(new Pair<String, Object>(P_APP_STAND_ALONE, standalone));
+    }
     public String getSpecialtyPeriod() {
         return specialtyPeriod;
     }
@@ -972,6 +997,7 @@ public class Session {
             this.downloadingSpecialtyPeriod = downloadingSpecialtyPeriod;
             writePreference(new Pair<String, Object>(P_APP_DOWNLOADING_SPECIALTY_PERIOD, downloadingSpecialtyPeriod));
         }
+
     }
 
     //轮播播放声音
@@ -1057,6 +1083,8 @@ public class Session {
     public static final String P_APP_PRIZE_INFO = "com.savor.ads.prizeInfo";
     // 是否使用虚拟小平台key
     public static final String P_APP_USE_VIRTUAL_SP = "com.savor.ads.use_virtual_sp";
+    //是否是单机版机顶盒
+    public static final String P_APP_STAND_ALONE = "com.savor.ads.stand_alone";
 
     public static final String P_APP_PLAY_LIST_VERSION = "com.savor.ads.play_list_version";
     public static final String P_APP_DOWNLOADING_PLAY_LIST_VERSION = "com.savor.ads.downloading_play_list_version";

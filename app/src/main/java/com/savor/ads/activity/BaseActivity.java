@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -21,11 +20,14 @@ import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.BoxInfoDialog;
+import com.savor.ads.dialog.FileCopyDialog;
+import com.savor.ads.dialog.InputBoiteIdDialog;
+import com.savor.ads.dialog.UsbUpdateDialog;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
-import com.savor.ads.utils.KeyCodeConstant;
+import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
@@ -43,13 +45,16 @@ import java.util.List;
 /**
  * Created by zhanghq on 2016/6/23.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends Activity implements InputBoiteIdDialog.Callback {
 
     protected Activity mContext;
     protected Session mSession;
     public AudioManager mAudioManager = null;
 
     private BoxInfoDialog mBoxInfoDialog;
+    private UsbUpdateDialog mUsbUpdateDialog;
+    private InputBoiteIdDialog mInputBoiteIdDialog;
+    private FileCopyDialog mFileCopyDialog;
 
     private Handler mHandler = new Handler();
 
@@ -82,14 +87,19 @@ public abstract class BaseActivity extends Activity {
      * 注册广播，判断sd卡以及U盘挂载状态
      */
     public void registerListener() {
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+//        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+//        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
-        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+//        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         intentFilter.addDataScheme("file");
 
@@ -99,33 +109,52 @@ public abstract class BaseActivity extends Activity {
     private BroadcastReceiver recevierListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LogUtils.e("BroadcastReceiver: " + intent.getAction());
-            String usbPath = intent.getDataString();
-            if (intent.getAction().equals("android.intent.action.MEDIA_MOUNTED") && usbPath.contains("usb")) {//U盘插入
-                String pathString = usbPath.split("file://")[1];
-                insertUSB(pathString);
-            } else if (intent.getAction().equals("android.intent.action.MEDIA_REMOVED") && usbPath.contains("usb")) {
-                //U盘拔出
-                removeUSB(usbPath.split("file://")[1]);
+            LogUtils.d("BroadcastReceiver: " + intent.getAction());
+            if (intent.getAction() == null) {
+                return;
             }
 
-            String action = intent.getAction();
             String path = intent.getData().getPath();
-            if (Intent.ACTION_MEDIA_REMOVED.equals(action)
-                    || Intent.ACTION_MEDIA_UNMOUNTED.equals(action)
-                    || Intent.ACTION_MEDIA_BAD_REMOVAL.equals(action)) {
-                if (path.contains("/mnt/extsd")) {//sd 卡拔除
-                    handleSDCardRemoved();
-                }
-            } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                if (path.contains("/mnt/extsd")) {
-                    handleMediaMounted();
-                }
+            String usbPath = intent.getDataString().split("file://")[1];
+            switch (intent.getAction()) {
+                case Intent.ACTION_MEDIA_MOUNTED:
+                    if (AppUtils.isMstar()) {
+                        if (path.contains("/mnt/extsd")) {
+                            handleExtsdMounted();
+                        } else if (path.contains("usb")) {
+                            mSession.setUsbPath(usbPath);
+                            handleUdiskMounted(path);
+                        }
+                    } else {
+                        if (path.contains("storage/") && path.contains("-")) {
+                            mSession.setUsbPath(usbPath);
+                            handleUdiskMounted(path);
+                        }
+                    }
+                    break;
+                case Intent.ACTION_MEDIA_UNMOUNTED:
+                case Intent.ACTION_MEDIA_REMOVED:
+                case Intent.ACTION_MEDIA_BAD_REMOVAL:
+                    if (AppUtils.isMstar()) {
+                        if (path.contains("/mnt/extsd")) {//sd 卡拔除
+                            handleExtsdRemoved();
+                        } else if (path.contains("usb")) {
+                            //U盘拔出
+                            mSession.setUsbPath(null);
+                            handleUdiskRemoved(path);
+                        }
+                    } else {
+                        if (path.contains("storage/") && path.contains("-")) {
+                            mSession.setUsbPath(null);
+                            handleUdiskRemoved(path);
+                        }
+                    }
+                    break;
             }
         }
     };
 
-    private void handleMediaMounted() {
+    private void handleExtsdMounted() {
         TechnicalLogReporter.sdcardMounted(this);
         checkAndClearCache();
 
@@ -146,7 +175,7 @@ public abstract class BaseActivity extends Activity {
         if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
             dateStr = lastStartStr.split(" ")[0];
         }
-        LogFileUtil.write("checkAndClearCache curTimeStr="+curTimeStr+" lastDateStr="+dateStr);
+        LogFileUtil.write("checkAndClearCache curTimeStr=" + curTimeStr + " lastDateStr=" + dateStr);
         if (!curTimeStr.equals(dateStr)) {
             AppUtils.clearPptTmpFiles(this);
         }
@@ -154,7 +183,7 @@ public abstract class BaseActivity extends Activity {
 
     public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        if (!TextUtils.isEmpty(AppUtils.getExternalSDCardPath())) {
+        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
             ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
 
@@ -326,12 +355,10 @@ public abstract class BaseActivity extends Activity {
      *
      * @param pathString
      */
-    private void insertUSB(String pathString) {
+    private void handleUdiskMounted(String pathString) {
         ShowMessage.showToast(mContext, "U盘已插入，正在读取...");
-
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
-        //指定存放图片的文件夹不存在的情况
         if (!file.exists()) {
             ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
             return;
@@ -375,7 +402,7 @@ public abstract class BaseActivity extends Activity {
     /**
      * USB拔出
      */
-    private void removeUSB(String pathString) {
+    private void handleUdiskRemoved(String pathString) {
         ShowMessage.showToast(mContext, "U盘已拔出");
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         if (this instanceof UsbImageViewerActivity && imagesPath.equals(((UsbImageViewerActivity) this).getCurrentUsbPath())) {
@@ -384,32 +411,46 @@ public abstract class BaseActivity extends Activity {
     }
 
 
-    private void handleSDCardRemoved() {
+    private void handleExtsdRemoved() {
         TechnicalLogReporter.sdcardRemoved(this);
         //SD移除时跳到TV页
         if (this instanceof AdsPlayerActivity) {
-            Intent intent = new Intent(this, TvPlayerActivity.class);
-            startActivity(intent);
+            if (AppUtils.isMstar()) {
+                Intent intent = new Intent(this, TvPlayerActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, TvPlayerGiecActivity.class);
+                startActivity(intent);
+            }
         }
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        switch (keyCode) {
-            case KeyCodeConstant.KEY_CODE_SYSTEM_SETTING:
-                LogFileUtil.write("will gotoSystemSetting");
-                gotoSystemSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_SETTING:
-                gotoSetting();
-                handled = true;
-                break;
-            case KeyCodeConstant.KEY_CODE_MANUAL_HEARTBEAT:
-                manualHeartbeat();
-                handled = true;
-                break;
+        if (keyCode == KeyCode.KEY_CODE_SYSTEM_SETTING) {
+            LogFileUtil.write("will gotoSystemSetting");
+            gotoSystemSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SETTING) {
+            gotoSetting();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_MANUAL_HEARTBEAT) {
+            manualHeartbeat();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_APP_INSTALLED) {
+            gotoAppBrowser();
+            handled = true;
+
+        } else if (keyCode == KeyCode.KEY_CODE_UDISK_UPDATE) {
+            handleUsbUpdate();
+            handled = true;
+        } else if (keyCode == KeyCode.KEY_CODE_UDISK_COPY) {
+            handleUsbCopy();
+            handled = true;
         }
         return handled || super.onKeyDown(keyCode, event);
     }
@@ -423,6 +464,70 @@ public abstract class BaseActivity extends Activity {
     private void gotoSetting() {
         Intent intent = new Intent(this, SettingActivity.class);
         startActivity(intent);
+    }
+
+    private void gotoAppBrowser() {
+        Intent intent = new Intent(this, AppBrowserActivity.class);
+        startActivity(intent);
+    }
+
+    private void handleUsbUpdate() {
+        if (checkAndSetUsbPath()) {
+            if (!TextUtils.isEmpty(mSession.getBoiteId())) {
+                if (mUsbUpdateDialog == null) {
+                    mUsbUpdateDialog = new UsbUpdateDialog(this);
+                }
+                if (!mUsbUpdateDialog.isShowing()) {
+                    mUsbUpdateDialog.show();
+                }
+            } else {
+                if (mInputBoiteIdDialog == null) {
+                    mInputBoiteIdDialog = new InputBoiteIdDialog(this, this);
+                }
+
+                if (!mInputBoiteIdDialog.isShowing()) {
+                    mInputBoiteIdDialog.show();
+                }
+            }
+        } else {
+            ShowMessage.showToast(this, "未发现可执行U盘目录");
+        }
+    }
+
+    private void handleUsbCopy() {
+        if (checkAndSetUsbPath()) {
+            File mediaFile = new File(mSession.getUsbPath() + "media/");
+            File multicastFile = new File(mSession.getUsbPath() + "multicast/");
+            if (!mediaFile.exists() && !multicastFile.exists()) {
+                ShowMessage.showToast(this, "未发现可执行U盘目录");
+            } else {
+                if (mFileCopyDialog == null) {
+                    mFileCopyDialog = new FileCopyDialog(this);
+                }
+                if (!mFileCopyDialog.isShowing()) {
+                    mFileCopyDialog.show();
+                }
+            }
+        } else {
+            ShowMessage.showToast(this, "未发现可执行U盘目录");
+        }
+    }
+
+    private boolean checkAndSetUsbPath() {
+        boolean hasEligibleUdisk = false;
+        if (AppUtils.isMstar()) {
+
+        } else {
+            String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
+            for (String path : possiblePaths) {
+                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists()) {
+                    mSession.setUsbPath(path);
+                    hasEligibleUdisk = true;
+                    break;
+                }
+            }
+        }
+        return hasEligibleUdisk;
     }
 
     private void manualHeartbeat() {
@@ -465,5 +570,10 @@ public abstract class BaseActivity extends Activity {
             return mAudioSkin.getVolume();
         }
         return -1;
+    }
+
+    @Override
+    public void onBoiteIdCheckPass() {
+        handleUsbUpdate();
     }
 }

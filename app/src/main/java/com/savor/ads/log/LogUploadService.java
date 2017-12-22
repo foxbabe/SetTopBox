@@ -15,6 +15,7 @@ import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
 import com.savor.ads.oss.ResuambleUpload;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 
 import java.io.File;
 import java.text.ParseException;
@@ -73,8 +74,8 @@ public class LogUploadService {
                         String logMonth = null;
                         /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
                             logMonth = split[2].substring(0, 6);
-                        } else */if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
-                            logMonth = split[1].substring(0, 6);
+                        } else */if (split.length == 2||split.length==3) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
+                            logMonth = split[1].substring(0, 6);               //单机：FCD5D900B8B6_2017061415_standalone.blog
                         } else {
                             file.delete();
                             continue;
@@ -93,17 +94,18 @@ public class LogUploadService {
                         }
                     }
                 }
-
-                uploadLotteryRecordFile();
-
-                while (true) {
-                    uploadFile();
-                    try {
-                        Thread.sleep(1000 * 5);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                if (AppUtils.isNetworkAvailable(context)){
+                    uploadLotteryRecordFile();
+                    while (true) {
+                        uploadFile();
+                        try {
+                            Thread.sleep(1000 * 5);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
+
 
             }
         }.start();
@@ -160,7 +162,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile()) {
                     String[] split = name.split("_");
-                    if (split.length != 2) {
+                    if (split.length != 2||split.length!=3) {
                         continue;
                     }
                     final String time = split[1].substring(0, 10);
@@ -180,8 +182,15 @@ public class LogUploadService {
                         }
                         if (zipFile.exists()) {
                             String localFilePath = archivePath.substring(1, archivePath.length());
-                            String ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator +
-                                    AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            String ossFilePath = null;
+                            if (name.contains(ConstantValues.STANDALONE)){
+                                ossFilePath = OSSValues.uploadStandaloneFilePath + session.getOssAreaId() + File.separator +
+                                        AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            }else{
+                                ossFilePath = OSSValues.uploadFilePath + session.getOssAreaId() + File.separator +
+                                        AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            }
+
 
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
@@ -246,4 +255,18 @@ public class LogUploadService {
     public interface UploadCallback {
         void isSuccessOSSUpload(boolean flag);
     }
+
+
+    public  void copyLogToUSBDriver(AppUtils.StorageFile storageFile){
+        String path = AppUtils.getFilePath(context, storageFile);
+        switch (storageFile){
+            case log:
+
+                break;
+            case loged:
+
+                break;
+        }
+    }
+
 }

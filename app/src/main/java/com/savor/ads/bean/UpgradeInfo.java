@@ -15,6 +15,8 @@ public class UpgradeInfo implements Serializable {
 	/**软件下载地址 */
 	private String apkUrl;
 	private String romUrl;
+	private String apk_name;
+	private String logo_name;
 
 	/**下载安装包文件的md5值 */
 	private String apkMd5;
@@ -26,6 +28,7 @@ public class UpgradeInfo implements Serializable {
 
 	private String logo_url;
 	private String logo_md5;
+	private String logo_version;
 
 	public int getIsApkForceUpgrade() {
 		return isApkForceUpgrade;
@@ -137,5 +140,29 @@ public class UpgradeInfo implements Serializable {
 
 	public void setLogo_md5(String logo_md5) {
 		this.logo_md5 = logo_md5;
+	}
+
+	public String getApk_name() {
+		return apk_name;
+	}
+
+	public void setApk_name(String apk_name) {
+		this.apk_name = apk_name;
+	}
+
+	public String getLogo_name() {
+		return logo_name;
+	}
+
+	public void setLogo_name(String logo_name) {
+		this.logo_name = logo_name;
+	}
+
+	public String getLogo_version() {
+		return logo_version;
+	}
+
+	public void setLogo_version(String logo_version) {
+		this.logo_version = logo_version;
 	}
 }

@@ -13,10 +13,10 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -26,6 +26,7 @@ import com.savor.ads.core.Session;
 
 import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -54,6 +55,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -102,7 +105,7 @@ public class AppUtils {
     public static final String BoxlogedDir = "loged/";
     public static final String BoxMediaDir = "media/";
     public static final String BoxMulticast = "multicast/";
-    public static final String BoxLotteryDir= "lottery/";
+    public static final String BoxLotteryDir = "lottery/";
     // UTF-8 encoding
     private static final String ENCODING_UTF8 = "UTF-8";
 
@@ -153,9 +156,13 @@ public class AppUtils {
          * 抽奖记录
          */
         lottery,
-        /**幻灯片所用图片*/
+        /**
+         * 幻灯片所用图片
+         */
         ppt,
-        /**特色菜目录*/
+        /**
+         * 特色菜目录
+         */
         specialty,
     }
 
@@ -212,52 +219,56 @@ public class AppUtils {
     }
 
     //获取外部存储卡地址
-    public static String getExternalSDCardPath() {
-        if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)){
-            return EXTERNAL_SDCARD_PATH;
-        }
-        String sdcard_path = null;
-        String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
-        LogUtils.d(sd_default);
-        if (sd_default.endsWith("/")) {
-            sd_default = sd_default.substring(0, sd_default.length() - 1);
-        }
-        // 得到路径
-        try {
-            Runtime runtime = Runtime.getRuntime();
-            Process proc = runtime.exec("mount");
-            InputStream is = proc.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            String line;
-            BufferedReader br = new BufferedReader(isr);
-            while ((line = br.readLine()) != null) {
-                if (line.contains("secure"))
-                    continue;
-                if (line.contains("asec"))
-                    continue;
-                if (line.contains("fat") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
+    public static String getMainMediaPath() {
+        if (AppUtils.isMstar()) {
+            if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)) {
+                return EXTERNAL_SDCARD_PATH;
+            }
+            String sdcard_path = null;
+            String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
+            LogUtils.d(sd_default);
+            if (sd_default.endsWith("/")) {
+                sd_default = sd_default.substring(0, sd_default.length() - 1);
+            }
+            // 得到路径
+            try {
+                Runtime runtime = Runtime.getRuntime();
+                Process proc = runtime.exec("mount");
+                InputStream is = proc.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                String line;
+                BufferedReader br = new BufferedReader(isr);
+                while ((line = br.readLine()) != null) {
+                    if (line.contains("secure"))
+                        continue;
+                    if (line.contains("asec"))
+                        continue;
+                    if (line.contains("fat") && line.contains("/mnt/")) {
+                        String columns[] = line.split(" ");
+                        if (columns != null && columns.length > 1) {
+                            if (sd_default.trim().equals(columns[1].trim())) {
+                                continue;
+                            }
+                            sdcard_path = columns[1];
                         }
-                        sdcard_path = columns[1];
-                    }
-                } else if (line.contains("fuse") && line.contains("/mnt/")) {
-                    String columns[] = line.split(" ");
-                    if (columns != null && columns.length > 1) {
-                        if (sd_default.trim().equals(columns[1].trim())) {
-                            continue;
+                    } else if (line.contains("fuse") && line.contains("/mnt/")) {
+                        String columns[] = line.split(" ");
+                        if (columns != null && columns.length > 1) {
+                            if (sd_default.trim().equals(columns[1].trim())) {
+                                continue;
+                            }
+                            sdcard_path = columns[1];
                         }
-                        sdcard_path = columns[1];
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            EXTERNAL_SDCARD_PATH = sdcard_path;
+            return sdcard_path;
+        } else {
+            return getSDCardPath();
         }
-        EXTERNAL_SDCARD_PATH = sdcard_path;
-        return sdcard_path;
     }
 
     /**
@@ -266,7 +277,7 @@ public class AppUtils {
      * @return
      */
     public static String getFilePath(Context context, StorageFile mode) {
-        String path = getExternalSDCardPath();
+        String path = getMainMediaPath();
 
         File targetLogFile = new File(path + File.separator, BoxLogDir);
         if (!targetLogFile.exists()) {
@@ -288,8 +299,8 @@ public class AppUtils {
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
-        File targetLotteryFile = new File(path + File.separator,BoxLotteryDir);
-        if (!targetLotteryFile.exists()){
+        File targetLotteryFile = new File(path + File.separator, BoxLotteryDir);
+        if (!targetLotteryFile.exists()) {
             targetLotteryFile.mkdir();
         }
         File targetPptFile = new File(path + File.separator, "ppt");
@@ -438,7 +449,7 @@ public class AppUtils {
         String md5Vod1 = MD5(newb1);
         String md5Vod2 = MD5(newb2);
 
-        String md5Vod = getMD5(md5Vod1+md5Vod2);
+        String md5Vod = getMD5(md5Vod1 + md5Vod2);
         return md5Vod;
     }
 
@@ -1369,35 +1380,47 @@ public class AppUtils {
         return isImageFile;
     }
 
+    public static boolean zipFile(File srcFile, File zipFile, String comment) throws Exception {
+//        BufferedInputStream in = null;
 
-    public static boolean zipFile(File srcFile, File destFile, String comment) throws Exception {
         ZipOutputStream zOutStream = null;
-        if (srcFile == null || destFile == null) return false;
+        if (srcFile == null || zipFile == null) return false;
 
         long fileSize = srcFile.length();
         if (!srcFile.exists()) {
             return false;
         }
         try {
-            if (destFile.exists()) {
-                destFile.delete();
+            if (zipFile.exists()) {
+                zipFile.delete();
             }
-            boolean flag = destFile.createNewFile();
-            zOutStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destFile), (int) fileSize / 2));
+            // 创建字节输入流对象
+//            in = new BufferedInputStream(new FileInputStream(srcFile));//文件输入流
+            boolean flag = zipFile.createNewFile();
+            zOutStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
             ZipEntry en = new ZipEntry(srcFile.getName());
             en.setSize(srcFile.length());
             zOutStream.putNextEntry(en);
             zOutStream.setComment(comment);
+            // 向压缩文件中输出数据
+//            int temp = 0;
+//            while ((temp = in.read())!=-1) {//读取内容
+//                zOutStream.write(temp);//压缩输出
+//            }
             byte[] byFile = FileUtils.readFileToByteArray(srcFile);
             zOutStream.write(byFile);
             zOutStream.flush();
-            zOutStream.close();
+            zOutStream.closeEntry();
+
         } catch (Exception e) {
             // TODO: handle exception
             LogUtils.e(e.toString());
             return false;
         } finally {
             try {
+//                if (in!=null){
+//                    in.close();
+//                }
                 if (zOutStream != null) {
                     zOutStream.close();
                     zOutStream = null;
@@ -1411,29 +1434,28 @@ public class AppUtils {
     }
 
     /**
-     *
      * @param context
      * @param serverVersion
      * @param type：1是rom升级，2是apk升级
      * @return
      */
-    public static boolean needUpdate(Context context,String serverVersion,int type){
+    public static boolean needUpdate(Context context, String serverVersion, int type) {
         Session session = Session.get(context);
-        if (serverVersion == null){
+        if (serverVersion == null) {
             return false;
         }
         String localVersion = null;
-        if (type ==1){
+        if (type == 1) {
             String rom = session.getRomVersion();
-            if (!TextUtils.isEmpty(rom)){
-                localVersion = rom.replace("V","").trim();
-            }else{
+            if (!TextUtils.isEmpty(rom)) {
+                localVersion = rom.replace("V", "").trim();
+            } else {
                 return false;
             }
-        }else{
+        } else {
             localVersion = session.getVersionName();
         }
-        if (!TextUtils.isEmpty(serverVersion)&&!localVersion.equals(serverVersion)){
+        if (!TextUtils.isEmpty(serverVersion) && !localVersion.equals(serverVersion)) {
             return true;
         }
         return false;
@@ -1470,6 +1492,7 @@ public class AppUtils {
         }
         return state;
     }
+
     public static boolean setWifiApEnabled(Context context, boolean enabled) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (enabled) { // disable WiFi in any case
@@ -1535,7 +1558,7 @@ public class AppUtils {
             reader = new BufferedReader(
                     new InputStreamReader(is));
             String line = null;
-            while ((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.contains("wlan0") && line.contains("proto kernel")) {
                     result = line.substring(line.lastIndexOf(" ") + 1).trim();
@@ -1576,7 +1599,7 @@ public class AppUtils {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         try {
             Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
-            WifiConfiguration wifiConfig = (WifiConfiguration)method.invoke(wifiManager);
+            WifiConfiguration wifiConfig = (WifiConfiguration) method.invoke(wifiManager);
             return wifiConfig.SSID;
         } catch (Exception e) {
             return null;
@@ -1585,6 +1608,7 @@ public class AppUtils {
 
     /**
      * 检测是否可播放下一期
+     *
      * @param context
      * @return
      */
@@ -1618,15 +1642,19 @@ public class AppUtils {
     }
 
     public static String getShowingSSID(Context context) {
-        String ssid = AppUtils.getWifiName(context);
-        if (TextUtils.isEmpty(ssid)) {
-            ssid = Session.get(context).getBoxName();
+        if (isMstar()) {
+            String ssid = AppUtils.getWifiName(context);
+            if (TextUtils.isEmpty(ssid)) {
+                ssid = Session.get(context).getBoxName();
+            }
+            return ssid;
+        } else {
+            return Session.get(context).getBoxName();
         }
-        return ssid;
     }
 
     public static long getAvailableExtSize() {
-        StatFs stat = new StatFs(getExternalSDCardPath());
+        StatFs stat = new StatFs(getMainMediaPath());
         long blockSize = stat.getBlockSize();
         long blocks = stat.getAvailableBlocks();
         return blockSize * blocks;
@@ -1643,5 +1671,9 @@ public class AppUtils {
             }
         }
         return period;
+    }
+
+    public static boolean isMstar() {
+        return Build.MODEL.contains("MStar");
     }
 }

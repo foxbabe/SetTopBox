@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.savor.ads">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
@@ -22,6 +23,54 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.REBOOT"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission
+        android:name="android.permission.GLOBAL_SEARCH"
+        tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"/>
+    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_ALL_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS"/>
+    <uses-permission android:name="droidlogic.permission.SYSTEM_CONTROL"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.HDMI_CEC"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.DEVICE_POWER"/>
+
+    <!-- 系统rom更新 -->
+    <uses-permission android:name="android.permission.DELETE_CACHE_FILES"/>
+    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
+    <uses-permission android:name="android.permission.REBOOT"/>
+    <uses-permission android:name="android.permission.RECOVERY"/>
+    <!-- 系统rom更新 -->
+
+    <uses-feature
+        android:name="android.software.live_tv"
+        android:required="true"/>
+
+    <!-- Permissions/feature for USB tuner -->
+    <uses-permission android:name="android.permission.DVB_DEVICE"/>
+
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false"/>
+
+    <!-- Limit only for Android TV -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.software.live_tv"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false"/>
 
     <application
         android:name=".SavorApplication"
@@ -75,7 +124,11 @@
             android:name=".service.HandleMediaDataService"
             android:exported="false">
         </service>
-
+        <!--处理U盘更新单机版机顶盒-->
+        <service
+            android:name=".service.HandleUSBUpdateService"
+            android:exported="false">
+        </service>
         <!-- 点播类处理和转发指令的Service， 实现在savorbox.jar包中 -->
         <service
             android:name="com.jar.savor.box.services.RemoteService"
@@ -93,6 +146,10 @@
         <!-- 电视播放页面 -->
         <activity
             android:name=".activity.TvPlayerActivity"
+            android:launchMode="singleTask">
+        </activity>
+        <activity
+            android:name=".activity.TvPlayerGiecActivity"
             android:launchMode="singleTask">
         </activity>
         <!-- 投屏类播放页面 -->
@@ -131,7 +188,9 @@
             android:name=".activity.LotteryActivity"
             android:launchMode="singleTask">
         </activity>
-
+        <activity
+            android:name=".activity.AppBrowserActivity"
+            android:launchMode="singleTask"/>
         <service
             android:name=".service.GreetingService"
             android:enabled="true"
