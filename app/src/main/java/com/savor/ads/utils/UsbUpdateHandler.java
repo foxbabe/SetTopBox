@@ -638,7 +638,11 @@ public class UsbUpdateHandler {
             LogUtils.w("Update apk but apk file not exits");
             return false;
         }
-
+        if (setTopBoxBean==null||setTopBoxBean.getVersion()==null) {
+            LogFileUtil.write("setTopBoxBean is null or version is null");
+            LogUtils.w("setTopBoxBean is null or version is null");
+            return false;
+        }
         String md5Str = setTopBoxBean.getVersion().getApkMd5();
         if (apkFile.length() <= 0) {
             LogFileUtil.write("Update apk but apk file is empty");

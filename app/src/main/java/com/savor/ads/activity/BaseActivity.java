@@ -360,18 +360,18 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
         if (!file.exists()) {
-            ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
+//            ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
             return;
         }
         File[] files = file.listFiles();
         //空文件夹的情况
         if (files.length == 0) {
-            ShowMessage.showToast(mContext, "检测到【redian】文件夹是空的，请检查后重试！");
+//            ShowMessage.showToast(mContext, "检测到【redian】文件夹是空的，请检查后重试！");
             return;
         }
         ArrayList<String> usbImgPathList = getImagePath(files);//获取所有图片路径
         if (usbImgPathList.size() <= 0) {
-            ShowMessage.showToast(mContext, "检测到【redian】文件夹中没有图片文件，请检查后重试！");
+//            ShowMessage.showToast(mContext, "检测到【redian】文件夹中没有图片文件，请检查后重试！");
             return;
         }
 
