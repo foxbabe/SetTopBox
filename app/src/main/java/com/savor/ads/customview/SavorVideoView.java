@@ -672,6 +672,7 @@ public class SavorVideoView extends RelativeLayout {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            release();
         }
     }
 
@@ -686,7 +687,6 @@ public class SavorVideoView extends RelativeLayout {
         }
 //        mMediaPlayer.reset();
 //        mPlayState = MediaPlayerState.IDLE;
-        release();
     }
 
     /**

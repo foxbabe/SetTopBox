@@ -1,7 +1,9 @@
 package com.jar.savor.box.services;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -27,9 +29,13 @@ import com.jar.savor.box.vo.VideoPrepareRequestVo;
 import com.jar.savor.box.vo.VolumeResponseVo;
 import com.savor.ads.bean.PptImage;
 import com.savor.ads.bean.PptVideo;
+import com.savor.ads.bean.RstrSpecialty;
+import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectionManager;
+import com.savor.ads.service.GreetingService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
@@ -49,12 +55,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+
+import cn.savor.small.netty.NettyClient;
 
 /**
  * Created by zhanghq on 2016/12/22.
@@ -366,6 +376,15 @@ public class RemoteService extends Service {
                     break;
                 case "/restaurant/stop":
                     resJson = handleRstrStopRequest(deviceId);
+                    break;
+                case "/specialty":
+                    resJson = handleRstrSpecialty(request, deviceId, deviceName);
+                    break;
+                case "/greeting":
+                    resJson = handleRstrGreeting(request, deviceId, deviceName);
+                    break;
+                case "/adv":
+                    resJson = handleRstrAdv(request, deviceId, deviceName);
                     break;
                 default:
                     LogUtils.d(" not enter any method");
@@ -1057,7 +1076,7 @@ public class RemoteService extends Service {
                         if (isAllExist1) {
                             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                                     deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                                    GlobalValues.IS_RSTR_PROJECTION ) {
+                                    GlobalValues.IS_RSTR_PROJECTION) {
                                 boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
 
                                 // 通知上一个投屏者已被抢投
@@ -1350,6 +1369,200 @@ public class RemoteService extends Service {
                 stopResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
             }
             return new Gson().toJson(stopResponse);
+        }
+
+        /**
+         * 处理演示版餐厅端投特色菜请求
+         *
+         * @param request
+         * @param deviceId
+         * @param deviceName
+         * @return
+         */
+        private String handleRstrSpecialty(HttpServletRequest request, String deviceId, String deviceName) {
+            String specialtyIds = request.getParameter("name");
+            int interval = Integer.parseInt(request.getParameter("interval"));
+
+            String[] names = specialtyIds.split(",");
+            String failedIds = "";
+            ArrayList<String> paths = new ArrayList<>();
+            for (int i = 0; i < names.length; i++) {
+                String name = names[i].trim();
+
+                File file = new File(AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.demo), name + ".jpg");
+                if (file.exists()) {
+                    paths.add(file.getPath());
+                } else {
+                    failedIds += name + ",";
+                }
+            }
+
+            BaseResponse resp = new BaseResponse();
+            if (!TextUtils.isEmpty(failedIds)) {
+                failedIds = failedIds.substring(0, failedIds.length() - 1);
+            }
+
+            if (paths.size() > 0) {
+                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        GlobalValues.IS_RSTR_PROJECTION) {
+                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = true;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                    if (TextUtils.isEmpty(failedIds)) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                        resp.setInfo("投屏成功");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                        resp.setInfo(failedIds);
+                    }
+                    listener.showSpecialty(paths, interval, isNewDevice);
+                } else {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    if (GlobalValues.IS_LOTTERY) {
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    } else {
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    }
+                }
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未发现任何对应的特色菜");
+            }
+            return new Gson().toJson(resp);
+        }
+
+        /**
+         * 处理演示版餐厅端投欢迎词请求
+         *
+         * @param request
+         * @param deviceId
+         * @param deviceName
+         * @return
+         */
+        private String handleRstrGreeting(HttpServletRequest request, String deviceId, String deviceName) {
+            String words = request.getParameter("word");
+            int template = Integer.parseInt(request.getParameter("templateId"));
+
+            BaseResponse resp = new BaseResponse();
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    GlobalValues.IS_RSTR_PROJECTION) {
+                boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                GlobalValues.IS_RSTR_PROJECTION = true;
+                GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("投屏成功");
+
+                listener.showGreeting(words, template, 1000 * 60 * 2, isNewDevice);
+
+                Intent intent = new Intent(RemoteService.this, GreetingService.class);
+                intent.putExtra(GreetingService.EXTRA_DEVICE_ID, deviceId);
+                intent.putExtra(GreetingService.EXTRA_DEVICE_NAME, deviceName);
+                intent.putExtra(GreetingService.EXTRA_WORDS, words);
+                intent.putExtra(GreetingService.EXTRA_TEMPLATE, template);
+                try {
+                    unbindService(connection);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                bindService(intent, connection, Service.BIND_AUTO_CREATE);
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                if (GlobalValues.IS_LOTTERY) {
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                } else {
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                }
+            }
+            return new Gson().toJson(resp);
+        }
+
+        private ServiceConnection connection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+
+        /**
+         * 处理演示版餐厅端投宣传片请求
+         *
+         * @param request
+         * @param deviceId
+         * @param deviceName
+         * @return
+         */
+        private String handleRstrAdv(HttpServletRequest request, String deviceId, String deviceName) {
+            String videos = request.getParameter("videos");
+
+            String[] video = videos.split(",");
+            String failedIds = "";
+            ArrayList<String> paths = new ArrayList<>();
+            for (int i = 0; i < video.length; i++) {
+                String name = video[i].trim();
+
+                File file = new File(AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.demo), name + ".mp4");
+                if (file.exists()) {
+                    paths.add(file.getPath());
+                } else {
+                    failedIds += name + ",";
+                }
+            }
+
+            if (!TextUtils.isEmpty(failedIds)) {
+                failedIds = failedIds.substring(0, failedIds.length() - 1);
+            }
+
+            BaseResponse resp = new BaseResponse();
+            if (paths.size() > 0) {
+                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                        GlobalValues.IS_RSTR_PROJECTION) {
+                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                    GlobalValues.IS_RSTR_PROJECTION = true;
+                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
+                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                    if (TextUtils.isEmpty(failedIds)) {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                        resp.setInfo("投屏成功");
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                        resp.setInfo(failedIds);
+                    }
+                    listener.showAdv(paths, isNewDevice);
+                } else {
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    if (GlobalValues.IS_LOTTERY) {
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    } else {
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    }
+                }
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未发现任何对应的宣传片");
+            }
+            return new Gson().toJson(resp);
         }
 
         private String handleStreamImageProjection(HttpServletRequest request, int imageType,

@@ -164,6 +164,10 @@ public class AppUtils {
          * 特色菜目录
          */
         specialty,
+        /**
+         * 演示文件目录
+         */
+        demo,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -311,6 +315,10 @@ public class AppUtils {
         if (!specialtyFile.exists()) {
             specialtyFile.mkdir();
         }
+        File demoFile = new File(path + File.separator, "demo");
+        if (!demoFile.exists()) {
+            demoFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -330,6 +338,8 @@ public class AppUtils {
             path = targetPptFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.specialty) {
             path = specialtyFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.demo) {
+            path = demoFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
