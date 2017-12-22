@@ -79,6 +79,9 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = readChannelList();
+                        if (isSuccess){
+                            msg = "电视节目表提取完成";
+                        }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_SET_CHANNEL:
                         if (mCallback != null) {
@@ -86,6 +89,9 @@ public class UsbUpdateHandler {
                         }
                         isKnownAction = true;
                         isSuccess = writeChannelList();
+                        if (isSuccess){
+                            msg = "电视节目表已设置到机顶盒";
+                        }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOG:
                         if (mCallback != null) {
