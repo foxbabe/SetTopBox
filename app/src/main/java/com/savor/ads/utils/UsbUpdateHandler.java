@@ -36,6 +36,7 @@ public class UsbUpdateHandler {
     Context mContext;
     ProgressCallback mCallback;
     List<String> cfgList;
+    private String copyErrorMsg=null;
     /**
      * 节目数据
      */
@@ -128,7 +129,11 @@ public class UsbUpdateHandler {
                         }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
                             msg = "机顶盒期号与U盘内期号相同,无需更新";
                         }else{
-                            msg = "视频更新失败，请重试!!";
+                            if (!TextUtils.isEmpty(copyErrorMsg)){
+                                msg = copyErrorMsg;
+                            }else {
+                                msg = "视频更新失败，请重试!!";
+                            }
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_APK:
@@ -384,60 +389,81 @@ public class UsbUpdateHandler {
                     + File.separator;
             String localRootPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media);
             int completedCount = 0;     // 下载成功个数
-            while (completedCount != mediaLibBeans.size()) {
-                DBHelper.get(mContext).deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
-                for (int i =0;i<mediaLibBeans.size();i++) {
-                    MediaLibBean bean = mediaLibBeans.get(i);
-                    String localPath = null;
-                    String usbMeidaPath = null;
-                    if (bean.getType().equals(ConstantValues.ADV)) {
-                        localPath = localRootPath + bean.getName();
-                        usbMeidaPath = usbAdvRootPath + bean.getName();
+//            while (completedCount != mediaLibBeans.size()) {
+//
+//            }
+            DBHelper.get(mContext).deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
+            for (int i =0;i<mediaLibBeans.size();i++) {
+                MediaLibBean bean = mediaLibBeans.get(i);
+                String localPath = null;
+                String usbMeidaPath = null;
+                if (bean.getType().equals(ConstantValues.ADV)) {
+                    localPath = localRootPath + bean.getName();
+                    usbMeidaPath = usbAdvRootPath + bean.getName();
 
-                    } else {
-                        localPath = localRootPath + bean.getChinese_name() + "." + bean.getSurfix();
-                        usbMeidaPath = usbMediaRootPath + bean.getChinese_name() + "." + bean.getSurfix();
-                    }
-                    try {
-                        mCallback.onActionProgress(index,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+(i+1)+"个");
-                        boolean isDownloaded = false;
-                        if (isDownloadCompleted(localPath, bean.getMd5())) {
-                            isDownloaded = true;
-                        } else {
-                            new File(localPath).delete();
-                            FileUtils.copyFile(usbMeidaPath, localPath);
-                        }
-                        if (!isDownloaded&&isDownloadCompleted(localPath, bean.getMd5())){
-                            isDownloaded = true;
-                        }
-                        if (isDownloaded) {
-                            PlayListBean play = new PlayListBean();
-                            play.setPeriod(setTopBoxBean.getPeriod());
-                            play.setDuration(bean.getDuration());
-                            play.setMd5(bean.getMd5());
-                            play.setVid(bean.getVid());
-                            if (bean.getType().equals(ConstantValues.ADV)) {
-                                play.setMedia_name(bean.getName());
-                            }else{
-                                play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
-                            }
-                            play.setMedia_type(bean.getType());
-                            play.setOrder(bean.getOrder());
-                            play.setSurfix(bean.getSurfix());
-                            play.setLocation_id(bean.getLocation_id());
-                            play.setMediaPath(localPath);
-                            // 插库成功，completedCount+1
-                            if (DBHelper.get(mContext).insertOrUpdateNewPlayListLib(play, -1)) {
-                                completedCount++;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        ShowMessage.showToast(mContext, usbMeidaPath + "出错");
-                    }
-
+                } else {
+                    localPath = localRootPath + bean.getChinese_name() + "." + bean.getSurfix();
+                    usbMeidaPath = usbMediaRootPath + bean.getChinese_name() + "." + bean.getSurfix();
                 }
+                try {
+                    mCallback.onActionProgress(index,"总共:"+mediaLibBeans.size()+"个视频，正在更新第"+(i+1)+"个");
+                    boolean isDownloaded = false;
+                    if (isDownloadCompleted(localPath, bean.getMd5())) {
+                        isDownloaded = true;
+                    } else {
+                        new File(localPath).delete();
+                        FileUtils.copyFile(usbMeidaPath, localPath);
+                    }
+                    if (!isDownloaded&&isDownloadCompleted(localPath, bean.getMd5())){
+                        isDownloaded = true;
+                    }else if(!isDownloaded){
+                        copyErrorMsg = "第"+(i+1)+"个视频下载出错,";
+                        int status = downloadStatus(localPath, bean.getMd5());
+                        switch (status){
+                            case -1:
+                                copyErrorMsg = copyErrorMsg + "U盘json中缺少md5值";
+                                break;
+                            case -2:
+                                copyErrorMsg = copyErrorMsg + "U盘json中md5值和文件md5值不匹配";
+                                break;
+                            case -3:
+                                if (bean.getType().equals(ConstantValues.ADV)) {
+                                    copyErrorMsg = copyErrorMsg + "U盘中'"+bean.getName()+"'文件不存在";
+                                }else{
+                                    copyErrorMsg = copyErrorMsg + "U盘中'"+bean.getChinese_name()+ "." + bean.getSurfix()+"'文件不存在";
+                                }
+                                break;
+                        }
+                        break;
+                    }
+                    if (isDownloaded) {
+                        PlayListBean play = new PlayListBean();
+                        play.setPeriod(setTopBoxBean.getPeriod());
+                        play.setDuration(bean.getDuration());
+                        play.setMd5(bean.getMd5());
+                        play.setVid(bean.getVid());
+                        if (bean.getType().equals(ConstantValues.ADV)) {
+                            play.setMedia_name(bean.getName());
+                        }else{
+                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
+                        }
+                        play.setMedia_type(bean.getType());
+                        play.setOrder(bean.getOrder());
+                        play.setSurfix(bean.getSurfix());
+                        play.setLocation_id(bean.getLocation_id());
+                        play.setMediaPath(localPath);
+                        // 插库成功，completedCount+1
+                        if (DBHelper.get(mContext).insertOrUpdateNewPlayListLib(play, -1)) {
+                            completedCount++;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ShowMessage.showToast(mContext, usbMeidaPath + "出错");
+                }
+
             }
+
             if (completedCount == mediaLibBeans.size()) {
                 DBHelper.get(mContext).copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, DBHelper.MediaDBInfo.TableName.PLAYLIST);
                 mSession.setProPeriod(setTopBoxBean.getPeriod());
@@ -470,6 +496,28 @@ public class UsbUpdateHandler {
         } else {
             return false;
         }
+    }
+
+    /**
+     * 根据返回值判断是md5校验失败还是文件不存在
+     * @param path
+     * @param md5
+     * @return
+     * @throws Exception
+     */
+    private int downloadStatus(String path, String md5) throws Exception {
+        int status =0;
+        if (AppUtils.isFileExist(path)) {
+            String realMd5 = AppUtils.getEasyMd5(new File(path));
+            if (TextUtils.isEmpty(md5)){
+                status = -1;
+            }else if (!md5.equals(realMd5)){
+                status = -2;
+            }
+        } else {
+            status = -3;
+        }
+        return status;
     }
 
     private void notifyToPlay() {
@@ -574,7 +622,10 @@ public class UsbUpdateHandler {
         }
 
         if (fileList!=null&&fileList.size()>0){
-            String usbLogPath = null;
+            String usbLogPath = mSession.getUsbPath()
+                    + File.separator
+                    + ConstantValues.USB_FILE_LOG_PATH
+                    + File.separator;
             for (int i =0;i<fileList.size();i++) {
                 File file = fileList.get(i);
                 mCallback.onActionProgress(index,"总共:"+fileList.size()+"个日志，正在提取第"+(i+1)+"个");
@@ -585,29 +636,18 @@ public class UsbUpdateHandler {
                     String archivePath = path + ".zip";
                     File zipFile = new File(archivePath);
                     try {
+                        Thread.sleep(100);
                         AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
+                        Thread.sleep(100);
                         if (zipFile.exists()) {
-                            if (storageFile.equals(log)){
-                                usbLogPath = mSession.getUsbPath()
-                                        + File.separator
-                                        + ConstantValues.USB_FILE_LOG_PATH
-                                        + File.separator;
-                                String usbLogFilePath = usbLogPath + zipFile.getName();
-                                FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
-                                if (new File(usbLogFilePath).exists()) {
-                                    zipFile.delete();
+                            String usbLogFilePath = usbLogPath + zipFile.getName();
+                            FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
+                            Thread.sleep(100);
+                            if (new File(usbLogFilePath).exists()) {
+                                zipFile.delete();
+                                if (storageFile.equals(log)) {
                                     String logedPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.loged);
                                     sourceFile.renameTo(new File(logedPath + sourceFile.getName()));
-                                }
-                            }else{
-                                usbLogPath = mSession.getUsbPath()
-                                        + File.separator
-                                        + ConstantValues.USB_FILE_LOGED_PATH
-                                        + File.separator;
-                                String usbLogFilePath = usbLogPath + zipFile.getName();
-                                FileUtils.copyFile(zipFile.getPath(), usbLogFilePath);
-                                if (new File(usbLogFilePath).exists()) {
-                                    zipFile.delete();
                                 }
                             }
 
