@@ -493,10 +493,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mExitProjectionRunnable);
 
             ArrayList<String> list = new ArrayList<>();
-            String basePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID + File.separator;
             for (PptVideo video :
                     mVideoPptConfig.getVideos()) {
-                list.add(basePath + video.getName());
+                list.add(video.getName());
             }
             mSavorVideoView.setMediaFiles(list, 0, 0);
 

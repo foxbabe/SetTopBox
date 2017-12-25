@@ -337,14 +337,14 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public void showPpt(PptRequestVo currentPptRequest, boolean isNewDevice) {
-        PptAction imageAction = new PptAction(mContext, currentPptRequest, isNewDevice);
+    public void showPpt(PptRequestVo currentPptRequest, boolean isNewDevice, String deviceId) {
+        PptAction imageAction = new PptAction(mContext, currentPptRequest, isNewDevice, deviceId);
         ProjectionManager.getInstance().enqueueAction(imageAction);
     }
 
     @Override
-    public void showVideoPpt(PptVideoRequestVo currentPptRequest, boolean isNewDevice) {
-        VideoPptAction imageAction = new VideoPptAction(mContext, currentPptRequest, isNewDevice);
+    public void showVideoPpt(PptVideoRequestVo currentPptRequest, boolean isNewDevice, String deviceId) {
+        VideoPptAction imageAction = new VideoPptAction(mContext, currentPptRequest, isNewDevice, deviceId);
         ProjectionManager.getInstance().enqueueAction(imageAction);
     }
 
