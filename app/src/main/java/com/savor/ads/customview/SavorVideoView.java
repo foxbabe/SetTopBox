@@ -539,14 +539,16 @@ public class SavorVideoView extends RelativeLayout {
     private void resetAndPreparePlayer(int assignedPlayPosition) {
         LogUtils.w(TAG + "resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
-        mMediaPlayer.reset();
-        mPlayState = MediaPlayerState.IDLE;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.reset();
+            mPlayState = MediaPlayerState.IDLE;
 
-        mAssignedPlayPosition = assignedPlayPosition;
+            mAssignedPlayPosition = assignedPlayPosition;
 
-        if (mMediaFiles != null && mMediaFiles.size() > 0) {
-            setMediaPlayerSource();
-            prepareMediaPlayer();
+            if (mMediaFiles != null && mMediaFiles.size() > 0) {
+                setMediaPlayerSource();
+                prepareMediaPlayer();
+            }
         }
     }
 
