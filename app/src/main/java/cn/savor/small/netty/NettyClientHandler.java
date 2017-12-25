@@ -241,7 +241,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 resp.setInfo("投屏成功");
 
-                ProjectOperationListener.getInstance(mContext).showGreeting(words, template, 1000 * 60 * 2, isNewDevice);
+                ProjectOperationListener.getInstance(mContext).showGreeting(words, template, 1000 * 60 * 5, isNewDevice);
 
 //                Intent intent = new Intent(mContext, GreetingService.class);
 //                intent.putExtra(GreetingService.EXTRA_DEVICE_ID, deviceId);
