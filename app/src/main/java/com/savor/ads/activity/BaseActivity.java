@@ -116,19 +116,18 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
             }
 
             String path = intent.getData().getPath();
-            String usbPath = intent.getDataString().split("file://")[1];
             switch (intent.getAction()) {
                 case Intent.ACTION_MEDIA_MOUNTED:
                     if (AppUtils.isMstar()) {
                         if (path.contains("/mnt/extsd")) {
                             handleExtsdMounted();
                         } else if (path.contains("usb")) {
-                            mSession.setUsbPath(usbPath);
+                            mSession.setUsbPath(path + File.separator);
                             handleUdiskMounted(path);
                         }
                     } else {
                         if (path.contains("storage/") && path.contains("-")) {
-                            mSession.setUsbPath(usbPath);
+                            mSession.setUsbPath(path + File.separator);
                             handleUdiskMounted(path);
                         }
                     }
@@ -544,8 +543,8 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     private void handleUsbCopy() {
         if (checkAndSetUsbPath()) {
-            File mediaFile = new File(mSession.getUsbPath() + "media/");
-            File multicastFile = new File(mSession.getUsbPath() + "multicast/");
+            File mediaFile = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH);
+            File multicastFile = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH);
             if (!mediaFile.exists() && !multicastFile.exists()) {
                 ShowMessage.showToast(this, "未发现可执行U盘目录");
             } else {
@@ -563,17 +562,33 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     private boolean checkAndSetUsbPath() {
         boolean hasEligibleUdisk = false;
-        if (AppUtils.isMstar()) {
-
-        } else {
-            String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
-            for (String path : possiblePaths) {
-                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists()) {
-                    mSession.setUsbPath(path);
-                    hasEligibleUdisk = true;
-                    break;
+        if (TextUtils.isEmpty(mSession.getUsbPath())) {
+            if (AppUtils.isMstar()) {
+                for (File file : new File("/mnt/usb/").listFiles()) {
+                    if (new File(file, ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                            new File(file, ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                            new File(file, ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists()) {
+                        mSession.setUsbPath(file.getPath() + File.separator);
+                        hasEligibleUdisk = true;
+                        break;
+                    }
+                }
+            } else {
+                String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
+                for (String path : possiblePaths) {
+                    if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                            new File(path + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                            new File(path + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists()) {
+                        mSession.setUsbPath(path);
+                        hasEligibleUdisk = true;
+                        break;
+                    }
                 }
             }
+        } else {
+            hasEligibleUdisk = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                    new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                    new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists();
         }
         return hasEligibleUdisk;
     }
