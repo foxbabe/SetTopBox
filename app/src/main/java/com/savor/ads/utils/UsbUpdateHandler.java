@@ -636,7 +636,14 @@ public class UsbUpdateHandler {
                     String archivePath = path + ".zip";
                     File zipFile = new File(archivePath);
                     try {
-                        Thread.sleep(100);
+                        /**测试代码**/
+//                        String usbLogFilePath = usbLogPath + sourceFile.getName();
+//                        FileUtils.copyFile(sourceFile.getPath(), usbLogFilePath);
+//                        if (storageFile.equals(log)) {
+//                            String logedPath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.loged);
+//                            sourceFile.renameTo(new File(logedPath + sourceFile.getName()));
+//                        }
+                        /**测试代码**/
                         AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
                         Thread.sleep(100);
                         if (zipFile.exists()) {
@@ -652,6 +659,7 @@ public class UsbUpdateHandler {
                             }
 
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         isSuccess = false;
