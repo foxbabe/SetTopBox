@@ -1407,8 +1407,9 @@ public class AppUtils {
             zOutStream.setComment(comment);
             // 向压缩文件中输出数据
 //            int temp = 0;
-//            while ((temp = in.read())!=-1) {//读取内容
-//                zOutStream.write(temp);//压缩输出
+//            byte b[] =new byte[1024];
+//            while ((temp = in.read(b))!=-1) {//读取内容
+//                zOutStream.write(b,0,temp);//压缩输出
 //            }
             byte[] byFile = FileUtils.readFileToByteArray(srcFile);
             zOutStream.write(byFile);

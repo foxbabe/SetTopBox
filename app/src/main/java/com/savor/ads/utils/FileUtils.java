@@ -92,7 +92,7 @@ public class FileUtils {
                     bytesum += byteread; //字节数 文件大小
 //                    System.out.println(bytesum);
                     fs.write(buffer, 0, byteread);
-//                    Thread.sleep(1);
+                    fs.flush();
                 }
             }
         } catch (Exception e) {
