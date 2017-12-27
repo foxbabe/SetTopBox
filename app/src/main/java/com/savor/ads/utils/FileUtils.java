@@ -87,11 +87,12 @@ public class FileUtils {
             if (oldFile.exists()) { //文件存在时
                 inStream = new FileInputStream(oldFile); //读入原文件
                 fs = new FileOutputStream(newFile);
-                byte[] buffer = new byte[2048];
+                byte[] buffer = new byte[4096];
                 while ((byteread = inStream.read(buffer)) != -1) {
                     bytesum += byteread; //字节数 文件大小
-                    System.out.println(bytesum);
+//                    System.out.println(bytesum);
                     fs.write(buffer, 0, byteread);
+//                    Thread.sleep(1);
                 }
             }
         } catch (Exception e) {

@@ -112,11 +112,13 @@ public class FileCopyDialog extends Dialog {
                                 "(" + (i + 1) + "/" + listFiles.length + ")"));
                         boolean isSuccess = true;
                         File dstFile = new File(sdMediaFile, file.getName());
-                        try {
-                            FileUtils.copyFile(file, dstFile);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            isSuccess = false;
+                        if (!dstFile.exists() || dstFile.length() != file.length()) {
+                            try {
+                                FileUtils.copyFile(file, dstFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                isSuccess = false;
+                            }
                         }
                         String resultMsg = "拷贝" + file.getPath();
                         if (isSuccess) {
@@ -139,11 +141,13 @@ public class FileCopyDialog extends Dialog {
                                 "(" + (i1 + 1) + "/" + listFiles.length + ")"));
                         boolean isSuccess = true;
                         File dstFile = new File(sdMulticastFile, file.getName());
-                        try {
-                            FileUtils.copyFile(file, dstFile);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            isSuccess = false;
+                        if (!dstFile.exists() || dstFile.length() != file.length()) {
+                            try {
+                                FileUtils.copyFile(file, dstFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                isSuccess = false;
+                            }
                         }
                         String resultMsg = "拷贝" + file.getPath();
                         if (isSuccess) {

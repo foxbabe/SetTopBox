@@ -34,7 +34,7 @@ public class SavorApplication extends MultiDexApplication {
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         // 初始化文件记录类
         LogFileUtil.init();
-
+        // 映射真实健值
         mappingKeyCode();
 
         mQrCodeWindowManager = new QrCodeWindowManager();
@@ -68,6 +68,9 @@ public class SavorApplication extends MultiDexApplication {
         }
     }
 
+    /**
+     * 映射真实健值
+     */
     private void mappingKeyCode() {
         if (AppUtils.isMstar()) {
             KeyCode.KEY_CODE_ANT_IN = KeyCodeConstant.KEY_CODE_ANT_IN;

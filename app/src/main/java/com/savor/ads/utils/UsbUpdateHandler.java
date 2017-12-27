@@ -392,6 +392,9 @@ public class UsbUpdateHandler {
 //            while (completedCount != mediaLibBeans.size()) {
 //
 //            }
+            mSession.setProDownloadPeriod(setTopBoxBean.getPeriod());
+            mSession.setAdsDownloadPeriod(setTopBoxBean.getPeriod());
+            mSession.setAdvDownloadPeriod(setTopBoxBean.getPeriod());
             DBHelper.get(mContext).deleteAllData(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST);
             for (int i =0;i<mediaLibBeans.size();i++) {
                 MediaLibBean bean = mediaLibBeans.get(i);
