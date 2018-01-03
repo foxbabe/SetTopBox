@@ -243,7 +243,7 @@ public class AppUtils {
                         continue;
                     if (line.contains("asec"))
                         continue;
-                    if (line.contains("fat") && line.contains("/mnt/")) {
+                    if (line.contains("fat") && line.contains("/mnt/extsd")) {
                         String columns[] = line.split(" ");
                         if (columns != null && columns.length > 1) {
                             if (sd_default.trim().equals(columns[1].trim())) {
@@ -251,7 +251,7 @@ public class AppUtils {
                             }
                             sdcard_path = columns[1];
                         }
-                    } else if (line.contains("fuse") && line.contains("/mnt/")) {
+                    } else if (line.contains("fuse") && line.contains("/mnt/extsd")) {
                         String columns[] = line.split(" ");
                         if (columns != null && columns.length > 1) {
                             if (sd_default.trim().equals(columns[1].trim())) {
