@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.savor.ads.R;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.KeyCode;
@@ -97,8 +98,8 @@ public class FileCopyDialog extends Dialog {
             public void run() {
                 mIsProcessing = true;
 
-                File mediaDir = new File(mSession.getUsbPath() + "media/");
-                File multicastDir = new File(mSession.getUsbPath() + "multicast/");
+                File mediaDir = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH);
+                File multicastDir = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH);
                 if (mediaDir.isDirectory() && mediaDir.isDirectory()) {
                     File sdMediaFile = new File(AppUtils.getMainMediaPath() + "media/");
                     if (!sdMediaFile.exists()) {
@@ -107,17 +108,19 @@ public class FileCopyDialog extends Dialog {
                     File[] listFiles = mediaDir.listFiles();
                     for (int i = 0; i < listFiles.length; i++) {
                         File file = listFiles[i];
-                        mHandler.sendMessage(mHandler.obtainMessage(1, "开始拷贝media/" + file.getName() +
+                        mHandler.sendMessage(mHandler.obtainMessage(1, "开始拷贝" + file.getPath() +
                                 "(" + (i + 1) + "/" + listFiles.length + ")"));
                         boolean isSuccess = true;
                         File dstFile = new File(sdMediaFile, file.getName());
-                        try {
-                            FileUtils.copyFile(file, dstFile);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            isSuccess = false;
+                        if (!dstFile.exists() || dstFile.length() != file.length()) {
+                            try {
+                                FileUtils.copyFile(file, dstFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                isSuccess = false;
+                            }
                         }
-                        String resultMsg = "拷贝media/" + file.getName();
+                        String resultMsg = "拷贝" + file.getPath();
                         if (isSuccess) {
                             resultMsg += "成功";
                         } else {
@@ -134,17 +137,19 @@ public class FileCopyDialog extends Dialog {
                     File[] listFiles = multicastDir.listFiles();
                     for (int i1 = 0; i1 < listFiles.length; i1++) {
                         File file = listFiles[i1];
-                        mHandler.sendMessage(mHandler.obtainMessage(1, "开始拷贝multicast/" + file.getName() +
+                        mHandler.sendMessage(mHandler.obtainMessage(1, "开始拷贝" + file.getPath() +
                                 "(" + (i1 + 1) + "/" + listFiles.length + ")"));
                         boolean isSuccess = true;
                         File dstFile = new File(sdMulticastFile, file.getName());
-                        try {
-                            FileUtils.copyFile(file, dstFile);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            isSuccess = false;
+                        if (!dstFile.exists() || dstFile.length() != file.length()) {
+                            try {
+                                FileUtils.copyFile(file, dstFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                isSuccess = false;
+                            }
                         }
-                        String resultMsg = "拷贝multicast/" + file.getName();
+                        String resultMsg = "拷贝" + file.getPath();
                         if (isSuccess) {
                             resultMsg += "成功";
                         } else {

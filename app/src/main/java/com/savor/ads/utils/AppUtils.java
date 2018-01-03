@@ -175,7 +175,7 @@ public class AppUtils {
      * SDCard的根路径
      **/
     private static String SDCARD_PATH;
-    private static String EXTERNAL_SDCARD_PATH;
+    private static String EXTERNAL_SDCARD_PATH = "/mnt/extsd/";
     public static final int NOCONNECTION = 0;
     public static final int WIFI = 1;
     public static final int MOBILE = 2;
@@ -218,54 +218,57 @@ public class AppUtils {
         return SDCardPath;
     }
 
-    //获取外部存储卡地址
+    /**
+     * 获取主媒体路径
+     * @return
+     */
     public static String getMainMediaPath() {
         if (AppUtils.isMstar()) {
-            if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)) {
-                return EXTERNAL_SDCARD_PATH;
-            }
-            String sdcard_path = null;
-            String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
-            LogUtils.d(sd_default);
-            if (sd_default.endsWith("/")) {
-                sd_default = sd_default.substring(0, sd_default.length() - 1);
-            }
-            // 得到路径
-            try {
-                Runtime runtime = Runtime.getRuntime();
-                Process proc = runtime.exec("mount");
-                InputStream is = proc.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                String line;
-                BufferedReader br = new BufferedReader(isr);
-                while ((line = br.readLine()) != null) {
-                    if (line.contains("secure"))
-                        continue;
-                    if (line.contains("asec"))
-                        continue;
-                    if (line.contains("fat") && line.contains("/mnt/extsd")) {
-                        String columns[] = line.split(" ");
-                        if (columns != null && columns.length > 1) {
-                            if (sd_default.trim().equals(columns[1].trim())) {
-                                continue;
-                            }
-                            sdcard_path = columns[1];
-                        }
-                    } else if (line.contains("fuse") && line.contains("/mnt/extsd")) {
-                        String columns[] = line.split(" ");
-                        if (columns != null && columns.length > 1) {
-                            if (sd_default.trim().equals(columns[1].trim())) {
-                                continue;
-                            }
-                            sdcard_path = columns[1];
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            EXTERNAL_SDCARD_PATH = sdcard_path;
-            return sdcard_path;
+            return EXTERNAL_SDCARD_PATH;
+//            if (!TextUtils.isEmpty(EXTERNAL_SDCARD_PATH)) {
+//            }
+//            String sdcard_path = null;
+//            String sd_default = Environment.getExternalStorageDirectory().getAbsolutePath();
+//            LogUtils.d(sd_default);
+//            if (sd_default.endsWith("/")) {
+//                sd_default = sd_default.substring(0, sd_default.length() - 1);
+//            }
+//            // 得到路径
+//            try {
+//                Runtime runtime = Runtime.getRuntime();
+//                Process proc = runtime.exec("mount");
+//                InputStream is = proc.getInputStream();
+//                InputStreamReader isr = new InputStreamReader(is);
+//                String line;
+//                BufferedReader br = new BufferedReader(isr);
+//                while ((line = br.readLine()) != null) {
+//                    if (line.contains("secure"))
+//                        continue;
+//                    if (line.contains("asec"))
+//                        continue;
+//                    if (line.contains("fat") && line.contains("/mnt/")) {
+//                        String columns[] = line.split(" ");
+//                        if (columns != null && columns.length > 1) {
+//                            if (sd_default.trim().equals(columns[1].trim())) {
+//                                continue;
+//                            }
+//                            sdcard_path = columns[1];
+//                        }
+//                    } else if (line.contains("fuse") && line.contains("/mnt/")) {
+//                        String columns[] = line.split(" ");
+//                        if (columns != null && columns.length > 1) {
+//                            if (sd_default.trim().equals(columns[1].trim())) {
+//                                continue;
+//                            }
+//                            sdcard_path = columns[1];
+//                        }
+//                    }
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            EXTERNAL_SDCARD_PATH = sdcard_path;
+//            return sdcard_path;
         } else {
             return getSDCardPath();
         }
@@ -1404,8 +1407,9 @@ public class AppUtils {
             zOutStream.setComment(comment);
             // 向压缩文件中输出数据
 //            int temp = 0;
-//            while ((temp = in.read())!=-1) {//读取内容
-//                zOutStream.write(temp);//压缩输出
+//            byte b[] =new byte[1024];
+//            while ((temp = in.read(b))!=-1) {//读取内容
+//                zOutStream.write(b,0,temp);//压缩输出
 //            }
             byte[] byFile = FileUtils.readFileToByteArray(srcFile);
             zOutStream.write(byFile);

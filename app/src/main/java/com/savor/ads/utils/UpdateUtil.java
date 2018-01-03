@@ -93,8 +93,8 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
                 Thread.sleep(5000);
                 File file1 = new File("/system/app/1.apk");
                 if (file1.length() > 0) {
-                    dos.writeBytes("rm -r " + file.getPath() + "\n");
-                    dos.flush();
+//                    dos.writeBytes("rm -r " + file.getPath() + "\n");
+//                    dos.flush();
                     dos.writeBytes("mv /system/app/1.apk /system/app/savormedia.apk\n");
                     dos.flush();
                     Thread.sleep(1000);

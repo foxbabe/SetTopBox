@@ -26,6 +26,7 @@ import com.savor.ads.dialog.UsbUpdateDialog;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
@@ -115,19 +116,18 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
             }
 
             String path = intent.getData().getPath();
-            String usbPath = intent.getDataString().split("file://")[1];
             switch (intent.getAction()) {
                 case Intent.ACTION_MEDIA_MOUNTED:
                     if (AppUtils.isMstar()) {
                         if (path.contains("/mnt/extsd")) {
                             handleExtsdMounted();
                         } else if (path.contains("usb")) {
-                            mSession.setUsbPath(usbPath);
+                            mSession.setUsbPath(path + File.separator);
                             handleUdiskMounted(path);
                         }
                     } else {
                         if (path.contains("storage/") && path.contains("-")) {
-                            mSession.setUsbPath(usbPath);
+                            mSession.setUsbPath(path + File.separator);
                             handleUdiskMounted(path);
                         }
                     }
@@ -298,6 +298,53 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         }
     }
 
+    protected void deleteOldMedia() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                LogUtils.d("删除多余视频");
+
+                // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
+                if (mSession.getProPeriod() == null ) {
+                    return;
+                }
+
+                //排除当前已经完整下载的文件和正在下载的文件，其他删除
+                String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media);
+                File[] listFiles = new File(path).listFiles();
+                if (listFiles == null || listFiles.length == 0) {
+                    return;
+                }
+                try {
+                    DBHelper dbHelper = DBHelper.get(mContext);
+                    if (dbHelper.findPlayListByWhere(null, null) == null &&
+                            dbHelper.findNewPlayListByWhere(null, null) == null){
+                        return;
+                    }
+                    for (File file : listFiles) {
+                        if (file.isFile()) {
+                            String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
+                            String[] selectionArgs = new String[]{file.getName()};
+
+                            if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findAdsByWhere(selection, selectionArgs) == null &&
+                                    dbHelper.findNewAdsByWhere(selection, selectionArgs) == null) {
+                                file.delete();
+                                LogUtils.d("删除文件===================" + file.getName());
+                            }
+                        } else {
+                            FileUtils.deleteFile(file);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -360,18 +407,18 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         String imagesPath = pathString + File.separator + ConstantValues.USB_FILE_PATH;
         File file = new File(imagesPath);
         if (!file.exists()) {
-            ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
+//            ShowMessage.showToast(mContext, "未在U盘中检测到【redian】文件夹，请检查后重试！");
             return;
         }
         File[] files = file.listFiles();
         //空文件夹的情况
         if (files.length == 0) {
-            ShowMessage.showToast(mContext, "检测到【redian】文件夹是空的，请检查后重试！");
+//            ShowMessage.showToast(mContext, "检测到【redian】文件夹是空的，请检查后重试！");
             return;
         }
         ArrayList<String> usbImgPathList = getImagePath(files);//获取所有图片路径
         if (usbImgPathList.size() <= 0) {
-            ShowMessage.showToast(mContext, "检测到【redian】文件夹中没有图片文件，请检查后重试！");
+//            ShowMessage.showToast(mContext, "检测到【redian】文件夹中没有图片文件，请检查后重试！");
             return;
         }
 
@@ -496,8 +543,8 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     private void handleUsbCopy() {
         if (checkAndSetUsbPath()) {
-            File mediaFile = new File(mSession.getUsbPath() + "media/");
-            File multicastFile = new File(mSession.getUsbPath() + "multicast/");
+            File mediaFile = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH);
+            File multicastFile = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH);
             if (!mediaFile.exists() && !multicastFile.exists()) {
                 ShowMessage.showToast(this, "未发现可执行U盘目录");
             } else {
@@ -515,17 +562,33 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     private boolean checkAndSetUsbPath() {
         boolean hasEligibleUdisk = false;
-        if (AppUtils.isMstar()) {
-
-        } else {
-            String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
-            for (String path : possiblePaths) {
-                if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists()) {
-                    mSession.setUsbPath(path);
-                    hasEligibleUdisk = true;
-                    break;
+        if (TextUtils.isEmpty(mSession.getUsbPath())) {
+            if (AppUtils.isMstar()) {
+                for (File file : new File("/mnt/usb/").listFiles()) {
+                    if (new File(file, ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                            new File(file, ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                            new File(file, ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists()) {
+                        mSession.setUsbPath(file.getPath() + File.separator);
+                        hasEligibleUdisk = true;
+                        break;
+                    }
+                }
+            } else {
+                String[] possiblePaths = new String[]{"/storage/udisk0/", "/storage/udisk1/", "/storage/udisk2/"};
+                for (String path : possiblePaths) {
+                    if (new File(path + ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                            new File(path + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                            new File(path + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists()) {
+                        mSession.setUsbPath(path);
+                        hasEligibleUdisk = true;
+                        break;
+                    }
                 }
             }
+        } else {
+            hasEligibleUdisk = new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_PATH).exists() ||
+                    new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MEDIA_PATH).exists() ||
+                    new File(mSession.getUsbPath() + ConstantValues.USB_FILE_HOTEL_MULTICAST_PATH).exists();
         }
         return hasEligibleUdisk;
     }

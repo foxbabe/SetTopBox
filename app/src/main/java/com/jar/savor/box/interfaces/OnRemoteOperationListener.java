@@ -65,9 +65,9 @@ public interface OnRemoteOperationListener {
 
     ResponseT<CodeVerifyBean> verify(String code);
 
-    void showPpt(PptRequestVo currentPptRequest, boolean isNewDevice);
+    void showPpt(PptRequestVo currentPptRequest, boolean isNewDevice, String deviceId);
 
-    void showVideoPpt(PptVideoRequestVo currentPptRequest, boolean isNewDevice);
+    void showVideoPpt(PptVideoRequestVo currentPptRequest, boolean isNewDevice, String deviceId);
 
     void showSpecialty(ArrayList<String> mediaPath, int interval, boolean isNewDevice);
 

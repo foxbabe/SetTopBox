@@ -82,6 +82,7 @@ public class ConstantValues {
     /**U盘安装酒楼文件夹目录*/
     public static final String USB_FILE_HOTEL_PATH = "savor";
     public static final String USB_FILE_HOTEL_MEDIA_PATH = "media";
+    public static final String USB_FILE_HOTEL_MULTICAST_PATH = "multicast";
     /**U盘安装酒楼配置文件*/
     public static final String USB_FILE_HOTEL_UPDATE_CFG = "update.cfg";
     /**U盘安装酒楼配置文件-获取电视列表*/

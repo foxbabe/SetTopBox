@@ -978,7 +978,7 @@ public class RemoteService extends Service {
                     GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                     AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                    RemoteService.listener.showPpt(req, isNewDevice);
+                    RemoteService.listener.showPpt(req, isNewDevice, deviceId);
                 } else {
                     pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     if (GlobalValues.IS_LOTTERY) {
@@ -1072,7 +1072,7 @@ public class RemoteService extends Service {
                                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                                RemoteService.listener.showPpt(reqVo, isNewDevice);
+                                RemoteService.listener.showPpt(reqVo, isNewDevice, deviceId);
 
                                 object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                             } else {
@@ -1167,7 +1167,7 @@ public class RemoteService extends Service {
                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                        RemoteService.listener.showVideoPpt(pptVideoRequestVo, isNewDevice);
+                        RemoteService.listener.showVideoPpt(pptVideoRequestVo, isNewDevice, deviceId);
                     } else {
                         pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         if (GlobalValues.IS_LOTTERY) {
@@ -1300,7 +1300,7 @@ public class RemoteService extends Service {
                                         GlobalValues.CURRENT_PROJECT_DEVICE_IP = request.getRemoteHost();
                                         AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                                        RemoteService.listener.showVideoPpt(reqVo, isNewDevice);
+                                        RemoteService.listener.showVideoPpt(reqVo, isNewDevice, deviceId);
 
                                         object.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                                     } else {

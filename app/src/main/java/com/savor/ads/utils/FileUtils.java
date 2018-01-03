@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,11 +87,12 @@ public class FileUtils {
             if (oldFile.exists()) { //文件存在时
                 inStream = new FileInputStream(oldFile); //读入原文件
                 fs = new FileOutputStream(newFile);
-                byte[] buffer = new byte[2048];
+                byte[] buffer = new byte[4096];
                 while ((byteread = inStream.read(buffer)) != -1) {
                     bytesum += byteread; //字节数 文件大小
-                    System.out.println(bytesum);
+//                    System.out.println(bytesum);
                     fs.write(buffer, 0, byteread);
+                    fs.flush();
                 }
             }
         } catch (Exception e) {
@@ -145,6 +147,51 @@ public class FileUtils {
             }
         }
         return content;
+    }
+
+    public static String read(String filePath, String charsetName) {
+        StringBuilder sb = new StringBuilder();
+        File file = new File(filePath);
+        if (file.exists()) {
+            FileInputStream fileInputStream = null;
+            InputStreamReader inputStreamReader = null;
+            BufferedReader bufferedReader = null;
+            try {
+                fileInputStream = new FileInputStream(file);
+                inputStreamReader = new InputStreamReader(fileInputStream, charsetName);
+                bufferedReader = new BufferedReader(inputStreamReader);
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line + "\r\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (fileInputStream != null) {
+                    try {
+                        fileInputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (inputStreamReader != null) {
+                    try {
+                        inputStreamReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
 
 

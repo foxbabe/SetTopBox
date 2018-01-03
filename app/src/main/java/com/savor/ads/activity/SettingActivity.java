@@ -31,6 +31,8 @@ public class SettingActivity extends BaseActivity {
     private ViewGroup mUseVirtualVp;
     private RelativeLayout mServerIpRl;
     private Switch mUseVirtualSwitch;
+    private ViewGroup mStandaloneVg;
+    private Switch mStandaloneSwitch;
     private TextView mServerIpTv;
     private IPEditText mIPEditText;
     private Button mConfirmBtn;
@@ -50,6 +52,8 @@ public class SettingActivity extends BaseActivity {
         mUseVirtualVp = (ViewGroup) findViewById(R.id.rl_use_virtual);
         mServerIpRl = (RelativeLayout) findViewById(R.id.rl_server_ip);
         mUseVirtualSwitch = (Switch) findViewById(R.id.use_switch);
+        mStandaloneVg = (ViewGroup) findViewById(R.id.rl_standalone);
+        mStandaloneSwitch = (Switch) findViewById(R.id.standalone_switch);
         mServerIpTv = (TextView) findViewById(R.id.tv_server_ip);
         mIPEditText = (IPEditText) findViewById(R.id.et_ip);
         mConfirmBtn = (Button) findViewById(R.id.btn_ok);
@@ -64,23 +68,43 @@ public class SettingActivity extends BaseActivity {
                 }
             }
         });
+        mStandaloneSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mSession.setStandalone(true);
+                    mUseVirtualVp.setVisibility(View.GONE);
+                    mServerIpRl.setVisibility(View.GONE);
+                } else {
+                    mSession.setStandalone(false);
+                    mUseVirtualVp.setVisibility(View.VISIBLE);
+                    mServerIpRl.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        if (mSession.isUseVirtualSp()) {
-            mServerIpTv.setText(ConstantValues.VIRTUAL_SP_HOST);
-            mUseVirtualSwitch.setChecked(true);
-            mServerIpRl.setFocusable(false);
+        if (mSession.isStandalone()) {
+            mStandaloneSwitch.setChecked(true);
         } else {
-            mUseVirtualSwitch.setChecked(false);
-            if (mSession.getServerInfo() != null) {
-                mServerIp = mSession.getServerInfo().getServerIp();
+            mStandaloneSwitch.setChecked(false);
+
+            if (mSession.isUseVirtualSp()) {
+                mServerIpTv.setText(ConstantValues.VIRTUAL_SP_HOST);
+                mUseVirtualSwitch.setChecked(true);
+                mServerIpRl.setFocusable(false);
+            } else {
+                mUseVirtualSwitch.setChecked(false);
+                if (mSession.getServerInfo() != null) {
+                    mServerIp = mSession.getServerInfo().getServerIp();
+                }
+                mServerIpTv.setText(mServerIp);
+                mServerIpRl.setFocusable(true);
             }
-            mServerIpTv.setText(mServerIp);
-            mServerIpRl.setFocusable(true);
         }
         mBaseLl.requestFocus();
 
@@ -233,6 +257,10 @@ public class SettingActivity extends BaseActivity {
             }
             mUseVirtualDialog.show();
         }
+    }
+
+    public void switchStandalone(View v) {
+        mStandaloneSwitch.setChecked(!mStandaloneSwitch.isChecked());
     }
 
     @Override
