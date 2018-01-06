@@ -276,7 +276,6 @@ public class SavorVideoView extends RelativeLayout {
                         }
                     }
                 }
-                }
             });
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
