@@ -138,12 +138,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     } while (true);
 
+                    // 等一会再开始下载
+                    try {
+                        Thread.sleep(6000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     // 检测剩余存储空间
-//                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
-//                        // 存储空间不足
-//                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
-//                        LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
-//                    }
+                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                        // 存储空间不足
+                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
+                        LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
+                    }
 
                     LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
                     // 异步更新apk、rom
