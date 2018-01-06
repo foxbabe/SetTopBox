@@ -139,15 +139,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     } while (true);
 
                     // 检测剩余存储空间
-//                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
-//                        // 存储空间不足
-//                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
-//                        LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
-//                    }
+                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                        // 存储空间不足
+                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
+                        LogFileUtil.writeException(new Throwable("Low spaces in extsd"));
+                    }
 
-                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                    // 异步更新apk、rom
-                    new UpdateUtil(context);
+//                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+//                    // 异步更新apk、rom
+//                    new UpdateUtil(context);
 
                     getPrizeInfo();
 
@@ -160,23 +160,22 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         notifyToPlay();
                     }
 
-                    LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
-                    // 同步获取轮播节目媒体数据
-                    getProgramDataFromSmallPlatform();
-                    //同步获取宣传片媒体数据
-                    getAdvDataFromSmallPlatform();
-                    //同步获取广告片媒体数据
-                    getAdsDataFromSmallPlatform();
+//                    LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
+//                    // 同步获取轮播节目媒体数据
+//                    getProgramDataFromSmallPlatform();
+//                    //同步获取宣传片媒体数据
+//                    getAdvDataFromSmallPlatform();
+//                    //同步获取广告片媒体数据
+//                    getAdsDataFromSmallPlatform();
                     LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
                     // 同步获取点播媒体数据
                     getOnDemandDataFromSmallPlatform();
-                    // 获取特色菜媒体数据
-                    getSpecialtyFromSmallPlatform();
-//                    setAutoClose(true);
-
-                    LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
-                    // 异步获取电视节目信息
-                    getTVMatchDataFromSmallPlatform();
+//                    // 获取特色菜媒体数据
+//                    getSpecialtyFromSmallPlatform();
+//
+//                    LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
+//                    // 异步获取电视节目信息
+//                    getTVMatchDataFromSmallPlatform();
 
                     // 睡眠10分钟
                     try {
@@ -531,15 +530,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                 }
                 break;
-        }
-    }
-
-    //机顶盒监听电视屏,控制是否当电视屏没有通电的时候关机,false不关机,true关机
-    private void setAutoClose(boolean flag) {
-        try {
-            TvManager.setGpioDeviceStatus(128, flag);
-        } catch (TvCommonException e) {
-            e.printStackTrace();
         }
     }
 

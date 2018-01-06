@@ -123,25 +123,25 @@ public class MainActivity extends BaseActivity {
         // 启动心跳服务
         startHeartbeatService();
 
-//        if (mSession.getServerInfo() != null) {
-//            startNettyService();
-//            AppApi.resetSmallPlatformInterface(this);
-//
-//            // source=3表示是在设置界面手动设置的
-//            if (mSession.getServerInfo().getSource() != 3) {
-//                //  启动service以发现小平台
-//                startSsdpService();
-//                // 去云平台获取小平台地址
-//                getSpIpFromServer();
-//            }
-//        } else {
-//            //  启动service以发现小平台
-//            startSsdpService();
-//            // 去云平台获取小平台地址
-//            getSpIpFromServer();
-//        }
-//
-//        startDownloadMediaDataService();
+        if (mSession.getServerInfo() != null) {
+            startNettyService();
+            AppApi.resetSmallPlatformInterface(this);
+
+            // source=3表示是在设置界面手动设置的
+            if (mSession.getServerInfo().getSource() != 3) {
+                //  启动service以发现小平台
+                startSsdpService();
+                // 去云平台获取小平台地址
+                getSpIpFromServer();
+            }
+        } else {
+            //  启动service以发现小平台
+            startSsdpService();
+            // 去云平台获取小平台地址
+            getSpIpFromServer();
+        }
+
+        startDownloadMediaDataService();
 //
 //        startProduceLogService();
 //        startUploadLogService();
