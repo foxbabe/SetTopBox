@@ -8,11 +8,15 @@ import android.os.Bundle;
 import com.jar.savor.box.vo.PptVideoRequestVo;
 import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
+import com.savor.ads.bean.PptVideo;
 import com.savor.ads.projection.ProjectPriority;
 import com.savor.ads.utils.ActivitiesManager;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -25,13 +29,20 @@ public class VideoPptAction extends ProjectionActionBase implements Serializable
     private PptVideoRequestVo pptRequestVo;
     private boolean isNewDevice;
 
-    public VideoPptAction(Context mContext, PptVideoRequestVo pptRequestVo, boolean isNewDevice) {
+    public VideoPptAction(Context mContext, PptVideoRequestVo pptRequestVo, boolean isNewDevice, String deviceId) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         this.mContext = mContext;
         this.pptRequestVo = pptRequestVo;
         this.isNewDevice = isNewDevice;
+
+        if (pptRequestVo != null && pptRequestVo.getVideos() != null) {
+            for (PptVideo pptVideo: pptRequestVo.getVideos()) {
+                pptVideo.setName(AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + deviceId +
+                        File.separator + pptVideo.getName());
+            }
+        }
     }
 
     @Override

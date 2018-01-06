@@ -80,8 +80,7 @@ public class PptVpAdapter extends PagerAdapter {
         loadingRl.setVisibility(View.VISIBLE);
         String path = null;
         if (1 == mSourceType) {
-            path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.ppt) + GlobalValues.CURRENT_PROJECT_DEVICE_ID +
-                    File.separator + pptImages.get(position).getName();
+            path = pptImages.get(position).getName();
         } else {
             path = specialtyImages.get(position);
         }
