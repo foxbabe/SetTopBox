@@ -146,4 +146,6 @@ public class ConstantValues {
 
     /**外置SD卡至少保留的可用空间*/
     public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
+
+    public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
 }

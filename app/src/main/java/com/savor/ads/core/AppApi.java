@@ -88,6 +88,7 @@ public class AppApi {
         CP_REPORT_LOTTERY_JSON,
         PH_NOTIFY_STOP_JSON,
         SP_GET_SPECIALTY_JSON,
+        CP_POST_DEVICE_TOKEN_JSON,
     }
 
 
@@ -114,6 +115,7 @@ public class AppApi {
             put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
             put(Action.PH_NOTIFY_STOP_JSON, PHONE_BASE_URL + "stopProjection");
             put(Action.SP_GET_SPECIALTY_JSON, SP_BASE_URL + "small/api/download/recommend/config");
+            put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
         }
     };
 
@@ -347,6 +349,19 @@ public class AppApi {
         params.put("mac", Session.get(context).getEthernetMac());
         params.put("date", AppUtils.getCurTime("yyyy-MM-dd"));
         new AppServiceOk(context, Action.CP_REPORT_LOTTERY_JSON, handler, params).post();
+    }
+
+    /**
+     * 上报推送DeviceToken
+     * @param context
+     * @param handler
+     */
+    public static void reportDeviceToken(Context context, ApiRequestListener handler, String deviceToken) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("box_id", Session.get(context).getBoxId());
+        params.put("box_mac", Session.get(context).getEthernetMac());
+        params.put("device_token", deviceToken);
+        new AppServiceOk(context, Action.CP_POST_DEVICE_TOKEN_JSON, handler, params).post();
     }
 
     /**

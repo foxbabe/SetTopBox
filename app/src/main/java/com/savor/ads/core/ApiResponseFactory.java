@@ -182,6 +182,9 @@ public class ApiResponseFactory {
             case CP_GET_HEARTBEAT_PLAIN:
                 result = info;
                 break;
+            case CP_POST_DEVICE_TOKEN_JSON:
+                result = info;
+                break;
             default:
                 break;
         }

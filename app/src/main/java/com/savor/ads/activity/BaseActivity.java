@@ -34,6 +34,7 @@ import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.message.PushAgent;
 
 import java.io.File;
 import java.text.ParseException;
@@ -71,8 +72,15 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         LogFileUtil.write("BaseActivity onCreate this is " + this.toString());
 
-        mAudioSkin = new AudioSkin(this);
-        mAudioSkin.connect(null);
+        if (AppUtils.isMstar()) {
+            mAudioSkin = new AudioSkin(this);
+            mAudioSkin.connect(null);
+        }
+        if (GlobalValues.IS_UPUSH_REGISTER_SUCCESS) {
+            LogUtils.d("onAppStart " + this.getClass().getSimpleName());
+            LogFileUtil.write("onAppStart " + this.getClass().getSimpleName());
+            PushAgent.getInstance(this).onAppStart();
+        }
     }
 
 
@@ -639,13 +647,6 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                 audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, volume * maxVolume / 100, 0);
             }
         }
-    }
-
-    protected int getVolume() {
-        if (mAudioSkin != null) {
-            return mAudioSkin.getVolume();
-        }
-        return -1;
     }
 
     @Override

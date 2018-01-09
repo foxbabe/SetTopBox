@@ -1,22 +1,25 @@
 package com.savor.ads.activity;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
+import com.jar.savor.box.ServiceUtil;
+import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.customview.SavorVideoView;
-import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
@@ -25,7 +28,6 @@ import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -39,7 +41,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private ArrayList<PlayListBean> mPlayList;
     private String mListPeriod;
     private boolean mNeedPlayNewer;
-    /** 日志用的播放记录标识*/
+    /**
+     * 日志用的播放记录标识
+     */
     private String mUUID;
     private long mActivityResumeTime;
 
@@ -57,7 +61,18 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         mSavorVideoView.setPlayStateCallback(this);
 
         registerDownloadReceiver();
+        // 启动投屏类操作处理的Service
+        startScreenProjectionService();
         LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
+    }
+
+
+    private ServiceConnection mConnection;
+
+    private void startScreenProjectionService() {
+        mConnection = ServiceUtil.registerService(ProjectOperationListener.getInstance(this));
+//        bindService(new Intent(ServiceUtil.ACTION_REMOTE_SERVICE), connection, Service.BIND_AUTO_CREATE);
+        bindService(new Intent(this, RemoteService.class), mConnection, Service.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -81,7 +96,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             if (AppUtils.isMstar()) {
@@ -114,7 +129,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private boolean mIsGoneToTv;
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -138,7 +152,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             }, 1000 * DELAY_TIME);
         }
     }
-
 
 
     @Override
@@ -241,6 +254,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     int resolutionIndex = 0;
+
     private void changeResolution() {
         OutputResolution resolution = OutputResolution.values()[(resolutionIndex++) % OutputResolution.values().length];
         TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC)
@@ -328,6 +342,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     private int mCurrentPlayingIndex = -1;
+
     @Override
     public void onMediaPrepared(int index) {
         // 准备播放新视频时产生一个新的UUID作为日志标识

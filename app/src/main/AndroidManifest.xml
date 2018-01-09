@@ -23,7 +23,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.REBOOT"/>
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission
         android:name="android.permission.GLOBAL_SEARCH"
@@ -49,6 +48,9 @@
     <uses-permission android:name="android.permission.REBOOT"/>
     <uses-permission android:name="android.permission.RECOVERY"/>
     <!-- 系统rom更新 -->
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature
         android:name="android.software.live_tv"
@@ -83,6 +85,10 @@
         <meta-data
             android:name="UMENG_APPKEY"
             android:value="58576b54677baa3b41000809"/>
+        <meta-data
+            android:name="UMENG_MESSAGE_SECRET"
+            android:value="f0c6648f85f494cf83953ddafaaee305">
+        </meta-data>
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="official"/>
@@ -124,7 +130,7 @@
             android:name=".service.HandleMediaDataService"
             android:exported="false">
         </service>
-        <!--处理U盘更新单机版机顶盒-->
+        <!-- 处理U盘更新单机版机顶盒 -->
         <service
             android:name=".service.HandleUSBUpdateService"
             android:exported="false">
@@ -191,9 +197,14 @@
         <activity
             android:name=".activity.AppBrowserActivity"
             android:launchMode="singleTask"/>
+
         <service
             android:name=".service.GreetingService"
             android:enabled="true"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".UMessageIntentService"
             android:exported="false">
         </service>
     </application>

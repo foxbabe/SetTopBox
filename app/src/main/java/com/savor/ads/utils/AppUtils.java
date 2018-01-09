@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
@@ -220,6 +221,7 @@ public class AppUtils {
 
     /**
      * 获取主媒体路径
+     *
      * @return
      */
     public static String getMainMediaPath() {
@@ -1679,5 +1681,30 @@ public class AppUtils {
 
     public static boolean isMstar() {
         return Build.MODEL.contains("MStar");
+    }
+
+    /**
+     * 根据Pid获取当前进程的名字，一般就是当前app的包名
+     *
+     * @param context 上下文
+     * @return 返回进程的名字
+     */
+    public static String getProcessName(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List list = activityManager.getRunningAppProcesses();
+        Iterator i = list.iterator();
+        while (i.hasNext()) {
+            ActivityManager.RunningAppProcessInfo info = (ActivityManager.RunningAppProcessInfo) (i.next());
+            try {
+                if (info.pid == android.os.Process.myPid()) {
+                    // 根据进程的信息获取当前进程的名字
+                    return info.processName;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        // 没有匹配的项，返回为null
+        return null;
     }
 }
