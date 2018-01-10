@@ -5,32 +5,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-<<<<<<< HEAD
 import android.content.res.AssetManager;
-=======
 import android.content.ServiceConnection;
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
-<<<<<<< HEAD
 import com.admaster.sdk.api.AdmasterSdk;
-=======
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.PlayListBean;
-<<<<<<< HEAD
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-=======
 import com.savor.ads.callback.ProjectOperationListener;
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
+
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
@@ -43,11 +36,8 @@ import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
 
-<<<<<<< HEAD
 import java.io.File;
 import java.io.IOException;
-=======
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
 import java.util.ArrayList;
 
 /**

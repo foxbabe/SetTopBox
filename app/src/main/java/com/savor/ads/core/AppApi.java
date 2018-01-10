@@ -88,11 +88,9 @@ public class AppApi {
         CP_REPORT_LOTTERY_JSON,
         PH_NOTIFY_STOP_JSON,
         SP_GET_SPECIALTY_JSON,
-<<<<<<< HEAD
         CP_GET_ADMASTER_CONFIG_JSON,
-=======
         CP_POST_DEVICE_TOKEN_JSON,
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
+
     }
 
 
@@ -119,11 +117,9 @@ public class AppApi {
             put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
             put(Action.PH_NOTIFY_STOP_JSON, PHONE_BASE_URL + "stopProjection");
             put(Action.SP_GET_SPECIALTY_JSON, SP_BASE_URL + "small/api/download/recommend/config");
-<<<<<<< HEAD
             put(Action.CP_GET_ADMASTER_CONFIG_JSON,BuildConfig.BASE_URL + "Box/Admaster/getConfFile");
-=======
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
->>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
+
         }
     };
 
