@@ -987,7 +987,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void notifyToPlay() {
         if (fillPlayList()) {
             LogUtils.d("发送广告下载完成广播");
-            sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+            sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
         }
     }
 
@@ -997,6 +997,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
 
         if (playList != null && !playList.isEmpty()) {
+            int rtbIndex = 0;
             for (int i = 0; i < playList.size(); i++) {
                 MediaLibBean bean = playList.get(i);
 
@@ -1036,6 +1037,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                 }
 
+                if (GlobalValues.RTB_PUSH_ADS != null && !GlobalValues.RTB_PUSH_ADS.isEmpty()) {
+                    if (ConstantValues.RTB_ADS.equals(bean.getType())) {
+                        MediaLibBean rtbItem = GlobalValues.RTB_PUSH_ADS.get(rtbIndex++);
+                        bean.setName(rtbItem.getName());
+                        bean.setMediaPath(rtbItem.getMediaPath());
+                        bean.setAdmaster_sin(rtbItem.getAdmaster_sin());
+                        bean.setChinese_name(rtbItem.getChinese_name());
+                        bean.setDuration(rtbItem.getDuration());
+                        bean.setVid(rtbItem.getVid());
+                        bean.setMd5(rtbItem.getMd5());
+                        bean.setPeriod(rtbItem.getPeriod());
+                    }
+                }
                 File mediaFile = new File(bean.getMediaPath());
                 boolean fileCheck = false;
                 if (!TextUtils.isEmpty(bean.getMd5()) &&

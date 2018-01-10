@@ -314,7 +314,7 @@ public class HandleUSBUpdateService extends Service {
     private void notifyToPlay() {
         if (fillPlayList()) {
             LogUtils.d("发送广告下载完成广播");
-            sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+            sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
         }
     }
 

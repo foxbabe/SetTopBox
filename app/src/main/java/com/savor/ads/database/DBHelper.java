@@ -687,11 +687,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
             long successCount = 0;
             if (isUpdate) {
-                successCount = db.update(MediaDBInfo.TableName.MULTICASTMEDIALIB,
+                successCount = db.update(MediaDBInfo.TableName.RTB_ADS,
                         initialValues, MediaDBInfo.FieldName.VID + "=? ",
                         new String[]{playList.getVid()});
             } else {
-                successCount = db.insert(MediaDBInfo.TableName.MULTICASTMEDIALIB,
+                successCount = db.insert(MediaDBInfo.TableName.RTB_ADS,
                         null,
                         initialValues);
             }

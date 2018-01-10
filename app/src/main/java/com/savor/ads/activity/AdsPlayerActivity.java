@@ -5,11 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.AssetManager;
 import android.content.ServiceConnection;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
@@ -51,6 +49,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private ArrayList<MediaLibBean> mPlayList;
     private String mListPeriod;
     private boolean mNeedPlayNewer;
+    private boolean mForcePlayNewer;
     /**
      * 日志用的播放记录标识
      */
@@ -97,15 +96,21 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     private void registerDownloadReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION);
+        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
+        intentFilter.addAction(ConstantValues.RTB_ADS_PUSH_ACTION);
         registerReceiver(mDownloadCompleteReceiver, intentFilter);
     }
 
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LogUtils.d("收到下载完成广播");
-            mNeedPlayNewer = true;
+            if (ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION.equals(intent.getAction())) {
+                LogUtils.d("收到下载完成广播");
+                mNeedPlayNewer = true;
+            } else if (ConstantValues.RTB_ADS_PUSH_ACTION.equals(intent.getAction())) {
+                LogUtils.d("收到RTB广告推送广播");
+                mForcePlayNewer = true;
+            }
         }
     };
 

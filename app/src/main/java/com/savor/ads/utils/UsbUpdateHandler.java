@@ -517,7 +517,7 @@ public class UsbUpdateHandler {
     private void notifyToPlay() {
         if (fillPlayList()) {
             LogUtils.d("发送广告下载完成广播");
-            mContext.sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+            mContext.sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
         }
     }
 
