@@ -11,30 +11,24 @@
 package cn.savor.small.netty;
 
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.SQLException;
 import android.os.IBinder;
 import android.text.TextUtils;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.jar.savor.box.vo.BaseResponse;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RstrSpecialty;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
-import com.savor.ads.service.GreetingService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
@@ -300,7 +294,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                     selection = DBHelper.MediaDBInfo.FieldName.VID + "=?";
                     selectionArgs = new String[]{id};
                 }
-                List<PlayListBean> videos = DBHelper.get(mContext).findPlayListByWhere(selection, selectionArgs);
+                List<MediaLibBean> videos = DBHelper.get(mContext).findPlayListByWhere(selection, selectionArgs);
 
                 if (videos != null && videos.size() > 0) {
                     paths.add(videos.get(0).getMediaPath());

@@ -14,12 +14,10 @@ import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.BoiteBean;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.bean.RoomBean;
 import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
-import com.savor.ads.log.LogUploadService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
@@ -33,7 +31,6 @@ import com.savor.tvlibrary.AtvChannel;
 import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -269,19 +266,11 @@ public class HandleUSBUpdateService extends Service {
                             FileUtils.copyFile(usbMeidaPath, localPath);
                         }
                         if (isDownloaded) {
-                            PlayListBean play = new PlayListBean();
-                            play.setPeriod(setTopBoxBean.getPeriod());
-                            play.setDuration(bean.getDuration());
-                            play.setMd5(bean.getMd5());
-                            play.setVid(bean.getVid());
-                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
-                            play.setMedia_type(bean.getType());
-                            play.setOrder(bean.getOrder());
-                            play.setSurfix(bean.getSurfix());
-                            play.setLocation_id(bean.getLocation_id());
-                            play.setMediaPath(localPath);
+                            bean.setPeriod(setTopBoxBean.getPeriod());
+                            bean.setName(bean.getChinese_name()+"."+bean.getSurfix());
+                            bean.setMediaPath(localPath);
                             // 插库成功，completedCount+1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(play, -1)) {
+                            if (dbHelper.insertOrUpdateNewPlayListLib(bean, -1)) {
                                 completedCount++;
                             }
                         }
@@ -336,11 +325,11 @@ public class HandleUSBUpdateService extends Service {
      */
     private boolean fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
+        ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
 
         if (playList != null && !playList.isEmpty()) {
             for (int i = 0; i < playList.size(); i++) {
-                PlayListBean bean = playList.get(i);
+                MediaLibBean bean = playList.get(i);
 
                 File mediaFile = new File(bean.getMediaPath());
                 boolean fileCheck = false;
@@ -368,19 +357,19 @@ public class HandleUSBUpdateService extends Service {
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                            new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                     dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                            new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                 }
             }
         }
 
         if (playList != null && !playList.isEmpty()) {
-            ArrayList<PlayListBean> list = new ArrayList<>();
-            for (PlayListBean bean : playList) {
+            ArrayList<MediaLibBean> list = new ArrayList<>();
+            for (MediaLibBean bean : playList) {
                 if (!TextUtils.isEmpty(bean.getMediaPath())) {
                     list.add(bean);
                 }

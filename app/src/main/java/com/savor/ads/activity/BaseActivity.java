@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 
 import com.mstar.tv.service.skin.AudioSkin;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.ResponseErrorMessage;
@@ -193,20 +193,20 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         LogUtils.d("开始fillPlayList");
         if (!TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             DBHelper dbHelper = DBHelper.get(mContext);
-            ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
+            ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
 
             if (playList != null && !playList.isEmpty()) {
                 for (int i = 0; i < playList.size(); i++) {
-                    PlayListBean bean = playList.get(i);
+                    MediaLibBean bean = playList.get(i);
 
                     // 特殊处理ads数据
-                    if (bean.getMedia_type().equals(ConstantValues.ADS)) {
+                    if (bean.getType().equals(ConstantValues.ADS)) {
                         String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
                                 + "=? ";
                         String[] selectionArgs = new String[]{bean.getLocation_id()};
-                        List<PlayListBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
+                        List<MediaLibBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
                         if (list != null && !list.isEmpty()) {
-                            for (PlayListBean item :
+                            for (MediaLibBean item :
                                     list) {
                                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                 Date startDate = null;
@@ -227,7 +227,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                                     bean.setVid(item.getVid());
                                     bean.setDuration(item.getDuration());
                                     bean.setMd5(item.getMd5());
-                                    bean.setMedia_name(item.getMedia_name());
+                                    bean.setName(item.getName());
                                     bean.setMediaPath(item.getMediaPath());
                                     break;
                                 }
@@ -263,12 +263,12 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                                new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                         DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                                new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                     }
                 }
 
@@ -276,8 +276,8 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
             }
 
             if (playList != null && !playList.isEmpty()) {
-                ArrayList<PlayListBean> list = new ArrayList<>();
-                for (PlayListBean bean : playList) {
+                ArrayList<MediaLibBean> list = new ArrayList<>();
+                for (MediaLibBean bean : playList) {
                     if (!TextUtils.isEmpty(bean.getMediaPath())) {
                         list.add(bean);
                     }
@@ -287,11 +287,11 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                 File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
                 if (mediaDir.exists() && mediaDir.isDirectory()) {
                     File[] files = mediaDir.listFiles();
-                    ArrayList<PlayListBean> filePlayList = new ArrayList<>();
+                    ArrayList<MediaLibBean> filePlayList = new ArrayList<>();
                     if (files != null) {
                         for (File file : files) {
                             if (file.isFile()) {
-                                PlayListBean bean = new PlayListBean();
+                                MediaLibBean bean = new MediaLibBean();
                                 bean.setMediaPath(file.getPath());
                                 filePlayList.add(bean);
                             }

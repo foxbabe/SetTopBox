@@ -165,6 +165,10 @@ public class AppUtils {
          * 特色菜目录
          */
         specialty,
+        /**
+         * RTB广告目录
+         */
+        rtb_ads,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -316,6 +320,10 @@ public class AppUtils {
         if (!specialtyFile.exists()) {
             specialtyFile.mkdir();
         }
+        File rtbFile = new File(path + File.separator, "rtb_ads");
+        if (!rtbFile.exists()) {
+            rtbFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -335,6 +343,8 @@ public class AppUtils {
             path = targetPptFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.specialty) {
             path = specialtyFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.rtb_ads) {
+            path = rtbFile.getAbsolutePath() + File.separator;
         }
         return path;
     }

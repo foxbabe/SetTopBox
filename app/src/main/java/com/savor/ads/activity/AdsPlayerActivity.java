@@ -14,7 +14,7 @@ import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
@@ -38,7 +38,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
 
-    private ArrayList<PlayListBean> mPlayList;
+    private ArrayList<MediaLibBean> mPlayList;
     private String mListPeriod;
     private boolean mNeedPlayNewer;
     /**
@@ -118,7 +118,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity doPlay");
         ArrayList<String> urls = new ArrayList<>();
         if (mPlayList != null && mPlayList.size() > 0) {
-            for (PlayListBean bean : mPlayList) {
+            for (MediaLibBean bean : mPlayList) {
                 urls.add(bean.getMediaPath());
             }
 
@@ -302,7 +302,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
@@ -360,7 +360,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
@@ -375,7 +375,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         try {
             if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
                 LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                        String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                         "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                         "");
             }
@@ -392,7 +392,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
