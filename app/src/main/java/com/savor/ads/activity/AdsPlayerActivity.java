@@ -5,17 +5,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.content.ServiceConnection;
+
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
+import com.admaster.sdk.api.AdmasterSdk;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
+import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.callback.ProjectOperationListener;
+
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
@@ -28,12 +36,14 @@ import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback {
+public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback ,ApiRequestListener{
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
@@ -48,7 +58,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private long mActivityResumeTime;
 
     private static final int DELAY_TIME = 2;
-
+    private AdMasterResult adMasterResult=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +74,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         // 启动投屏类操作处理的Service
         startScreenProjectionService();
         LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
+        // SDK初始化
+        AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
+        AdmasterSdk.setLogState(true);
+        AppApi.getAdMasterConfig(this,this);
     }
 
 
@@ -410,5 +424,74 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity onDestroy");
         super.onDestroy();
         unregisterReceiver(mDownloadCompleteReceiver);
+        AdmasterSdk.terminateSDK();
+    }
+
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        switch (method){
+            case CP_GET_ADMASTER_CONFIG_JSON:
+                if (obj instanceof AdMasterResult){
+                    adMasterResult = (AdMasterResult)obj;
+                    handleAdmaster();
+                }
+                break;
+            case SP_GET_LOADING_IMG_DOWN:
+                if (obj instanceof File) {
+                    File f = (File) obj;
+                    byte[] fRead = new byte[0];
+                    String md5Value = null;
+                    try {
+                        fRead = org.apache.commons.io.FileUtils.readFileToByteArray(f);
+                        md5Value = AppUtils.getMD5(fRead);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
+                    if (md5Value != null && md5Value.equals(adMasterResult.getMd5())) {
+                        try {
+                            mContext.deleteFile("admaster_sdkconfig.xml");
+                            String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + "admaster_sdkconfig.xml";
+                            File tarFile = new File(path);
+//                            AssetManager assetManager = this.getAssets();
+//                            assetManager.
+
+//                            FileUtils.copyFile(path, Environment.getExternalStorageDirectory().getAbsolutePath() + newPath);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    private void handleAdmaster(){
+        if (adMasterResult==null) {
+                return;
+        }
+        int admaster_update_time = mSession.getAdmaster_update_time();
+        if (admaster_update_time != 0 && admaster_update_time != adMasterResult.getUpdate_time()) {
+            String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + "admaster_sdkconfig.xml";
+            File tarFile = new File(path);
+            if (tarFile.exists()) {
+                tarFile.delete();
+            }
+            if (!TextUtils.isEmpty(adMasterResult.getFile())) {
+                AppApi.downloadLoadingImg(adMasterResult.getFile(), mContext, this, path);
+            }
+        }
+
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+
     }
 }

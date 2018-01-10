@@ -191,6 +191,8 @@ public class Session {
     private String usbPath;
     /**是否是单机版机顶盒*/
     private boolean standalone=false;
+
+    private int admaster_update_time;
     private Session(Context context) {
 
         mContext = context;
@@ -270,6 +272,7 @@ public class Session {
         mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
         mUseVirtualSp = mPreference.loadBooleanKey(P_APP_USE_VIRTUAL_SP, false);
         standalone = mPreference.loadBooleanKey(P_APP_STAND_ALONE,false);
+        admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -994,6 +997,16 @@ public class Session {
         this.standalone = standalone;
         writePreference(new Pair<String, Object>(P_APP_STAND_ALONE, standalone));
     }
+
+    public int getAdmaster_update_time() {
+        return admaster_update_time;
+    }
+
+    public void setAdmaster_update_time(int admaster_update_time) {
+        this.admaster_update_time = admaster_update_time;
+        writePreference(new Pair<String, Object>(P_APP_ADMASTER_UPDATE_TIME,admaster_update_time));
+    }
+
     public String getSpecialtyPeriod() {
         return specialtyPeriod;
     }
@@ -1104,6 +1117,9 @@ public class Session {
     public static final String P_APP_USE_VIRTUAL_SP = "com.savor.ads.use_virtual_sp";
     //是否是单机版机顶盒
     public static final String P_APP_STAND_ALONE = "com.savor.ads.stand_alone";
+
+    //admster配置文件版本
+    public static final String P_APP_ADMASTER_UPDATE_TIME = "com.savor.ads.admaster_update_time";
 
     public static final String P_APP_PLAY_LIST_VERSION = "com.savor.ads.play_list_version";
     public static final String P_APP_DOWNLOADING_PLAY_LIST_VERSION = "com.savor.ads.downloading_play_list_version";

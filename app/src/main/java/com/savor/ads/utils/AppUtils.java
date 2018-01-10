@@ -304,7 +304,7 @@ public class AppUtils {
         if (!targetMulticastFile.exists()) {
             targetMulticastFile.mkdir();
         }
-        File targetCacheFile = new File(path + File.separator, "cache");
+        File targetCacheFile = new File(path + File.separator, "cache/");
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
