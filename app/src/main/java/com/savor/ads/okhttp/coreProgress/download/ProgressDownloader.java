@@ -7,6 +7,9 @@ import com.savor.ads.utils.LogUtils;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -118,20 +121,30 @@ public class ProgressDownloader {
     private void save(Response response,long startsPoint){
         ResponseBody body = response.body();
         InputStream inputStream = body.byteStream();
-        FileChannel channelOut = null;
-        //随机访问文件，可以指定断点续传的起始位置
-        RandomAccessFile randomAccessFile = null;
+//        FileChannel channelOut = null;
+//        //随机访问文件，可以指定断点续传的起始位置
+//        RandomAccessFile randomAccessFile = null;
+        FileOutputStream outputStream = null;
         try{
-            randomAccessFile = new RandomAccessFile(destination,"rwd");
-            //Chanel NIO中的用法，由于RandomAccessFile没有使用缓存策略，直接使用会使得下载速度变慢，亲测缓存下载3.3秒的文件，用普通的RandomAccessFile需要20多秒。
-            channelOut = randomAccessFile.getChannel();
-            //内存映射，直接使用RandomAccessFile，使用其seek方法指定下载的起始位置，使用缓存下载，在这里指定下载位置
-            MappedByteBuffer mappedByteBuffer = channelOut.map(FileChannel.MapMode.READ_WRITE,startsPoint,body.contentLength());
-            byte[] buffer = new byte[1024];
+//            randomAccessFile = new RandomAccessFile(destination,"rwd");
+//            //Chanel NIO中的用法，由于RandomAccessFile没有使用缓存策略，直接使用会使得下载速度变慢，亲测缓存下载3.3秒的文件，用普通的RandomAccessFile需要20多秒。
+//            channelOut = randomAccessFile.getChannel();
+//            //内存映射，直接使用RandomAccessFile，使用其seek方法指定下载的起始位置，使用缓存下载，在这里指定下载位置
+//            MappedByteBuffer mappedByteBuffer = channelOut.map(FileChannel.MapMode.READ_WRITE,startsPoint,body.contentLength());
+            outputStream = new FileOutputStream(destination);
+            byte[] buffer = new byte[4096];
             int len;
             while ((len = inputStream.read(buffer))!=-1){
-                ByteBuffer bf  = mappedByteBuffer.put(buffer,0,len);
-                LogUtils.v("while---------" + url+"   " + randomAccessFile.length());
+//                ByteBuffer bf  = mappedByteBuffer.put(buffer,0,len);
+//                LogUtils.v("while---------" + url+"   " + randomAccessFile.length());
+                outputStream.write(buffer, 0, len);
+                outputStream.flush();
+
+//                try {
+//                    Thread.sleep(1);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
         }catch (Exception e){
             if (progressResponseListener != null) {
@@ -141,11 +154,14 @@ public class ProgressDownloader {
         }finally {
             try {
                 inputStream.close();
-                if (channelOut != null) {
-                    channelOut.close();
-                }
-                if (randomAccessFile != null) {
-                    randomAccessFile.close();
+//                if (channelOut != null) {
+//                    channelOut.close();
+//                }
+//                if (randomAccessFile != null) {
+//                    randomAccessFile.close();
+//                }
+                if (outputStream != null) {
+                    outputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -44,4 +44,8 @@ public class GlobalValues {
 
 
     public static volatile boolean IS_BOX_BUSY = false;
+
+    public static boolean IS_UPUSH_SO_COPY_SUCCESS = false;
+
+    public static boolean IS_UPUSH_REGISTER_SUCCESS = false;
 }

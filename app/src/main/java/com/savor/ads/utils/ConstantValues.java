@@ -147,10 +147,14 @@ public class ConstantValues {
     /**外置SD卡至少保留的可用空间*/
     public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
 
+<<<<<<< HEAD
     /**
      * sdkconfig.xml配置文件服务器存放地址,如果为空的话，默认去加载本地assets目录
      */
     public static final String CONFIG_URL = "";
     /**ad admaster曝光地址*/
     public static final String TEST_IMP__URL = "http://vqq.admaster.com.cn/i/a1234567,b45789,c121,i0,m202,h";//曝光地址
+=======
+    public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
+>>>>>>> fd07764a0dfd3723c4f51c4aae7e0245f23b637f
 }

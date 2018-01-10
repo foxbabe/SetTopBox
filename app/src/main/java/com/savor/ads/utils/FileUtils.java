@@ -1,8 +1,13 @@
 package com.savor.ads.utils;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.text.TextUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -65,6 +70,83 @@ public class FileUtils {
                     copyDir(file.getPath(), dstFile.getPath());
                 }
             }
+        }
+    }
+
+    public static void copyFilesFromAssets(Context context, String assetsPath, String storagePath) {
+        String temp = "";
+
+        if (TextUtils.isEmpty(storagePath)) {
+            return;
+        } else if (storagePath.endsWith(File.separator)) {
+            storagePath = storagePath.substring(0, storagePath.length() - 1);
+        }
+
+        if (TextUtils.isEmpty(assetsPath) || assetsPath.equals(File.separator)) {
+            assetsPath = "";
+        } else if (assetsPath.endsWith(File.separator)) {
+            assetsPath = assetsPath.substring(0, assetsPath.length() - 1);
+        }
+
+        AssetManager assetManager = context.getAssets();
+        try {
+            File file = new File(storagePath);
+            if (!file.exists()) {//如果文件夹不存在，则创建新的文件夹
+                file.mkdirs();
+            }
+
+            // 获取assets目录下的所有文件及目录名
+            String[] fileNames = assetManager.list(assetsPath);
+            if (fileNames.length > 0) {
+                for (String fileName : fileNames) {
+                    if (!TextUtils.isEmpty(assetsPath)) {
+                        temp = assetsPath + File.separator + fileName;//补全assets资源路径
+                    }
+
+                    String[] childFileNames = assetManager.list(temp);
+                    if (!TextUtils.isEmpty(temp) && childFileNames.length > 0) {//判断是文件还是文件夹：如果是文件夹
+                        copyFilesFromAssets(context, temp, storagePath + File.separator + fileName);
+                    } else {//如果是文件
+                        InputStream inputStream = assetManager.open(temp);
+                        readInputStream(storagePath + File.separator + fileName, inputStream);
+                    }
+                }
+            } else {
+                InputStream inputStream = assetManager.open(assetsPath);
+                if (assetsPath.contains(File.separator)) {
+                    assetsPath = assetsPath.substring(assetsPath.lastIndexOf(File.separator), assetsPath.length());
+                }
+                readInputStream(storagePath + File.separator + assetsPath, inputStream);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 读取输入流中的数据写入输出流
+     *
+     * @param storagePath 目标文件路径
+     * @param inputStream 输入流
+     */
+    public static void readInputStream(String storagePath, InputStream inputStream) {
+        File file = new File(storagePath);
+        try {
+            if (!file.exists()) {
+                FileOutputStream fos = new FileOutputStream(file);
+                byte[] buffer = new byte[inputStream.available()];
+                int length = 0;
+                while ((length = inputStream.read(buffer)) != -1) {
+                    fos.write(buffer, 0, length);
+                    fos.flush();
+                }
+                fos.flush();
+                fos.close();
+                inputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
