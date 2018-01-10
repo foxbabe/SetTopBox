@@ -88,6 +88,7 @@ public class AppApi {
         CP_REPORT_LOTTERY_JSON,
         PH_NOTIFY_STOP_JSON,
         SP_GET_SPECIALTY_JSON,
+        CP_GET_ADMASTER_CONFIG_JSON,
     }
 
 
@@ -114,6 +115,7 @@ public class AppApi {
             put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
             put(Action.PH_NOTIFY_STOP_JSON, PHONE_BASE_URL + "stopProjection");
             put(Action.SP_GET_SPECIALTY_JSON, SP_BASE_URL + "small/api/download/recommend/config");
+            put(Action.CP_GET_ADMASTER_CONFIG_JSON,BuildConfig.BASE_URL + "Box/Admaster/getConfFile");
         }
     };
 
@@ -361,7 +363,15 @@ public class AppApi {
         new AppServiceOk(context, Action.PH_NOTIFY_STOP_JSON, handler, params).get();
     }
 
-
+    /**
+     * 获取admaster配置文件
+     * @param context
+     * @param handler
+     */
+    public static void getAdMasterConfig(Context context, ApiRequestListener handler){
+        final HashMap<String, Object> params = new HashMap<>();
+        new AppServiceOk(context, Action.CP_GET_ADMASTER_CONFIG_JSON, handler, params).get();
+    }
 
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";
