@@ -77,7 +77,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         // SDK初始化
         AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
         AdmasterSdk.setLogState(true);
-        AppApi.getAdMasterConfig(this,this);
+//        AppApi.getAdMasterConfig(this,this);
     }
 
 
@@ -373,10 +373,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             action = "resume";
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+            PlayListBean playListBean = mPlayList.get(index);
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), action, playListBean.getMedia_type(), playListBean.getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
+//            if (playListBean.getT)
         }
     }
 

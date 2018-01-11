@@ -65,3 +65,10 @@ public static final int *;
    public static *** w(...);
  }
 #友盟混淆结束
+
+#admaster混淆开始
+-dontwarn com.admaster.**
+-keep class com.admaster.** {
+*;
+}
+#admaster混淆结束
