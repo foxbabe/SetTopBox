@@ -41,7 +41,7 @@ import java.util.ArrayList;
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback ,ApiRequestListener{
+public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener {
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
@@ -57,7 +57,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private long mActivityResumeTime;
 
     private static final int DELAY_TIME = 2;
-    private AdMasterResult adMasterResult=null;
+    private AdMasterResult adMasterResult = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +77,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         // SDK初始化
         AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
         AdmasterSdk.setLogState(true);
-        AppApi.getAdMasterConfig(this,this);
+        AppApi.getAdMasterConfig(this, this);
     }
 
 
@@ -92,7 +93,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        checkAndPlay();
+        checkAndPlay(-1);
     }
 
     private void registerDownloadReceiver() {
@@ -114,7 +115,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
     };
 
-    private void checkAndPlay() {
+    private void checkAndPlay(int lastMediaOrder) {
         LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
@@ -129,19 +130,27 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         } else {
             mPlayList = GlobalValues.PLAY_LIST;
             mListPeriod = mSession.getAdsPeriod();
-            doPlay();
+            doPlay(lastMediaOrder);
         }
     }
 
-    private void doPlay() {
+    private void doPlay(int lastMediaOrder) {
         LogFileUtil.write("AdsPlayerActivity doPlay");
         ArrayList<String> urls = new ArrayList<>();
         if (mPlayList != null && mPlayList.size() > 0) {
-            for (MediaLibBean bean : mPlayList) {
+            int index = 0;
+            for (int i = 0; i < mPlayList.size(); i++) {
+                MediaLibBean bean = mPlayList.get(i);
+                if (bean.getOrder() > lastMediaOrder) {
+                    index = i;
+                }
+            }
+            for (int i = 0; i < mPlayList.size(); i++) {
+                MediaLibBean bean = mPlayList.get(i);
                 urls.add(bean.getMediaPath());
             }
 
-            mSavorVideoView.setMediaFiles(urls);
+            mSavorVideoView.setMediaFiles(urls, index, 0);
         }
     }
 
@@ -326,12 +335,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     "");
         }
 
-        // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
+            // 重新获取播放列表开始播放
+            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
             mNeedPlayNewer = false;
+            mForcePlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
-                checkAndPlay();
+                checkAndPlay(currentOrder);
                 deleteOldMedia();
                 return true;
             } else {
@@ -344,12 +355,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
-        // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
+            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
+            // 重新获取播放列表开始播放
             mNeedPlayNewer = false;
+            mForcePlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
-                checkAndPlay();
+                checkAndPlay(currentOrder);
                 deleteOldMedia();
                 return true;
             } else {
@@ -434,10 +447,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public void onSuccess(AppApi.Action method, Object obj) {
-        switch (method){
+        switch (method) {
             case CP_GET_ADMASTER_CONFIG_JSON:
-                if (obj instanceof AdMasterResult){
-                    adMasterResult = (AdMasterResult)obj;
+                if (obj instanceof AdMasterResult) {
+                    adMasterResult = (AdMasterResult) obj;
                     handleAdmaster();
                 }
                 break;
@@ -472,9 +485,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
     }
 
-    private void handleAdmaster(){
-        if (adMasterResult==null) {
-                return;
+    private void handleAdmaster() {
+        if (adMasterResult == null) {
+            return;
         }
         int admaster_update_time = mSession.getAdmaster_update_time();
         if (admaster_update_time != 0 && admaster_update_time != adMasterResult.getUpdate_time()) {
