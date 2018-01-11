@@ -307,7 +307,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT,"
                 + MediaDBInfo.FieldName.MD5 + " TEXT, "
                 + MediaDBInfo.FieldName.PERIOD + " TEXT, "
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
