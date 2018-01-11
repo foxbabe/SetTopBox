@@ -30,9 +30,15 @@ public class MediaLibBean implements Serializable {
     private String url;
     private String area_id;
 
+    private String mediaPath;
+
     private String location_id;
     private String start_date;
     private String end_date;
+
+    /** ADMaster 曝光*/
+    private String admaster_sin;
+
     public int getId() {
         return id;
     }
@@ -161,6 +167,22 @@ public class MediaLibBean implements Serializable {
 
     public void setEnd_date(String end_date) {
         this.end_date = end_date;
+    }
+
+    public String getMediaPath() {
+        return mediaPath;
+    }
+
+    public void setMediaPath(String mediaPath) {
+        this.mediaPath = mediaPath;
+    }
+
+    public String getAdmaster_sin() {
+        return admaster_sin;
+    }
+
+    public void setAdmaster_sin(String admaster_sin) {
+        this.admaster_sin = admaster_sin;
     }
 }
 

@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AtvProgramInfo;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -440,23 +439,15 @@ public class UsbUpdateHandler {
                         break;
                     }
                     if (isDownloaded) {
-                        PlayListBean play = new PlayListBean();
-                        play.setPeriod(setTopBoxBean.getPeriod());
-                        play.setDuration(bean.getDuration());
-                        play.setMd5(bean.getMd5());
-                        play.setVid(bean.getVid());
+                        bean.setPeriod(setTopBoxBean.getPeriod());
                         if (bean.getType().equals(ConstantValues.ADV)) {
-                            play.setMedia_name(bean.getName());
+                            bean.setName(bean.getName());
                         }else{
-                            play.setMedia_name(bean.getChinese_name()+"."+bean.getSurfix());
+                            bean.setName(bean.getChinese_name()+"."+bean.getSurfix());
                         }
-                        play.setMedia_type(bean.getType());
-                        play.setOrder(bean.getOrder());
-                        play.setSurfix(bean.getSurfix());
-                        play.setLocation_id(bean.getLocation_id());
-                        play.setMediaPath(localPath);
+                        bean.setMediaPath(localPath);
                         // 插库成功，completedCount+1
-                        if (DBHelper.get(mContext).insertOrUpdateNewPlayListLib(play, -1)) {
+                        if (DBHelper.get(mContext).insertOrUpdateNewPlayListLib(bean, -1)) {
                             completedCount++;
                         }
                     }
@@ -526,7 +517,7 @@ public class UsbUpdateHandler {
     private void notifyToPlay() {
         if (fillPlayList()) {
             LogUtils.d("发送广告下载完成广播");
-            mContext.sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+            mContext.sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
         }
     }
 
@@ -537,11 +528,11 @@ public class UsbUpdateHandler {
      */
     private boolean fillPlayList() {
         LogUtils.d("开始fillPlayList");
-        ArrayList<PlayListBean> playList = DBHelper.get(mContext).getOrderedPlayList();
+        ArrayList<MediaLibBean> playList = DBHelper.get(mContext).getOrderedPlayList();
 
         if (playList != null && !playList.isEmpty()) {
             for (int i = 0; i < playList.size(); i++) {
-                PlayListBean bean = playList.get(i);
+                MediaLibBean bean = playList.get(i);
 
                 File mediaFile = new File(bean.getMediaPath());
                 boolean fileCheck = false;
@@ -569,19 +560,19 @@ public class UsbUpdateHandler {
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                            new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                     DBHelper.get(mContext).deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
                             DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
                                     DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                            new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
                 }
             }
         }
 
         if (playList != null && !playList.isEmpty()) {
-            ArrayList<PlayListBean> list = new ArrayList<>();
-            for (PlayListBean bean : playList) {
+            ArrayList<MediaLibBean> list = new ArrayList<>();
+            for (MediaLibBean bean : playList) {
                 if (!TextUtils.isEmpty(bean.getMediaPath())) {
                     list.add(bean);
                 }

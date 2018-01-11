@@ -2,8 +2,7 @@ package com.savor.ads.utils;
 
 import android.graphics.Bitmap;
 
-import com.jar.savor.box.vo.PptRequestVo;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.MediaLibBean;
 
 import java.util.ArrayList;
 
@@ -19,7 +18,7 @@ public class GlobalValues {
     public static String AUTH_CODE = "";
 
     /** 播放列表*/
-    public static ArrayList<PlayListBean> PLAY_LIST;
+    public static ArrayList<MediaLibBean> PLAY_LIST;
 
     /** 当前投屏设备ID*/
     public volatile static String CURRENT_PROJECT_DEVICE_ID;
@@ -48,4 +47,6 @@ public class GlobalValues {
     public static boolean IS_UPUSH_SO_COPY_SUCCESS = false;
 
     public static boolean IS_UPUSH_REGISTER_SUCCESS = false;
+
+    public static ArrayList<MediaLibBean> RTB_PUSH_ADS = null;
 }

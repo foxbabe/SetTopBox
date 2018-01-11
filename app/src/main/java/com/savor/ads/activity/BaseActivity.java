@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 
 import com.mstar.tv.service.skin.AudioSkin;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.ResponseErrorMessage;
@@ -192,114 +192,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     public void fillPlayList() {
         LogUtils.d("开始fillPlayList");
         if (!TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
-            DBHelper dbHelper = DBHelper.get(mContext);
-            ArrayList<PlayListBean> playList = dbHelper.getOrderedPlayList();
-
-            if (playList != null && !playList.isEmpty()) {
-                for (int i = 0; i < playList.size(); i++) {
-                    PlayListBean bean = playList.get(i);
-
-                    // 特殊处理ads数据
-                    if (bean.getMedia_type().equals(ConstantValues.ADS)) {
-                        String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
-                                + "=? ";
-                        String[] selectionArgs = new String[]{bean.getLocation_id()};
-                        List<PlayListBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
-                        if (list != null && !list.isEmpty()) {
-                            for (PlayListBean item :
-                                    list) {
-                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                Date startDate = null;
-                                Date endDate = null;
-                                try {
-                                    startDate = format.parse(item.getStart_date());
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                try {
-                                    endDate = format.parse(item.getEnd_date());
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                Date now = new Date();
-                                if (startDate != null && endDate != null &&
-                                        now.after(startDate) && now.before(endDate)) {
-                                    bean.setVid(item.getVid());
-                                    bean.setDuration(item.getDuration());
-                                    bean.setMd5(item.getMd5());
-                                    bean.setMedia_name(item.getMedia_name());
-                                    bean.setMediaPath(item.getMediaPath());
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    File mediaFile = new File(bean.getMediaPath());
-                    boolean fileCheck = false;
-                    if (!TextUtils.isEmpty(bean.getMd5()) &&
-                            !TextUtils.isEmpty(bean.getMediaPath()) &&
-                            mediaFile.exists()) {
-                        if (!bean.getMd5().equals(AppUtils.getEasyMd5(mediaFile))) {
-                            fileCheck = true;
-
-                            TechnicalLogReporter.md5Failed(this, bean.getVid());
-                        }
-                    } else {
-                        fileCheck = true;
-                    }
-
-                    if (fileCheck) {
-                        if (!TextUtils.isEmpty(bean.getVid())) {
-                            LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
-                        }
-                        // 校验失败时将文件路径置空，下面会删除掉为空的项
-                        bean.setMediaPath(null);
-                        if (mediaFile.exists()) {
-                            mediaFile.delete();
-                        }
-
-                        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
-                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
-                                        DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
-                                        DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
-                        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
-                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
-                                        DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
-                                        DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
-                                new String[]{bean.getPeriod(), bean.getVid(), bean.getMedia_type()});
-                    }
-                }
-
-//                dbHelper.close();
-            }
-
-            if (playList != null && !playList.isEmpty()) {
-                ArrayList<PlayListBean> list = new ArrayList<>();
-                for (PlayListBean bean : playList) {
-                    if (!TextUtils.isEmpty(bean.getMediaPath())) {
-                        list.add(bean);
-                    }
-                }
-                GlobalValues.PLAY_LIST = list;
-            } else {
-                File mediaDir = new File(AppUtils.getFilePath(this, AppUtils.StorageFile.media));
-                if (mediaDir.exists() && mediaDir.isDirectory()) {
-                    File[] files = mediaDir.listFiles();
-                    ArrayList<PlayListBean> filePlayList = new ArrayList<>();
-                    if (files != null) {
-                        for (File file : files) {
-                            if (file.isFile()) {
-                                PlayListBean bean = new PlayListBean();
-                                bean.setMediaPath(file.getPath());
-                                filePlayList.add(bean);
-                            }
-                        }
-                    }
-                    GlobalValues.PLAY_LIST = filePlayList;
-                }
-            }
+            AppUtils.fillPlaylist(this);
         } else {
             LogFileUtil.writeKeyLogInfo("跳转轮播，未找到SD卡！");
             ShowMessage.showToast(mContext, "未发现SD卡");
