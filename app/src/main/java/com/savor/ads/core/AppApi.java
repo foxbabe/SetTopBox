@@ -307,7 +307,13 @@ public class AppApi {
         params.put("pro_period", Session.get(context).getProPeriod());
         params.put("adv_period", Session.get(context).getAdvPeriod());
         params.put("period", Session.get(context).getAdsPeriod());
+        params.put("pro_download_period", Session.get(context).getProDownloadPeriod());
+        params.put("adv_download_period", Session.get(context).getAdvDownloadPeriod());
+        params.put("ads_download_period", Session.get(context).getAdsDownloadPeriod());
         params.put("demand", Session.get(context).getVodPeriod());
+        params.put("vod_download_period", Session.get(context).getVodDownloadPeriod());
+        params.put("specialty_period", Session.get(context).getSpecialtyPeriod());
+        params.put("rtb_ads_period", Session.get(context).getRtbadsPeriod());
         params.put("apk", Session.get(context).getVersionName());
         params.put("war", "");
         params.put("logo", Session.get(context).getSplashVersion());

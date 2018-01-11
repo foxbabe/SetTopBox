@@ -1008,7 +1008,7 @@ public class Session {
     }
 
     public String getSpecialtyPeriod() {
-        return specialtyPeriod;
+        return specialtyPeriod == null ? "" : specialtyPeriod;
     }
 
     public void setSpecialtyPeriod(String specialtyPeriod) {
