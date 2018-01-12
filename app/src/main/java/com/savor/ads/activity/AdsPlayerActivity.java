@@ -395,11 +395,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-
                     String.valueOf(System.currentTimeMillis()), action, libBean.getType(), libBean.getVid(),
-
-                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
-                    "");
+                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),"");
             if (ConstantValues.RTB_ADS.equals(libBean.getType())&&!TextUtils.isEmpty(libBean.getAdmaster_sin())){
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
             }
