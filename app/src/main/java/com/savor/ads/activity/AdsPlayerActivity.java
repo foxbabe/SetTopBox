@@ -145,6 +145,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 MediaLibBean bean = mPlayList.get(i);
                 if (bean.getOrder() > lastMediaOrder) {
                     index = i;
+                    break;
                 }
             }
             for (int i = 0; i < mPlayList.size(); i++) {

@@ -1765,9 +1765,9 @@ public class AppUtils {
                     }
                 }
 
-                if (GlobalValues.RTB_PUSH_ADS != null && !GlobalValues.RTB_PUSH_ADS.isEmpty()) {
-                    if (ConstantValues.RTB_ADS.equals(bean.getType())) {
-                        MediaLibBean rtbItem = GlobalValues.RTB_PUSH_ADS.get(rtbIndex++);
+                if (ConstantValues.RTB_ADS.equals(bean.getType())) {
+                    if (GlobalValues.RTB_PUSH_ADS != null && !GlobalValues.RTB_PUSH_ADS.isEmpty()) {
+                        MediaLibBean rtbItem = GlobalValues.RTB_PUSH_ADS.get(rtbIndex);
                         bean.setName(rtbItem.getName());
                         bean.setMediaPath(rtbItem.getMediaPath());
                         bean.setAdmaster_sin(rtbItem.getAdmaster_sin());
@@ -1776,6 +1776,8 @@ public class AppUtils {
                         bean.setVid(rtbItem.getVid());
                         bean.setMd5(rtbItem.getMd5());
                         bean.setPeriod(rtbItem.getPeriod());
+
+                        rtbIndex = (++rtbIndex) % GlobalValues.RTB_PUSH_ADS.size();
                     }
                 }
 
