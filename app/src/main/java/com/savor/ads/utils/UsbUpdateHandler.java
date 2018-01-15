@@ -42,6 +42,7 @@ public class UsbUpdateHandler {
      */
     private SetTopBoxBean setTopBoxBean;
     private final Session mSession;
+    private boolean mIsAllSuccess;
 
     public UsbUpdateHandler(Context context, List<String> cfgList, ProgressCallback callback) {
         mContext = context;
@@ -62,6 +63,7 @@ public class UsbUpdateHandler {
     }
 
     public void execute() {
+        mIsAllSuccess = true;
         if (cfgList != null && cfgList.size() > 0) {
             boolean haveCfg = initConfig();
             if (!haveCfg){
@@ -82,6 +84,8 @@ public class UsbUpdateHandler {
                         isSuccess = readChannelList();
                         if (isSuccess){
                             msg = "电视节目表提取完成";
+                        } else {
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_SET_CHANNEL:
@@ -92,6 +96,8 @@ public class UsbUpdateHandler {
                         isSuccess = writeChannelList();
                         if (isSuccess){
                             msg = "电视节目表已设置到机顶盒";
+                        } else {
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOG:
@@ -104,6 +110,7 @@ public class UsbUpdateHandler {
                             msg = "单机版日志文件提取完成";
                         }else{
                             msg = "单机版日志文件提取失败";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOGED:
@@ -116,6 +123,7 @@ public class UsbUpdateHandler {
                             msg = "单机版历史日志文件提取完成";
                         }else{
                             msg = "单机版历史日志文件提取失败";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_MEIDA:
@@ -129,6 +137,7 @@ public class UsbUpdateHandler {
                         }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
                             msg = "机顶盒期号与U盘内期号相同,无需更新";
                         }else{
+                            mIsAllSuccess = false;
                             if (!TextUtils.isEmpty(copyErrorMsg)){
                                 msg = copyErrorMsg;
                             }else {
@@ -144,6 +153,7 @@ public class UsbUpdateHandler {
                         isSuccess = updateApk();
                         if (!isSuccess){
                             msg = "应用更新失败！！！";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_LOGO:
@@ -153,11 +163,12 @@ public class UsbUpdateHandler {
                         isKnownAction = true;
                         isSuccess = updateLogo();
                         if (isSuccess){
-                            msg = "LOGO更新成功,重启生效！！！";
+                            msg = "LOGO更新成功";
                         }else if(mSession.getSplashVersion().equals(setTopBoxBean.getVersion().getLogo_version())){
-                            msg = "LOGO已经是最新的啦，么么哒!!!";
+                            msg = "LOGO已是最新，无需更新";
                         }else{
-                            msg = "LOGO更新失败,请联系热点张海强！！！";
+                            msg = "LOGO更新失败！";
+                            mIsAllSuccess = false;
                         }
                         break;
                     default:
@@ -168,6 +179,11 @@ public class UsbUpdateHandler {
                 if (isKnownAction && mCallback != null) {
                     mCallback.onActionComplete(i, isSuccess, msg);
                 }
+            }
+
+            if (mIsAllSuccess) {
+                // 设置更新时间
+                mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
             }
 
             if (mCallback != null) {
@@ -624,7 +640,7 @@ public class UsbUpdateHandler {
             }
         }
 
-        if (fileList!=null&&fileList.size()>0){
+        if (fileList.size() > 0) {
             String usbLogPath = mSession.getUsbPath()
                     + File.separator
                     + ConstantValues.USB_FILE_LOG_PATH
@@ -710,6 +726,9 @@ public class UsbUpdateHandler {
 
         try {
             if (md5Str.equals(AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(apkFile)))) {
+                // 设置更新时间
+                mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
+
                 if (AppUtils.isMstar()) {
                     isSuccess = UpdateUtil.updateApk(apkFile);
                 } else {
