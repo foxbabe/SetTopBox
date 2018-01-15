@@ -454,23 +454,23 @@ public class SavorVideoView extends RelativeLayout {
     /**
      * 设置播放数据源
      */
-    private void setMediaPlayerSource() {
+    private boolean setMediaPlayerSource() {
         LogUtils.w(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         LogFileUtil.write(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (mMediaPlayer == null) {
             LogUtils.e(TAG + "setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
             LogFileUtil.write(TAG + "setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
-            return;
+            return false;
         }
         if (mPlayState != MediaPlayerState.IDLE) {
             LogUtils.e(TAG + "setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
             LogFileUtil.write(TAG + "setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
-            return;
+            return false;
         }
         if (mMediaFiles == null || mMediaFiles.isEmpty() || mCurrentFileIndex >= mMediaFiles.size()) {
             LogUtils.e(TAG + "setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
             LogFileUtil.write(TAG + "setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
-            return;
+            return false;
         }
         try {
             LogUtils.w("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
@@ -479,7 +479,9 @@ public class SavorVideoView extends RelativeLayout {
             mPlayState = MediaPlayerState.INITIALIZED;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -555,8 +557,29 @@ public class SavorVideoView extends RelativeLayout {
         mAssignedPlayPosition = assignedPlayPosition;
 
         if (mMediaFiles != null && mMediaFiles.size() > 0) {
-            setMediaPlayerSource();
+            setAndPrepare();
+        }
+    }
+
+    private void setAndPrepare() {
+        if (setMediaPlayerSource()) {
             prepareMediaPlayer();
+        } else {
+            if (mForcePlayFromStart) {
+                // 强制从头播放
+                mForcePlayFromStart = false;
+                mCurrentFileIndex = 0;
+                mAssignedPlayPosition = 0;
+            } else {
+                // 播放下一个
+                mCurrentFileIndex = (mCurrentFileIndex + 1) % mMediaFiles.size();
+                mAssignedPlayPosition = 0;
+            }
+
+            if (mIsLooping) {
+                // 重置播放器状态，以备下次播放
+                resetAndPreparePlayer();
+            }
         }
     }
 
@@ -711,8 +734,7 @@ public class SavorVideoView extends RelativeLayout {
 
         mIsPauseByOut = false;
         if (mPlayState == MediaPlayerState.IDLE && mMediaFiles != null && mMediaFiles.size() > 0) {
-            setMediaPlayerSource();
-            prepareMediaPlayer();
+            setAndPrepare();
         }
     }
 
@@ -795,8 +817,7 @@ public class SavorVideoView extends RelativeLayout {
             }
             mPlayVideoIv.setVisibility(GONE);
 
-            setMediaPlayerSource();
-            prepareMediaPlayer();
+            setAndPrepare();
         }
     }
 
