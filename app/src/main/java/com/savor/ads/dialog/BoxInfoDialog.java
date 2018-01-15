@@ -80,7 +80,7 @@ public class BoxInfoDialog extends Dialog {
         mRoomNameTv = (TextView) findViewById(R.id.tv_room_name);
         mEthernetIpTv = (TextView) findViewById(R.id.tv_eth_ip);
         mWlanIpTv = (TextView) findViewById(R.id.tv_wlan_ip);
-        mWlanMacLabelTv = (TextView) findViewById(R.id.tv_wlan_ip_label);
+        mWlanIpLabelTv = (TextView) findViewById(R.id.tv_wlan_ip_label);
         mSignalSourceTv = (TextView) findViewById(R.id.tv_signal_source);
         mEthernetMacTv = (TextView) findViewById(R.id.tv_ethernet_mac);
         mWlanMacTv = (TextView) findViewById(R.id.tv_wlan_mac);
@@ -135,9 +135,9 @@ public class BoxInfoDialog extends Dialog {
             mWlanMacLabelTv.setText("是否单机版");
             mWlanMacTv.setText("是");
         } else {
-            mWlanIpTv.setText("无线IP地址");
+            mWlanIpLabelTv.setText("无线IP地址");
             mWlanIpTv.setText(AppUtils.getWlanIP());
-            mWlanMacTv.setText("无线MAC地址");
+            mWlanMacLabelTv.setText("无线MAC地址");
             mWlanMacTv.setText(session.getWlanMac());
         }
         mAdsPeriodTv.setText(session.getAdsPeriod());

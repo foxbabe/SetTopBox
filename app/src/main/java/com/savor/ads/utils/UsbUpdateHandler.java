@@ -726,8 +726,10 @@ public class UsbUpdateHandler {
 
         try {
             if (md5Str.equals(AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(apkFile)))) {
-                // 设置更新时间
-                mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
+                if (mIsAllSuccess) {
+                    // 设置更新时间
+                    mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
+                }
 
                 if (AppUtils.isMstar()) {
                     isSuccess = UpdateUtil.updateApk(apkFile);

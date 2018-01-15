@@ -131,7 +131,6 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
     }
 
     public static boolean updateApk4Giec(File file) {
-        boolean isSuccess = true;
         if (file.length() <= 0) {
             file.delete();
             LogFileUtil.writeException(new Throwable("apk update fatal, updateapksamples.apk length is 0"));
@@ -149,27 +148,37 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
                 dos.writeBytes("mount -o remount,rw /system\n");
                 dos.flush();
 
-                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
+                String catCommand = "cat " + file.getPath() + " > " + targetPath + "\n";
                 dos.writeBytes(catCommand);
                 dos.flush();
                 Thread.sleep(2000);
 
-//                file.delete();
+                dos.writeBytes("chmod 755 " + targetPath + "\n");
+                dos.flush();
+                Thread.sleep(1000);
+                isflag = true;
 
-                File file1 = new File(tempPath);
-                if (file1.length() > 0) {
-
-                    dos.writeBytes("mv " + tempPath + " " + targetPath + "\n");
-                    dos.flush();
-                    Thread.sleep(1000);
-
-                    dos.writeBytes("chmod 755 " + targetPath + "\n");
-                    dos.flush();
-                    Thread.sleep(1000);
-                    isflag = true;
-                } else {
-                    file1.delete();
-                }
+//                String catCommand = "cat " + file.getPath() + " > " + tempPath + "\n";
+//                dos.writeBytes(catCommand);
+//                dos.flush();
+//                Thread.sleep(2000);
+//
+////                file.delete();
+//
+//                File file1 = new File(tempPath);
+//                if (file1.length() > 0) {
+//
+//                    dos.writeBytes("mv " + tempPath + " " + targetPath + "\n");
+//                    dos.flush();
+//                    Thread.sleep(1000);
+//
+//                    dos.writeBytes("chmod 755 " + targetPath + "\n");
+//                    dos.flush();
+//                    Thread.sleep(1000);
+//                    isflag = true;
+//                } else {
+//                    file1.delete();
+//                }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
