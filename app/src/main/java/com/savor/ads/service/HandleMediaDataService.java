@@ -511,13 +511,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         String selection = DBHelper.MediaDBInfo.FieldName.VID + "=? ";
                         String[] selectionArgs = new String[]{bean.getVid()};
                         List<MediaLibBean> list = dbHelper.findRtbadsMediaLibByWhere(selection, selectionArgs);
+                        boolean isInsertSuccess = false;
                         if (list != null && list.size() > 1) {
                             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.RTB_ADS, selection, selectionArgs);
-                            dbHelper.insertOrUpdateRTBAdsList(bean, false);
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, false);
                         } else if (list != null && list.size() == 1) {
-                            dbHelper.insertOrUpdateRTBAdsList(bean, true);
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, true);
                         } else {
-                            dbHelper.insertOrUpdateRTBAdsList(bean, false);
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, false);
+                        }
+
+                        if (isInsertSuccess) {
+                            adsDownloadedCount++;
                         }
                     }
                 } catch (Exception e) {
