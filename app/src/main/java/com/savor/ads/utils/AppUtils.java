@@ -21,8 +21,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.Session;
+import com.savor.ads.database.DBHelper;
 
 import org.apache.commons.io.FileUtils;
 
@@ -54,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
@@ -164,6 +167,10 @@ public class AppUtils {
          * 特色菜目录
          */
         specialty,
+        /**
+         * RTB广告目录
+         */
+        rtb_ads,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -220,6 +227,7 @@ public class AppUtils {
 
     /**
      * 获取主媒体路径
+     *
      * @return
      */
     public static String getMainMediaPath() {
@@ -298,7 +306,7 @@ public class AppUtils {
         if (!targetMulticastFile.exists()) {
             targetMulticastFile.mkdir();
         }
-        File targetCacheFile = new File(path + File.separator, "cache");
+        File targetCacheFile = new File(path + File.separator, "cache/");
         if (!targetCacheFile.exists()) {
             targetCacheFile.mkdir();
         }
@@ -313,6 +321,10 @@ public class AppUtils {
         File specialtyFile = new File(path + File.separator, "specialty");
         if (!specialtyFile.exists()) {
             specialtyFile.mkdir();
+        }
+        File rtbFile = new File(path + File.separator, "rtb_ads");
+        if (!rtbFile.exists()) {
+            rtbFile.mkdir();
         }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
@@ -333,6 +345,8 @@ public class AppUtils {
             path = targetPptFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.specialty) {
             path = specialtyFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.rtb_ads) {
+            path = rtbFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
@@ -1679,5 +1693,160 @@ public class AppUtils {
 
     public static boolean isMstar() {
         return Build.MODEL.contains("MStar");
+    }
+
+    /**
+     * 根据Pid获取当前进程的名字，一般就是当前app的包名
+     *
+     * @param context 上下文
+     * @return 返回进程的名字
+     */
+    public static String getProcessName(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List list = activityManager.getRunningAppProcesses();
+        Iterator i = list.iterator();
+        while (i.hasNext()) {
+            ActivityManager.RunningAppProcessInfo info = (ActivityManager.RunningAppProcessInfo) (i.next());
+            try {
+                if (info.pid == android.os.Process.myPid()) {
+                    // 根据进程的信息获取当前进程的名字
+                    return info.processName;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        // 没有匹配的项，返回为null
+        return null;
+    }
+
+    public static boolean fillPlaylist(Context context) {
+        DBHelper dbHelper = DBHelper.get(context);
+        ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
+
+        if (playList != null && !playList.isEmpty()) {
+            int rtbIndex = 0;
+            for (int i = 0; i < playList.size(); i++) {
+                MediaLibBean bean = playList.get(i);
+
+                // 特殊处理ads数据
+                if (bean.getType().equals(ConstantValues.ADS)) {
+                    String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
+                            + "=? ";
+                    String[] selectionArgs = new String[]{bean.getLocation_id()};
+                    List<MediaLibBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
+                    if (list != null && !list.isEmpty()) {
+                        for (MediaLibBean item :
+                                list) {
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            Date startDate = null;
+                            Date endDate = null;
+                            try {
+                                startDate = format.parse(item.getStart_date());
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                endDate = format.parse(item.getEnd_date());
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            Date now = new Date();
+                            if (startDate != null && endDate != null &&
+                                    now.after(startDate) && now.before(endDate)) {
+                                bean.setVid(item.getVid());
+                                bean.setDuration(item.getDuration());
+                                bean.setMd5(item.getMd5());
+                                bean.setName(item.getName());
+                                bean.setMediaPath(item.getMediaPath());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (ConstantValues.RTB_ADS.equals(bean.getType())) {
+                    if (GlobalValues.RTB_PUSH_ADS != null && !GlobalValues.RTB_PUSH_ADS.isEmpty()) {
+                        MediaLibBean rtbItem = GlobalValues.RTB_PUSH_ADS.get(rtbIndex);
+                        bean.setName(rtbItem.getName());
+                        bean.setMediaPath(rtbItem.getMediaPath());
+                        bean.setAdmaster_sin(rtbItem.getAdmaster_sin());
+                        bean.setChinese_name(rtbItem.getChinese_name());
+                        bean.setDuration(rtbItem.getDuration());
+                        bean.setVid(rtbItem.getVid());
+                        bean.setMd5(rtbItem.getMd5());
+                        bean.setPeriod(rtbItem.getPeriod());
+
+                        rtbIndex = (++rtbIndex) % GlobalValues.RTB_PUSH_ADS.size();
+                    }
+                }
+
+                File mediaFile = new File(bean.getMediaPath());
+                boolean fileCheck = false;
+                if (!TextUtils.isEmpty(bean.getMd5()) &&
+                        !TextUtils.isEmpty(bean.getMediaPath()) &&
+                        mediaFile.exists()) {
+                    if (!bean.getMd5().equals(AppUtils.getEasyMd5(mediaFile))) {
+                        fileCheck = true;
+
+                        TechnicalLogReporter.md5Failed(context, bean.getVid());
+                    }
+                } else {
+                    fileCheck = true;
+                }
+
+                if (fileCheck) {
+                    if (!TextUtils.isEmpty(bean.getVid())) {
+                        LogUtils.e("媒体文件校验失败! vid:" + bean.getVid());
+                    }
+                    // 校验失败时将文件路径置空，下面会删除掉为空的项
+                    bean.setMediaPath(null);
+                    if (mediaFile.exists()) {
+                        mediaFile.delete();
+                    }
+
+                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,
+                            DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
+                                    DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
+                                    DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
+                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,
+                            DBHelper.MediaDBInfo.FieldName.PERIOD + "=? AND " +
+                                    DBHelper.MediaDBInfo.FieldName.VID + "=? AND " +
+                                    DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?",
+                            new String[]{bean.getPeriod(), bean.getVid(), bean.getType()});
+                }
+            }
+
+//                dbHelper.close();
+        }
+
+        if (playList != null && !playList.isEmpty()) {
+            ArrayList<MediaLibBean> list = new ArrayList<>();
+            for (MediaLibBean bean : playList) {
+                if (!TextUtils.isEmpty(bean.getMediaPath())) {
+                    list.add(bean);
+                }
+            }
+            GlobalValues.PLAY_LIST = list;
+        } else {
+            File mediaDir = new File(AppUtils.getFilePath(context, AppUtils.StorageFile.media));
+            if (mediaDir.exists() && mediaDir.isDirectory()) {
+                File[] files = mediaDir.listFiles();
+                ArrayList<MediaLibBean> filePlayList = new ArrayList<>();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            MediaLibBean bean = new MediaLibBean();
+                            bean.setMediaPath(file.getPath());
+                            filePlayList.add(bean);
+                        }
+                    }
+                }
+                GlobalValues.PLAY_LIST = filePlayList;
+            }
+        }
+
+        return GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty();
     }
 }

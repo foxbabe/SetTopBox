@@ -1,22 +1,31 @@
 package com.savor.ads.activity;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
+import com.admaster.sdk.api.AdmasterSdk;
+import com.jar.savor.box.ServiceUtil;
+import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
-import com.savor.ads.bean.PlayListBean;
+import com.savor.ads.bean.AdMasterResult;
+import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
+import com.savor.ads.callback.ProjectOperationListener;
+
 import com.savor.ads.customview.SavorVideoView;
-import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
@@ -26,24 +35,29 @@ import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback {
+public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener {
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
 
-    private ArrayList<PlayListBean> mPlayList;
+    private ArrayList<MediaLibBean> mPlayList;
     private String mListPeriod;
     private boolean mNeedPlayNewer;
-    /** 日志用的播放记录标识*/
+    private boolean mForcePlayNewer;
+    /**
+     * 日志用的播放记录标识
+     */
     private String mUUID;
     private long mActivityResumeTime;
 
     private static final int DELAY_TIME = 2;
+    private AdMasterResult adMasterResult = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,31 +71,54 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         mSavorVideoView.setPlayStateCallback(this);
 
         registerDownloadReceiver();
+        // 启动投屏类操作处理的Service
+        startScreenProjectionService();
         LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
+        // SDK初始化
+        AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
+        AdmasterSdk.setLogState(true);
+
+//        AppApi.getAdMasterConfig(this,this);
+
+    }
+
+
+    private ServiceConnection mConnection;
+
+    private void startScreenProjectionService() {
+        mConnection = ServiceUtil.registerService(ProjectOperationListener.getInstance(this));
+//        bindService(new Intent(ServiceUtil.ACTION_REMOTE_SERVICE), connection, Service.BIND_AUTO_CREATE);
+        bindService(new Intent(this, RemoteService.class), mConnection, Service.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        checkAndPlay();
+        checkAndPlay(-1);
     }
 
     private void registerDownloadReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION);
+        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
+        intentFilter.addAction(ConstantValues.RTB_ADS_PUSH_ACTION);
         registerReceiver(mDownloadCompleteReceiver, intentFilter);
     }
 
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LogUtils.d("收到下载完成广播");
-            mNeedPlayNewer = true;
+            if (ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION.equals(intent.getAction())) {
+                LogUtils.d("收到下载完成广播");
+                mNeedPlayNewer = true;
+            } else if (ConstantValues.RTB_ADS_PUSH_ACTION.equals(intent.getAction())) {
+                LogUtils.d("收到RTB广告推送广播");
+                mForcePlayNewer = true;
+            }
         }
     };
 
-    private void checkAndPlay() {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST +" AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
+    private void checkAndPlay(int lastMediaOrder) {
+        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             if (AppUtils.isMstar()) {
@@ -95,24 +132,32 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         } else {
             mPlayList = GlobalValues.PLAY_LIST;
             mListPeriod = mSession.getAdsPeriod();
-            doPlay();
+            doPlay(lastMediaOrder);
         }
     }
 
-    private void doPlay() {
+    private void doPlay(int lastMediaOrder) {
         LogFileUtil.write("AdsPlayerActivity doPlay");
         ArrayList<String> urls = new ArrayList<>();
         if (mPlayList != null && mPlayList.size() > 0) {
-            for (PlayListBean bean : mPlayList) {
+            int index = 0;
+            for (int i = 0; i < mPlayList.size(); i++) {
+                MediaLibBean bean = mPlayList.get(i);
+                if (bean.getOrder() > lastMediaOrder) {
+                    index = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < mPlayList.size(); i++) {
+                MediaLibBean bean = mPlayList.get(i);
                 urls.add(bean.getMediaPath());
             }
 
-            mSavorVideoView.setMediaFiles(urls);
+            mSavorVideoView.setMediaFiles(urls, index, 0);
         }
     }
 
     private boolean mIsGoneToTv;
-
 
 
     @Override
@@ -138,7 +183,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             }, 1000 * DELAY_TIME);
         }
     }
-
 
 
     @Override
@@ -241,6 +285,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     int resolutionIndex = 0;
+
     private void changeResolution() {
         OutputResolution resolution = OutputResolution.values()[(resolutionIndex++) % OutputResolution.values().length];
         TVOperatorFactory.getTVOperator(this, TVOperatorFactory.TVType.GIEC)
@@ -288,17 +333,19 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
 
-        // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
+            // 重新获取播放列表开始播放
+            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
             mNeedPlayNewer = false;
+            mForcePlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
-                checkAndPlay();
+                checkAndPlay(currentOrder);
                 deleteOldMedia();
                 return true;
             } else {
@@ -311,12 +358,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
-        // 新一期下载完成时重新获取播放列表开始播放
-        if (isLast && mNeedPlayNewer) {
+        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
+            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
+            // 重新获取播放列表开始播放
             mNeedPlayNewer = false;
+            mForcePlayNewer = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
-                checkAndPlay();
+                checkAndPlay(currentOrder);
                 deleteOldMedia();
                 return true;
             } else {
@@ -328,6 +377,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     private int mCurrentPlayingIndex = -1;
+
     @Override
     public void onMediaPrepared(int index) {
         // 准备播放新视频时产生一个新的UUID作为日志标识
@@ -344,10 +394,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             action = "resume";
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+            MediaLibBean libBean = mPlayList.get(index);
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), action, mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+
+                    String.valueOf(System.currentTimeMillis()), action, libBean.getType(), libBean.getVid(),
+
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
+            if (ConstantValues.RTB_ADS.equals(libBean.getType())&&!TextUtils.isEmpty(libBean.getAdmaster_sin())){
+                AdmasterSdk.onExpose(libBean.getAdmaster_sin());
+            }
         }
     }
 
@@ -360,7 +416,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         try {
             if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
                 LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                        String.valueOf(System.currentTimeMillis()), "pause", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                         "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                         "");
             }
@@ -377,7 +433,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
+                    String.valueOf(System.currentTimeMillis()), "resume", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
         }
@@ -395,5 +451,74 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         LogFileUtil.write("AdsPlayerActivity onDestroy");
         super.onDestroy();
         unregisterReceiver(mDownloadCompleteReceiver);
+        AdmasterSdk.terminateSDK();
+    }
+
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        switch (method) {
+            case CP_GET_ADMASTER_CONFIG_JSON:
+                if (obj instanceof AdMasterResult) {
+                    adMasterResult = (AdMasterResult) obj;
+                    handleAdmaster();
+                }
+                break;
+            case SP_GET_LOADING_IMG_DOWN:
+                if (obj instanceof File) {
+                    File f = (File) obj;
+                    byte[] fRead = new byte[0];
+                    String md5Value = null;
+                    try {
+                        fRead = org.apache.commons.io.FileUtils.readFileToByteArray(f);
+                        md5Value = AppUtils.getMD5(fRead);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //比较本地文件版本是否与服务器文件一致，如果一致则启动安装
+                    if (md5Value != null && md5Value.equals(adMasterResult.getMd5())) {
+                        try {
+                            mContext.deleteFile("admaster_sdkconfig.xml");
+                            String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + "admaster_sdkconfig.xml";
+                            File tarFile = new File(path);
+//                            AssetManager assetManager = this.getAssets();
+//                            assetManager.
+
+//                            FileUtils.copyFile(path, Environment.getExternalStorageDirectory().getAbsolutePath() + newPath);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    private void handleAdmaster() {
+        if (adMasterResult == null) {
+            return;
+        }
+        int admaster_update_time = mSession.getAdmaster_update_time();
+        if (admaster_update_time != 0 && admaster_update_time != adMasterResult.getUpdate_time()) {
+            String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + "admaster_sdkconfig.xml";
+            File tarFile = new File(path);
+            if (tarFile.exists()) {
+                tarFile.delete();
+            }
+            if (!TextUtils.isEmpty(adMasterResult.getFile())) {
+                AppApi.downloadLoadingImg(adMasterResult.getFile(), mContext, this, path);
+            }
+        }
+
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+
     }
 }

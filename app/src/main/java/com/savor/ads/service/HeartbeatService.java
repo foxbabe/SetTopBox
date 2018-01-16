@@ -15,7 +15,6 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
-import com.savor.ads.utils.TechnicalLogReporter;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -88,7 +87,7 @@ public class HeartbeatService extends IntentService {
                 if(activity instanceof BaseActivity) {
                     BaseActivity baseActivity = (BaseActivity) activity;
                     baseActivity.fillPlayList();
-                    sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION));
+                    sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
                 }
             }
 

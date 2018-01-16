@@ -88,6 +88,9 @@ public class AppApi {
         CP_REPORT_LOTTERY_JSON,
         PH_NOTIFY_STOP_JSON,
         SP_GET_SPECIALTY_JSON,
+        CP_GET_ADMASTER_CONFIG_JSON,
+        CP_POST_DEVICE_TOKEN_JSON,
+        SP_GET_RTB_ADS_JSON,
     }
 
 
@@ -114,6 +117,9 @@ public class AppApi {
             put(Action.CP_REPORT_LOTTERY_JSON, BuildConfig.BASE_URL + "Award/Award/recordAwardLog");
             put(Action.PH_NOTIFY_STOP_JSON, PHONE_BASE_URL + "stopProjection");
             put(Action.SP_GET_SPECIALTY_JSON, SP_BASE_URL + "small/api/download/recommend/config");
+            put(Action.CP_GET_ADMASTER_CONFIG_JSON,BuildConfig.BASE_URL + "Box/Admaster/getConfFile");
+            put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
+            put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
         }
     };
 
@@ -202,6 +208,20 @@ public class AppApi {
     }
 
     /**
+     * 获取实时竞价广告资源
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @return
+     * @throws IOException
+     */
+    public static String getRtbadsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("boxMac",boxMac);
+        return new AppServiceOk(context, Action.SP_GET_RTB_ADS_JSON, handler, params).syncGet();
+    }
+
+    /**
      * 获取小平台电视频道数据
      * @param context
      * @param handler
@@ -287,7 +307,13 @@ public class AppApi {
         params.put("pro_period", Session.get(context).getProPeriod());
         params.put("adv_period", Session.get(context).getAdvPeriod());
         params.put("period", Session.get(context).getAdsPeriod());
+        params.put("pro_download_period", Session.get(context).getProDownloadPeriod());
+        params.put("adv_download_period", Session.get(context).getAdvDownloadPeriod());
+        params.put("ads_download_period", Session.get(context).getAdsDownloadPeriod());
         params.put("demand", Session.get(context).getVodPeriod());
+        params.put("vod_download_period", Session.get(context).getVodDownloadPeriod());
+        params.put("specialty_period", Session.get(context).getSpecialtyPeriod());
+        params.put("rtb_ads_period", Session.get(context).getRtbadsPeriod());
         params.put("apk", Session.get(context).getVersionName());
         params.put("war", "");
         params.put("logo", Session.get(context).getSplashVersion());
@@ -350,6 +376,19 @@ public class AppApi {
     }
 
     /**
+     * 上报推送DeviceToken
+     * @param context
+     * @param handler
+     */
+    public static void reportDeviceToken(Context context, ApiRequestListener handler, String deviceToken) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("box_id", Session.get(context).getBoxId());
+        params.put("box_mac", Session.get(context).getEthernetMac());
+        params.put("device_token", deviceToken);
+        new AppServiceOk(context, Action.CP_POST_DEVICE_TOKEN_JSON, handler, params).post();
+    }
+
+    /**
      * 通知手机投屏结束
      * @param context
      * @param handler
@@ -361,7 +400,15 @@ public class AppApi {
         new AppServiceOk(context, Action.PH_NOTIFY_STOP_JSON, handler, params).get();
     }
 
-
+    /**
+     * 获取admaster配置文件
+     * @param context
+     * @param handler
+     */
+    public static void getAdMasterConfig(Context context, ApiRequestListener handler){
+        final HashMap<String, Object> params = new HashMap<>();
+        new AppServiceOk(context, Action.CP_GET_ADMASTER_CONFIG_JSON, handler, params).get();
+    }
 
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";

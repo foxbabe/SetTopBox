@@ -1,5 +1,7 @@
 package com.savor.ads.utils;
 
+import com.savor.ads.BuildConfig;
+
 /**
  * Created by zhanghq on 2016/12/8.
  */
@@ -115,7 +117,9 @@ public class ConstantValues {
     /**U盘安装酒楼配置文件-单机日志标志*/
     public static final String STANDALONE="standalone";
     /** 广告下载完成广播Action*/
-    public static final String ADS_DOWNLOAD_COMPLETE_ACCTION = "com.savor.ads.ads_download_complete";
+    public static final String ADS_DOWNLOAD_COMPLETE_ACTION = "com.savor.ads.ads_download_complete";
+    /** 接到RTB广告推送Action*/
+    public static final String RTB_ADS_PUSH_ACTION = "com.savor.ads.receive_rtb_push";
 
 
     public static final int KEY_DOWN_LAG = 2000;
@@ -138,6 +142,8 @@ public class ConstantValues {
     public static final String ADV = "adv";
     /**节目单-广告*/
     public static final String ADS = "ads";
+    /**节目单-RTB广告*/
+    public static final String RTB_ADS = "rtbads";
     /**特色菜*/
     public static final String RECOMMEND = "recommend";
 
@@ -146,4 +152,14 @@ public class ConstantValues {
 
     /**外置SD卡至少保留的可用空间*/
     public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
+
+
+    /**
+     * sdkconfig.xml配置文件服务器存放地址,如果为空的话，默认去加载本地assets目录
+     */
+    public static final String CONFIG_URL = BuildConfig.BASE_URL+"/Public/admaster/admaster_sdkconfig.xml";
+
+    public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
+
+
 }

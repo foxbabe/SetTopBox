@@ -139,8 +139,8 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
 
         boolean isflag = false;
         Process proc = null;
-        String tempPath = "/system/priv-app/savormedia/temp.apk";
-        String targetPath = "/system/priv-app/savormedia/savormedia.apk";
+        String tempPath = ConstantValues.APK_INSTALLED_PATH + "temp.apk";
+        String targetPath = ConstantValues.APK_INSTALLED_PATH + "savormedia.apk";
         try {
             proc = Runtime.getRuntime().exec("su");
             try {

@@ -80,7 +80,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void registerDownloadReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACCTION);
+        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
         registerReceiver(mDownloadCompleteReceiver, intentFilter);
     }
 

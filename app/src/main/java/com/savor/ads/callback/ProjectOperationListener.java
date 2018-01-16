@@ -22,7 +22,6 @@ import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
 import com.savor.ads.bean.AwardTime;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.PlayListBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectionManager;
@@ -209,11 +208,11 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
         if ("2".equals(vodType)) {
             // 酒楼宣传片点播
-            List<PlayListBean> list = dbHelper.findPlayListByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
+            List<MediaLibBean> list = dbHelper.findPlayListByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
 
             if (list != null && !list.isEmpty()) {
-                PlayListBean bean = list.get(0);
-                String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media) + bean.getMedia_name();
+                MediaLibBean bean = list.get(0);
+                String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media) + bean.getName();
                 String md5 = bean.getMd5();
                 File file = new File(filePath);
                 if (file.exists()) {

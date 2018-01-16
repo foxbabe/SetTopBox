@@ -3,26 +3,39 @@ package com.savor.ads;
 import android.app.Service;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.callback.ProjectOperationListener;
+import com.savor.ads.core.ApiRequestListener;
+import com.savor.ads.core.AppApi;
+import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
+import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.QrCodeWindowManager;
+import com.umeng.message.IUmengCallback;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
+
+import java.io.DataOutputStream;
+import java.io.File;
 
 /**
  * Created by Administrator on 2016/12/9.
  */
 
-public class SavorApplication extends MultiDexApplication {
+public class SavorApplication extends MultiDexApplication implements ApiRequestListener {
 
     private QrCodeWindowManager mQrCodeWindowManager;
     private ServiceConnection mConnection;
@@ -39,10 +52,265 @@ public class SavorApplication extends MultiDexApplication {
 
         mQrCodeWindowManager = new QrCodeWindowManager();
         // 启动投屏类操作处理的Service
-        startScreenProjectionService();
+//        startScreenProjectionService();
 
         // 检测播放时间
         AppUtils.checkPlayTime(SavorApplication.this);
+
+        initPush();
+    }
+
+
+    private Handler mHandler = new Handler();
+
+    private void initPush() {
+        if (AppUtils.isMstar()) {
+            initMStarPush();
+        } else {
+            initGiecPush();
+        }
+    }
+
+    private void initMStarPush() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                boolean isCopySuccess = false;
+                if (getPackageName().equals(AppUtils.getProcessName(SavorApplication.this)) &&
+                        !GlobalValues.IS_UPUSH_SO_COPY_SUCCESS) {
+                    File innerLibDir = new File("/sdcard/inner_so/");
+                    if (!innerLibDir.exists()) {
+                        innerLibDir.mkdirs();
+                    }
+                    if (innerLibDir.exists()) {
+                        FileUtils.copyFilesFromAssets(SavorApplication.this, "inner_so/", innerLibDir.getPath());
+                    }
+
+//                    File outerLibDir = new File("/sdcard/outer_so/");
+//                    if (!outerLibDir.exists()) {
+//                        outerLibDir.mkdirs();
+//                    }
+//                    if (outerLibDir.exists()) {
+//                        FileUtils.copyFilesFromAssets(SavorApplication.this, "outer_so/", outerLibDir.getPath());
+//                    }
+
+                    Process proc = null;
+                    try {
+                        proc = Runtime.getRuntime().exec("su");
+
+                        DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
+                        dos.writeBytes("mount -o remount,rw /system\n");
+                        dos.flush();
+
+//                            dos.writeBytes("chmod -R 755 /sdcard/outer_so/\n");
+//                            dos.flush();
+//                            Thread.sleep(100);
+
+//                            dos.writeBytes("mkdir /system/priv-app/savormedia/lib/\n");
+//                            dos.flush();
+//                            Thread.sleep(100);
+//
+//                            dos.writeBytes("mkdir /system/priv-app/savormedia/lib/arm/\n");
+//                            dos.flush();
+//                            Thread.sleep(100);
+
+                        dos.writeBytes("cp /sdcard/inner_so/* /data/data/com.savor.ads/lib/\n");
+                        dos.flush();
+                        Thread.sleep(2000);
+
+                        dos.writeBytes("chmod -R 755 /data/data/com.savor.ads/lib/\n");
+                        dos.flush();
+                        Thread.sleep(200);
+
+                        //                        dos.writeBytes("cp /sdcard/outer_so/ /system/lib/\n");
+                        //                        dos.flush();
+                        //                        Thread.sleep(2000);
+
+                        dos.close();
+
+                        GlobalValues.IS_UPUSH_SO_COPY_SUCCESS = true;
+                        isCopySuccess = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        GlobalValues.IS_UPUSH_SO_COPY_SUCCESS = false;
+                        isCopySuccess = false;
+                    } finally {
+                        if (proc != null) {
+                            try {
+                                proc.destroy();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } else {
+                    isCopySuccess = true;
+                }
+
+                LogFileUtil.write("Copy so file success? " + isCopySuccess);
+                if (isCopySuccess) {
+                    LogUtils.d("copy so success");
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PushAgent pushAgent = PushAgent.getInstance(SavorApplication.this);
+                            pushAgent.setPushIntentServiceClass(UMessageIntentService.class);
+                            //注册推送服务，每次调用register方法都会回调该接口
+                            pushAgent.register(new IUmengRegisterCallback() {
+
+                                @Override
+                                public void onSuccess(String deviceToken) {
+                                    //注册成功会返回device token
+                                    Log.e("register", "UPush register success, deviceToken is " + deviceToken);
+                                    LogFileUtil.write("UPush register success, deviceToken is " + deviceToken);
+
+                                    GlobalValues.IS_UPUSH_REGISTER_SUCCESS = true;
+                                    reportDeviceToken(deviceToken);
+
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            PushAgent.getInstance(SavorApplication.this).onAppStart();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(String s, String s1) {
+                                    Log.e("register", "UPush register failed, s is " + s + ", s1 is " + s1);
+                                    LogFileUtil.write("UPush register failed, s is " + s + ", s1 is " + s1);
+                                    GlobalValues.IS_UPUSH_REGISTER_SUCCESS = false;
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void initGiecPush() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                boolean isCopySuccess = false;
+                if (getPackageName().equals(AppUtils.getProcessName(SavorApplication.this)) &&
+                        !GlobalValues.IS_UPUSH_SO_COPY_SUCCESS) {
+                    File innerLibDir = new File("/sdcard/inner_so/"/*ConstantValues.APK_INSTALLED_PATH + "lib/arm/"*/);
+                    if (!innerLibDir.exists()) {
+                        innerLibDir.mkdirs();
+                    }
+                    if (innerLibDir.exists()) {
+                        FileUtils.copyFilesFromAssets(SavorApplication.this, "inner_so/", innerLibDir.getPath());
+                    }
+
+//                    File outerLibDir = new File("/sdcard/outer_so/");
+//                    if (!outerLibDir.exists()) {
+//                        outerLibDir.mkdirs();
+//                    }
+//                    if (outerLibDir.exists()) {
+//                        FileUtils.copyFilesFromAssets(SavorApplication.this, "outer_so/", outerLibDir.getPath());
+//                    }
+
+                    Process proc = null;
+                    try {
+                        proc = Runtime.getRuntime().exec("su");
+
+                        DataOutputStream dos = new DataOutputStream(proc.getOutputStream());
+                        dos.writeBytes("mount -o remount,rw /system\n");
+                        dos.flush();
+
+//                        dos.writeBytes("chmod -R 755 /sdcard/outer_so/\n");
+//                        dos.flush();
+//                        Thread.sleep(100);
+
+                        dos.writeBytes("mkdir /system/priv-app/savormedia/lib/\n");
+                        dos.flush();
+                        Thread.sleep(100);
+
+                        dos.writeBytes("mkdir /system/priv-app/savormedia/lib/arm/\n");
+                        dos.flush();
+                        Thread.sleep(100);
+
+                        dos.writeBytes("cp /sdcard/inner_so/* /system/priv-app/savormedia/lib/arm/\n");
+                        dos.flush();
+                        Thread.sleep(2000);
+
+                        dos.writeBytes("chmod -R 755 /system/priv-app/savormedia/lib/\n");
+                        dos.flush();
+                        Thread.sleep(200);
+
+                        //                        dos.writeBytes("cp /sdcard/outer_so/ /system/lib/\n");
+                        //                        dos.flush();
+                        //                        Thread.sleep(2000);
+
+                        dos.close();
+
+                        GlobalValues.IS_UPUSH_SO_COPY_SUCCESS = true;
+                        isCopySuccess = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        GlobalValues.IS_UPUSH_SO_COPY_SUCCESS = false;
+                        isCopySuccess = false;
+                    } finally {
+                        if (proc != null) {
+                            try {
+                                proc.destroy();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } else {
+                    isCopySuccess = true;
+                }
+
+                LogFileUtil.write("Copy so file success? " + isCopySuccess);
+                if (isCopySuccess) {
+                    LogUtils.d("copy so success");
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PushAgent pushAgent = PushAgent.getInstance(SavorApplication.this);
+                            pushAgent.setPushIntentServiceClass(UMessageIntentService.class);
+                            //注册推送服务，每次调用register方法都会回调该接口
+                            pushAgent.register(new IUmengRegisterCallback() {
+
+                                @Override
+                                public void onSuccess(String deviceToken) {
+                                    //注册成功会返回device token
+                                    Log.e("register", "UPush register success, deviceToken is " + deviceToken);
+                                    LogFileUtil.write("UPush register success, deviceToken is " + deviceToken);
+
+                                    GlobalValues.IS_UPUSH_REGISTER_SUCCESS = true;
+                                    reportDeviceToken(deviceToken);
+
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            PushAgent.getInstance(SavorApplication.this).onAppStart();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(String s, String s1) {
+                                    Log.e("register", "UPush register failed, s is " + s + ", s1 is " + s1);
+                                    LogFileUtil.write("UPush register failed, s is " + s + ", s1 is " + s1);
+                                    GlobalValues.IS_UPUSH_REGISTER_SUCCESS = false;
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void reportDeviceToken(String deviceToken) {
+        AppApi.reportDeviceToken(this, this, deviceToken);
     }
 
     /**
@@ -120,6 +388,34 @@ public class SavorApplication extends MultiDexApplication {
             KeyCode.KEY_CODE_UP = KeyCodeConstantGiec.KEY_CODE_UP;
             KeyCode.KEY_CODE_UPLOAD_CHANNEL_INFO = KeyCodeConstantGiec.KEY_CODE_UPLOAD_CHANNEL_INFO;
             KeyCode.KEY_CODE_UDISK_UPDATE = KeyCodeConstantGiec.KEY_CODE_UDISK_UPDATE;
+        }
+    }
+
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        if (AppApi.Action.CP_POST_DEVICE_TOKEN_JSON.equals(method)) {
+            LogUtils.d("Report DeviceToken onSuccess!");
+            LogFileUtil.write("Report DeviceToken onSuccess!");
+        }
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+        if (AppApi.Action.CP_POST_DEVICE_TOKEN_JSON.equals(method)) {
+            String msg = "";
+            if (obj instanceof ResponseErrorMessage) {
+                msg = ((ResponseErrorMessage) obj).getMessage();
+            }
+            LogUtils.d("Report DeviceToken onError! msg is " + msg);
+            LogFileUtil.write("Report DeviceToken onError! msg is " + msg);
+        }
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+        if (AppApi.Action.CP_POST_DEVICE_TOKEN_JSON.equals(method)) {
+            LogUtils.d("Report DeviceToken onNetworkFailed!");
+            LogFileUtil.write("Report DeviceToken onNetworkFailed!");
         }
     }
 }

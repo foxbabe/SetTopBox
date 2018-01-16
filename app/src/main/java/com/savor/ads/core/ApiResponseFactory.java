@@ -21,6 +21,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.TvProgramResponse;
@@ -180,6 +181,13 @@ public class ApiResponseFactory {
                 result = info;
                 break;
             case CP_GET_HEARTBEAT_PLAIN:
+                result = info;
+                break;
+            case CP_GET_ADMASTER_CONFIG_JSON:
+                result = gson.fromJson(info, new TypeToken<AdMasterResult>() {
+                }.getType());
+                break;
+            case CP_POST_DEVICE_TOKEN_JSON:
                 result = info;
                 break;
             default:
