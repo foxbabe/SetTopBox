@@ -158,7 +158,7 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
                     foundMatchRoom = false;
                 } else {
                     for (RoomBean roomBean : setTopBoxBean.getRoom_info()) {
-                        if (roomBean != null) {
+                        if (roomBean != null && roomBean.getBox_list() != null) {
                             for (BoxBean boxBean : roomBean.getBox_list()) {
                                 if (boxBean != null && !TextUtils.isEmpty(boxBean.getBox_mac()) &&
                                         boxBean.getBox_mac().equals(mSession.getEthernetMac())) {
@@ -173,11 +173,7 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
                     }
                 }
             }
-        }
 
-        if (!foundMatchRoom) {
-            ShowMessage.showToast(mContext, "请输入合法的酒楼ID");
-        } else {
             mSession.setStandalone(true);
             mSession.setBoiteId(boiteId);
             mSession.setBoiteName(boiteName);
@@ -189,6 +185,8 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
                 mCallback.onBoiteIdCheckPass();
             }
             dismiss();
+        } else {
+            ShowMessage.showToast(mContext, "请输入合法的酒楼ID");
         }
     }
 

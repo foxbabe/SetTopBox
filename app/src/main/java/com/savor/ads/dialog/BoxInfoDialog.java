@@ -38,7 +38,9 @@ public class BoxInfoDialog extends Dialog {
     private TextView mTvSwitchTimeTv;
     private TextView mEthernetMacTv;
     private TextView mWlanMacTv;
+    private TextView mWlanMacLabelTv;
     private TextView mEthernetIpTv;
+    private TextView mWlanIpLabelTv;
     private TextView mWlanIpTv;
     private TextView mAdsPeriodTv;
     private TextView mVodPeriodTv;
@@ -78,9 +80,11 @@ public class BoxInfoDialog extends Dialog {
         mRoomNameTv = (TextView) findViewById(R.id.tv_room_name);
         mEthernetIpTv = (TextView) findViewById(R.id.tv_eth_ip);
         mWlanIpTv = (TextView) findViewById(R.id.tv_wlan_ip);
+        mWlanIpLabelTv = (TextView) findViewById(R.id.tv_wlan_ip_label);
         mSignalSourceTv = (TextView) findViewById(R.id.tv_signal_source);
         mEthernetMacTv = (TextView) findViewById(R.id.tv_ethernet_mac);
         mWlanMacTv = (TextView) findViewById(R.id.tv_wlan_mac);
+        mWlanMacLabelTv = (TextView) findViewById(R.id.tv_wlan_mac_label);
         mAdsPeriodTv = (TextView) findViewById(R.id.tv_ads_period);
         mVodPeriodTv = (TextView) findViewById(R.id.tv_vod_period);
         mProPeriodTv = (TextView) findViewById(R.id.tv_pro_period);
@@ -124,9 +128,18 @@ public class BoxInfoDialog extends Dialog {
         mRoomNameTv.setText(session.getBoxName());
         mRoomTypeTv.setText(session.getRoomType());
         mEthernetIpTv.setText(AppUtils.getEthernetIP());
-        mWlanIpTv.setText(AppUtils.getWlanIP());
         mEthernetMacTv.setText(session.getEthernetMac());
-        mWlanMacTv.setText(session.getWlanMac());
+        if (session.isStandalone()) {
+            mWlanIpLabelTv.setText("U盘更新时间");
+            mWlanIpTv.setText(session.getLastUDiskUpdateTime());
+            mWlanMacLabelTv.setText("是否单机版");
+            mWlanMacTv.setText("是");
+        } else {
+            mWlanIpLabelTv.setText("无线IP地址");
+            mWlanIpTv.setText(AppUtils.getWlanIP());
+            mWlanMacLabelTv.setText("无线MAC地址");
+            mWlanMacTv.setText(session.getWlanMac());
+        }
         mAdsPeriodTv.setText(session.getAdsPeriod());
         mVodPeriodTv.setText(session.getVodPeriod());
         mAdvPeriodTv.setText(session.getAdvPeriod());

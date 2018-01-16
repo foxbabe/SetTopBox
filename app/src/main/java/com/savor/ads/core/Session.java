@@ -28,7 +28,6 @@ import android.os.Build;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
@@ -193,6 +192,9 @@ public class Session {
     private boolean standalone=false;
 
     private int admaster_update_time;
+	/**上次U盘更新时间*/
+    private String lastUDiskUpdateTime;
+	
     private Session(Context context) {
 
         mContext = context;
@@ -273,6 +275,7 @@ public class Session {
         mUseVirtualSp = mPreference.loadBooleanKey(P_APP_USE_VIRTUAL_SP, false);
         standalone = mPreference.loadBooleanKey(P_APP_STAND_ALONE,false);
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
+		lastUDiskUpdateTime = mPreference.loadStringKey(P_APP_LAST_UDISK_UPDATE_TIME, "");
         /** 清理App缓存 */
         AppUtils.clearExpiredFile(mContext, false);
     }
@@ -346,6 +349,7 @@ public class Session {
                 || P_APP_LOADING_PATH.equals(key)
                 || P_APP_SPLASH_VERSION.equals(key)
                 || P_APP_LOADING_VERSION.equals(key)
+                || P_APP_LAST_UDISK_UPDATE_TIME.equals(key)
                 || P_APP_SPECIALTY_PERIOD.equals(key)
                 || P_APP_DOWNLOADING_SPECIALTY_PERIOD.equals(key)
                 || P_APP_LOADING_VERSION.equals(key)) {
@@ -1117,6 +1121,8 @@ public class Session {
     public static final String P_APP_USE_VIRTUAL_SP = "com.savor.ads.use_virtual_sp";
     //是否是单机版机顶盒
     public static final String P_APP_STAND_ALONE = "com.savor.ads.stand_alone";
+    //上次U盘动作时间
+    public static final String P_APP_LAST_UDISK_UPDATE_TIME = "com.savor.ads.last_udisk_update_time";
 
     //admster配置文件版本
     public static final String P_APP_ADMASTER_UPDATE_TIME = "com.savor.ads.admaster_update_time";
@@ -1196,5 +1202,14 @@ public class Session {
             mUseVirtualSp = useVirtualSp;
             writePreference(new Pair<String, Object>(P_APP_USE_VIRTUAL_SP, mUseVirtualSp));
         }
+    }
+
+    public String getLastUDiskUpdateTime() {
+        return lastUDiskUpdateTime;
+    }
+
+    public void setLastUDiskUpdateTime(String lastUDiskUpdateTime) {
+        this.lastUDiskUpdateTime = lastUDiskUpdateTime;
+        writePreference(new Pair<String, Object>(P_APP_LAST_UDISK_UPDATE_TIME, lastUDiskUpdateTime));
     }
 }
