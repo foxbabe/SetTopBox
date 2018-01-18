@@ -7,7 +7,9 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.ads.bean.BoxBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.RoomBean;
 import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -68,10 +70,10 @@ public class UsbUpdateHandler {
             if (!haveCfg){
                 return;
             }
+            fillBoiteInfo();
             for (int i = 0; i < cfgList.size(); i++) {
                 boolean isKnownAction = true;
                 String str = cfgList.get(i);
-
                 boolean isSuccess = false;
                 String msg = null;
                 switch (str) {
@@ -212,6 +214,59 @@ public class UsbUpdateHandler {
         }else{
             return false;
         }
+    }
+
+    private void fillBoiteInfo(){
+        if (TextUtils.isEmpty(mSession.getBoiteId())){
+            return;
+        }
+        String roomId = null, roomName = null, roomType = null, boxName = null;
+        String jsonPath = mSession.getUsbPath() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            LogUtils.w("update logo but play_list file not exist");
+            LogFileUtil.write("update logo but play_list file not exist");
+            return;
+        } else {
+            String jsonContent = FileUtils.readFileToStr(jsonFile);
+            SetTopBoxBean setTopBoxBean = null;
+            if (!TextUtils.isEmpty(jsonContent)) {
+                setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
+                }.getType());
+            }
+            if (setTopBoxBean == null || setTopBoxBean.getRoom_info() == null) {
+                LogUtils.w("update logo but play_list file json format error");
+                LogFileUtil.write("update logo but play_list file json format error");
+                return;
+            } else {
+                boolean isfounded=false;
+                for (RoomBean roomBean : setTopBoxBean.getRoom_info()) {
+                    if (roomBean != null && roomBean.getBox_list() != null) {
+                        for (BoxBean boxBean : roomBean.getBox_list()) {
+                            if (boxBean != null && !TextUtils.isEmpty(boxBean.getBox_mac()) &&
+                                    boxBean.getBox_mac().equals(mSession.getEthernetMac())) {
+                                roomId = roomBean.getRoom_id();
+                                roomName = roomBean.getRoom_name();
+                                roomType = roomBean.getRoom_type();
+                                boxName = boxBean.getBox_name();
+                                isfounded = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (isfounded){
+                        break;
+                    }
+                }
+            }
+        }
+        mSession.setRoomId(roomId);
+        mSession.setRoomName(roomName);
+        mSession.setRoomType(roomType);
+        mSession.setBoxName(boxName);
     }
 
     private boolean readChannelList() {
