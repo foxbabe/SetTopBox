@@ -136,51 +136,9 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
         }
 
         if (foundMatchHotel) {
-            String jsonPath = mSession.getUsbPath() + File.separator +
-                    ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
-                    boiteId + File.separator +
-                    ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
-            File jsonFile = new File(jsonPath);
-            if (!jsonFile.exists()) {
-                LogUtils.w("update logo but play_list file not exist");
-                LogFileUtil.write("update logo but play_list file not exist");
-                foundMatchRoom = false;
-            } else {
-                String jsonContent = FileUtils.readFileToStr(jsonFile);
-                SetTopBoxBean setTopBoxBean = null;
-                if (!TextUtils.isEmpty(jsonContent)) {
-                    setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
-                    }.getType());
-                }
-                if (setTopBoxBean == null || setTopBoxBean.getRoom_info() == null) {
-                    LogUtils.w("update logo but play_list file json format error");
-                    LogFileUtil.write("update logo but play_list file json format error");
-                    foundMatchRoom = false;
-                } else {
-                    for (RoomBean roomBean : setTopBoxBean.getRoom_info()) {
-                        if (roomBean != null && roomBean.getBox_list() != null) {
-                            for (BoxBean boxBean : roomBean.getBox_list()) {
-                                if (boxBean != null && !TextUtils.isEmpty(boxBean.getBox_mac()) &&
-                                        boxBean.getBox_mac().equals(mSession.getEthernetMac())) {
-                                    foundMatchRoom = true;
-                                    roomId = roomBean.getRoom_id();
-                                    roomName = roomBean.getRoom_name();
-                                    roomType = roomBean.getRoom_type();
-                                    boxName = boxBean.getBox_name();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             mSession.setStandalone(true);
             mSession.setBoiteId(boiteId);
             mSession.setBoiteName(boiteName);
-            mSession.setRoomId(roomId);
-            mSession.setRoomName(roomName);
-            mSession.setRoomType(roomType);
-            mSession.setBoxName(boxName);
             if (mCallback != null) {
                 mCallback.onBoiteIdCheckPass();
             }
