@@ -7,7 +7,9 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.ads.bean.BoxBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.RoomBean;
 import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -41,6 +43,7 @@ public class UsbUpdateHandler {
      */
     private SetTopBoxBean setTopBoxBean;
     private final Session mSession;
+    private boolean mIsAllSuccess;
 
     public UsbUpdateHandler(Context context, List<String> cfgList, ProgressCallback callback) {
         mContext = context;
@@ -61,15 +64,16 @@ public class UsbUpdateHandler {
     }
 
     public void execute() {
+        mIsAllSuccess = true;
         if (cfgList != null && cfgList.size() > 0) {
             boolean haveCfg = initConfig();
             if (!haveCfg){
                 return;
             }
+            fillBoiteInfo();
             for (int i = 0; i < cfgList.size(); i++) {
                 boolean isKnownAction = true;
                 String str = cfgList.get(i);
-
                 boolean isSuccess = false;
                 String msg = null;
                 switch (str) {
@@ -81,6 +85,8 @@ public class UsbUpdateHandler {
                         isSuccess = readChannelList();
                         if (isSuccess){
                             msg = "电视节目表提取完成";
+                        } else {
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_SET_CHANNEL:
@@ -91,6 +97,8 @@ public class UsbUpdateHandler {
                         isSuccess = writeChannelList();
                         if (isSuccess){
                             msg = "电视节目表已设置到机顶盒";
+                        } else {
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOG:
@@ -103,6 +111,7 @@ public class UsbUpdateHandler {
                             msg = "单机版日志文件提取完成";
                         }else{
                             msg = "单机版日志文件提取失败";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_GET_LOGED:
@@ -115,6 +124,7 @@ public class UsbUpdateHandler {
                             msg = "单机版历史日志文件提取完成";
                         }else{
                             msg = "单机版历史日志文件提取失败";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_MEIDA:
@@ -128,6 +138,7 @@ public class UsbUpdateHandler {
                         }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
                             msg = "机顶盒期号与U盘内期号相同,无需更新";
                         }else{
+                            mIsAllSuccess = false;
                             if (!TextUtils.isEmpty(copyErrorMsg)){
                                 msg = copyErrorMsg;
                             }else {
@@ -143,6 +154,7 @@ public class UsbUpdateHandler {
                         isSuccess = updateApk();
                         if (!isSuccess){
                             msg = "应用更新失败！！！";
+                            mIsAllSuccess = false;
                         }
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_LOGO:
@@ -152,11 +164,12 @@ public class UsbUpdateHandler {
                         isKnownAction = true;
                         isSuccess = updateLogo();
                         if (isSuccess){
-                            msg = "LOGO更新成功,重启生效！！！";
+                            msg = "LOGO更新成功";
                         }else if(mSession.getSplashVersion().equals(setTopBoxBean.getVersion().getLogo_version())){
-                            msg = "LOGO已经是最新的啦，么么哒!!!";
+                            msg = "LOGO已是最新，无需更新";
                         }else{
-                            msg = "LOGO更新失败,请联系热点张海强！！！";
+                            msg = "LOGO更新失败！";
+                            mIsAllSuccess = false;
                         }
                         break;
                     default:
@@ -167,6 +180,11 @@ public class UsbUpdateHandler {
                 if (isKnownAction && mCallback != null) {
                     mCallback.onActionComplete(i, isSuccess, msg);
                 }
+            }
+
+            if (mIsAllSuccess) {
+                // 设置更新时间
+                mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
             }
 
             if (mCallback != null) {
@@ -196,6 +214,59 @@ public class UsbUpdateHandler {
         }else{
             return false;
         }
+    }
+
+    private void fillBoiteInfo(){
+        if (TextUtils.isEmpty(mSession.getBoiteId())){
+            return;
+        }
+        String roomId = null, roomName = null, roomType = null, boxName = null;
+        String jsonPath = mSession.getUsbPath() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
+                mSession.getBoiteId() + File.separator +
+                ConstantValues.USB_FILE_HOTEL_UPDATE_JSON;
+        File jsonFile = new File(jsonPath);
+        if (!jsonFile.exists()) {
+            LogUtils.w("update logo but play_list file not exist");
+            LogFileUtil.write("update logo but play_list file not exist");
+            return;
+        } else {
+            String jsonContent = FileUtils.readFileToStr(jsonFile);
+            SetTopBoxBean setTopBoxBean = null;
+            if (!TextUtils.isEmpty(jsonContent)) {
+                setTopBoxBean = new Gson().fromJson(jsonContent, new TypeToken<SetTopBoxBean>() {
+                }.getType());
+            }
+            if (setTopBoxBean == null || setTopBoxBean.getRoom_info() == null) {
+                LogUtils.w("update logo but play_list file json format error");
+                LogFileUtil.write("update logo but play_list file json format error");
+                return;
+            } else {
+                boolean isfounded=false;
+                for (RoomBean roomBean : setTopBoxBean.getRoom_info()) {
+                    if (roomBean != null && roomBean.getBox_list() != null) {
+                        for (BoxBean boxBean : roomBean.getBox_list()) {
+                            if (boxBean != null && !TextUtils.isEmpty(boxBean.getBox_mac()) &&
+                                    boxBean.getBox_mac().equals(mSession.getEthernetMac())) {
+                                roomId = roomBean.getRoom_id();
+                                roomName = roomBean.getRoom_name();
+                                roomType = roomBean.getRoom_type();
+                                boxName = boxBean.getBox_name();
+                                isfounded = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (isfounded){
+                        break;
+                    }
+                }
+            }
+        }
+        mSession.setRoomId(roomId);
+        mSession.setRoomName(roomName);
+        mSession.setRoomType(roomType);
+        mSession.setBoxName(boxName);
     }
 
     private boolean readChannelList() {
@@ -615,7 +686,7 @@ public class UsbUpdateHandler {
             }
         }
 
-        if (fileList!=null&&fileList.size()>0){
+        if (fileList.size() > 0) {
             String usbLogPath = mSession.getUsbPath()
                     + File.separator
                     + ConstantValues.USB_FILE_LOG_PATH
@@ -701,6 +772,11 @@ public class UsbUpdateHandler {
 
         try {
             if (md5Str.equals(AppUtils.getMD5(org.apache.commons.io.FileUtils.readFileToByteArray(apkFile)))) {
+                if (mIsAllSuccess) {
+                    // 设置更新时间
+                    mSession.setLastUDiskUpdateTime(AppUtils.getCurTime());
+                }
+
                 if (AppUtils.isMstar()) {
                     isSuccess = UpdateUtil.updateApk(apkFile);
                 } else {

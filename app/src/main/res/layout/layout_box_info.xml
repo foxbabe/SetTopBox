@@ -248,6 +248,7 @@
                     android:layout_weight="1">
 
                     <TextView
+                        android:id="@+id/tv_wlan_mac_label"
                         style="@style/box_info_item_label"
                         android:text="无线MAC地址"
                         />
@@ -308,7 +309,7 @@
                     android:layout_weight="1">
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/tv_wlan_ip_label"
                         style="@style/box_info_item_label"
                         android:text="无线IP地址"/>
 

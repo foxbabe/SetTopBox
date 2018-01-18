@@ -21,6 +21,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.KeyCode;
+import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.UsbUpdateHandler;
 
@@ -139,9 +140,15 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
             }
 
             if (mActionList.contains(ConstantValues.USB_FILE_HOTEL_UPDATE_APK) && mActionList.size() > 1) {
-                ShowMessage.showToastLong(mContext, "【更新应用】动作只能单独执行！！");
-                mConfirmBtn.setEnabled(false);
+//                ShowMessage.showToastLong(mContext, "【更新应用】动作只能单独执行！！");
+//                mConfirmBtn.setEnabled(false);
+
+                // 手动将APK升级放到最后执行
+                mActionList.remove(ConstantValues.USB_FILE_HOTEL_UPDATE_APK);
+                mActionList.add(ConstantValues.USB_FILE_HOTEL_UPDATE_APK);
             }
+
+            LogUtils.d("UDisk Action List is " + mActionList);
         }
     }
 

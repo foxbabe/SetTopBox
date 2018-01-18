@@ -111,6 +111,10 @@ public class DBHelper extends SQLiteOpenHelper {
          * 创建特色菜表
          */
         createTable_specialty(db);
+        /**
+         * 创建实时竞价广告表
+         */
+        createTable_rtbads(db);
     }
 
     @Override
@@ -189,7 +193,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.CREATETIME + " TEXT, "
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
@@ -208,7 +212,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.CREATETIME + " TEXT, "
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
@@ -232,7 +236,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT, "
                 + MediaDBInfo.FieldName.PERIOD + " TEXT, "
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
@@ -258,7 +262,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT, "
                 + MediaDBInfo.FieldName.PERIOD + " TEXT, "
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
@@ -279,7 +283,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT, "
                 + MediaDBInfo.FieldName.PERIOD + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT);";
         db.execSQL(DATABASE_CREATE);
     }
@@ -307,7 +311,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIANAME + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIATYPE + " TEXT, "
-                + MediaDBInfo.FieldName.CHINESE_NAME + "TEXT,"
+                + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT, "
                 + MediaDBInfo.FieldName.PERIOD + " TEXT, "
                 + MediaDBInfo.FieldName.ADS_ORDER + " INTEGER, "
@@ -682,8 +686,6 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
             initialValues.put(MediaDBInfo.FieldName.ADMASTER_SIN, playList.getAdmaster_sin());
-            initialValues.put(MediaDBInfo.FieldName.START_DATE, playList.getStart_date());
-            initialValues.put(MediaDBInfo.FieldName.END_DATE, playList.getEnd_date());
 
             long successCount = 0;
             if (isUpdate) {
