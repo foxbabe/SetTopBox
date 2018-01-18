@@ -117,5 +117,5 @@ public class KeyCodeConstantGiec {
     /**
      * 呼出轮播列表
      */
-    public static int KEY_CODE_SHOW_PLAYLIST = 2019;
+    public static int KEY_CODE_SHOW_PLAYLIST = 178;
 }

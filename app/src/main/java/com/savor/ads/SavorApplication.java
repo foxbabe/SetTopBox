@@ -357,7 +357,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
             KeyCode.KEY_CODE_PREVIOUS_ADS = KeyCodeConstant.KEY_CODE_PREVIOUS_ADS;
             KeyCode.KEY_CODE_RIGHT = KeyCodeConstant.KEY_CODE_RIGHT;
             KeyCode.KEY_CODE_SETTING = KeyCodeConstant.KEY_CODE_SETTING;
-//            KeyCode.KEY_CODE_SHOW_APP_INSTALLED = KeyCodeConstant.KEY_CODE_SHOW_APP_INSTALLED;
+            KeyCode.KEY_CODE_SHOW_APP_INSTALLED = KeyCodeConstant.KEY_CODE_SHOW_APP_INSTALLED;
             KeyCode.KEY_CODE_SHOW_INFO = KeyCodeConstant.KEY_CODE_SHOW_INFO;
             KeyCode.KEY_CODE_SHOW_QRCODE = KeyCodeConstant.KEY_CODE_SHOW_QRCODE;
             KeyCode.KEY_CODE_SYSTEM_SETTING = KeyCodeConstant.KEY_CODE_SYSTEM_SETTING;

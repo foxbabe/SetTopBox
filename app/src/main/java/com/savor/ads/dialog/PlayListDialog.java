@@ -77,7 +77,7 @@ public class PlayListDialog extends Dialog {
         String adsPeriod = Session.get(getContext()).getAdsPeriod();
         String proPeriod = Session.get(getContext()).getProPeriod();
         if (playlist != null) {
-            mTitleTv.setText(String.format("播放列表  共%s个内容  广告版本：%s  节目版本：%s", playlist.size(), adsPeriod, proPeriod));
+            mTitleTv.setText(String.format("播放列表    共%s个内容    广告版本：%s    节目版本：%s", playlist.size(), adsPeriod, proPeriod));
             mPlaylistAdapter.setPlaylist(playlist);
 
         }

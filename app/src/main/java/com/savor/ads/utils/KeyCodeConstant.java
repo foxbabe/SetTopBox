@@ -99,6 +99,10 @@ public class KeyCodeConstant {
      */
     public static final int KEY_CODE_MANUAL_HEARTBEAT = 167;
     /**
+     * 调起已装应用浏览页
+     */
+    public static final int KEY_CODE_SHOW_APP_INSTALLED = 2003;
+    /**
      * U盘更新
      */
     public static int KEY_CODE_UDISK_UPDATE = 165;
@@ -109,5 +113,5 @@ public class KeyCodeConstant {
     /**
      * 呼出轮播列表
      */
-    public static int KEY_CODE_SHOW_PLAYLIST = 0;
+    public static int KEY_CODE_SHOW_PLAYLIST = 4130;
 }

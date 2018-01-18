@@ -278,8 +278,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             handled = true;
 
         } else if (keyCode == KeyCode.KEY_CODE_CHANGE_RESOLUTION) {
-            changeResolution();
-            handled = true;
+            if (!AppUtils.isMstar()) {
+                changeResolution();
+                handled = true;
+            }
 
         } else if (keyCode == KeyCode.KEY_CODE_SHOW_PLAYLIST) {
             showPlaylist();

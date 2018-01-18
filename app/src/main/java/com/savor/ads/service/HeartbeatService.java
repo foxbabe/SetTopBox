@@ -62,8 +62,10 @@ public class HeartbeatService extends IntentService {
         //  启动时立即心跳一次
         doHeartbeat();
 
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(mNetworkDetectionRunnable, 1, 5, TimeUnit.MINUTES);
+        if (!Session.get(this).isUseVirtualSp()) {
+            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.scheduleAtFixedRate(mNetworkDetectionRunnable, 1, 5, TimeUnit.MINUTES);
+        }
 
         while (true) {
 
