@@ -364,6 +364,8 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
             KeyCode.KEY_CODE_UP = KeyCodeConstant.KEY_CODE_UP;
             KeyCode.KEY_CODE_UPLOAD_CHANNEL_INFO = KeyCodeConstant.KEY_CODE_UPLOAD_CHANNEL_INFO;
             KeyCode.KEY_CODE_UDISK_UPDATE = KeyCodeConstant.KEY_CODE_UDISK_UPDATE;
+            KeyCode.KEY_CODE_UDISK_COPY = KeyCodeConstant.KEY_CODE_UDISK_COPY;
+            KeyCode.KEY_CODE_SHOW_PLAYLIST = KeyCodeConstant.KEY_CODE_SHOW_PLAYLIST;
         } else {
             KeyCode.KEY_CODE_ANT_IN = KeyCodeConstantGiec.KEY_CODE_ANT_IN;
             KeyCode.KEY_CODE_AV_IN = KeyCodeConstantGiec.KEY_CODE_AV_IN;
@@ -388,6 +390,8 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
             KeyCode.KEY_CODE_UP = KeyCodeConstantGiec.KEY_CODE_UP;
             KeyCode.KEY_CODE_UPLOAD_CHANNEL_INFO = KeyCodeConstantGiec.KEY_CODE_UPLOAD_CHANNEL_INFO;
             KeyCode.KEY_CODE_UDISK_UPDATE = KeyCodeConstantGiec.KEY_CODE_UDISK_UPDATE;
+            KeyCode.KEY_CODE_UDISK_COPY = KeyCodeConstantGiec.KEY_CODE_UDISK_COPY;
+            KeyCode.KEY_CODE_SHOW_PLAYLIST = KeyCodeConstantGiec.KEY_CODE_SHOW_PLAYLIST;
         }
     }
 

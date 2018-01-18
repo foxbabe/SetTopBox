@@ -1839,6 +1839,7 @@ public class AppUtils {
                         if (file.isFile()) {
                             MediaLibBean bean = new MediaLibBean();
                             bean.setMediaPath(file.getPath());
+                            bean.setChinese_name(file.getName());
                             filePlayList.add(bean);
                         }
                     }

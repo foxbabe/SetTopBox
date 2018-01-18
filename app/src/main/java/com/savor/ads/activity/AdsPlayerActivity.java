@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -18,11 +17,11 @@ import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-import com.savor.ads.callback.ProjectOperationListener;
-
 import com.savor.ads.customview.SavorVideoView;
+import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -41,7 +40,7 @@ import java.util.ArrayList;
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener {
+public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener, PlayListDialog.Callback {
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
@@ -58,6 +57,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     private static final int DELAY_TIME = 2;
     private AdMasterResult adMasterResult = null;
+
+    private PlayListDialog mPlayListDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,8 +281,25 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             changeResolution();
             handled = true;
 
+        } else if (keyCode == KeyCode.KEY_CODE_SHOW_PLAYLIST) {
+            showPlaylist();
+            handled = true;
+
         }
         return handled || super.onKeyDown(keyCode, event);
+    }
+
+    private void showPlaylist() {
+        if (mPlayListDialog == null) {
+            mPlayListDialog = new PlayListDialog(this, this);
+        }
+        if (mPlayList != null) {
+            if (!mPlayListDialog.isShowing()) {
+                mPlayListDialog.showPlaylist(mPlayList);
+            }
+        } else {
+            ShowMessage.showToast(mContext, "播放列表为空");
+        }
     }
 
     int resolutionIndex = 0;
@@ -298,8 +316,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             case RESOLUTION_720p:
                 msg = "720P";
                 break;
-            case RESOLUTION_480p:
-                msg = "480P";
+            case RESOLUTION_576p:
+                msg = "576P";
                 break;
         }
         ShowMessage.showToast(getApplicationContext(), msg);
@@ -517,5 +535,21 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     @Override
     public void onNetworkFailed(AppApi.Action method) {
 
+    }
+
+    @Override
+    public void onMediaItemSelect(int index) {
+        LogUtils.d("onMediaItemSelect index is " + index);
+        if (mPlayList != null && index < mPlayList.size()) {
+            if (mSavorVideoView != null) {
+                ArrayList<String> urls = new ArrayList<>();
+                for (int i = 0; i < mPlayList.size(); i++) {
+                    MediaLibBean bean = mPlayList.get(i);
+                    urls.add(bean.getMediaPath());
+                }
+
+                mSavorVideoView.setMediaFiles(urls, index, 0);
+            }
+        }
     }
 }

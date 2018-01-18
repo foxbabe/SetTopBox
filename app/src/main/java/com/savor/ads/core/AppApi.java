@@ -91,6 +91,7 @@ public class AppApi {
         CP_GET_ADMASTER_CONFIG_JSON,
         CP_POST_DEVICE_TOKEN_JSON,
         SP_GET_RTB_ADS_JSON,
+        SP_POST_NETSTAT_JSON,
     }
 
 
@@ -120,6 +121,7 @@ public class AppApi {
             put(Action.CP_GET_ADMASTER_CONFIG_JSON,BuildConfig.BASE_URL + "Box/Admaster/getConfFile");
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
+            put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
         }
     };
 
@@ -408,6 +410,22 @@ public class AppApi {
     public static void getAdMasterConfig(Context context, ApiRequestListener handler){
         final HashMap<String, Object> params = new HashMap<>();
         new AppServiceOk(context, Action.CP_GET_ADMASTER_CONFIG_JSON, handler, params).get();
+    }
+
+    /**
+     * 上传网络状况
+     * @param context
+     * @param handler
+     * @param intranetLatency 内网延时时间ms
+     * @param internetLatency 外网延时时间ms
+     */
+    public static void postNetstat(Context context, ApiRequestListener handler, String intranetLatency, String internetLatency){
+        final HashMap<String, Object> params = new HashMap<>();
+        params.put("boxId", Session.get(context).getBoxId());
+        params.put("boxMac", Session.get(context).getEthernetMac());
+        params.put("innerDelayed", intranetLatency);
+        params.put("outerDelayed", internetLatency);
+        new AppServiceOk(context, Action.SP_POST_NETSTAT_JSON, handler, params).get();
     }
 
     // 超时（网络）异常
