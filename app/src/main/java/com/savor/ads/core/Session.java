@@ -249,7 +249,7 @@ public class Session {
         multicastMediaPeriod = mPreference.loadStringKey(P_APP_MULTICASTMEDIAPERIOD, "");
         startTime = mPreference.loadStringKey(P_APP_STARTTIME, null);
         lastStartTime = mPreference.loadStringKey(P_APP_LASTSTARTTIME, null);
-        switchTime = mPreference.loadIntKey(P_APP_SWITCHTIME, 30);
+        switchTime = mPreference.loadIntKey(P_APP_SWITCHTIME, ConstantValues.DEFAULT_SWITCH_TIME);
 
         mTvInputSource = mPreference.loadIntKey(P_APP_TV_CURRENT_INPUT, 0);
         mTvCurrentChannelNumber = mTvDefaultChannelNumber = mPreference.loadIntKey(P_APP_TV_DEFAULT_CHANNEL, 0);

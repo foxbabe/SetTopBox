@@ -221,6 +221,7 @@ public class UsbUpdateHandler {
             return;
         }
         String roomId = null, roomName = null, roomType = null, boxName = null;
+        int switchTime = ConstantValues.DEFAULT_SWITCH_TIME;
         String jsonPath = mSession.getUsbPath() + File.separator +
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                 mSession.getBoiteId() + File.separator +
@@ -252,6 +253,7 @@ public class UsbUpdateHandler {
                                 roomName = roomBean.getRoom_name();
                                 roomType = roomBean.getRoom_type();
                                 boxName = boxBean.getBox_name();
+                                switchTime = boxBean.getSwitch_time();
                                 isfounded = true;
                                 break;
                             }
@@ -267,6 +269,7 @@ public class UsbUpdateHandler {
         mSession.setRoomName(roomName);
         mSession.setRoomType(roomType);
         mSession.setBoxName(boxName);
+        mSession.setSwitchTime(switchTime);
     }
 
     private boolean readChannelList() {

@@ -127,7 +127,7 @@ public class ConstantValues {
     public static final String SSDP_CONTENT_TYPE = "box";
 
     /** 默认电视切换时间*/
-    public static final int DEFAULT_SWITCH_TIME = 30;
+    public static final int DEFAULT_SWITCH_TIME = 999;
     /** 默认轮播音量*/
     public static final int DEFAULT_ADS_VOLUME = 20;
     /** 默认投屏音量*/
