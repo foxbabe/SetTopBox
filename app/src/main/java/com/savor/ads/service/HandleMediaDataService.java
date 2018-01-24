@@ -1065,23 +1065,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             if (boiteBean.getAds_volume() > 0) {
                 session.setVolume(boiteBean.getAds_volume());
-            } else {
-                session.setVolume(ConstantValues.DEFAULT_ADS_VOLUME);
             }
             if (boiteBean.getProject_volume() > 0) {
                 session.setProjectVolume(boiteBean.getProject_volume());
-            } else {
-                session.setProjectVolume(ConstantValues.DEFAULT_PROJECT_VOLUME);
             }
             if (boiteBean.getDemand_volume() > 0) {
                 session.setVodVolume(boiteBean.getDemand_volume());
-            } else {
-                session.setVodVolume(ConstantValues.DEFAULT_VOD_VOLUME);
             }
             if (boiteBean.getTv_volume() > 0) {
                 session.setTvVolume(boiteBean.getTv_volume());
-            } else {
-                session.setTvVolume(ConstantValues.DEFAULT_TV_VOLUME);
             }
         }
 
@@ -1102,8 +1094,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             if (boiteBean.getSwitch_time() > 0) {
                 session.setSwitchTime(boiteBean.getSwitch_time());
-            } else {
-                session.setSwitchTime(ConstantValues.DEFAULT_SWITCH_TIME);
             }
         }
 

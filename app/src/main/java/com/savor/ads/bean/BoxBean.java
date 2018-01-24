@@ -21,6 +21,14 @@ public class BoxBean implements Serializable{
     private int volume;
     /**包间ID*/
     private String room_id;
+    /** 轮播音量*/
+    private int ads_volume;
+    /** 投屏音量*/
+    private int project_volume;
+    /** 点播音量*/
+    private int demand_volume;
+    /** 电视节目音量*/
+    private int tv_volume;
 
     public String getBox_name() {
         return box_name;
@@ -68,5 +76,37 @@ public class BoxBean implements Serializable{
 
     public void setRoom_id(String room_id) {
         this.room_id = room_id;
+    }
+
+    public int getAds_volume() {
+        return ads_volume;
+    }
+
+    public void setAds_volume(int ads_volume) {
+        this.ads_volume = ads_volume;
+    }
+
+    public int getProject_volume() {
+        return project_volume;
+    }
+
+    public void setProject_volume(int project_volume) {
+        this.project_volume = project_volume;
+    }
+
+    public int getDemand_volume() {
+        return demand_volume;
+    }
+
+    public void setDemand_volume(int demand_volume) {
+        this.demand_volume = demand_volume;
+    }
+
+    public int getTv_volume() {
+        return tv_volume;
+    }
+
+    public void setTv_volume(int tv_volume) {
+        this.tv_volume = tv_volume;
     }
 }
