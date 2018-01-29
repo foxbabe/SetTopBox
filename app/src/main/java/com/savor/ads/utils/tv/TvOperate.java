@@ -29,12 +29,6 @@ public class TvOperate {
     private static int ATV_MAX_FREQ = 877250;
     private static int ATV_EVENT_INTERVAL = 500 * 1000;// every 500ms to show
 
-    //    private TVHandler mhandler = null;
-
-//    public void setTvhandler(TVHandler handler){
-//        mhandler = handler;
-//    }
-
     public void switchATVChannel(int channelNum) {
 
         int count, mchannelNum;

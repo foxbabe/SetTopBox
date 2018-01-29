@@ -16,7 +16,6 @@
 #   public *;
 #}
 
-#友盟混淆开始
 -keepclassmembers class * {
    public <init> (org.json.JSONObject);
 }
@@ -29,6 +28,38 @@ public static final int *;
 }
 
 
+#keep entity for gson
+-keep class com.savor.ads.bean.** { *; }
+-keep class com.jar.savor.box.vo.** { *; }
+-keep class cn.savor.small.** { *; }
+
+#Proguard for netty begin
+-keepattributes Signature,InnerClasses
+-keepclasseswithmembers class io.netty.** {
+    *;
+}
+-dontwarn io.netty.**
+-dontwarn sun.**
+#Proguard for netty end
+
+#Proguard for Glide begin
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+#Proguard for Glide end
+
+#Proguard for okhttp3 begin
+-keepattributes Signature
+-keepattributes Annotation
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.* { *; }
+-dontwarn okhttp3.*
+-dontwarn okio.**
+#Proguard for okhttp3 end
+
+#友盟混淆开始
 -keep class com.umeng.commonsdk.** {*;}
 
 -dontwarn com.taobao.**
@@ -72,3 +103,41 @@ public static final int *;
 *;
 }
 #admaster混淆结束
+
+#aliyun混淆开始
+-dontwarn com.alibaba.sdk.**
+-keep class com.alibaba.sdk.** {
+*;
+}
+#aliyun混淆结束
+
+
+-dontwarn org.apache.commons.**
+-keep class org.apache.commons.** {
+*;
+}
+
+-dontwarn org.eclipse.jetty.**
+-keep class org.eclipse.jetty.** {
+*;
+}
+
+-dontwarn com.amlogic.update.**
+-keep class com.amlogic.update.** {
+*;
+}
+
+-dontwarn javax.servlet.**
+-keep class javax.servlet.** {
+*;
+}
+
+-dontwarn com.mstar.tv.service.**
+-keep class com.mstar.tv.service.** {
+*;
+}
+
+-dontwarn com.droidlogic.app.**
+-keep class com.droidlogic.app.** {
+*;
+}

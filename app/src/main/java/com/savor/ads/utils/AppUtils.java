@@ -1759,6 +1759,7 @@ public class AppUtils {
                                 bean.setMd5(item.getMd5());
                                 bean.setName(item.getName());
                                 bean.setMediaPath(item.getMediaPath());
+                                bean.setChinese_name(item.getChinese_name());
                                 break;
                             }
                         }
