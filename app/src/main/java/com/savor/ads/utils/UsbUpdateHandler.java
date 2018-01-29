@@ -220,7 +220,6 @@ public class UsbUpdateHandler {
         if (TextUtils.isEmpty(mSession.getBoiteId())){
             return;
         }
-        String roomId = null, roomName = null, roomType = null, boxName = null;
         String jsonPath = mSession.getUsbPath() + File.separator +
                 ConstantValues.USB_FILE_HOTEL_PATH + File.separator +
                 mSession.getBoiteId() + File.separator +
@@ -248,10 +247,25 @@ public class UsbUpdateHandler {
                         for (BoxBean boxBean : roomBean.getBox_list()) {
                             if (boxBean != null && !TextUtils.isEmpty(boxBean.getBox_mac()) &&
                                     boxBean.getBox_mac().equals(mSession.getEthernetMac())) {
-                                roomId = roomBean.getRoom_id();
-                                roomName = roomBean.getRoom_name();
-                                roomType = roomBean.getRoom_type();
-                                boxName = boxBean.getBox_name();
+                                mSession.setRoomId(roomBean.getRoom_id());
+                                mSession.setRoomName(roomBean.getRoom_name());
+                                mSession.setRoomType(roomBean.getRoom_type());
+                                mSession.setBoxName(boxBean.getBox_name());
+                                if (boxBean.getSwitch_time() > 0) {
+                                    mSession.setSwitchTime(boxBean.getSwitch_time());
+                                }
+                                if (boxBean.getAds_volume() > 0) {
+                                    mSession.setVolume(boxBean.getAds_volume());
+                                }
+                                if (boxBean.getProject_volume() > 0) {
+                                    mSession.setProjectVolume(boxBean.getProject_volume());
+                                }
+                                if (boxBean.getDemand_volume() > 0) {
+                                    mSession.setVodVolume(boxBean.getDemand_volume());
+                                }
+                                if (boxBean.getTv_volume() > 0) {
+                                    mSession.setTvVolume(boxBean.getTv_volume());
+                                }
                                 isfounded = true;
                                 break;
                             }
@@ -263,10 +277,6 @@ public class UsbUpdateHandler {
                 }
             }
         }
-        mSession.setRoomId(roomId);
-        mSession.setRoomName(roomName);
-        mSession.setRoomType(roomType);
-        mSession.setBoxName(boxName);
     }
 
     private boolean readChannelList() {
