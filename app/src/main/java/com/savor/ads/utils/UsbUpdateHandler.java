@@ -443,7 +443,7 @@ public class UsbUpdateHandler {
             LogFileUtil.write("update media but play_list file json format error");
             return false;
         }
-        if (setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+        if (!TextUtils.isEmpty(setTopBoxBean.getPeriod()) && setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
             return false;
         }
         //TODO:包间信息
