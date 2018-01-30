@@ -40,6 +40,16 @@ public class ConstantValues {
     public static final String NETTY_SHOW_WELCOME_COMMAND = "call-word";
 
     /**
+     * 播放特色菜和宣传片指令
+     */
+    public static final String NETTY_SHOW_WELCOME_THEN_SPECIALTY_COMMAND = "call-word-then-specialty";
+
+    /**
+     * 停止投屏
+     */
+    public static final String NETTY_STOP_PROJECTION_COMMAND = "call-stop-projection";
+
+    /**
      * 播放宣传片指令
      */
     public static final String NETTY_SHOW_ADV_COMMAND = "call-adv";
@@ -59,15 +69,19 @@ public class ConstantValues {
     /**
      * 投屏类型:餐厅端，特色菜
      */
-    public static final String PROJECT_TYPE_RSTR_SPECIALTY = "rstr_video_specialty";
+    public static final String PROJECT_TYPE_RSTR_SPECIALTY = "rstr_specialty";
     /**
      * 投屏类型:餐厅端，欢迎词
      */
-    public static final String PROJECT_TYPE_RSTR_GREETING = "rstr_video_greeting";
+    public static final String PROJECT_TYPE_RSTR_GREETING = "rstr_greeting";
+    /**
+     * 投屏类型:餐厅端，欢迎词、特色菜连播
+     */
+    public static final String PROJECT_TYPE_RSTR_GREETING_THEN_SPECIALTY = "rstr_greeting_then_specialty";
     /**
      * 投屏类型:餐厅端，宣传片
      */
-    public static final String PROJECT_TYPE_RSTR_ADV = "rstr_video_adv";
+    public static final String PROJECT_TYPE_RSTR_ADV = "rstr_adv";
     /**
      * 投屏类型:视频
      */

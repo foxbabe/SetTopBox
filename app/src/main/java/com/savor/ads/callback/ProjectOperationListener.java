@@ -27,6 +27,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectionManager;
 import com.savor.ads.projection.action.AdvAction;
 import com.savor.ads.projection.action.GreetingAction;
+import com.savor.ads.projection.action.GreetingThenSpecialtyAction;
 import com.savor.ads.projection.action.ImageAction;
 import com.savor.ads.projection.action.PlayAction;
 import com.savor.ads.projection.action.PptAction;
@@ -238,6 +239,12 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     public void showAdv(ArrayList<String> mediaPath, boolean isNewDevice) {
         AdvAction advAction = new AdvAction(mContext, mediaPath, isNewDevice);
         ProjectionManager.getInstance().enqueueAction(advAction);
+    }
+
+    @Override
+    public void showGreetingThenSpecialty(String word, int template, int duration, boolean isNewDevice) {
+        GreetingThenSpecialtyAction greetingAction = new GreetingThenSpecialtyAction(mContext, word, template, duration, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(greetingAction);
     }
 
     @Override

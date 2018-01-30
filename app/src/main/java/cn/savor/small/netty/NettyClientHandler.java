@@ -135,6 +135,14 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         // 宣传片
                         LogUtils.d("Netty command: show adv " + params);
                         handleAdv(params, response);
+                    } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
+                        // 欢迎词、特色菜连播
+                        LogUtils.d("Netty command: show greeting then specialty " + params);
+                        handleGreetingThenSpecialty(params, response);
+                    } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
+                        // 停止投屏
+                        LogUtils.d("Netty command: stop projection " + params);
+                        handleStopProjection(params, response);
                     }
                 }
                 ctx.writeAndFlush(response);
@@ -346,6 +354,70 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             e.printStackTrace();
         }
     }
+
+    private void handleGreetingThenSpecialty(String json, MessageBean response) {
+        try {
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+            String deviceId = jsonObject.get("deviceId").getAsString();
+            String deviceName = jsonObject.get("deviceName").getAsString();
+            String words = jsonObject.get("word").getAsString();
+            int template = jsonObject.get("templateId").getAsInt();
+
+            BaseResponse resp = new BaseResponse();
+            if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                    GlobalValues.IS_RSTR_PROJECTION) {
+                boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                GlobalValues.IS_RSTR_PROJECTION = true;
+                GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
+                AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("投屏成功");
+
+                ProjectOperationListener.getInstance(mContext).showGreetingThenSpecialty(words, template, 1000 * 60 * 5, isNewDevice);
+
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                if (GlobalValues.IS_LOTTERY) {
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                } else {
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                }
+            }
+
+            response.getContent().add(new Gson().toJson(resp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleStopProjection(String json, MessageBean response) {
+        try {
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+            String deviceId = jsonObject.get("deviceId").getAsString();
+
+            BaseResponse resp = new BaseResponse();
+            if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) && GlobalValues.IS_RSTR_PROJECTION) {
+                ProjectOperationListener.getInstance(mContext).rstrStop();
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+
+                GlobalValues.IS_RSTR_PROJECTION = false;
+                GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
+            } else {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("您的投屏已退出，无需再次停止");
+            }
+
+            response.getContent().add(new Gson().toJson(resp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

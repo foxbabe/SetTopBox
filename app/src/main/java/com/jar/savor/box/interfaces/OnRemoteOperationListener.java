@@ -74,4 +74,6 @@ public interface OnRemoteOperationListener {
     void showGreeting(String word, int template, int duration, boolean isNewDevice);
 
     void showAdv(ArrayList<String> mediaPath, boolean isNewDevice);
+
+    void showGreetingThenSpecialty(String word, int template, int duration, boolean isNewDevice);
 }
