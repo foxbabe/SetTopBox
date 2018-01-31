@@ -135,11 +135,11 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         // 宣传片
                         LogUtils.d("Netty command: show adv " + params);
                         handleAdv(params, response);
-                    } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
+                    } else if (ConstantValues.NETTY_SHOW_WELCOME_THEN_SPECIALTY_COMMAND.equals(order)) {
                         // 欢迎词、特色菜连播
                         LogUtils.d("Netty command: show greeting then specialty " + params);
                         handleGreetingThenSpecialty(params, response);
-                    } else if (ConstantValues.NETTY_SHOW_ADV_COMMAND.equals(order)) {
+                    } else if (ConstantValues.NETTY_STOP_PROJECTION_COMMAND.equals(order)) {
                         // 停止投屏
                         LogUtils.d("Netty command: stop projection " + params);
                         handleStopProjection(params, response);
@@ -422,6 +422,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) && GlobalValues.IS_RSTR_PROJECTION) {
                 ProjectOperationListener.getInstance(mContext).rstrStop();
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("停止成功");
 
                 GlobalValues.IS_RSTR_PROJECTION = false;
                 GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
