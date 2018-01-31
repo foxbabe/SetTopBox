@@ -135,16 +135,23 @@ public class UsbUpdateHandler {
                         isSuccess = handleProgramMediaData(i);
                         if(isSuccess&&setTopBoxBean!=null&&setTopBoxBean.getPlay_list()!=null){
                             msg = "总共:"+setTopBoxBean.getPlay_list().size()+"个视频，已全部更新完成";
-                        }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
-                            msg = "机顶盒期号与U盘内期号相同,无需更新";
                         }else{
                             mIsAllSuccess = false;
-                            if (!TextUtils.isEmpty(copyErrorMsg)){
-                                msg = copyErrorMsg;
-                            }else {
-                                msg = "视频更新失败，请重试!!";
+                            if(setTopBoxBean!=null&&TextUtils.isEmpty(setTopBoxBean.getPeriod())){
+                                msg = "U盘内期号为空,更新失败";
+                            }else if(setTopBoxBean!=null&&setTopBoxBean.getPlay_list().isEmpty()){
+                                msg = "U盘内节目单为空,更新失败";
+                            }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+                                msg = "机顶盒期号与U盘内期号相同,无需更新";
+                            }else{
+                                if (!TextUtils.isEmpty(copyErrorMsg)){
+                                    msg = copyErrorMsg;
+                                }else {
+                                    msg = "视频更新失败，请重试!!";
+                                }
                             }
                         }
+
                         break;
                     case ConstantValues.USB_FILE_HOTEL_UPDATE_APK:
                         if (mCallback != null) {
@@ -438,12 +445,21 @@ public class UsbUpdateHandler {
     private boolean handleProgramMediaData(int index) {
         boolean isSuccess = true;
 
-        if (setTopBoxBean == null) {
+        if (setTopBoxBean == null
+                ||setTopBoxBean.getPlay_list()==null
+                ||setTopBoxBean.getPlay_list().isEmpty()) {
             LogUtils.w("update media but play_list file json format error");
             LogFileUtil.write("update media but play_list file json format error");
             return false;
         }
+        if (TextUtils.isEmpty(setTopBoxBean.getPeriod())){
+            LogUtils.w("update media but period is null error");
+            LogFileUtil.write("update media but period is null error");
+            return false;
+        }
         if (setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+            LogUtils.w("update media but period is equal error");
+            LogFileUtil.write("update media but period is equal error");
             return false;
         }
         //TODO:包间信息
