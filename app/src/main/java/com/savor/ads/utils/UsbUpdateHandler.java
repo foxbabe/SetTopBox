@@ -142,6 +142,7 @@ public class UsbUpdateHandler {
                             }else if(setTopBoxBean!=null&&setTopBoxBean.getPlay_list().isEmpty()){
                                 msg = "U盘内节目单为空,更新失败";
                             }else if(setTopBoxBean!=null&&setTopBoxBean.getPeriod().equals(mSession.getProPeriod())){
+                                mIsAllSuccess = false;
                                 msg = "机顶盒期号与U盘内期号相同,无需更新";
                             }else{
                                 if (!TextUtils.isEmpty(copyErrorMsg)){
