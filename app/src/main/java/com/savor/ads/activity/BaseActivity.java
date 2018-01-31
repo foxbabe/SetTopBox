@@ -1,5 +1,6 @@
 package com.savor.ads.activity;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,8 +8,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
@@ -81,8 +84,14 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
             LogFileUtil.write("onAppStart " + this.getClass().getSimpleName());
             PushAgent.getInstance(this).onAppStart();
         }
+        //1是打开，0是关闭
+//        writeCecOption("hdmi_control_enabled",false);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private void writeCecOption(String key, boolean value) {
+        Settings.Global.putInt(getContentResolver(), key, value ? 1 : 0);
+    }
 
     @Override
     protected void onResume() {
