@@ -7,12 +7,16 @@ import android.os.Bundle;
 
 import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
+import com.savor.ads.bean.RstrSpecialty;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectPriority;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhang.haiqiang on 2017/12/6.
@@ -23,6 +27,8 @@ public class GreetingThenSpecialtyAction extends ProjectionActionBase implements
     private String mWords;
     private int mTemplate;
     private int mDuration;
+    private ArrayList<String> mMediaPaths;
+    private int mInterval;
     private boolean mIsNewDevice;
 
     public GreetingThenSpecialtyAction(Context context, String words, int template, int duration, boolean isNewDevice) {
@@ -34,6 +40,20 @@ public class GreetingThenSpecialtyAction extends ProjectionActionBase implements
         this.mTemplate = template;
         this.mDuration = duration;
         this.mIsNewDevice = isNewDevice;
+
+        mMediaPaths = new ArrayList<>();
+        List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(null, null);
+
+        if (specialties != null && specialties.size() > 0) {
+            for (RstrSpecialty specialty : specialties) {
+                mMediaPaths.add(specialty.getMedia_path());
+            }
+        }
+        if (mMediaPaths.size() > 1) {
+            mInterval = 10;
+        } else {
+            mInterval = 20;
+        }
     }
 
     @Override
@@ -46,6 +66,8 @@ public class GreetingThenSpecialtyAction extends ProjectionActionBase implements
         data.putSerializable(ScreenProjectionActivity.EXTRA_GREETING_WORD, mWords);
         data.putInt(ScreenProjectionActivity.EXTRA_GREETING_TEMPLATE, mTemplate);
         data.putInt(ScreenProjectionActivity.EXTRA_GREETING_DURATION, mDuration);
+        data.putSerializable(ScreenProjectionActivity.EXTRA_SPECIALTY_LIST, mMediaPaths);
+        data.putInt(ScreenProjectionActivity.EXTRA_SPECIALTY_INTERVAL, mInterval);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, mIsNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();

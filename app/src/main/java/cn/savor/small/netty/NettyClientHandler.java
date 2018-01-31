@@ -160,60 +160,78 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String specialtyIds = jsonObject.get("specialtyId").getAsString();
             int interval = jsonObject.get("interval").getAsInt();
 
-            String[] ids = specialtyIds.split(",");
-            String failedIds = "";
-            ArrayList<String> paths = new ArrayList<>();
-            for (int i = 0; i < ids.length; i++) {
-                String id = ids[i].trim();
-
-                String selection = DBHelper.MediaDBInfo.FieldName.FOOD_ID + "=?";
-                String[] selectionArgs = new String[]{id};
-                List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(selection, selectionArgs);
-
-                if (specialties != null && specialties.size() > 0) {
-                    paths.add(specialties.get(0).getMedia_path());
-                } else {
-                    failedIds += id + ",";
-                }
-            }
-
             BaseResponse resp = new BaseResponse();
-            if (!TextUtils.isEmpty(failedIds)) {
-                failedIds = failedIds.substring(0, failedIds.length() - 1);
-            }
 
-            if (paths.size() > 0) {
-                if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                        deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
-                        GlobalValues.IS_RSTR_PROJECTION) {
-                    boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+            if (TextUtils.isEmpty(specialtyIds)) {
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未选择任何特色菜");
+            } else {
 
-                    GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
-                    GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
-                    GlobalValues.IS_RSTR_PROJECTION = true;
-                    GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
-                    AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+                ArrayList<String> paths = new ArrayList<>();
+                String failedIds = null;
+                if ("-1".equals(specialtyIds)) {
+                    List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(null, null);
 
-                    if (TextUtils.isEmpty(failedIds)) {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                        resp.setInfo("投屏成功");
-                    } else {
-                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
-                        resp.setInfo(failedIds);
+                    if (specialties != null && specialties.size() > 0) {
+                        for (RstrSpecialty specialty : specialties) {
+                            paths.add(specialty.getMedia_path());
+                        }
                     }
-                    ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
+                } else {
+                    String[] ids = specialtyIds.split(",");
+                    failedIds = "";
+                    for (int i = 0; i < ids.length; i++) {
+                        String id = ids[i].trim();
+
+                        String selection = DBHelper.MediaDBInfo.FieldName.FOOD_ID + "=?";
+                        String[] selectionArgs = new String[]{id};
+                        List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(selection, selectionArgs);
+
+                        if (specialties != null && specialties.size() > 0) {
+                            paths.add(specialties.get(0).getMedia_path());
+                        } else {
+                            failedIds += id + ",";
+                        }
+                    }
+                    if (!TextUtils.isEmpty(failedIds)) {
+                        failedIds = failedIds.substring(0, failedIds.length() - 1);
+                    }
+                }
+
+                if (paths.size() > 0) {
+                    if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                            deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
+                            GlobalValues.IS_RSTR_PROJECTION) {
+                        boolean isNewDevice = TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID);
+
+                        GlobalValues.CURRENT_PROJECT_DEVICE_ID = deviceId;
+                        GlobalValues.CURRENT_PROJECT_DEVICE_NAME = deviceName;
+                        GlobalValues.IS_RSTR_PROJECTION = true;
+                        GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
+                        AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
+
+                        if (TextUtils.isEmpty(failedIds)) {
+                            resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                            resp.setInfo("投屏成功");
+                        } else {
+                            resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                            resp.setInfo(failedIds);
+                        }
+                        ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
+                    } else {
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        if (GlobalValues.IS_LOTTERY) {
+                            resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                        } else {
+                            resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                        }
+                    }
                 } else {
                     resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    if (GlobalValues.IS_LOTTERY) {
-                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
-                    } else {
-                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
-                    }
+                    resp.setInfo("未发现任何对应的特色菜");
                 }
-            } else {
-                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                resp.setInfo("未发现任何对应的特色菜");
             }
+
             response.getContent().add(new Gson().toJson(resp));
         } catch (Exception e) {
             e.printStackTrace();

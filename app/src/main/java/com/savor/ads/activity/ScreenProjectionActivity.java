@@ -192,6 +192,33 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         }
     };
 
+    private Runnable mPlaySpecialtyRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mSpecialtyFileList != null && mSpecialtyFileList.size() > 0) {
+                // 餐厅端特色菜
+                mSavorVideoView.setVisibility(View.GONE);
+                mSavorVideoView.release();
+                mImageArea.setVisibility(View.GONE);
+                mGreetingRl.setVisibility(View.GONE);
+                mPptVp.setVisibility(View.VISIBLE);
+                mHandler.removeCallbacks(mPPTPlayNextRunnable);
+                mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+                mHandler.removeCallbacks(mExitProjectionRunnable);
+                mPptAdapter.setSourceType(2);
+                mPptAdapter.setSpecialtyDataSource(mSpecialtyFileList);
+                if (mPptVp.getChildCount() > 0) {
+                    mPptVp.setCurrentItem(0);
+                }
+                mPptImgStates = new int[mSpecialtyFileList.size()];
+            } else {
+                LogUtils.w("没有可连播的特色菜信息");
+                resetGlobalFlag();
+                exitProjection();
+            }
+        }
+    };
+
     private SavorVideoView mSavorVideoView;
     private RelativeLayout mImageArea;
     private ImageView mImageView;
@@ -518,10 +545,6 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mPptVp.setCurrentItem(0);
             }
             mPptImgStates = new int[mSpecialtyFileList.size()];
-
-//            if (mPptConfig.getDuration() > 0) {
-//                mHandler.postDelayed(mPPTPlayFinishRunnable, mPptConfig.getDuration() * 1000);
-//            }
         } else if (ConstantValues.PROJECT_TYPE_RSTR_GREETING.equals(mProjectType)) {
             // 餐厅端投欢迎语
             mSavorVideoView.setVisibility(View.GONE);
@@ -564,6 +587,48 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingTv.setText(mGreetingWords);
 
             mHandler.postDelayed(mExitProjectionRunnable, mGreetingDuration);
+        } else if (ConstantValues.PROJECT_TYPE_RSTR_GREETING_THEN_SPECIALTY.equals(mProjectType)) {
+            // 餐厅端投欢迎语、特色菜连播
+            mSavorVideoView.setVisibility(View.GONE);
+            mSavorVideoView.release();
+            mImageArea.setVisibility(View.GONE);
+            mPptVp.setVisibility(View.GONE);
+            mGreetingRl.setVisibility(View.VISIBLE);
+            mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mExitProjectionRunnable);
+
+            int bgResId = 0;
+            switch (mGreetingTemplate) {
+                case 1:
+                    bgResId = R.mipmap.bg_greeting_01;
+                    break;
+                case 2:
+                    bgResId = R.mipmap.bg_greeting_02;
+                    break;
+                case 3:
+                    bgResId = R.mipmap.bg_greeting_03;
+                    break;
+                case 4:
+                    bgResId = R.mipmap.bg_greeting_04;
+                    break;
+                case 5:
+                    bgResId = R.mipmap.bg_greeting_05;
+                    break;
+                case 6:
+                    bgResId = R.mipmap.bg_greeting_06;
+                    break;
+                case 7:
+                    bgResId = R.mipmap.bg_greeting_07;
+                    break;
+                case 8:
+                    bgResId = R.mipmap.bg_greeting_08;
+                    break;
+            }
+            mGreetingRl.setBackgroundResource(bgResId);
+            mGreetingTv.setText(mGreetingWords);
+
+                mHandler.postDelayed(mPlaySpecialtyRunnable, mGreetingDuration);
         } else if (ConstantValues.PROJECT_TYPE_RSTR_ADV.equals(mProjectType)) {
             // 餐厅端点播宣传片
             mSavorVideoView.setVisibility(View.VISIBLE);
