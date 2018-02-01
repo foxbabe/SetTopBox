@@ -15,7 +15,6 @@ import com.savor.ads.R;
 import com.savor.ads.adapter.PlaylistAdapter;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.core.Session;
-import com.savor.ads.utils.GlobalValues;
 
 import java.util.ArrayList;
 
