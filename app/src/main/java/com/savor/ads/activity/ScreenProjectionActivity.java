@@ -628,7 +628,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setBackgroundResource(bgResId);
             mGreetingTv.setText(mGreetingWords);
 
-                mHandler.postDelayed(mPlaySpecialtyRunnable, mGreetingDuration);
+            mHandler.postDelayed(mPlaySpecialtyRunnable, mGreetingDuration);
         } else if (ConstantValues.PROJECT_TYPE_RSTR_ADV.equals(mProjectType)) {
             // 餐厅端点播宣传片
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -1207,7 +1207,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 int interval = 0;
                 if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType) && mPptConfig != null) {
                     interval = mPptConfig.getInterval() * 1000;
-                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType) ||
+                        ConstantValues.PROJECT_TYPE_RSTR_GREETING_THEN_SPECIALTY.equals(mProjectType)) {
                     interval = mSpecialtyInterval * 1000;
                 }
                 mHandler.postDelayed(mPPTPlayNextRunnable, interval);
