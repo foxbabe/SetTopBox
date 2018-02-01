@@ -7,8 +7,6 @@ import android.os.Bundle;
 
 import com.savor.ads.activity.LotteryActivity;
 import com.savor.ads.activity.ScreenProjectionActivity;
-import com.savor.ads.bean.RstrSpecialty;
-import com.savor.ads.database.DBHelper;
 import com.savor.ads.projection.ProjectPriority;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
@@ -16,7 +14,6 @@ import com.savor.ads.utils.LogUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by zhang.haiqiang on 2017/12/6.
@@ -31,7 +28,8 @@ public class GreetingThenSpecialtyAction extends ProjectionActionBase implements
     private int mInterval;
     private boolean mIsNewDevice;
 
-    public GreetingThenSpecialtyAction(Context context, String words, int template, int duration, boolean isNewDevice) {
+    public GreetingThenSpecialtyAction(Context context, String words, int template, int duration,
+                                       ArrayList<String> specialtyPaths, int interval, boolean isNewDevice) {
         super();
 
         mPriority = ProjectPriority.HIGH;
@@ -39,21 +37,9 @@ public class GreetingThenSpecialtyAction extends ProjectionActionBase implements
         this.mWords = words;
         this.mTemplate = template;
         this.mDuration = duration;
+        mMediaPaths = specialtyPaths;
+        mInterval = interval;
         this.mIsNewDevice = isNewDevice;
-
-        mMediaPaths = new ArrayList<>();
-        List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(null, null);
-
-        if (specialties != null && specialties.size() > 0) {
-            for (RstrSpecialty specialty : specialties) {
-                mMediaPaths.add(specialty.getMedia_path());
-            }
-        }
-        if (mMediaPaths.size() > 1) {
-            mInterval = 10;
-        } else {
-            mInterval = 20;
-        }
     }
 
     @Override

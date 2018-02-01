@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.jar.savor.box.vo.BaseResponse;
+import com.jar.savor.box.vo.SpecialtyResponse;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RstrSpecialty;
 import com.savor.ads.callback.ProjectOperationListener;
@@ -160,7 +161,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String specialtyIds = jsonObject.get("specialtyId").getAsString();
             int interval = jsonObject.get("interval").getAsInt();
 
-            BaseResponse resp = new BaseResponse();
+            SpecialtyResponse resp = new SpecialtyResponse();
 
             if (TextUtils.isEmpty(specialtyIds)) {
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
@@ -212,9 +213,11 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
                         if (TextUtils.isEmpty(failedIds)) {
                             resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                            resp.setFounded_count(paths.size());
                             resp.setInfo("投屏成功");
                         } else {
                             resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                            resp.setFounded_count(paths.size());
                             resp.setInfo(failedIds);
                         }
                         ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
@@ -381,7 +384,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String words = jsonObject.get("word").getAsString();
             int template = jsonObject.get("templateId").getAsInt();
 
-            BaseResponse resp = new BaseResponse();
+            SpecialtyResponse resp = new SpecialtyResponse();
             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     GlobalValues.IS_RSTR_PROJECTION) {
@@ -393,10 +396,26 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
+                ArrayList<String> paths = new ArrayList<>();
+                int interval;
+                List<RstrSpecialty> specialties = DBHelper.get(mContext).findSpecialtyByWhere(null, null);
+
+                if (specialties != null && specialties.size() > 0) {
+                    for (RstrSpecialty specialty : specialties) {
+                        paths.add(specialty.getMedia_path());
+                    }
+                }
+                if (paths.size() > 1) {
+                    interval = 10;
+                } else {
+                    interval = 20;
+                }
+
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setFounded_count(paths.size());
                 resp.setInfo("投屏成功");
 
-                ProjectOperationListener.getInstance(mContext).showGreetingThenSpecialty(words, template, 1000 * 60 * 5, isNewDevice);
+                ProjectOperationListener.getInstance(mContext).showGreetingThenSpecialty(words, template, 1000 * 60 * 5, paths, interval, isNewDevice);
 
             } else {
                 resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
