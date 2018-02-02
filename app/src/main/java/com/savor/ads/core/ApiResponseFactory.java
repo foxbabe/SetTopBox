@@ -24,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
+import com.savor.ads.bean.TvProgramGiecResponse;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.UpgradeInfo;
 import com.savor.ads.utils.DesUtils;
@@ -165,12 +166,19 @@ public class ApiResponseFactory {
             case SP_POST_UPLOAD_PROGRAM_JSON:
                 result = info;
                 break;
+            case SP_POST_UPLOAD_PROGRAM_GIEC_JSON:
+                result = info;
+                break;
             case CP_GET_SP_IP_JSON:
                 result = gson.fromJson(info, new TypeToken<ServerInfo>() {
                 }.getType());
                 break;
             case SP_GET_TV_MATCH_DATA_FROM_JSON:
                 result = gson.fromJson(info, new TypeToken<TvProgramResponse>() {
+                }.getType());
+                break;
+            case SP_GET_TV_MATCH_DATA_FROM_GIEC_JSON:
+                result = gson.fromJson(info, new TypeToken<TvProgramGiecResponse>() {
                 }.getType());
                 break;
             case CP_GET_PRIZE_JSON:

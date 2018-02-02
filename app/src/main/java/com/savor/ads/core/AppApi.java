@@ -349,7 +349,7 @@ public class AppApi {
             return;
         final HashMap<String, Object> params = new HashMap<>();
         params.put("data", programs);
-        new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_JSON, handler, params).post();
+        new AppServiceOk(context, Action.SP_POST_UPLOAD_PROGRAM_GIEC_JSON, handler, params).post();
     }
 
     /**
