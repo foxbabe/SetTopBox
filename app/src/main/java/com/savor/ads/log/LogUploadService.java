@@ -162,7 +162,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile()) {
                     String[] split = name.split("_");
-                    if (split.length != 2||split.length!=3) {
+                    if (split.length != 2 && split.length != 3) {
                         continue;
                     }
                     final String time = split[1].substring(0, 10);

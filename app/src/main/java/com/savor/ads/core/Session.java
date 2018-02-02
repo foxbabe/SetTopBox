@@ -276,8 +276,6 @@ public class Session {
         standalone = mPreference.loadBooleanKey(P_APP_STAND_ALONE,false);
         lastUDiskUpdateTime = mPreference.loadStringKey(P_APP_LAST_UDISK_UPDATE_TIME, "");
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
-        /** 清理App缓存 */
-        AppUtils.clearExpiredFile(mContext, false);
     }
 
     /*
