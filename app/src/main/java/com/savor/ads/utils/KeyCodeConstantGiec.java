@@ -110,4 +110,12 @@ public class KeyCodeConstantGiec {
      * U盘更新
      */
     public static int KEY_CODE_UDISK_UPDATE = 2009;
+    /**
+     * U盘媒体拷贝
+     */
+    public static int KEY_CODE_UDISK_COPY = 2011;
+    /**
+     * 呼出轮播列表
+     */
+    public static int KEY_CODE_SHOW_PLAYLIST = 178;
 }

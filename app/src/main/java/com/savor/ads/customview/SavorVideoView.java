@@ -798,10 +798,10 @@ public class SavorVideoView extends RelativeLayout {
             mAssignedPlayPosition = playPosition;
             mMediaFiles = mediaFiles;
 
-            if (mPlayState == MediaPlayerState.STARTED || mPlayState == MediaPlayerState.PAUSED) {
-                // 重设播放源集合后，将 mForcePlayFromStart置true强制从头播放
-                mForcePlayFromStart = true;
-            }
+//            if (mPlayState == MediaPlayerState.STARTED || mPlayState == MediaPlayerState.PAUSED) {
+//                // 重设播放源集合后，将 mForcePlayFromStart置true强制从头播放
+//                mForcePlayFromStart = true;
+//            }
 
             if (mMediaPlayer == null) {
                 initMediaPlayer();

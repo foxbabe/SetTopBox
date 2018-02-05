@@ -16,6 +16,14 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import cn.savor.small.netty.NettyClient;
 
 
@@ -53,6 +61,11 @@ public class HeartbeatService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         //  启动时立即心跳一次
         doHeartbeat();
+
+        if (!Session.get(this).isUseVirtualSp()) {
+            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.scheduleAtFixedRate(mNetworkDetectionRunnable, 1, 5, TimeUnit.MINUTES);
+        }
 
         while (true) {
 
@@ -171,4 +184,84 @@ public class HeartbeatService extends IntentService {
             }
         }
     }
+
+    private Runnable mNetworkDetectionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            LogUtils.d("NetworkDetectionRunnable is run.");
+
+            double internetLatency = getLatency("www.baidu.com");
+            double intranetLatency = -1;
+            if (Session.get(HeartbeatService.this).getServerInfo() != null) {
+                intranetLatency = getLatency(Session.get(HeartbeatService.this).getServerInfo().getServerIp());
+            }
+
+            AppApi.postNetstat(HeartbeatService.this, new ApiRequestListener() {
+                @Override
+                public void onSuccess(AppApi.Action method, Object obj) {
+                    LogUtils.d("postNetstat success");
+                }
+
+                @Override
+                public void onError(AppApi.Action method, Object obj) {
+                    LogUtils.d("postNetstat failed");
+                }
+
+                @Override
+                public void onNetworkFailed(AppApi.Action method) {
+                    LogUtils.d("postNetstat failed");
+                }
+            }, intranetLatency == -1 ? "" : "" + intranetLatency, internetLatency == -1 ? "" : "" + internetLatency);
+        }
+
+        private double getLatency(String address) {
+            LogUtils.d("address is " + address);
+            double latency = -1;
+
+            Process process = null;
+            InputStream is = null;
+            BufferedReader reader = null;
+            try {
+                process = Runtime.getRuntime().exec("ping -c 10 -i 0.2 -s 56 " + address);
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String str = null;
+                while ((str = reader.readLine()) != null) {
+                    if (str.contains("rtt ")) {
+                        LogUtils.d(str);
+                        String speedStr = str.split(" = ")[1].split(",")[0];
+                        String unitStr = speedStr.split(" ")[1];
+                        double min = Double.parseDouble(speedStr.split(" ")[0].split("/")[0]);
+                        double avg = Double.parseDouble(speedStr.split(" ")[0].split("/")[1]);
+                        double max = Double.parseDouble(speedStr.split(" ")[0].split("/")[2]);
+                        double mdev = Double.parseDouble(speedStr.split(" ")[0].split("/")[3]);
+
+                        if ("ms".equals(unitStr)) {
+                            latency = avg;
+                        } else if ("s".equals(unitStr)) {
+                            latency = avg * 1000;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (process != null) {
+                    try {
+                        process.destroy();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return latency;
+        }
+    };
 }

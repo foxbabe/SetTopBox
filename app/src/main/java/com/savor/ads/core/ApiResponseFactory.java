@@ -198,6 +198,9 @@ public class ApiResponseFactory {
             case CP_POST_DEVICE_TOKEN_JSON:
                 result = info;
                 break;
+            case SP_POST_NETSTAT_JSON:
+                result = info;
+                break;
             default:
                 break;
         }
