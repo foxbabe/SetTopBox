@@ -43,6 +43,7 @@ import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TechnicalLogReporter;
 import com.savor.ads.utils.UpdateUtil;
 import com.savor.ads.utils.tv.TvOperate;
+import com.savor.tvlibrary.AtvChannel;
 import com.savor.tvlibrary.ITVOperator;
 import com.savor.tvlibrary.TVOperatorFactory;
 import com.tvos.common.TvManager;
@@ -583,6 +584,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 if (obj instanceof TvProgramGiecResponse) {
                     TvProgramGiecResponse response = (TvProgramGiecResponse) obj;
                     ITVOperator tvOperate = TVOperatorFactory.getTVOperator(getApplicationContext(), TVOperatorFactory.TVType.GIEC);
+                    for (AtvChannel atvChannel :
+                            response.getTvChannelList()) {
+                        atvChannel.setDisplayName(atvChannel.getChannelName());
+//                        atvChannel.setDisplayNumber(atvChannel.getChannelNum() + "");
+                    }
                     tvOperate.setAtvChannels(response.getTvChannelList());
                     session.setTvDefaultChannelNumber(response.getLockingChannelNum());
                 }

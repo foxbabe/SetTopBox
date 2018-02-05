@@ -12,7 +12,7 @@ public class OSSValues {
     //网络日志上传路径
     public static final String uploadFilePath = "log/box/";
     //单机日志上传路径
-    public static final String uploadStandaloneFilePath = "log/box-stand_alone/";
+    public static final String uploadStandaloneFilePath = "log/box_standalone/";
     //抽奖结果上传路径
     public static final String uploadLotteryPath = "lottery/box/";
 

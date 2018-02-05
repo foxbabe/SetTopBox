@@ -130,15 +130,9 @@
             android:name=".service.HandleMediaDataService"
             android:exported="false">
         </service>
-        <!-- 处理U盘更新单机版机顶盒 -->
+        <!-- 点播类处理和转发指令的Service-->
         <service
-            android:name=".service.HandleUSBUpdateService"
-            android:exported="false">
-        </service>
-        <!-- 点播类处理和转发指令的Service， 实现在savorbox.jar包中 -->
-        <service
-            android:name="com.jar.savor.box.services.RemoteService"
-            android:permission="oem.permission.SENDMAIL">
+            android:name="com.jar.savor.box.services.RemoteService">
             <intent-filter>
                 <action android:name="com.jar.savor.box.REMOTE1"/>
             </intent-filter>
