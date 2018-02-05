@@ -58,7 +58,7 @@ public class FaceDetectLogUtil {
     }
 
     private void createFaceRecordFile(){
-        String time = AppUtils.getCurTime("yyyyMMdd");
+        String time = AppUtils.getCurTime("yyyyMMddHH");
         String recordFileName = time + "_" + mSession.getEthernetMac() + ".blog";
         String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.face);
         try {

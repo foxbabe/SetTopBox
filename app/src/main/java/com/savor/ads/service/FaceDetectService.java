@@ -76,8 +76,10 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
     private HandlerThread mHandlerThread = new HandlerThread("facepp");
     private Handler mHandler;
 
+    /**当前观看的人脸和最近一次识别到的时间，Key为trackId*/
     private HashMap<Integer, Long> mFaceTrackTime = new HashMap<>();
-    private ConcurrentHashMap<Integer, FaceLogBean> mWatchingMap = new ConcurrentHashMap<>();
+    /**当前正在观看的人脸集合, Key为trackId*/
+    private volatile ConcurrentHashMap<Integer, FaceLogBean> mWatchingMap = new ConcurrentHashMap<>();
     private static final int DETECT_THRESHOLD = 2 * 1000;
 
     private boolean isSuccess;
@@ -126,10 +128,20 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         return super.onUnbind(intent);
     }
 
-    public void notifyPlayingMediaId(String mediaId) {
+    public void notifyPlayStart(String mediaId) {
         if (mediaId != null && mWatchingMap != null) {
             for (FaceLogBean bean : mWatchingMap.values()) {
-                bean.addMediaIds(mediaId);
+                bean.setMediaIds(mediaId);
+                bean.setStartTime(System.currentTimeMillis());
+            }
+        }
+    }
+
+    public void notifyPlayComplete(String mediaId) {
+        if (mediaId != null && mWatchingMap != null) {
+            for (FaceLogBean bean : mWatchingMap.values()) {
+                bean.setEndTime(System.currentTimeMillis());
+                FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(bean);
             }
         }
     }
@@ -416,7 +428,10 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         }
     }
 
+    /**标识当前是第几次识别*/
     long mFrameIndex = 0;
+    /**上一次VID*/
+    String mLastVid;
     FaceDetectListener faceDetectListener;
 
     public void setFaceDetectListener(FaceDetectListener faceDetectListener) {
@@ -433,29 +448,31 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                int width = previewSize.width;
-                int height = previewSize.height;
-
+                // 累加检测计数
                 if (mFrameIndex >= Long.MAX_VALUE) {
                     mFrameIndex = 1;
                 } else {
                     mFrameIndex++;
                 }
+
+                // 获取当前正在播放的视频ID
+                String vid = null;
+                Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
+                if (ac != null && ac instanceof AdsPlayerActivity) {
+                    vid = ((AdsPlayerActivity) ac).getCurrentVid();
+                }
+
+                // 调SDK方法检测人脸
+                int width = previewSize.width;
+                int height = previewSize.height;
                 final Facepp.Face[] faces = facepp.detect(data, width, height, Facepp.IMAGEMODE_NV21);
 
                 HashMap<Integer, Long> newMap = new HashMap<Integer, Long>();
                 if (faces != null) {
                     confidence = 0.0f;
-
-                    int[] pointColors = new int[faces.length];
-
                     Log.d("-------Eye--------", "face count=" +faces.length);
                     if (faces.length >= 0) {
-                        String vid = null;
-                        Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
-                        if (ac != null && ac instanceof AdsPlayerActivity) {
-                            vid = ((AdsPlayerActivity) ac).getCurrentVid();
-                        }
+                        // 检测到人脸
 
                         for (int c = 0; c < faces.length; c++) {
 //                    if (is106Points)
@@ -476,8 +493,8 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
                             // add code fragment start
                             if (isOverlap(face)) {
+                                // 不认为是有效的观看姿态
                                 Log.e("---------------------", "检测到侧脸！！！！");
-                                pointColors[c] = 1;
                             } else {
                                 long now = System.currentTimeMillis();
 
@@ -485,26 +502,24 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                                     long time = mFaceTrackTime.get(face.trackID);
                                     newMap.put(face.trackID, time);
                                     if (now - time > DETECT_THRESHOLD) {
-                                        // 认为符合正在观看
-                                        pointColors[c] = 0;
+                                        // 停留时长超过阈值，认为符合正在观看
                                         if (!mWatchingMap.containsKey(face.trackID)) {
+                                            // 新增的观看者
                                             FaceLogBean faceLogBean = new FaceLogBean();
                                             faceLogBean.setUuid(UUID.randomUUID().toString());
-                                            faceLogBean.setStartTime(System.currentTimeMillis());
+                                            faceLogBean.setStartTime(System.currentTimeMillis() - DETECT_THRESHOLD);
                                             faceLogBean.setNewestFrameIndex(mFrameIndex);
                                             faceLogBean.setTrackId(face.trackID);
-                                            faceLogBean.addMediaIds(vid);
+                                            faceLogBean.setMediaIds(vid);
                                             mWatchingMap.put(face.trackID, faceLogBean);
                                         } else {
+                                            // 持续的观看者
                                             FaceLogBean faceLogBean = mWatchingMap.get(face.trackID);
                                             faceLogBean.setNewestFrameIndex(mFrameIndex);
                                         }
-                                    } else {
-                                        pointColors[c] = 1;
                                     }
                                 } else {
                                     newMap.put(face.trackID, now);
-                                    pointColors[c] = 1;
                                 }
                             }
 
@@ -528,6 +543,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                         mWatchingMap.keySet()) {
                     FaceLogBean faceLogBean = mWatchingMap.get(trackId);
                     if (faceLogBean.getNewestFrameIndex() != mFrameIndex) {
+                        // 当前人脸在最近一次识别中没有被识别到，认为该人脸已观看结束，记录日志
                         faceLogBean.setEndTime(System.currentTimeMillis());
                         FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(faceLogBean);
 

@@ -371,6 +371,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getMedia_type(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
+
+            faceDetectService.notifyPlayComplete(mPlayList.get(index).getVid());
         }
 
         // 新一期下载完成时重新获取播放列表开始播放
@@ -438,7 +440,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     "");
 
             if ("start".equals(action) && faceDetectService != null) {
-                faceDetectService.notifyPlayingMediaId(mPlayList.get(index).getVid());
+                faceDetectService.notifyPlayStart(mPlayList.get(index).getVid());
             }
         }
     }

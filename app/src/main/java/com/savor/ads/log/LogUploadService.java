@@ -95,9 +95,9 @@ public class LogUploadService {
                 }
 
                 uploadLotteryRecordFile();
-                uploadFaceRecordFile();
 
                 while (true) {
+                    uploadFaceRecordFile();
                     uploadFile();
                     try {
                         Thread.sleep(1000 * 5);
@@ -161,7 +161,7 @@ public class LogUploadService {
                 final String path = file.getPath();
                 if (file.isFile() && file.length() > 0) {
 
-                    if (name.contains(AppUtils.getCurTime("yyyyMMdd"))) {
+                    if (name.contains(AppUtils.getCurTime("yyyyMMddHH"))) {
                         continue;
                     }
                     final String archive = path + ".zip";

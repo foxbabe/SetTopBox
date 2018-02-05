@@ -43,7 +43,7 @@ public class FaceLogBean {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
-        this.totalSeconds = (this.endTime - this.startTime) / 1000.0f + 2;
+        this.totalSeconds = (this.endTime - this.startTime) / 1000.0f;
     }
 
     public long getNewestFrameIndex() {
@@ -70,11 +70,7 @@ public class FaceLogBean {
         return mediaIds;
     }
 
-    public void addMediaIds(String mediaId) {
-        if (TextUtils.isEmpty(this.mediaIds)) {
-            this.mediaIds = mediaId;
-        } else {
-            this.mediaIds = this.mediaIds + "," + mediaId;
-        }
+    public void setMediaIds(String mediaId) {
+        this.mediaIds = mediaId;
     }
 }

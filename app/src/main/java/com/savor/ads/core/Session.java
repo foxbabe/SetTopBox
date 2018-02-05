@@ -261,8 +261,6 @@ public class Session {
         setDownloadingVodVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_VOD_VERSION, "")));
         mPrizeInfo = (PrizeInfo) StringToObject(mPreference.loadStringKey(P_APP_PRIZE_INFO, ""));
         mUseVirtualSp = mPreference.loadBooleanKey(P_APP_USE_VIRTUAL_SP, false);
-        /** 清理App缓存 */
-        AppUtils.clearExpiredFile(mContext, false);
     }
 
     /*
