@@ -30,12 +30,15 @@ public static final int *;
 
 #keep entity for gson
 -keep class com.savor.ads.bean.** { *; }
--keep class com.jar.savor.box.vo.** { *; }
+-keep class com.jar.savor.box.** { *; }
 -keep class cn.savor.small.** { *; }
 
 #Proguard for netty begin
 -keepattributes Signature,InnerClasses
 -keepclasseswithmembers class io.netty.** {
+    *;
+}
+-keepnames class io.netty.** {
     *;
 }
 -dontwarn io.netty.**
@@ -87,14 +90,6 @@ public static final int *;
 -keep public class **.R$*{
    public static final int *;
 }
-
-#（可选）避免Log打印输出
--assumenosideeffects class android.util.Log {
-   public static *** v(...);
-   public static *** d(...);
-   public static *** i(...);
-   public static *** w(...);
- }
 #友盟混淆结束
 
 #admaster混淆开始
