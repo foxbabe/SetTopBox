@@ -24,6 +24,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.jar.savor.box.vo.AdvResponseBean;
 import com.jar.savor.box.vo.ResponseT;
+import com.jar.savor.box.vo.ResponseT1;
 import com.jar.savor.box.vo.SpecialtyResponseBean;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RstrSpecialty;
@@ -162,11 +163,11 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String specialtyIds = jsonObject.get("specialtyId").getAsString();
             int interval = jsonObject.get("interval").getAsInt();
 
-            ResponseT<SpecialtyResponseBean> resp = new ResponseT<>();
+            ResponseT1<SpecialtyResponseBean> resp = new ResponseT1<>();
 
             if (TextUtils.isEmpty(specialtyIds)) {
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                resp.setMsg("未选择任何特色菜");
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未选择任何特色菜");
             } else {
 
                 ArrayList<String> paths = new ArrayList<>();
@@ -215,26 +216,26 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         SpecialtyResponseBean specialtyResponseBean = new SpecialtyResponseBean();
                         specialtyResponseBean.setFounded_count(paths.size());
                         specialtyResponseBean.setFailed_ids(failedIds);
-                        resp.setResult(specialtyResponseBean);
+                        resp.setContent(specialtyResponseBean);
                         if (TextUtils.isEmpty(failedIds)) {
-                            resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                            resp.setMsg("投屏成功");
+                            resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                            resp.setInfo("投屏成功");
                         } else {
-                            resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
-                            resp.setMsg("投屏成功");
+                            resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                            resp.setInfo("投屏成功");
                         }
                         ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
                     } else {
-                        resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                         if (GlobalValues.IS_LOTTERY) {
-                            resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                            resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                         } else {
-                            resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                            resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                         }
                     }
                 } else {
-                    resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                    resp.setMsg("未发现任何对应的特色菜");
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    resp.setInfo("未发现任何对应的特色菜");
                 }
             }
 
@@ -252,7 +253,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String words = jsonObject.get("word").getAsString();
             int template = jsonObject.get("templateId").getAsInt();
 
-            ResponseT resp = new ResponseT();
+            ResponseT1 resp = new ResponseT1();
             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     GlobalValues.IS_RSTR_PROJECTION) {
@@ -264,8 +265,8 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 GlobalValues.CURRENT_PROJECT_DEVICE_IP = NettyClient.host;
                 AppApi.resetPhoneInterface(GlobalValues.CURRENT_PROJECT_DEVICE_IP);
 
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                resp.setMsg("投屏成功");
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("投屏成功");
 
                 ProjectOperationListener.getInstance(mContext).showGreeting(words, template, 1000 * 60 * 5, isNewDevice);
 
@@ -281,11 +282,11 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 //                }
 //                mContext.bindService(intent, connection, Service.BIND_AUTO_CREATE);
             } else {
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 if (GlobalValues.IS_LOTTERY) {
-                    resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                 } else {
-                    resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                 }
             }
 
@@ -339,7 +340,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 failedIds = failedIds.substring(0, failedIds.length() - 1);
             }
 
-            ResponseT<AdvResponseBean> resp = new ResponseT();
+            ResponseT1<AdvResponseBean> resp = new ResponseT1();
             if (paths.size() > 0) {
                 if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                         deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
@@ -354,26 +355,26 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
 
                     AdvResponseBean advResponseBean = new AdvResponseBean();
                     advResponseBean.setFailed_ids(failedIds);
-                    resp.setResult(advResponseBean);
+                    resp.setContent(advResponseBean);
                     if (TextUtils.isEmpty(failedIds)) {
-                        resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                        resp.setMsg("投屏成功");
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                        resp.setInfo("投屏成功");
                     } else {
-                        resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
-                        resp.setMsg("投屏成功");
+                        resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
+                        resp.setInfo("投屏成功");
                     }
                     ProjectOperationListener.getInstance(mContext).showAdv(paths, isNewDevice);
                 } else {
-                    resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                    resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                     if (GlobalValues.IS_LOTTERY) {
-                        resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                     } else {
-                        resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                        resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                     }
                 }
             } else {
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                resp.setMsg("未发现任何对应的宣传片");
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("未发现任何对应的宣传片");
             }
 
             response.getContent().add(new Gson().toJson(resp));
@@ -390,7 +391,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             String words = jsonObject.get("word").getAsString();
             int template = jsonObject.get("templateId").getAsInt();
 
-            ResponseT<SpecialtyResponseBean> resp = new ResponseT<>();
+            ResponseT1<SpecialtyResponseBean> resp = new ResponseT1<>();
             if (TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) ||
                     GlobalValues.IS_RSTR_PROJECTION) {
@@ -417,21 +418,21 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                     interval = 20;
                 }
 
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
                 SpecialtyResponseBean specialtyResponseBean = new SpecialtyResponseBean();
                 specialtyResponseBean.setFailed_ids("");
                 specialtyResponseBean.setFounded_count(paths.size());
-                resp.setResult(specialtyResponseBean);
-                resp.setMsg("投屏成功");
+                resp.setContent(specialtyResponseBean);
+                resp.setInfo("投屏成功");
 
                 ProjectOperationListener.getInstance(mContext).showGreetingThenSpecialty(words, template, 1000 * 60 * 5, paths, interval, isNewDevice);
 
             } else {
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
                 if (GlobalValues.IS_LOTTERY) {
-                    resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在砸蛋");
                 } else {
-                    resp.setMsg("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
+                    resp.setInfo("请稍等，" + GlobalValues.CURRENT_PROJECT_DEVICE_NAME + " 正在投屏");
                 }
             }
 
@@ -446,17 +447,17 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
             String deviceId = jsonObject.get("deviceId").getAsString();
 
-            ResponseT resp = new ResponseT();
+            ResponseT1 resp = new ResponseT1();
             if (!TextUtils.isEmpty(deviceId) && deviceId.equals(GlobalValues.CURRENT_PROJECT_DEVICE_ID) && GlobalValues.IS_RSTR_PROJECTION) {
                 ProjectOperationListener.getInstance(mContext).rstrStop();
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
-                resp.setMsg("停止成功");
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+                resp.setInfo("停止成功");
 
                 GlobalValues.IS_RSTR_PROJECTION = false;
                 GlobalValues.CURRENT_PROJECT_IMAGE_ID = null;
             } else {
-                resp.setCode(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
-                resp.setMsg("您的投屏已退出，无需再次停止");
+                resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_FAILED);
+                resp.setInfo("您的投屏已退出，无需再次停止");
             }
 
             response.getContent().add(new Gson().toJson(resp));
