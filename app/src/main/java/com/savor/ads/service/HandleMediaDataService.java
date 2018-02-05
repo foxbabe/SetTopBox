@@ -835,19 +835,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             }
                         }
                         if (id != -1) {
-                            MediaLibBean playListBean = new MediaLibBean();
-                            playListBean.setPeriod(bean.getPeriod());
-                            playListBean.setDuration(bean.getDuration());
-                            playListBean.setMd5(bean.getMd5());
-                            playListBean.setVid(bean.getVid());
-                            playListBean.setName(bean.getName());
-                            playListBean.setType(bean.getType());
-                            playListBean.setOrder(list.get(0).getOrder());
-                            playListBean.setSurfix(bean.getSurfix());
-                            playListBean.setMediaPath(path);
-                            playListBean.setLocation_id(bean.getLocation_id());
+                            bean.setOrder(list.get(0).getOrder());
+                            bean.setMediaPath(path);
                             // 插库成功，downloadedCount加1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(playListBean, id)) {
+                            if (dbHelper.insertOrUpdateNewPlayListLib(bean, id)) {
                                 advDownloadedCount++;
                             }
                         }
