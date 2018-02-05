@@ -1685,6 +1685,7 @@ public class AppUtils {
                                 bean.setDuration(item.getDuration());
                                 bean.setMd5(item.getMd5());
                                 bean.setName(item.getName());
+                                bean.setChinese_name(item.getChinese_name());
                                 bean.setMediaPath(item.getMediaPath());
                                 break;
                             }
@@ -1766,6 +1767,7 @@ public class AppUtils {
                         if (file.isFile()) {
                             MediaLibBean bean = new MediaLibBean();
                             bean.setMediaPath(file.getPath());
+                            bean.setChinese_name(file.getName());
                             filePlayList.add(bean);
                         }
                     }
