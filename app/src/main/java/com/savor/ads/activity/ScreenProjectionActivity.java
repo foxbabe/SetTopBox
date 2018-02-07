@@ -1233,7 +1233,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 int interval = 0;
                 if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
                     interval = mPptConfig.getInterval() * 1000;
-                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType) ||
+                        ConstantValues.PROJECT_TYPE_RSTR_GREETING_THEN_SPECIALTY.equals(mProjectType)) {
                     interval = mSpecialtyInterval * 1000;
                 }
                 mHandler.postDelayed(mPPTPlayNextRunnable, interval);
