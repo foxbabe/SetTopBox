@@ -169,6 +169,10 @@ public class LogUploadService {
                     if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
                         continue;
                     }
+                    if (file.length() <= 0) {
+                        file.delete();
+                        continue;
+                    }
                     final String archivePath = path + ".zip";
 
                     if (!TextUtils.isEmpty(session.getOssAreaId())) {
