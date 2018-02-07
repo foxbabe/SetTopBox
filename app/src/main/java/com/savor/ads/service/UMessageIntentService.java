@@ -1,4 +1,4 @@
-package com.savor.ads;
+package com.savor.ads.service;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RTBPushItem;
+import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -50,24 +51,20 @@ public class UMessageIntentService extends UmengMessageService {
                     // RTB推送
                     ArrayList<RTBPushItem> rtbPushItems = new Gson().fromJson(jsonObject.getString("data"), new TypeToken<ArrayList<RTBPushItem>>() {
                     }.getType());
-                    ArrayList<MediaLibBean> rtbMedias = new ArrayList<>();
+
                     if (rtbPushItems != null) {
                         for (RTBPushItem item : rtbPushItems) {
-                            String selection = DBHelper.MediaDBInfo.FieldName.VID + "=? ";
-                            String[] selectionArgs = new String[]{item.getId()};
-                            List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection, selectionArgs);
-                            if (list != null) {
-                                rtbMedias.add(list.get(0));
-                            }
+                            item.setRemain_time(item.getRemain_time() * 1000 + System.currentTimeMillis());
                         }
                     }
-                    GlobalValues.RTB_PUSH_ADS = rtbMedias;
+                    Session.get(this).setRTBPushItems(rtbPushItems);
+
                     if (AppUtils.fillPlaylist(this)) {
                         sendBroadcast(new Intent(ConstantValues.RTB_ADS_PUSH_ACTION));
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

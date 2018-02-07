@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.RTBPushItem;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -1651,6 +1652,20 @@ public class AppUtils {
         DBHelper dbHelper = DBHelper.get(context);
         ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
 
+        ArrayList<MediaLibBean> rtbMedias = new ArrayList<>();
+        ArrayList<Long> rtbEndTimes = new ArrayList<>();
+        if (Session.get(context).getRTBPushItems() != null) {
+            for (RTBPushItem item : Session.get(context).getRTBPushItems()) {
+                String selection = DBHelper.MediaDBInfo.FieldName.VID + "=? ";
+                String[] selectionArgs = new String[]{item.getId()};
+                List<MediaLibBean> list = dbHelper.findRtbadsMediaLibByWhere(selection, selectionArgs);
+                if (list != null) {
+                    rtbMedias.add(list.get(0));
+                    rtbEndTimes.add(item.getRemain_time());
+                }
+            }
+        }
+
         if (playList != null && !playList.isEmpty()) {
             int rtbIndex = 0;
             for (int i = 0; i < playList.size(); i++) {
@@ -1694,18 +1709,21 @@ public class AppUtils {
                 }
 
                 if (ConstantValues.RTB_ADS.equals(bean.getType())) {
-                    if (GlobalValues.RTB_PUSH_ADS != null && !GlobalValues.RTB_PUSH_ADS.isEmpty()) {
-                        MediaLibBean rtbItem = GlobalValues.RTB_PUSH_ADS.get(rtbIndex);
-                        bean.setName(rtbItem.getName());
-                        bean.setMediaPath(rtbItem.getMediaPath());
-                        bean.setAdmaster_sin(rtbItem.getAdmaster_sin());
-                        bean.setChinese_name(rtbItem.getChinese_name());
-                        bean.setDuration(rtbItem.getDuration());
-                        bean.setVid(rtbItem.getVid());
-                        bean.setMd5(rtbItem.getMd5());
-                        bean.setPeriod(rtbItem.getPeriod());
+                    if (!rtbMedias.isEmpty()) {
+                        if (rtbIndex < rtbEndTimes.size() &&
+                                rtbEndTimes.get(rtbIndex) < System.currentTimeMillis()) {
+                            MediaLibBean rtbItem = rtbMedias.get(rtbIndex);
+                            bean.setName(rtbItem.getName());
+                            bean.setMediaPath(rtbItem.getMediaPath());
+                            bean.setAdmaster_sin(rtbItem.getAdmaster_sin());
+                            bean.setChinese_name(rtbItem.getChinese_name());
+                            bean.setDuration(rtbItem.getDuration());
+                            bean.setVid(rtbItem.getVid());
+                            bean.setMd5(rtbItem.getMd5());
+                            bean.setPeriod(rtbItem.getPeriod());
+                        }
 
-                        rtbIndex = (++rtbIndex) % GlobalValues.RTB_PUSH_ADS.size();
+                        rtbIndex = (++rtbIndex) % rtbMedias.size();
                     }
                 }
 

@@ -15,6 +15,7 @@ import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
+import com.savor.ads.service.UMessageIntentService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
@@ -24,7 +25,6 @@ import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.QrCodeWindowManager;
-import com.umeng.message.IUmengCallback;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
 

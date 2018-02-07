@@ -47,6 +47,4 @@ public class GlobalValues {
     public static boolean IS_UPUSH_SO_COPY_SUCCESS = false;
 
     public static boolean IS_UPUSH_REGISTER_SUCCESS = false;
-
-    public static ArrayList<MediaLibBean> RTB_PUSH_ADS = null;
 }

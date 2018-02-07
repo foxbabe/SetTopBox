@@ -198,7 +198,7 @@
             android:exported="false">
         </service>
         <service
-            android:name=".UMessageIntentService"
+            android:name=".service.UMessageIntentService"
             android:exported="false">
         </service>
     </application>
