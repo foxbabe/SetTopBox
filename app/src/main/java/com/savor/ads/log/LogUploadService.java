@@ -73,7 +73,8 @@ public class LogUploadService {
                         String logMonth = null;
                         /*if (split.length == 4) {    // 老版日志命名结构，例：43_FCD5D900B8B6_2017061415_12.blog
                             logMonth = split[2].substring(0, 6);
-                        } else */if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
+                        } else */
+                        if (split.length == 2) {     // 新版日志命名结构，例：FCD5D900B8B6_2017061415.blog
                             logMonth = split[1].substring(0, 6);
                         } else {
                             file.delete();
@@ -159,40 +160,50 @@ public class LogUploadService {
             for (final File file : files) {
                 final String name = file.getName();
                 final String path = file.getPath();
-                if (file.isFile() && file.length() > 0) {
-
-                    if (name.contains(AppUtils.getCurTime("yyyyMMddHH"))) {
+                if (file.isFile()) {
+                    String[] split = name.split("_");
+                    if (split.length != 2) {
                         continue;
                     }
-                    final String archive = path + ".zip";
-                    try {
-                        AppUtils.zipFile(new File(path), new File(archive), name + ".zip");
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    final String time = split[1].substring(0, 10);
+                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
+                        continue;
                     }
-                    if (new File(archive).exists()) {
-                        final String object_key = archive.substring(1, archive.length());
-                        String oss_file_path = OSSValues.uploadFacePath + name + ".zip";
-                        new ResuambleUpload(oss,
-                                BuildConfig.OSS_BUCKET_NAME,
-                                oss_file_path,
-                                object_key,
-                                new LogUploadService.UploadCallback() {
-                                    @Override
-                                    public void isSuccessOSSUpload(boolean flag) {
-                                        if (flag) {
-                                            file.delete();
+                    final String archivePath = path + ".zip";
+
+                    if (!TextUtils.isEmpty(session.getOssAreaId())) {
+
+                        File sourceFile = new File(path);
+                        final File zipFile = new File(archivePath);
+                        try {
+                            AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        if (zipFile.exists()) {
+                            String localFilePath = archivePath.substring(1, archivePath.length());
+                            String ossFilePath = OSSValues.uploadFacePath + session.getOssAreaId() + File.separator +
+                                    AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            new ResuambleUpload(oss,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    localFilePath,
+                                    ossFilePath,
+                                    new LogUploadService.UploadCallback() {
+                                        @Override
+                                        public void isSuccessOSSUpload(boolean flag) {
+                                            if (flag) {
+                                                file.delete();
+                                            }
+                                            if (zipFile.exists()) {
+                                                zipFile.delete();
+                                            }
                                         }
-                                        if (new File(archive).exists()) {
-                                            new File(archive).delete();
-                                        }
-                                    }
-                                }).resumableUpload();
+                                    }).resumableUpload();
+                        }
                     }
                 }
             }
         }
-
     }
 
     private void uploadFile() {
