@@ -72,7 +72,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "dbsavor.db";
 
 
-    private static final int DB_VERSION = 16;
+    private static final int DB_VERSION = 17;
 
     private Context mContext;
 
@@ -121,41 +121,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         LogFileUtil.writeKeyLogInfo("-------Database onUpgrade-------oldVersion=" + oldVersion + ", newVersion=" + newVersion);
 
-        if (oldVersion < 16) {
-            // 16版本加入RTB广告，同时轮播视频表和点播视频表加上<中文名称>列
-            try {
-                /**
-                 * 创建实时竞价广告表
-                 */
-                createTable_rtbads(sqLiteDatabase);
-
-                String alterPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.PLAYLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
-                sqLiteDatabase.execSQL(alterPlaylist);
-
-                String alterNewPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.NEWPLAYLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
-                sqLiteDatabase.execSQL(alterNewPlaylist);
-
-                String alterAdslist = "ALTER TABLE " + MediaDBInfo.TableName.ADSLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
-                sqLiteDatabase.execSQL(alterAdslist);
-
-                String alterNewAdslist = "ALTER TABLE " + MediaDBInfo.TableName.NEWADSLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
-                sqLiteDatabase.execSQL(alterNewAdslist);
-
-                String alterMulticast = "ALTER TABLE " + MediaDBInfo.TableName.MULTICASTMEDIALIB + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
-                sqLiteDatabase.execSQL(alterMulticast);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (oldVersion < 15) {
-            // 15版本加入特色菜
-            /**
-             * 创建特色菜表
-             */
-            createTable_specialty(sqLiteDatabase);
-        }
-
         if (oldVersion < 14) {
             // 14版本加入视频Location_id属性来给广告表做匹配
             try {
@@ -173,6 +138,51 @@ public class DBHelper extends SQLiteOpenHelper {
                  * 创建当前播放的完整的广告内容表
                  */
                 createTable_adsListTrace(sqLiteDatabase);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (oldVersion < 15) {
+            // 15版本加入特色菜
+            /**
+             * 创建特色菜表
+             */
+            createTable_specialty(sqLiteDatabase);
+        }
+
+        if (oldVersion < 16) {
+            // 16版本加入RTB广告，同时轮播视频表和点播视频表加上<中文名称>列
+            try {
+                /**
+                 * 创建实时竞价广告表
+                 */
+                createTable_rtbads(sqLiteDatabase);
+
+                String alterPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.PLAYLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterPlaylist);
+
+                String alterNewPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.NEWPLAYLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterNewPlaylist);
+
+                String alterMulticast = "ALTER TABLE " + MediaDBInfo.TableName.MULTICASTMEDIALIB + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterMulticast);
+
+                String alterAdslist = "ALTER TABLE " + MediaDBInfo.TableName.ADSLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterAdslist);
+
+                String alterNewAdslist = "ALTER TABLE " + MediaDBInfo.TableName.NEWADSLIST + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterNewAdslist);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (oldVersion < 17) {
+            // 17版本修复bug：14以下版本升到16版本时点播数据库中文名称列插入失败的问题
+            try {
+                String alterMulticast = "ALTER TABLE " + MediaDBInfo.TableName.MULTICASTMEDIALIB + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
+                sqLiteDatabase.execSQL(alterMulticast);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -721,17 +731,15 @@ public class DBHelper extends SQLiteOpenHelper {
                 String selection = null;
                 String[] args = null;
                 //            open();
-                if (session.isStandalone()){
+                if (session.isStandalone()) {
                     // 拼接查询条件
                     selection = MediaDBInfo.FieldName.PERIOD + "=?";
                     args = new String[]{session.getProPeriod()};
-                }else{
+                } else {
                     // 拼接查询条件
                     selection = MediaDBInfo.FieldName.PERIOD + "=? OR " + MediaDBInfo.FieldName.PERIOD + "=?";
                     args = new String[]{session.getProPeriod(), session.getAdvPeriod()};
                 }
-
-
 
 
                 cursor = db.query(MediaDBInfo.TableName.PLAYLIST, null, selection, args, null, null, MediaDBInfo.FieldName.ADS_ORDER);

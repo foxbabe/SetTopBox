@@ -405,20 +405,23 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     }
                     if (isChecked) {
-                        completedCount++;
-
                         // 入库
                         String selection = DBHelper.MediaDBInfo.FieldName.FOOD_ID + "=? ";
                         String[] selectionArgs = new String[]{mediaLib.getFood_id()};
                         List<RstrSpecialty> list = dbHelper.findSpecialtyByWhere(selection, selectionArgs);
                         mediaLib.setMedia_path(path);
+                        boolean isInsertSuccess = false;
                         if (list != null && list.size() > 1) {
                             dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB, selection, selectionArgs);
-                            dbHelper.insertOrUpdateSpecialtyLib(mediaLib, false);
+                            isInsertSuccess = dbHelper.insertOrUpdateSpecialtyLib(mediaLib, false);
                         } else if (list != null && list.size() == 1) {
-                            dbHelper.insertOrUpdateSpecialtyLib(mediaLib, true);
+                            isInsertSuccess = dbHelper.insertOrUpdateSpecialtyLib(mediaLib, true);
                         } else {
-                            dbHelper.insertOrUpdateSpecialtyLib(mediaLib, false);
+                            isInsertSuccess = dbHelper.insertOrUpdateSpecialtyLib(mediaLib, false);
+                        }
+
+                        if (isInsertSuccess) {
+                            completedCount++;
                         }
                     }
                 } catch (Exception e) {
@@ -1373,19 +1376,22 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             }
                         }
                         if (isChecked) {
-                            completedCount++;
-
                             // 入库
                             String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
                             String[] selectionArgs = new String[]{mediaLib.getName()};
                             List<MediaLibBean> list = dbHelper.findMutlicastMediaLibByWhere(selection, selectionArgs);
+                            boolean isInsertSuccess = false;
                             if (list != null && list.size() > 1) {
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB, selection, selectionArgs);
-                                dbHelper.insertOrUpdateMulticastLib(mediaLib, false);
+                                isInsertSuccess = dbHelper.insertOrUpdateMulticastLib(mediaLib, false);
                             } else if (list != null && list.size() == 1) {
-                                dbHelper.insertOrUpdateMulticastLib(mediaLib, true);
+                                isInsertSuccess = dbHelper.insertOrUpdateMulticastLib(mediaLib, true);
                             } else {
-                                dbHelper.insertOrUpdateMulticastLib(mediaLib, false);
+                                isInsertSuccess = dbHelper.insertOrUpdateMulticastLib(mediaLib, false);
+                            }
+
+                            if (isInsertSuccess) {
+                                completedCount++;
                             }
                         }
                     } catch (Exception e) {
