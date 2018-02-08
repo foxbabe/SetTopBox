@@ -14,6 +14,6 @@ public class OSSValues {
     //抽奖结果上传路径
     public static final String uploadLotteryPath = "lottery/box/";
     //人脸识别结果上传路径
-    public static final String uploadFacePath = "face/box/";
+    public static final String uploadFacePath = "log/face/box/";
 
 }

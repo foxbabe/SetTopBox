@@ -185,13 +185,13 @@ public class LogUploadService {
                             e.printStackTrace();
                         }
                         if (zipFile.exists()) {
-                            String localFilePath = archivePath.substring(1, archivePath.length());
                             String ossFilePath = OSSValues.uploadFacePath + session.getOssAreaId() + File.separator +
                                     AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            String localFilePath = archivePath.substring(1, archivePath.length());
                             new ResuambleUpload(oss,
                                     BuildConfig.OSS_BUCKET_NAME,
-                                    localFilePath,
                                     ossFilePath,
+                                    localFilePath,
                                     new LogUploadService.UploadCallback() {
                                         @Override
                                         public void isSuccessOSSUpload(boolean flag) {
