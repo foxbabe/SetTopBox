@@ -420,6 +420,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      * 根据不同的投屏类型
      */
     private void handleProjectRequest() {
+
         if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
             // 点播
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -429,6 +430,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -444,6 +446,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
@@ -458,6 +461,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mGreetingRl.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             // 展示图片
             if (GlobalValues.CURRENT_PROJECT_BITMAP != null) {
@@ -495,9 +499,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
-            mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
+
             mPptAdapter.setSourceType(1);
             mPptAdapter.setPptDataSource(mPptConfig.getImages());
             if (mPptVp.getChildCount() > 0) {
@@ -518,6 +524,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             ArrayList<String> list = new ArrayList<>();
             for (PptVideo video :
@@ -536,9 +543,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
-            mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
+            mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
+
             mPptAdapter.setSourceType(2);
             mPptAdapter.setSpecialtyDataSource(mSpecialtyFileList);
             if (mPptVp.getChildCount() > 0) {
@@ -555,6 +564,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             int bgResId = 0;
             switch (mGreetingTemplate) {
@@ -597,6 +607,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             int bgResId = 0;
             switch (mGreetingTemplate) {
@@ -639,6 +650,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
+            mHandler.removeCallbacks(mPlaySpecialtyRunnable);
 
             mSavorVideoView.setMediaFiles(mAdvFileList, 0, 0);
         }
@@ -1233,7 +1245,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 int interval = 0;
                 if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
                     interval = mPptConfig.getInterval() * 1000;
-                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType)) {
+                } else if (ConstantValues.PROJECT_TYPE_RSTR_SPECIALTY.equals(mProjectType) ||
+                        ConstantValues.PROJECT_TYPE_RSTR_GREETING_THEN_SPECIALTY.equals(mProjectType)) {
                     interval = mSpecialtyInterval * 1000;
                 }
                 mHandler.postDelayed(mPPTPlayNextRunnable, interval);

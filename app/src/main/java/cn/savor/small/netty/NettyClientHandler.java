@@ -222,7 +222,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                             resp.setInfo("投屏成功");
                         } else {
                             resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
-                            resp.setInfo("投屏成功");
+                            resp.setInfo(failedIds);
                         }
                         ProjectOperationListener.getInstance(mContext).showSpecialty(paths, interval, isNewDevice);
                     } else {
@@ -361,7 +361,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         resp.setInfo("投屏成功");
                     } else {
                         resp.setResult(ConstantValues.SERVER_RESPONSE_CODE_SPECIALTY_INCOMPLETE);
-                        resp.setInfo("投屏成功");
+                        resp.setInfo(failedIds);
                     }
                     ProjectOperationListener.getInstance(mContext).showAdv(paths, isNewDevice);
                 } else {

@@ -132,8 +132,8 @@ public class SavorVideoView extends RelativeLayout {
                                 mPlayState != MediaPlayerState.END)*/) {
 
                     try {
-                        LogUtils.w("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
-                        LogFileUtil.write("setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
+                        LogUtils.w("Will setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
+                        LogFileUtil.write("Will setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         mMediaPlayer.setDisplay(mSurfaceHolder);
                         mMediaPlayer.setScreenOnWhilePlaying(true);
                     } catch (Exception e) {
@@ -248,8 +248,8 @@ public class SavorVideoView extends RelativeLayout {
                     int currentPercent = mp.getCurrentPosition() * 100 / mp.getDuration();
                     LogUtils.v(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
                     LogFileUtil.write(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
-                    if (mp.getCurrentPosition() + 400 < mp.getDuration()) {
-                        if (percent != 100 && currentPercent >= percent - 1) {
+//                    if (mp.getCurrentPosition() + 400 < mp.getDuration()) {
+                        if (percent < 99 && currentPercent >= percent - 1) {
                             // 缓冲部分不足时，暂停播放并显示进度圈
                             if (mIfShowLoading) {
                                 mProgressBar.setVisibility(VISIBLE);
@@ -266,15 +266,15 @@ public class SavorVideoView extends RelativeLayout {
                                 playInner();
                             }
                         }
-                    } else {
-                        // 缓冲好时，继续播放并隐藏进度圈
-                        if (mIfShowLoading) {
-                            mProgressBar.setVisibility(GONE);
-                        }
-                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
-                            playInner();
-                        }
-                    }
+//                    } else {
+//                        // 缓冲好时，继续播放并隐藏进度圈
+//                        if (mIfShowLoading) {
+//                            mProgressBar.setVisibility(GONE);
+//                        }
+//                        if (mPlayState == MediaPlayerState.PAUSED && !mIsPauseByOut) {
+//                            playInner();
+//                        }
+//                    }
                 }
             });
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -300,6 +300,7 @@ public class SavorVideoView extends RelativeLayout {
 
                     // 如果Surface创建完毕且没被外部强行停止时，开始播放
                     if (mIsSurfaceCreated && !mIsPauseByOut) {
+                        LogUtils.d("Will setDisplay in onPrepared() when surface is created");
                         mp.setDisplay(mSurfaceHolder);
 
                         if (mAssignedPlayPosition > 0 && mAssignedPlayPosition < mp.getDuration()) {
@@ -806,6 +807,7 @@ public class SavorVideoView extends RelativeLayout {
             if (mMediaPlayer == null) {
                 initMediaPlayer();
                 if (mIsSurfaceCreated) {
+                    LogUtils.d("Will setDisplay in setMediaFiles() when surface is created");
                     mMediaPlayer.setDisplay(mSurfaceHolder);
                 }
             }
