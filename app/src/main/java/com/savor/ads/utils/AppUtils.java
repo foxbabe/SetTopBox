@@ -1671,6 +1671,7 @@ public class AppUtils {
             for (int i = 0; i < playList.size(); i++) {
                 MediaLibBean bean = playList.get(i);
 
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 // 特殊处理ads数据
                 if (bean.getType().equals(ConstantValues.ADS)) {
                     String selection = DBHelper.MediaDBInfo.FieldName.LOCATION_ID
@@ -1680,7 +1681,6 @@ public class AppUtils {
                     if (list != null && !list.isEmpty()) {
                         for (MediaLibBean item :
                                 list) {
-                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             Date startDate = null;
                             Date endDate = null;
                             try {
@@ -1702,6 +1702,8 @@ public class AppUtils {
                                 bean.setName(item.getName());
                                 bean.setMediaPath(item.getMediaPath());
                                 bean.setChinese_name(item.getChinese_name());
+                                bean.setStart_date(item.getStart_date());
+                                bean.setEnd_date(item.getEnd_date());
                                 break;
                             }
                         }
@@ -1721,6 +1723,7 @@ public class AppUtils {
                             bean.setVid(rtbItem.getVid());
                             bean.setMd5(rtbItem.getMd5());
                             bean.setPeriod(rtbItem.getPeriod());
+                            bean.setEnd_date(format.format(new Date(rtbEndTimes.get(rtbIndex))));
                         }
 
                         rtbIndex = (++rtbIndex) % rtbMedias.size();

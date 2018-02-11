@@ -35,7 +35,10 @@ import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * 广告播放页面
@@ -400,24 +403,41 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public void onMediaPrepared(int index) {
-        // 准备播放新视频时产生一个新的UUID作为日志标识
-        String action = "start";
-        if (mCurrentPlayingIndex != index) {
-            mUUID = String.valueOf(System.currentTimeMillis());
-            mCurrentPlayingIndex = index;
-            action = "start";
-        } else {
-            // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在onMediaPrepared()中赋值
-            if (TextUtils.isEmpty(mUUID)) {
-                mUUID = String.valueOf(System.currentTimeMillis());
-            }
-            action = "resume";
-        }
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
+            if (!TextUtils.isEmpty(libBean.getEnd_date())) {
+                // 检测截止时间是否已到，到达的话跳到下一个
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date endDate = null;
+                try {
+                    endDate = format.parse(libBean.getEnd_date());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Date now = new Date();
+                if (endDate != null && endDate.before(now)) {
+                    mSavorVideoView.playNext();
+                    return;
+                }
+            }
+
+            String action = "";
+            if (mCurrentPlayingIndex != index) {
+                // 准备播放新视频时产生一个新的UUID作为日志标识
+                mUUID = String.valueOf(System.currentTimeMillis());
+                mCurrentPlayingIndex = index;
+                action = "start";
+            } else {
+                // 这里只是为了防止到这里的时候mUUID没值，正常mUUID肯定会在onMediaPrepared()中赋值
+                if (TextUtils.isEmpty(mUUID)) {
+                    mUUID = String.valueOf(System.currentTimeMillis());
+                }
+                action = "resume";
+            }
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, libBean.getType(), libBean.getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),"");
+
             if (ConstantValues.RTB_ADS.equals(libBean.getType())&&!TextUtils.isEmpty(libBean.getAdmaster_sin())){
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
             }
