@@ -170,6 +170,8 @@ public class TvDBHelper extends SQLiteOpenHelper {
                     SQLiteDatabase db = getWritableDatabase();
                     db.beginTransaction();
 
+                    db.delete(TableName.ATV_CHANNEL, null, null);
+
                     int i = 0;
                     do {
                         ContentValues contentValues = new ContentValues();
