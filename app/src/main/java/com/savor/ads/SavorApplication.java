@@ -115,7 +115,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
 //                            dos.flush();
 //                            Thread.sleep(100);
 
-                        dos.writeBytes("cp /sdcard/inner_so/* /data/data/com.savor.ads/lib/\n");
+                        dos.writeBytes("busybox cp /sdcard/inner_so/* /data/data/com.savor.ads/lib/\n");
                         dos.flush();
                         Thread.sleep(2000);
 
