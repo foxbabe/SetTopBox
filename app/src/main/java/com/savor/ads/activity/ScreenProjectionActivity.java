@@ -1174,9 +1174,10 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         }
 
         @Override
-        public void onMediaPrepared(int index) {
+        public boolean onMediaPrepared(int index) {
             initVolume();
             rescheduleToExit(false);
+            return false;
         }
 
         @Override

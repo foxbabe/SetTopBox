@@ -402,7 +402,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private int mCurrentPlayingIndex = -1;
 
     @Override
-    public void onMediaPrepared(int index) {
+    public boolean onMediaPrepared(int index) {
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
             if (!TextUtils.isEmpty(libBean.getEnd_date())) {
@@ -417,7 +417,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 Date now = new Date();
                 if (endDate != null && endDate.before(now)) {
                     mSavorVideoView.playNext();
-                    return;
+                    return true;
                 }
             }
 
@@ -442,6 +442,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
             }
         }
+
+        return false;
     }
 
     @Override

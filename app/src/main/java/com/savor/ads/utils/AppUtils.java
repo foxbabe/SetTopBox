@@ -1713,7 +1713,7 @@ public class AppUtils {
                 if (ConstantValues.RTB_ADS.equals(bean.getType())) {
                     if (!rtbMedias.isEmpty()) {
                         if (rtbIndex < rtbEndTimes.size() &&
-                                rtbEndTimes.get(rtbIndex) < System.currentTimeMillis()) {
+                                rtbEndTimes.get(rtbIndex) > System.currentTimeMillis()) {
                             MediaLibBean rtbItem = rtbMedias.get(rtbIndex);
                             bean.setName(rtbItem.getName());
                             bean.setMediaPath(rtbItem.getMediaPath());

@@ -288,32 +288,35 @@ public class SavorVideoView extends RelativeLayout {
                             + " " + SavorVideoView.this.hashCode());
                     mPlayState = MediaPlayerState.PREPARED;
 
-                    // 回调准备完毕
-                    if (mPlayStateCallback != null) {
-                        mPlayStateCallback.onMediaPrepared(mCurrentFileIndex);
-                    }
-
-                    if (mIfShowLoading) {
-                        mLoadingIv.setVisibility(GONE);
-                        mProgressBar.setVisibility(GONE);
-                    }
-
-                    // 如果Surface创建完毕且没被外部强行停止时，开始播放
-                    if (mIsSurfaceCreated && !mIsPauseByOut) {
-                        LogUtils.d("Will setDisplay in onPrepared() when surface is created");
-                        mp.setDisplay(mSurfaceHolder);
-
-                        if (mAssignedPlayPosition > 0 && mAssignedPlayPosition < mp.getDuration()) {
-                            mp.seekTo(mAssignedPlayPosition);
-                            mAssignedPlayPosition = -1;
-                        } else {
-                            playInner();
-                        }
-                    }
-
                     if (mIfHandlePrepareTimeout) {
                         // 准备开始播放移除Runnable
                         removeCallbacks(mPrepareTimeoutRunnable);
+                    }
+
+                    boolean beenAborted = false;
+                    // 回调准备完毕
+                    if (mPlayStateCallback != null) {
+                        beenAborted = mPlayStateCallback.onMediaPrepared(mCurrentFileIndex);
+                    }
+
+                    if (!beenAborted) {
+                        if (mIfShowLoading) {
+                            mLoadingIv.setVisibility(GONE);
+                            mProgressBar.setVisibility(GONE);
+                        }
+
+                        // 如果Surface创建完毕且没被外部强行停止时，开始播放
+                        if (mIsSurfaceCreated && !mIsPauseByOut) {
+                            LogUtils.d("Will setDisplay in onPrepared() when surface is created");
+                            mp.setDisplay(mSurfaceHolder);
+
+                            if (mAssignedPlayPosition > 0 && mAssignedPlayPosition < mp.getDuration()) {
+                                mp.seekTo(mAssignedPlayPosition);
+                                mAssignedPlayPosition = -1;
+                            } else {
+                                playInner();
+                            }
+                        }
                     }
                 }
             });
@@ -963,8 +966,12 @@ public class SavorVideoView extends RelativeLayout {
          * @return true: 播放源被设置新的； false: otherwise
          */
         boolean onMediaError(int index, boolean isLast);
-
-        void onMediaPrepared(int index);
+        /**
+         * 视频准备完毕
+         * @param index 当前视频序号
+         * @return true: 播放被中止； false: otherwise
+         */
+        boolean onMediaPrepared(int index);
 
         void onMediaPause(int index);
 
