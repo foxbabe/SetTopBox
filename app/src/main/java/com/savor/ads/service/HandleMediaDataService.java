@@ -996,13 +996,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, null, null);
 
         String logUUID = String.valueOf(System.currentTimeMillis());
-        if (!isAdsFirstRun) {
-            // 记录下载开始日志
-            int count = programAdsBean.getMedia_lib() == null ? 0 : programAdsBean.getMedia_lib().size();
-            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", "ads_down", adsPeriod,
-                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
-        }
+        // 记录下载开始日志
+        int count = programAdsBean.getMedia_lib() == null ? 0 : programAdsBean.getMedia_lib().size();
+        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                String.valueOf(System.currentTimeMillis()), "start", "ads_down", adsPeriod,
+                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
 
         session.setAdsDownloadPeriod(adsPeriod);
         boolean isAdsCompleted = false;
@@ -1057,12 +1055,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             // 从ADS下载表中删除非该期的记录
             dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWADSLIST, DBHelper.MediaDBInfo.TableName.ADSLIST);
             // 记录日志
-            if (!isAdsFirstRun) {
-                // 记录下载完成日志
-                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "end", "ads_down", adsPeriod,
-                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
-            }
+            // 记录下载完成日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", "ads_down", adsPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
             LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                     Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "update", programAdsBean.getVersion().getType(), "",
@@ -1071,12 +1067,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             notifyToPlay();
         } else {
-            if (!isAdsFirstRun) {
-                // 记录下载中止日志
-                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "suspend", "ads_down", adsPeriod,
-                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
-            }
+            // 记录下载中止日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "suspend", "ads_down", adsPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
         }
     }
 
