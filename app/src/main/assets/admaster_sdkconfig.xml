@@ -5,9 +5,9 @@
     <!--缓存队列设置-->
     <offlineCache>
         <length>0</length>
-        <queueExpirationSecs>10</queueExpirationSecs>
+        <queueExpirationSecs>60</queueExpirationSecs>
          <!--发送超时时间-->
-        <timeout>10</timeout>
+        <timeout>60</timeout>
     </offlineCache>
 
     <companies>

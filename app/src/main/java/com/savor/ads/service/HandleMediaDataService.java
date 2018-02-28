@@ -728,13 +728,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 // 设置下载中期号
                 session.setProDownloadPeriod(proPeriod);
 
-                if (!isFirstRun) {
-                    // 记录下载开始日志
-                    int count = item.getMedia_lib() == null ? 0 : item.getMedia_lib().size();
-                    LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                            String.valueOf(System.currentTimeMillis()), "start", "pro_down", proPeriod,
-                            "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
-                }
+                // 记录下载开始日志
+                int count = item.getMedia_lib() == null ? 0 : item.getMedia_lib().size();
+                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "start", "pro_down", proPeriod,
+                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
             }
 
             VersionInfo versionInfo = item.getVersion();
@@ -803,12 +801,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     isProCompleted = true;
                     mProCompletedPeriod = proPeriod;
                     // 记录日志
-                    if (!isFirstRun) {
-                        // 记录下载完成日志
-                        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                                String.valueOf(System.currentTimeMillis()), "end", "pro_down", proPeriod,
-                                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
-                    }
+                    // 记录下载完成日志
+                    LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                            String.valueOf(System.currentTimeMillis()), "end", "pro_down", proPeriod,
+                            "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
                     LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                             Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
                             String.valueOf(System.currentTimeMillis()), "update", versionInfo.getType(), "",
@@ -857,13 +853,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selectionDel, argsDel);
 
         String logUUID = String.valueOf(System.currentTimeMillis());
-        if (!isFirstRun) {
-            // 记录下载开始日志
-            int count = programAdvBean.getMedia_lib() == null ? 0 : programAdvBean.getMedia_lib().size();
-            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "start", "adv_down", advPeriod,
-                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
-        }
+        // 记录下载开始日志
+        int count = programAdvBean.getMedia_lib() == null ? 0 : programAdvBean.getMedia_lib().size();
+        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                String.valueOf(System.currentTimeMillis()), "start", "adv_down", advPeriod,
+                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
 
         boolean isAdvCompleted = false;
         session.setAdvDownloadPeriod(programAdvBean.getVersion().getVersion());
@@ -924,19 +918,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             isAdvCompleted = true;
         }
 
-        if (!isFirstRun) {
-            // 记录日志
-            if (isAdvCompleted) {
-                // 记录下载完成日志
-                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "end", "adv_down", advPeriod,
-                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
-            } else {
-                // 记录下载中止日志
-                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "suspend", "adv_down", advPeriod,
-                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
-            }
+        // 记录日志
+        if (isAdvCompleted) {
+            // 记录下载完成日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", "adv_down", advPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
+        } else {
+            // 记录下载中止日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "suspend", "adv_down", advPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
         }
 
         if (isAdvCompleted && isProCompleted && !TextUtils.isEmpty(programAdvBean.getMenu_num()) &&

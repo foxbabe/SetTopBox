@@ -77,7 +77,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         registerDownloadReceiver();
         // 启动投屏类操作处理的Service
         startScreenProjectionService();
-        LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
+//        LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
         // SDK初始化
         AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
         AdmasterSdk.setLogState(true);
@@ -122,7 +122,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     };
 
     private void checkAndPlay(int lastMediaOrder) {
-        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
+//        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
         if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             if (AppUtils.isMstar()) {
@@ -141,7 +141,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     private void doPlay(int lastMediaOrder) {
-        LogFileUtil.write("AdsPlayerActivity doPlay");
+//        LogFileUtil.write("AdsPlayerActivity doPlay");
         ArrayList<String> urls = new ArrayList<>();
         if (mPlayList != null && mPlayList.size() > 0) {
             int index = 0;
@@ -168,7 +168,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     protected void onResume() {
         super.onResume();
 
-        LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
+//        LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
         mActivityResumeTime = System.currentTimeMillis();
         if (!mIsGoneToTv) {
             setVolume(mSession.getVolume());
@@ -191,13 +191,13 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     protected void onStart() {
-        LogFileUtil.write("AdsPlayerActivity onStart " + this.hashCode());
+//        LogFileUtil.write("AdsPlayerActivity onStart " + this.hashCode());
         super.onStart();
     }
 
     @Override
     protected void onRestart() {
-        LogFileUtil.write("AdsPlayerActivity onRestart " + this.hashCode());
+//        LogFileUtil.write("AdsPlayerActivity onRestart " + this.hashCode());
         super.onRestart();
 
 //        if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod())) {
@@ -217,14 +217,14 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     protected void onStop() {
-        LogFileUtil.write("AdsPlayerActivity onStop " + this.hashCode());
+//        LogFileUtil.write("AdsPlayerActivity onStop " + this.hashCode());
         mSavorVideoView.onStop();
         super.onStop();
     }
 
     @Override
     protected void onPause() {
-        LogFileUtil.write("AdsPlayerActivity onPause " + this.hashCode());
+//        LogFileUtil.write("AdsPlayerActivity onPause " + this.hashCode());
         mSavorVideoView.onPause();
         super.onPause();
     }
@@ -481,13 +481,13 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        LogFileUtil.write("AdsPlayerActivity onSaveInstanceState");
+//        LogFileUtil.write("AdsPlayerActivity onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onDestroy() {
-        LogFileUtil.write("AdsPlayerActivity onDestroy");
+//        LogFileUtil.write("AdsPlayerActivity onDestroy");
         super.onDestroy();
         unregisterReceiver(mDownloadCompleteReceiver);
         AdmasterSdk.terminateSDK();

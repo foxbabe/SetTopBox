@@ -62,6 +62,16 @@ public class LogFileUtil {
     }
 
     public static void write(String msg) {
+        try {
+            File file = new File(mLogFilePath);
+            if (file.exists() && file.length() > 1024 * 1024 * 10) {
+                file.delete();
+            }
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(mLogFilePath, true);

@@ -81,7 +81,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         }
         if (GlobalValues.IS_UPUSH_REGISTER_SUCCESS) {
             LogUtils.d("onAppStart " + this.getClass().getSimpleName());
-            LogFileUtil.write("onAppStart " + this.getClass().getSimpleName());
+//            LogFileUtil.write("onAppStart " + this.getClass().getSimpleName());
             PushAgent.getInstance(this).onAppStart();
         }
         //1是打开，0是关闭
@@ -192,7 +192,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         if (!TextUtils.isEmpty(lastStartStr) && lastStartStr.contains(" ")) {
             dateStr = lastStartStr.split(" ")[0];
         }
-        LogFileUtil.write("checkAndClearCache curTimeStr=" + curTimeStr + " lastDateStr=" + dateStr);
+//        LogFileUtil.write("checkAndClearCache curTimeStr=" + curTimeStr + " lastDateStr=" + dateStr);
         if (!curTimeStr.equals(dateStr)) {
             AppUtils.clearPptTmpFiles(this);
         }
@@ -386,7 +386,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
         if (keyCode == KeyCode.KEY_CODE_SYSTEM_SETTING) {
-            LogFileUtil.write("will gotoSystemSetting");
+//            LogFileUtil.write("will gotoSystemSetting");
             gotoSystemSetting();
             handled = true;
 
@@ -505,10 +505,12 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
     private void manualHeartbeat() {
         ShowMessage.showToast(this, "开始上报心跳");
+        LogFileUtil.write("开始手动上报心跳");
         AppApi.heartbeat(this, new ApiRequestListener() {
             @Override
             public void onSuccess(AppApi.Action method, Object obj) {
                 ShowMessage.showToast(mContext, "上报心跳成功");
+                LogFileUtil.write("手动上报心跳成功。 " + obj);
             }
 
             @Override
@@ -519,11 +521,13 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                     msg = errorMessage.getMessage();
                 }
                 ShowMessage.showToast(mContext, "上报心跳失败 " + msg);
+                LogFileUtil.write("手动上报心跳失败 " + msg);
             }
 
             @Override
             public void onNetworkFailed(AppApi.Action method) {
                 ShowMessage.showToast(mContext, "上报心跳失败，网络异常");
+                LogFileUtil.write("手动上报心跳失败，网络异常");
             }
         });
     }

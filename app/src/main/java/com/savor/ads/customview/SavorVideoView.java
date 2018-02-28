@@ -124,7 +124,7 @@ public class SavorVideoView extends RelativeLayout {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 LogUtils.w(TAG + "surfaceCreated mPlayState:" + mPlayState + " mMediaPlayer == null?" +(mMediaPlayer == null) + "  " + SavorVideoView.this.hashCode());
-                LogFileUtil.write(TAG + "surfaceCreated mPlayState:" + mPlayState + " mMediaPlayer == null?" +(mMediaPlayer == null) + "  " + SavorVideoView.this.hashCode());
+//                LogFileUtil.write(TAG + "surfaceCreated mPlayState:" + mPlayState + " mMediaPlayer == null?" +(mMediaPlayer == null) + "  " + SavorVideoView.this.hashCode());
                 mIsSurfaceCreated = true;
                 if (mMediaPlayer != null /*&&
                         (mPlayState != MediaPlayerState.ERROR &&
@@ -133,12 +133,12 @@ public class SavorVideoView extends RelativeLayout {
 
                     try {
                         LogUtils.w("Will setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
-                        LogFileUtil.write("Will setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//                        LogFileUtil.write("Will setDisplay Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         mMediaPlayer.setDisplay(mSurfaceHolder);
                         mMediaPlayer.setScreenOnWhilePlaying(true);
                     } catch (Exception e) {
                         LogUtils.e("setDisplay Exception, Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
-                        LogFileUtil.write("setDisplay Exception, Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//                        LogFileUtil.write("setDisplay Exception, Current state:" + mPlayState + " " + SavorVideoView.this.hashCode());
                         e.printStackTrace();
                     }
                     if (mPlayState == MediaPlayerState.INITIALIZED) {
@@ -152,13 +152,13 @@ public class SavorVideoView extends RelativeLayout {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 LogUtils.w(TAG + "surfaceChanged width = " + width + " height = " + height + " " + SavorVideoView.this.hashCode());
-                LogFileUtil.write(TAG + "surfaceChanged width = " + width + " height = " + height + " " + SavorVideoView.this.hashCode());
+//                LogFileUtil.write(TAG + "surfaceChanged width = " + width + " height = " + height + " " + SavorVideoView.this.hashCode());
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 LogUtils.w(TAG + "surfaceDestroyed" + " " + SavorVideoView.this.hashCode());
-                LogFileUtil.write(TAG + "surfaceDestroyed" + " " + SavorVideoView.this.hashCode());
+//                LogFileUtil.write(TAG + "surfaceDestroyed" + " " + SavorVideoView.this.hashCode());
                 mIsSurfaceCreated = false;
 
                 release();
@@ -194,7 +194,7 @@ public class SavorVideoView extends RelativeLayout {
 
     private void initMediaPlayer() {
         LogUtils.w(TAG + "initMediaPlayer mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "initMediaPlayer mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "initMediaPlayer mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
             mPlayState = MediaPlayerState.IDLE;
@@ -202,7 +202,7 @@ public class SavorVideoView extends RelativeLayout {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     LogUtils.w(TAG + "MediaPlayer onCompletion" + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer onCompletion" + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer onCompletion" + " " + SavorVideoView.this.hashCode());
                     mPlayState = MediaPlayerState.COMPLETED;
 
                     boolean beenResetSource = false;
@@ -238,7 +238,7 @@ public class SavorVideoView extends RelativeLayout {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
                     LogUtils.v(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "onBufferingUpdate percent = " + percent + " " + SavorVideoView.this.hashCode());
 
                     // 播放器状态不对时getDuration报错，也没必要处理播放、暂停了，这里直接return
                     if (mPlayState == MediaPlayerState.IDLE || mPlayState == MediaPlayerState.INITIALIZED ||
@@ -247,7 +247,7 @@ public class SavorVideoView extends RelativeLayout {
 
                     int currentPercent = mp.getCurrentPosition() * 100 / mp.getDuration();
                     LogUtils.v(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "onBufferingUpdate currentPercent = " + currentPercent + " position = " + mp.getCurrentPosition() + " duration = " + mp.getDuration() + " " + SavorVideoView.this.hashCode());
 //                    if (mp.getCurrentPosition() + 400 < mp.getDuration()) {
                         if (percent < 99 && currentPercent >= percent - 1) {
                             // 缓冲部分不足时，暂停播放并显示进度圈
@@ -283,9 +283,9 @@ public class SavorVideoView extends RelativeLayout {
                     LogUtils.w(TAG + "MediaPlayer onMediaPrepared " +  " mIsSurfaceCreated:" + mIsSurfaceCreated +
                             " mIsPauseByOut:" + mIsPauseByOut +" mAssignedPlayPosition:" + mAssignedPlayPosition
                             + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer onMediaPrepared " +  " mIsSurfaceCreated:" + mIsSurfaceCreated +
-                            " mIsPauseByOut:" + mIsPauseByOut +" mAssignedPlayPosition:" + mAssignedPlayPosition
-                            + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer onMediaPrepared " +  " mIsSurfaceCreated:" + mIsSurfaceCreated +
+//                            " mIsPauseByOut:" + mIsPauseByOut +" mAssignedPlayPosition:" + mAssignedPlayPosition
+//                            + " " + SavorVideoView.this.hashCode());
                     mPlayState = MediaPlayerState.PREPARED;
 
                     if (mIfHandlePrepareTimeout) {
@@ -328,8 +328,8 @@ public class SavorVideoView extends RelativeLayout {
                     int viewHeight = getHeight();
                     LogUtils.w(TAG + "MediaPlayer onVideoSizeChanged width = " + width + " height = " + height +
                             " viewWidth = " + viewWidth + " viewHeight = " + viewHeight + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer onVideoSizeChanged width = " + width + " height = " + height +
-                            " viewWidth = " + viewWidth + " viewHeight = " + viewHeight + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer onVideoSizeChanged width = " + width + " height = " + height +
+//                            " viewWidth = " + viewWidth + " viewHeight = " + viewHeight + " " + SavorVideoView.this.hashCode());
                     if (((double) viewWidth / width) * height > viewHeight) {
                         layoutParams.width = (int) (((double) viewHeight / height) * width);
                         layoutParams.height = viewHeight;
@@ -344,7 +344,7 @@ public class SavorVideoView extends RelativeLayout {
                 @Override
                 public void onSeekComplete(MediaPlayer mp) {
                     LogUtils.w(TAG + "MediaPlayer onSeekComplete" + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer onSeekComplete" + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer onSeekComplete" + " " + SavorVideoView.this.hashCode());
                     if (mMediaPlayer != null && mPlayState == MediaPlayerState.PREPARED) {
                         playInner();
                     }
@@ -354,7 +354,7 @@ public class SavorVideoView extends RelativeLayout {
                 @Override
                 public boolean onInfo(MediaPlayer mp, int what, int extra) {
                     LogUtils.w(TAG + "MediaPlayer setOnInfoListener" + " what=" + what + " extra=" + extra + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer setOnInfoListener" + " what=" + what + " extra=" + extra + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer setOnInfoListener" + " what=" + what + " extra=" + extra + " " + SavorVideoView.this.hashCode());
                     if (MediaPlayer.MEDIA_INFO_BUFFERING_START == what) {
                         mRootRl.removeCallbacks(mBufferTimeoutRunnable);
                         mRootRl.postDelayed(mBufferTimeoutRunnable, MAX_BUFFER_TIME);
@@ -368,7 +368,7 @@ public class SavorVideoView extends RelativeLayout {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     LogUtils.e(TAG + "MediaPlayer onError what = " + what + " extra = " + extra + " " + SavorVideoView.this.hashCode());
-                    LogFileUtil.write(TAG + "MediaPlayer onError what = " + what + " extra = " + extra + " " + SavorVideoView.this.hashCode());
+//                    LogFileUtil.write(TAG + "MediaPlayer onError what = " + what + " extra = " + extra + " " + SavorVideoView.this.hashCode());
                     if (!mp.equals(mMediaPlayer)) {
                         return true;
                     }
@@ -416,7 +416,7 @@ public class SavorVideoView extends RelativeLayout {
             try {
                 if (mIsSurfaceCreated) {
                     LogUtils.d("Will setDisplay in initMediaPlayer() when surface is created");
-                    LogFileUtil.write("Will setDisplay in initMediaPlayer() when surface is created");
+//                    LogFileUtil.write("Will setDisplay in initMediaPlayer() when surface is created");
                     mMediaPlayer.setDisplay(mSurfaceHolder);
                 }
             } catch (Exception e) {
@@ -459,26 +459,26 @@ public class SavorVideoView extends RelativeLayout {
      * 设置播放数据源
      */
     private boolean setMediaPlayerSource() {
-        LogUtils.w(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (mMediaPlayer == null) {
-            LogUtils.e(TAG + "setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + "setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
+            LogUtils.e(TAG + " setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
+            LogFileUtil.write(TAG + " setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
             return false;
         }
         if (mPlayState != MediaPlayerState.IDLE) {
-            LogUtils.e(TAG + "setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + "setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
+            LogUtils.e(TAG + " setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
+            LogFileUtil.write(TAG + " setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
             return false;
         }
         if (mMediaFiles == null || mMediaFiles.isEmpty() || mCurrentFileIndex >= mMediaFiles.size()) {
-            LogUtils.e(TAG + "setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + "setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
+            LogUtils.e(TAG + " setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
+            LogFileUtil.write(TAG + " setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
             return false;
         }
         try {
             LogUtils.w("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
+//            LogFileUtil.write("开始播放：" + mMediaFiles.get(mCurrentFileIndex) + " " + SavorVideoView.this.hashCode());
             mMediaPlayer.setDataSource(mMediaFiles.get(mCurrentFileIndex));
             mPlayState = MediaPlayerState.INITIALIZED;
         } catch (IOException e) {
@@ -492,13 +492,13 @@ public class SavorVideoView extends RelativeLayout {
      * 准备播放
      */
     private void prepareMediaPlayer() {
-        LogUtils.w(TAG + "prepareMediaPlayer mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "prepareMediaPlayer mPlayState:" + mPlayState + " mIsSurfaceCreated:" +
-                mIsSurfaceCreated + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " prepareMediaPlayer mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + " prepareMediaPlayer mPlayState:" + mPlayState + " mIsSurfaceCreated:" +
+//                mIsSurfaceCreated + " " + SavorVideoView.this.hashCode());
         if (mIsSurfaceCreated) {
             if (mPlayState != MediaPlayerState.INITIALIZED) {
-                LogUtils.e(TAG + "prepareMediaPlayer in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
-                LogFileUtil.write(TAG + "prepareMediaPlayer in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
+                LogUtils.e(TAG + " prepareMediaPlayer in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
+//                LogFileUtil.write(TAG + "prepareMediaPlayer in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
                 return;
             }
             mMediaPlayer.prepareAsync();
@@ -553,8 +553,8 @@ public class SavorVideoView extends RelativeLayout {
      * @param assignedPlayPosition
      */
     private void resetAndPreparePlayer(int assignedPlayPosition) {
-        LogUtils.w(TAG + "resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "resetAndPreparePlayer assignedPlayPosition = " + assignedPlayPosition + " " + SavorVideoView.this.hashCode());
         mMediaPlayer.reset();
         mPlayState = MediaPlayerState.IDLE;
 
@@ -588,8 +588,8 @@ public class SavorVideoView extends RelativeLayout {
     }
 
     public boolean tryPlay() {
-        LogUtils.w(TAG + "tryPlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "tryPlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " tryPlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "tryPlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (MediaPlayerState.PAUSED == mPlayState) {
             mIsPauseByOut = false;
             playInner();
@@ -621,15 +621,15 @@ public class SavorVideoView extends RelativeLayout {
     }
 
     private void playInner() {
-        LogUtils.w(TAG + "playInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "playInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " playInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "playInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         try {
             mMediaPlayer.start();
             mPlayState = MediaPlayerState.STARTED;
         } catch (IllegalStateException e) {
             e.printStackTrace();
-            LogUtils.e(TAG + "Exception when playInner");
-            LogFileUtil.write(TAG + "Exception when playInner");
+            LogUtils.e(TAG + " Exception when playInner");
+            LogFileUtil.write(TAG + " Exception when playInner");
         }
     }
 
@@ -637,8 +637,8 @@ public class SavorVideoView extends RelativeLayout {
      * 暂停播放
      */
     public boolean tryPause() {
-        LogUtils.w(TAG + "tryPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "tryPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " tryPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "tryPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (MediaPlayerState.STARTED == mPlayState) {
             mIsPauseByOut = true;
             pauseInner();
@@ -669,8 +669,8 @@ public class SavorVideoView extends RelativeLayout {
     }
 
     private void pauseInner() {
-        LogUtils.w(TAG + "pauseInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "pauseInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " pauseInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "pauseInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         mMediaPlayer.pause();
         mPlayState = MediaPlayerState.PAUSED;
     }
@@ -679,8 +679,8 @@ public class SavorVideoView extends RelativeLayout {
      * 停止播放
      */
     public void stop() {
-        LogUtils.w(TAG + "stop mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "stop mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " stop mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "stop mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         stopInner();
 
         mIsPauseByOut = true;
@@ -690,8 +690,8 @@ public class SavorVideoView extends RelativeLayout {
      * 停止播放
      */
     private void stopInner() {
-        LogUtils.w(TAG + "stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "stopInner mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (isInPlaybackState() && mMediaPlayer != null) {
             mMediaPlayer.stop();
             mPlayState = MediaPlayerState.STOPPED;
@@ -714,8 +714,8 @@ public class SavorVideoView extends RelativeLayout {
     }
 
     public void onStop() {
-        LogUtils.w(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "onPause mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
 
         removeCallbacks(mPrepareTimeoutRunnable);
 
@@ -730,8 +730,8 @@ public class SavorVideoView extends RelativeLayout {
      * 所在页面onResume时请调用此方法处理，类似的还有{@link #onPause()}
      */
     public void onResume() {
-        LogUtils.w(TAG + "onResume mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "onResume mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " onResume mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "onResume mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (mMediaPlayer == null) {
             initMediaPlayer();
         }
@@ -746,8 +746,8 @@ public class SavorVideoView extends RelativeLayout {
      * 停止播放并释放MediaPlayer
      */
     public void release() {
-        LogUtils.w(TAG + "release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "release mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -843,8 +843,8 @@ public class SavorVideoView extends RelativeLayout {
      * 播放下一条
      */
     public void playNext() {
-        LogUtils.w(TAG + "playNext mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "playNext mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " playNext mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "playNext mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         stopInner();
 
         mIsPauseByOut = false;
@@ -858,8 +858,8 @@ public class SavorVideoView extends RelativeLayout {
      * 播放上一条
      */
     public void playPrevious() {
-        LogUtils.w(TAG + "playPrevious mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "playPrevious mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " playPrevious mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + " playPrevious mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         stopInner();
 
         mIsPauseByOut = false;
@@ -875,8 +875,8 @@ public class SavorVideoView extends RelativeLayout {
      * @param position
      */
     public void seekTo(int position) {
-        LogUtils.w(TAG + "seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "seek mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (isInPlaybackState()) {
             mMediaPlayer.seekTo(position);
         } else {
@@ -911,8 +911,8 @@ public class SavorVideoView extends RelativeLayout {
      * @return
      */
     public int getCurrentPosition() {
-        LogUtils.w(TAG + "getCurrentPosition mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "getCurrentPosition mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+        LogUtils.w(TAG + " getCurrentPosition mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "getCurrentPosition mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (isInPlaybackState())
             return mMediaPlayer.getCurrentPosition();
         else

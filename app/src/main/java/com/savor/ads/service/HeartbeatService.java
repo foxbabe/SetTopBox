@@ -116,20 +116,21 @@ public class HeartbeatService extends IntentService {
     }
 
     private void doHeartbeat() {
+        LogFileUtil.write("开始自动上报心跳");
         AppApi.heartbeat(this, new ApiRequestListener() {
             @Override
             public void onSuccess(AppApi.Action method, Object obj) {
-
+                LogFileUtil.write("自动上报心跳成功。 " + obj);
             }
 
             @Override
             public void onError(AppApi.Action method, Object obj) {
-
+                LogFileUtil.write("自动上报心跳失败。 " + obj);
             }
 
             @Override
             public void onNetworkFailed(AppApi.Action method) {
-
+                LogFileUtil.write("自动上报心跳失败，网络异常");
             }
         });
     }
