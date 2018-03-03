@@ -2,11 +2,13 @@ package com.savor.ads.activity;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
@@ -23,6 +25,7 @@ import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.service.FaceDetectService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
@@ -102,6 +105,38 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         checkAndPlay(-1);
     }
 
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            faceDetectService = ((FaceDetectService.DetectBinder) service).getService();
+//            faceDetectService.setFaceDetectListener(AdsPlayerActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            faceDetectService = null;
+        }
+    };
+    FaceDetectService faceDetectService;
+    /**
+     * 启动人脸检测service
+     */
+    private void startFaceDetectService() {
+        LogFileUtil.write("will start FaceDetectService");
+        Intent intent = new Intent(this, FaceDetectService.class);
+        bindService(intent, connection, BIND_AUTO_CREATE);
+    }
+
+    /**
+     * 停止人脸检测service
+     */
+    private void stopFaceDetectService() {
+        LogFileUtil.write("will stop FaceDetectService");
+        if (connection != null) {
+            unbindService(connection);
+        }
+    }
+
     private void registerDownloadReceiver() {
         IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
         intentFilter.addAction(ConstantValues.RTB_ADS_PUSH_ACTION);
@@ -170,6 +205,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
 //        LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
         mActivityResumeTime = System.currentTimeMillis();
+        startFaceDetectService();
         if (!mIsGoneToTv) {
             setVolume(mSession.getVolume());
             mSavorVideoView.onResume();
@@ -219,6 +255,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     protected void onStop() {
 //        LogFileUtil.write("AdsPlayerActivity onStop " + this.hashCode());
         mSavorVideoView.onStop();
+        stopFaceDetectService();
         super.onStop();
     }
 
@@ -359,6 +396,8 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
                     "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
                     "");
+
+            faceDetectService.notifyPlayComplete(mPlayList.get(index).getVid());
         }
 
         if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
@@ -381,6 +420,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
+        if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
+            faceDetectService.notifyPlayComplete(mPlayList.get(index).getVid());
+        }
+
         if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
             int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
             // 重新获取播放列表开始播放
@@ -397,6 +440,18 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         } else {
             return false;
         }
+    }
+
+    /**
+     * 获取当前正在播放的视频ID
+     * @return
+     */
+    public String getCurrentVid() {
+        String vid = null;
+        if (mPlayList != null && mCurrentPlayingIndex >= 0 && mCurrentPlayingIndex < mPlayList.size()) {
+            vid = mPlayList.get(mCurrentPlayingIndex).getVid();
+        }
+        return vid;
     }
 
     private int mCurrentPlayingIndex = -1;
@@ -440,6 +495,10 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
             if (ConstantValues.RTB_ADS.equals(libBean.getType())&&!TextUtils.isEmpty(libBean.getAdmaster_sin())){
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
+            }
+
+            if ("start".equals(action) && faceDetectService != null) {
+                faceDetectService.notifyPlayStart(libBean.getVid());
             }
         }
 

@@ -87,7 +87,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     compileOnly fileTree(include: ['*.jar'], dir: 'provided')
     compile "com.android.support:support-v4:$SUPPORT_LIB_VERSION"
     compile "com.android.support:appcompat-v7:$SUPPORT_LIB_VERSION"

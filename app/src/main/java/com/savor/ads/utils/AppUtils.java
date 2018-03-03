@@ -172,6 +172,10 @@ public class AppUtils {
          * RTB广告目录
          */
         rtb_ads,
+        /**
+         * 人脸识别记录
+         */
+        face,
     }
 
     private static TrustManager[] trustAllCerts;
@@ -327,6 +331,10 @@ public class AppUtils {
         if (!rtbFile.exists()) {
             rtbFile.mkdir();
         }
+        File targetFaceFile = new File(path + File.separator, "face");
+        if (!targetFaceFile.exists()) {
+            targetFaceFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -348,6 +356,8 @@ public class AppUtils {
             path = specialtyFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.rtb_ads) {
             path = rtbFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.face) {
+            path = targetFaceFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
