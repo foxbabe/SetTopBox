@@ -43,7 +43,8 @@ public class FaceDetectLogUtil {
                         try {
                             String faceLog = System.currentTimeMillis() + "|" + mSession.getBoiteId() + "|" + mSession.getRoomId() + "|" +
                                     mSession.getBoxId() + "|" + bean.getUuid() + "|" + bean.getTrackId() + "|" + bean.getStartTime() +
-                                    "|" + bean.getEndTime() + "|" + bean.getTotalSeconds() + "|" + bean.getMediaIds() + "\r\n";
+                                    "|" + bean.getEndTime() + "|" + bean.getTotalSeconds() + "|" + bean.getMediaIds() + "|" + bean.getType() +
+                                    "\r\n";
                             mWriter.write(faceLog);
                             mWriter.flush();
                             closeWriter();

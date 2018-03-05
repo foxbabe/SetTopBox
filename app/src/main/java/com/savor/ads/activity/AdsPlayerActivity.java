@@ -337,7 +337,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
         if (mPlayList != null) {
             if (!mPlayListDialog.isShowing()) {
-                mPlayListDialog.showPlaylist(mPlayList);
+                mPlayListDialog.showPlaylist(mPlayList, mCurrentPlayingIndex);
             }
         } else {
             ShowMessage.showToast(mContext, "播放列表为空");
@@ -443,15 +443,15 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     /**
-     * 获取当前正在播放的视频ID
+     * 获取当前正在播放的视频
      * @return
      */
-    public String getCurrentVid() {
-        String vid = null;
+    public MediaLibBean getCurrentMedia() {
+        MediaLibBean media = null;
         if (mPlayList != null && mCurrentPlayingIndex >= 0 && mCurrentPlayingIndex < mPlayList.size()) {
-            vid = mPlayList.get(mCurrentPlayingIndex).getVid();
+            media = mPlayList.get(mCurrentPlayingIndex);
         }
-        return vid;
+        return media;
     }
 
     private int mCurrentPlayingIndex = -1;
@@ -498,7 +498,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             }
 
             if ("start".equals(action) && faceDetectService != null) {
-                faceDetectService.notifyPlayStart(libBean.getVid());
+                faceDetectService.notifyPlayStart(libBean.getVid(), libBean.getType());
             }
         }
 

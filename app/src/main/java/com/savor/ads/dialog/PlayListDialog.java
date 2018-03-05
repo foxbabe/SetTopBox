@@ -70,7 +70,7 @@ public class PlayListDialog extends Dialog {
         window.setAttributes(wl);
     }
 
-    public void showPlaylist(ArrayList<MediaLibBean> playlist) {
+    public void showPlaylist(ArrayList<MediaLibBean> playlist, int currentIndex) {
         super.show();
 
         String adsPeriod = Session.get(getContext()).getAdsPeriod();
@@ -79,6 +79,7 @@ public class PlayListDialog extends Dialog {
             mTitleTv.setText(String.format("播放列表    共%s个内容    广告版本：%s    节目版本：%s", playlist.size(), adsPeriod, proPeriod));
             mPlaylistAdapter.setPlaylist(playlist);
 
+            mPlaylistGv.setSelection(currentIndex);
         }
     }
 

@@ -98,6 +98,7 @@ public class LogUploadService {
                     uploadLotteryRecordFile();
                     while (true) {
                         uploadFile();
+                        uploadFaceRecordFile();
                         try {
                             Thread.sleep(1000 * 5);
                         } catch (InterruptedException e) {
@@ -152,6 +153,62 @@ public class LogUploadService {
             }
         }
 
+    }
+
+    private void uploadFaceRecordFile() {
+        File[] files = getAllLogInfo(AppUtils.StorageFile.face);
+        if (files != null && files.length > 0) {
+            for (final File file : files) {
+                final String name = file.getName();
+                final String path = file.getPath();
+                if (file.isFile()) {
+                    String[] split = name.split("_");
+                    if (split.length != 2) {
+                        continue;
+                    }
+                    final String time = split[1].substring(0, 10);
+                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
+                        continue;
+                    }
+                    if (file.length() <= 0) {
+                        file.delete();
+                        continue;
+                    }
+                    final String archivePath = path + ".zip";
+
+                    if (!TextUtils.isEmpty(session.getOssAreaId())) {
+
+                        File sourceFile = new File(path);
+                        final File zipFile = new File(archivePath);
+                        try {
+                            AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        if (zipFile.exists()) {
+                            String ossFilePath = OSSValues.uploadFacePath + session.getOssAreaId() + File.separator +
+                                    AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            String localFilePath = archivePath.substring(1, archivePath.length());
+                            new ResuambleUpload(oss,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    ossFilePath,
+                                    localFilePath,
+                                    new LogUploadService.UploadCallback() {
+                                        @Override
+                                        public void isSuccessOSSUpload(boolean flag) {
+                                            if (flag) {
+                                                file.delete();
+                                            }
+                                            if (zipFile.exists()) {
+                                                zipFile.delete();
+                                            }
+                                        }
+                                    }).resumableUpload();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void uploadFile() {

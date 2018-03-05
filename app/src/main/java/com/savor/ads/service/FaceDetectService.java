@@ -25,6 +25,7 @@ import com.megvii.licensemanager.sdk.LicenseManager;
 import com.savor.ads.R;
 import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.bean.FaceLogBean;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.log.FaceDetectLogUtil;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.LogFileUtil;
@@ -126,10 +127,11 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         return super.onUnbind(intent);
     }
 
-    public void notifyPlayStart(String mediaId) {
+    public void notifyPlayStart(String mediaId, String mediaType) {
         if (mediaId != null && mWatchingMap != null) {
             for (FaceLogBean bean : mWatchingMap.values()) {
                 bean.setMediaIds(mediaId);
+                bean.setType(mediaType);
                 bean.setStartTime(System.currentTimeMillis());
             }
         }
@@ -453,13 +455,6 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                     mFrameIndex++;
                 }
 
-                // 获取当前正在播放的视频ID
-                String vid = null;
-                Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
-                if (ac != null && ac instanceof AdsPlayerActivity) {
-                    vid = ((AdsPlayerActivity) ac).getCurrentVid();
-                }
-
                 // 调SDK方法检测人脸
                 int width = previewSize.width;
                 int height = previewSize.height;
@@ -471,6 +466,13 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                     Log.d("-------Eye--------", "face count=" +faces.length);
                     if (faces.length >= 0) {
                         // 检测到人脸
+
+                        // 获取当前正在播放的视频ID
+                        MediaLibBean mediaLibBean = null;
+                        Activity ac = ActivitiesManager.getInstance().getCurrentActivity();
+                        if (ac != null && ac instanceof AdsPlayerActivity) {
+                            mediaLibBean = ((AdsPlayerActivity) ac).getCurrentMedia();
+                        }
 
                         for (int c = 0; c < faces.length; c++) {
 //                    if (is106Points)
@@ -503,13 +505,16 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                                         // 停留时长超过阈值，认为符合正在观看
                                         if (!mWatchingMap.containsKey(face.trackID)) {
                                             // 新增的观看者
-                                            FaceLogBean faceLogBean = new FaceLogBean();
-                                            faceLogBean.setUuid(UUID.randomUUID().toString());
-                                            faceLogBean.setStartTime(System.currentTimeMillis() - DETECT_THRESHOLD);
-                                            faceLogBean.setNewestFrameIndex(mFrameIndex);
-                                            faceLogBean.setTrackId(face.trackID);
-                                            faceLogBean.setMediaIds(vid);
-                                            mWatchingMap.put(face.trackID, faceLogBean);
+                                            if (mediaLibBean != null && !TextUtils.isEmpty(mediaLibBean.getVid())) {
+                                                FaceLogBean faceLogBean = new FaceLogBean();
+                                                faceLogBean.setUuid(UUID.randomUUID().toString());
+                                                faceLogBean.setStartTime(System.currentTimeMillis() - DETECT_THRESHOLD);
+                                                faceLogBean.setNewestFrameIndex(mFrameIndex);
+                                                faceLogBean.setTrackId(face.trackID);
+                                                faceLogBean.setMediaIds(mediaLibBean.getVid());
+                                                faceLogBean.setType(mediaLibBean.getType());
+                                                mWatchingMap.put(face.trackID, faceLogBean);
+                                            }
                                         } else {
                                             // 持续的观看者
                                             FaceLogBean faceLogBean = mWatchingMap.get(face.trackID);
@@ -578,15 +583,12 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
             public void run() {
                 if (cameraInst != null) {
                     LogUtils.d("Will stop and release camera");
-                    LogFileUtil.writeKeyLogInfo("Will stop and release camera");
                     try {
                         cameraInst.setPreviewCallback(null);
                         LogUtils.d("Will stopPreview");
-                        LogFileUtil.writeKeyLogInfo("Will stopPreview");
                         cameraInst.stopPreview();
 //                        cameraInst.unlock();
                         LogUtils.d("Will release");
-                        LogFileUtil.writeKeyLogInfo("Will release");
                         cameraInst.release();
                         cameraInst = null;
                     } catch (Exception e) {
@@ -601,9 +603,18 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
                 if (facepp != null) {
                     LogUtils.d("Will release facepp");
-                    LogFileUtil.writeKeyLogInfo("Will release facepp");
                     facepp.release();
                     facepp = null;
+                }
+
+                // 服务停止时说明已不在轮播状态，记录日志
+                for (Integer trackId :
+                        mWatchingMap.keySet()) {
+                    FaceLogBean faceLogBean = mWatchingMap.get(trackId);
+                    faceLogBean.setEndTime(System.currentTimeMillis());
+                    FaceDetectLogUtil.getInstance(FaceDetectService.this).writeFaceRecord(faceLogBean);
+
+                    mWatchingMap.remove(trackId);
                 }
             }
         }).start();

@@ -12,6 +12,7 @@ public class FaceLogBean {
     private float totalSeconds;
     private int trackId;
     private String mediaIds;
+    private String type;
 
     public String getUuid() {
         return uuid;
@@ -65,5 +66,13 @@ public class FaceLogBean {
 
     public void setMediaIds(String mediaId) {
         this.mediaIds = mediaId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
