@@ -176,8 +176,9 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
 
     private void authState(boolean isSuccess) {
         if (isSuccess) {
-            initFaceDetect();
-
+            if (facepp != null) {
+                initFaceDetect();
+            }
         } else {
             LogUtils.e("授权失败！！将重试！！！");
             requireLicense();
@@ -454,6 +455,9 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                 } else {
                     mFrameIndex++;
                 }
+
+                if (facepp == null)
+                    return;
 
                 // 调SDK方法检测人脸
                 int width = previewSize.width;
