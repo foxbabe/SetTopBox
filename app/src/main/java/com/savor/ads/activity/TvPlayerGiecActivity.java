@@ -1,8 +1,10 @@
 package com.savor.ads.activity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.tv.TvView;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -160,6 +162,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
         mNoChannleTipsTv = (TextView) findViewById(R.id.tv_no_channel_tips);
     }
 
+    @SuppressLint("NewApi")
     private void setView() {
 //        mSurfaceHolder = mPreviewSv.getHolder();
 //        mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
@@ -201,6 +204,13 @@ public class TvPlayerGiecActivity extends BaseActivity {
 //                mIsSurfaceCreated = false;
 //            }
 //        });
+        mTvView.setCallback(new TvView.TvInputCallback() {
+            @Override
+            public void onVideoAvailable(String inputId) {
+                super.onVideoAvailable(inputId);
+                mTvView.setStreamVolume(1);
+            }
+        });
     }
 
     private void init() {

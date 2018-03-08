@@ -36,6 +36,8 @@ public class GiecTVOperator implements ITVOperator {
     @SuppressLint("NewApi")
     @Override
     public void switchATVChannel(TvView tvView, int channelId) {
+//        tvView.reset();
+        tvView.setStreamVolume(0);
         tvView.tune(ConstantValues.INPUT_ID_ATV, TvContract.buildChannelUri(channelId));
     }
 
@@ -131,7 +133,7 @@ public class GiecTVOperator implements ITVOperator {
 
 
         TvControlManager.getInstance().StartTv();
-        TvControlManager.TvMode mode = new TvControlManager.TvMode(TvContract.Channels.TYPE_ATSC_T);
+        TvControlManager.TvMode mode = new TvControlManager.TvMode(TvContract.Channels.TYPE_DTMB);
         int[] freqPair = new int[2];
         TvControlManager.getInstance().ATVGetMinMaxFreq(freqPair);
         TvControlManager.getInstance().DtvSetTextCoding("GB2312");
