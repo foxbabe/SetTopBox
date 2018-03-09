@@ -265,16 +265,16 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         isProCompleted = false;
         try {
             String configJson = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.PRO_DATA_PATH, configJson);
 
             Object result = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
             }.getType());
-            if (result instanceof SetBoxTopResult) {
-                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (setBoxTopResult.getResult() != null) {
-                        setTopBoxBean = setBoxTopResult.getResult();
-                        handleSmallPlatformProgramData();
-                    }
+            SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (setBoxTopResult.getResult() != null) {
+                    setTopBoxBean = setBoxTopResult.getResult();
+                    handleSmallPlatformProgramData();
                 }
             }
         } catch (Exception e) {
@@ -288,15 +288,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void getAdvDataFromSmallPlatform() {
         try {
             String configJson = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.ADV_DATA_PATH, configJson);
 
             Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (programBeanResult.getResult() != null) {
-                        handleSmallPlatformAdvData(programBeanResult.getResult());
-                    }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (programBeanResult.getResult() != null) {
+                    handleSmallPlatformAdvData(programBeanResult.getResult());
                 }
             }
         } catch (Exception e) {
@@ -310,14 +310,14 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void getAdsDataFromSmallPlatform() {
         try {
             String configJson = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.ADS_DATA_PATH, configJson);
             Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (programBeanResult.getResult() != null) {
-                        handleSmallPlatformAdsData(programBeanResult.getResult());
-                    }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (programBeanResult.getResult() != null) {
+                    handleSmallPlatformAdsData(programBeanResult.getResult());
                 }
             }
         } catch (Exception e) {
@@ -330,11 +330,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             String ondemandJson = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
             Object result = gson.fromJson(ondemandJson, new TypeToken<SetBoxTopResult>() {
             }.getType());
-            if (result instanceof SetBoxTopResult) {
-                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                    handleSmallPlatformOnDemandData(setBoxTopResult.getResult());
-                }
+            SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+                handleSmallPlatformOnDemandData(setBoxTopResult.getResult());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -346,11 +344,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             String json = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
             Object result = gson.fromJson(json, new TypeToken<RstrSpecialtyResult>() {
             }.getType());
-            if (result instanceof RstrSpecialtyResult) {
-                RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                    handleSpecialtyResult(setBoxTopResult.getResult());
-                }
+            RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+                handleSpecialtyResult(setBoxTopResult.getResult());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -471,11 +467,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             String json = AppApi.getRtbadsFromSmallPlatform(this, this, session.getEthernetMac());
             Object result = gson.fromJson(json, new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
-                    handRtbasResult(programBeanResult.getResult());
-                }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
+                handRtbasResult(programBeanResult.getResult());
             }
         } catch (Exception e) {
             e.printStackTrace();

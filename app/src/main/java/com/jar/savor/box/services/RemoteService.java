@@ -836,15 +836,15 @@ public class RemoteService extends Service {
             String reqJson = getBodyString(request);
             PptRequestVo req = (new Gson()).fromJson(reqJson, PptRequestVo.class);
             String path = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
-            File deviceIdDir = new File(path);
+//            File deviceIdDir = new File(path);
             PptResponseVo pptResponse = new PptResponseVo();
             pptResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             pptResponse.setImages(req.getImages());
 
             boolean isAllExist = true;
-            if (!deviceIdDir.exists()) {
-                deviceIdDir.mkdirs();
-            }
+//            if (!deviceIdDir.exists()) {
+//                deviceIdDir.mkdirs();
+//            }
 
             if (pptResponse.getImages() != null) {
                 for (PptImage pptImage :
@@ -1016,15 +1016,15 @@ public class RemoteService extends Service {
             LogUtils.e("enter method listener.restaurant/v-ppt");
             PptVideoRequestVo pptVideoRequestVo = (new Gson()).fromJson(getBodyString(request), PptVideoRequestVo.class);
             String pathPptVideo = AppUtils.getFilePath(RemoteService.this, AppUtils.StorageFile.ppt) + deviceId + File.separator;
-            File deviceIdDir = new File(pathPptVideo);
+//            File deviceIdDir = new File(pathPptVideo);
             PptVideoResponseVo pptVideoResponse = new PptVideoResponseVo();
             pptVideoResponse.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
             pptVideoResponse.setVideos(pptVideoRequestVo.getVideos());
 
             boolean isAllVideoExist = true;
-            if (!deviceIdDir.exists()) {
-                deviceIdDir.mkdirs();
-            }
+//            if (!deviceIdDir.exists()) {
+//                deviceIdDir.mkdirs();
+//            }
 
             long neededSpace = 0;
             if (pptVideoResponse.getVideos() != null) {

@@ -199,6 +199,9 @@ public class FileUtils {
 
     public static void write(String filePath, String content) {
         File file = new File(filePath);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
         if (file.exists()) {
             file.delete();
         }

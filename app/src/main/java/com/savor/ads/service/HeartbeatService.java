@@ -86,6 +86,8 @@ public class HeartbeatService extends IntentService {
                 mHeartbeatElapsedTime = 0;
 
                 doHeartbeat();
+
+                reportMediaDetail();
             }
 
             String time = AppUtils.getCurTime("HH:mm");
@@ -133,6 +135,37 @@ public class HeartbeatService extends IntentService {
                 LogFileUtil.write("自动上报心跳失败，网络异常");
             }
         });
+    }
+
+    private void reportMediaDetail() {
+        reportCurrent();
+
+        Session session = Session.get(this);
+        if (TextUtils.isEmpty(session.getAdvPeriod()) || !session.getAdvPeriod().endsWith(session.getAdvDownloadPeriod())) {
+            reportAdvDownload();
+        }
+        if (TextUtils.isEmpty(session.getAdsPeriod()) || !session.getAdsPeriod().endsWith(session.getAdsDownloadPeriod())) {
+            reportAdsDownload();
+        }
+        if (TextUtils.isEmpty(session.getProPeriod()) || !session.getProPeriod().endsWith(session.getProDownloadPeriod())) {
+            reportProDownload();
+        }
+    }
+
+    private void reportProDownload() {
+
+    }
+
+    private void reportAdvDownload() {
+
+    }
+
+    private void reportAdsDownload() {
+
+    }
+
+    private void reportCurrent() {
+
     }
 
     private void httpGetIp() {

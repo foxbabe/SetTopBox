@@ -175,5 +175,10 @@ public class ConstantValues {
 
     public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
 
-
+    /**节目数据文件位置*/
+    public static final String PRO_DATA_PATH = "/sdcard/server_data/pro_data";
+    /**宣传片数据文件位置*/
+    public static final String ADV_DATA_PATH = "/sdcard/server_data/adv_data";
+    /**广告数据文件位置*/
+    public static final String ADS_DATA_PATH = "/sdcard/server_data/ads_data";
 }
