@@ -38,6 +38,8 @@ public class MediaLibBean implements Serializable {
 
     /** ADMaster 曝光*/
     private String admaster_sin;
+    /**下载状态 0：未下载； 1：已下载； 2：下载中*/
+    private int download_state;
 
     public int getId() {
         return id;
@@ -183,6 +185,14 @@ public class MediaLibBean implements Serializable {
 
     public void setAdmaster_sin(String admaster_sin) {
         this.admaster_sin = admaster_sin;
+    }
+
+    public int getDownload_state() {
+        return download_state;
+    }
+
+    public void setDownload_state(int download_state) {
+        this.download_state = download_state;
     }
 }
 

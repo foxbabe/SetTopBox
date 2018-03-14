@@ -5,6 +5,9 @@ import android.text.TextUtils;
 
 import com.savor.ads.BuildConfig;
 import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.ads.bean.MediaDownloadBean;
+import com.savor.ads.bean.DownloadDetailRequestBean;
+import com.savor.ads.bean.PlaylistDetailRequestBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
@@ -92,6 +95,9 @@ public class AppApi {
         CP_POST_DEVICE_TOKEN_JSON,
         SP_GET_RTB_ADS_JSON,
         SP_POST_NETSTAT_JSON,
+        CP_POST_PLAY_LIST_JSON,
+        CP_POST_DOWNLOAD_LIST_JSON,
+        CP_POST_SDCARD_STATE_JSON,
     }
 
 
@@ -122,6 +128,9 @@ public class AppApi {
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
             put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
+            put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
+            put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
+            put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
         }
     };
 
@@ -426,6 +435,48 @@ public class AppApi {
         params.put("innerDelayed", intranetLatency);
         params.put("outerDelayed", internetLatency);
         new AppServiceOk(context, Action.SP_POST_NETSTAT_JSON, handler, params).get();
+    }
+
+    /**
+     * 上报当前播放列表
+     * @param context
+     * @param handler
+     * @param detail    明细数据
+     */
+    public static void reportPlaylist(Context context, ApiRequestListener handler, PlaylistDetailRequestBean detail) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("box_mac", Session.get(context).getEthernetMac());
+        params.put("resource_info", detail);
+        new AppServiceOk(context, Action.CP_POST_PLAY_LIST_JSON, handler, params).post();
+    }
+
+    /**
+     * 上报下载列表
+     * @param context
+     * @param handler
+     * @param type      1广告；2节目；3宣传片
+     * @param detail    明细数据
+     */
+    public static void reportDownloadList(Context context, ApiRequestListener handler, int type, DownloadDetailRequestBean detail) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("box_mac", Session.get(context).getEthernetMac());
+        params.put("type", type);
+        params.put("resource_info", detail);
+        new AppServiceOk(context, Action.CP_POST_DOWNLOAD_LIST_JSON, handler, params).post();
+    }
+
+    /**
+     * 上报SD卡异常
+     * @param context
+     * @param handler
+     * @param type      1内存卡损坏；2内存卡已满
+     */
+    public static void reportSDCardState(Context context, ApiRequestListener handler, int type) {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("box_id", Session.get(context).getBoxId());
+        params.put("box_mac", Session.get(context).getEthernetMac());
+        params.put("type", type);
+        new AppServiceOk(context, Action.CP_POST_SDCARD_STATE_JSON, handler, params).post();
     }
 
     // 超时（网络）异常

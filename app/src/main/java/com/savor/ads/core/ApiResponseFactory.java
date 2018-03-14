@@ -201,6 +201,15 @@ public class ApiResponseFactory {
             case SP_POST_NETSTAT_JSON:
                 result = info;
                 break;
+            case CP_POST_PLAY_LIST_JSON:
+                result = info;
+                break;
+            case CP_POST_DOWNLOAD_LIST_JSON:
+                result = info;
+                break;
+            case CP_POST_SDCARD_STATE_JSON:
+                result = info;
+                break;
             default:
                 break;
         }

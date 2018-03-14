@@ -212,6 +212,8 @@ public class ApiRequestFactory {
                 Object fieldValue = field.get(object);
                 if (fieldValue instanceof String || fieldValue instanceof Number) {
                     jObject.put(field.getName(), fieldValue);
+                } else if(fieldValue instanceof List) {
+                    jObject.put(field.getName(), getJSONArray((List<?>) fieldValue));
                 } else {
                     jObject.put(field.getName(), getJSONObject(fieldValue));
                 }

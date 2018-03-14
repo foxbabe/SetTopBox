@@ -5,14 +5,25 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.savor.ads.activity.BaseActivity;
+import com.savor.ads.bean.MediaDownloadBean;
+import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.DownloadDetailRequestBean;
+import com.savor.ads.bean.MediaPlaylistBean;
+import com.savor.ads.bean.PlaylistDetailRequestBean;
+import com.savor.ads.bean.ProgramBeanResult;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.FileUtils;
+import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -20,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +42,7 @@ import cn.savor.small.netty.NettyClient;
 
 /**
  */
-public class HeartbeatService extends IntentService {
+public class HeartbeatService extends IntentService implements ApiRequestListener {
     /**
      * 心跳周期，5分钟
      */
@@ -119,80 +132,127 @@ public class HeartbeatService extends IntentService {
 
     private void doHeartbeat() {
         LogFileUtil.write("开始自动上报心跳");
-        AppApi.heartbeat(this, new ApiRequestListener() {
-            @Override
-            public void onSuccess(AppApi.Action method, Object obj) {
-                LogFileUtil.write("自动上报心跳成功。 " + obj);
-            }
-
-            @Override
-            public void onError(AppApi.Action method, Object obj) {
-                LogFileUtil.write("自动上报心跳失败。 " + obj);
-            }
-
-            @Override
-            public void onNetworkFailed(AppApi.Action method) {
-                LogFileUtil.write("自动上报心跳失败，网络异常");
-            }
-        });
+        AppApi.heartbeat(this, this);
     }
 
     private void reportMediaDetail() {
         reportCurrent();
 
         Session session = Session.get(this);
-        if (TextUtils.isEmpty(session.getAdvPeriod()) || !session.getAdvPeriod().endsWith(session.getAdvDownloadPeriod())) {
+        if (!TextUtils.isEmpty(session.getAdvDownloadPeriod()) && !session.getAdvDownloadPeriod().equals(session.getAdvPeriod())) {
             reportAdvDownload();
         }
-        if (TextUtils.isEmpty(session.getAdsPeriod()) || !session.getAdsPeriod().endsWith(session.getAdsDownloadPeriod())) {
+        if (!TextUtils.isEmpty(session.getAdsDownloadPeriod()) && !session.getAdsDownloadPeriod().equals(session.getAdsPeriod())) {
             reportAdsDownload();
         }
-        if (TextUtils.isEmpty(session.getProPeriod()) || !session.getProPeriod().endsWith(session.getProDownloadPeriod())) {
+        if (!TextUtils.isEmpty(session.getProDownloadPeriod()) && !session.getProDownloadPeriod().equals(session.getProPeriod())) {
             reportProDownload();
         }
     }
 
     private void reportProDownload() {
-
+        reportDownloadDataByType(ConstantValues.PRO_DATA_PATH);
     }
 
     private void reportAdvDownload() {
-
+        reportDownloadDataByType(ConstantValues.ADV_DATA_PATH);
     }
 
     private void reportAdsDownload() {
+        reportDownloadDataByType(ConstantValues.ADS_DATA_PATH);
+    }
 
+    private void reportDownloadDataByType(String filePath) {
+        ArrayList<MediaDownloadBean> medias = new ArrayList<>();
+        String jsonData = FileUtils.read(filePath);
+        if (jsonData != null) {
+            ProgramBeanResult programBean = new Gson().fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
+            }.getType());
+            if (programBean.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (programBean.getResult() != null) {
+                    if (programBean.getResult().getMedia_lib() != null && programBean.getResult().getMedia_lib().size() > 0) {
+                        for (MediaLibBean bean : programBean.getResult().getMedia_lib()) {
+                            MediaDownloadBean mediaDownloadBean = new MediaDownloadBean();
+                            mediaDownloadBean.setMedia_id(bean.getVid());
+
+                            String selection = null;
+                            String[] selectionArgs = null;
+                            if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
+                                mediaDownloadBean.setOrder(bean.getLocation_id());
+                                selection = DBHelper.MediaDBInfo.FieldName.VID
+                                        + "=? and "
+                                        + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
+                                        + "=?";
+                                selectionArgs = new String[]{bean.getVid(), bean.getLocation_id()+""};
+                            } else {
+                                mediaDownloadBean.setOrder(bean.getOrder() + "");
+                                selection = DBHelper.MediaDBInfo.FieldName.VID
+                                        + "=? and "
+                                        + DBHelper.MediaDBInfo.FieldName.ADS_ORDER
+                                        + "=?";
+                                selectionArgs = new String[]{bean.getVid(), bean.getOrder()+""};
+                            }
+
+                            List<MediaLibBean> list = null;
+                            if (ConstantValues.ADS_DATA_PATH.equals(filePath)) {
+                                list = DBHelper.get(this).findNewAdsByWhere(selection, selectionArgs);
+                            } else {
+                                list = DBHelper.get(this).findNewPlayListByWhere(selection, selectionArgs);
+                            }
+                            if (list != null && list.size() >= 1) {
+                                mediaDownloadBean.setState(1);
+                            } else {
+                                mediaDownloadBean.setState(0);
+                            }
+                            medias.add(mediaDownloadBean);
+                        }
+                    }
+
+                    DownloadDetailRequestBean requestBean = new DownloadDetailRequestBean();
+                    requestBean.setPeriod(programBean.getResult().getVersion().getVersion());
+                    int type = 0;
+                    switch (programBean.getResult().getVersion().getType()) {
+                        case ConstantValues.ADS:
+                            type = 1;
+                            break;
+                        case ConstantValues.ADV:
+                            type = 3;
+                            break;
+                        case ConstantValues.PRO:
+                            type = 2;
+                            break;
+                    }
+                    AppApi.reportDownloadList(this, this, type, requestBean);
+                }
+            }
+        }
     }
 
     private void reportCurrent() {
+        if (GlobalValues.PLAY_LIST != null && !TextUtils.isEmpty(Session.get(this).getProPeriod())) {
+            PlaylistDetailRequestBean playlistDetailRequestBean = new PlaylistDetailRequestBean();
+            playlistDetailRequestBean.setMenu_num(Session.get(this).getProPeriod());
+            ArrayList<MediaPlaylistBean> playlist = new ArrayList<>();
+            for (MediaLibBean media :
+                    GlobalValues.PLAY_LIST) {
+                MediaPlaylistBean bean = new MediaPlaylistBean();
+                if (!TextUtils.isEmpty(media.getVid())) {
+                    bean.setMedia_id(media.getVid());
+                    bean.setType(media.getType());
+                    bean.setOrder(media.getOrder());
+                }
+                playlist.add(bean);
+            }
+            playlistDetailRequestBean.setList(playlist);
 
+            AppApi.reportPlaylist(this, this, playlistDetailRequestBean);
+        }
     }
 
     private void httpGetIp() {
         LogUtils.w("HeartbeatService 将发HTTP请求去发现小平台信息");
         LogFileUtil.write("HeartbeatService 将发HTTP请求去发现小平台信息");
-        AppApi.getSpIp(this, new ApiRequestListener() {
-            @Override
-            public void onSuccess(AppApi.Action method, Object obj) {
-                LogUtils.w("HeartbeatService HTTP接口发现小平台信息");
-                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息");
-                if (obj instanceof ServerInfo) {
-                    handleServerIp((ServerInfo) obj);
-                }
-            }
-
-            @Override
-            public void onError(AppApi.Action method, Object obj) {
-                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
-                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
-            }
-
-            @Override
-            public void onNetworkFailed(AppApi.Action method) {
-                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
-                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
-            }
-        });
+        AppApi.getSpIp(this, this);
     }
 
 
@@ -230,22 +290,8 @@ public class HeartbeatService extends IntentService {
                 intranetLatency = getLatency(Session.get(HeartbeatService.this).getServerInfo().getServerIp());
             }
 
-            AppApi.postNetstat(HeartbeatService.this, new ApiRequestListener() {
-                @Override
-                public void onSuccess(AppApi.Action method, Object obj) {
-                    LogUtils.d("postNetstat success");
-                }
-
-                @Override
-                public void onError(AppApi.Action method, Object obj) {
-                    LogUtils.d("postNetstat failed");
-                }
-
-                @Override
-                public void onNetworkFailed(AppApi.Action method) {
-                    LogUtils.d("postNetstat failed");
-                }
-            }, intranetLatency == -1 ? "" : "" + intranetLatency, internetLatency == -1 ? "" : "" + internetLatency);
+            AppApi.postNetstat(HeartbeatService.this, HeartbeatService.this,
+                    intranetLatency == -1 ? "" : "" + intranetLatency, internetLatency == -1 ? "" : "" + internetLatency);
         }
 
         private double getLatency(String address) {
@@ -298,4 +344,73 @@ public class HeartbeatService extends IntentService {
             return latency;
         }
     };
+
+    @Override
+    public void onSuccess(AppApi.Action method, Object obj) {
+        switch (method) {
+            case CP_GET_HEARTBEAT_PLAIN:
+                LogFileUtil.write("自动上报心跳成功。 " + obj);
+                break;
+            case SP_POST_NETSTAT_JSON:
+                LogUtils.d("postNetstat success");
+                break;
+            case CP_GET_SP_IP_JSON:
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息");
+                if (obj instanceof ServerInfo) {
+                    handleServerIp((ServerInfo) obj);
+                }
+                break;
+            case CP_POST_DOWNLOAD_LIST_JSON:
+                LogUtils.d("上报下载列表成功");
+                break;
+            case CP_POST_PLAY_LIST_JSON:
+                LogUtils.d("上报播放列表成功");
+                break;
+        }
+    }
+
+    @Override
+    public void onError(AppApi.Action method, Object obj) {
+        switch (method) {
+            case CP_GET_HEARTBEAT_PLAIN:
+                LogFileUtil.write("自动上报心跳失败。 " + obj);
+                break;
+            case SP_POST_NETSTAT_JSON:
+                LogUtils.d("postNetstat failed");
+                break;
+            case CP_GET_SP_IP_JSON:
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
+                break;
+            case CP_POST_DOWNLOAD_LIST_JSON:
+                LogUtils.d("上报下载列表失败");
+                break;
+            case CP_POST_PLAY_LIST_JSON:
+                LogUtils.d("上报播放列表失败");
+                break;
+        }
+    }
+
+    @Override
+    public void onNetworkFailed(AppApi.Action method) {
+        switch (method) {
+            case CP_GET_HEARTBEAT_PLAIN:
+                LogFileUtil.write("自动上报心跳失败，网络异常");
+                break;
+            case SP_POST_NETSTAT_JSON:
+                LogUtils.d("postNetstat failed");
+                break;
+            case CP_GET_SP_IP_JSON:
+                LogUtils.w("HeartbeatService HTTP接口发现小平台信息失败");
+                LogFileUtil.write("HeartbeatService HTTP接口发现小平台信息失败");
+                break;
+            case CP_POST_DOWNLOAD_LIST_JSON:
+                LogUtils.d("上报下载列表失败，网络异常");
+                break;
+            case CP_POST_PLAY_LIST_JSON:
+                LogUtils.d("上报播放列表失败，网络异常");
+                break;
+        }
+    }
 }

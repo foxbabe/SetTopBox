@@ -145,16 +145,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         e.printStackTrace();
                     }
 
+                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+                    // 异步更新apk、rom
+                    new UpdateUtil(context);
+
                     // 检测剩余存储空间
                     if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
                         // 存储空间不足
                         AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
                         LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
-                    }
 
-                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                    // 异步更新apk、rom
-                    new UpdateUtil(context);
+                        AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
+                    }
 
                     getPrizeInfo();
 
@@ -681,6 +683,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     }
                 }
                 break;
+            case CP_POST_SDCARD_STATE_JSON:
+                LogUtils.d("上报SD卡状态成功");
+                break;
         }
     }
 
@@ -688,6 +693,364 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void setAutoClose(boolean flag) {
         try {
             TvManager.setGpioDeviceStatus(128, flag);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         } catch (TvCommonException e) {
             e.printStackTrace();
         }
@@ -1543,11 +1906,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     @Override
     public void onError(AppApi.Action method, Object obj) {
-
+        switch (method) {
+            case CP_POST_SDCARD_STATE_JSON:
+                LogUtils.d("上报SD卡状态失败");
+                break;
+        }
     }
 
     @Override
     public void onNetworkFailed(AppApi.Action method) {
-
+        switch (method) {
+            case CP_POST_SDCARD_STATE_JSON:
+                LogUtils.d("上报SD卡状态失败，网络异常");
+                break;
+        }
     }
 }

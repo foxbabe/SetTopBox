@@ -3,6 +3,7 @@ package com.savor.ads.log;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
@@ -185,6 +186,8 @@ public class LogProduceService {
 		} catch (Exception e2) {
 			e2.printStackTrace();
 			LogFileUtil.writeException(e2);
+
+            AppApi.reportSDCardState(mContext, null, 1);
 		}
 	}
 
