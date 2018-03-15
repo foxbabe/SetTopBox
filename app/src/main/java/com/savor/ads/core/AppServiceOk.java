@@ -120,7 +120,7 @@ public class AppServiceOk {
             }
             requestUrl = AppApi.API_URLS.get(action);
 
-            Map<String, String> headers = new HashMap<String, String>();
+            final Map<String, String> headers = new HashMap<String, String>();
             headers.put("traceinfo", appSession.getDeviceInfo());
             LogUtils.d("url-->" + requestUrl);
             LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
@@ -175,7 +175,6 @@ public class AppServiceOk {
                     LogUtils.d(object.toString() + "");
                     response.close();
 //					} catch (IOException e) {
-//						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
                     return object;
@@ -183,16 +182,19 @@ public class AppServiceOk {
 
                 @Override
                 public void onError(Call call, Exception e) {
-                    // TODO Auto-generated method stub
-                    handler.onNetworkFailed(action);
+                    if (handler != null) {
+                        handler.onNetworkFailed(action);
+                    }
                 }
 
                 @Override
                 public void onResponse(Object response) {
-                    if (response instanceof ResponseErrorMessage) {
-                        handler.onError(action, response);
-                    } else {
-                        handler.onSuccess(action, response);
+                    if (handler != null) {
+                        if (response instanceof ResponseErrorMessage) {
+                            handler.onError(action, response);
+                        } else {
+                            handler.onSuccess(action, response);
+                        }
                     }
                 }
 
@@ -247,24 +249,24 @@ public class AppServiceOk {
 
             @Override
             public void onError(Call call, Exception e) {
-                // TODO Auto-generated method stub
-                handler.onNetworkFailed(action);
+                if (handler != null) {
+                    handler.onNetworkFailed(action);
+                }
             }
 
             @Override
             public void onResponse(Object response) {
-                if (response instanceof ResponseErrorMessage) {
-                    handler.onError(action, response);
-                } else {
-                    handler.onSuccess(action, response);
+                if (handler != null) {
+                    if (response instanceof ResponseErrorMessage) {
+                        handler.onError(action, response);
+                    } else {
+                        handler.onSuccess(action, response);
+                    }
                 }
-
-
             }
 
             @Override
             public void inProgress(float progress) {
-                // TODO Auto-generated method stub
                 super.inProgress(progress);
             }
 
@@ -331,11 +333,13 @@ public class AppServiceOk {
                 }
                 //ui层回调
 
-                FileDownProgress fileDownProgress = new FileDownProgress();
-                fileDownProgress.setTotal(contentLength);
-                fileDownProgress.setNow(bytesRead);
-                fileDownProgress.setLoading(done);
-                handler.onSuccess(action, fileDownProgress);
+                if (handler != null) {
+                    FileDownProgress fileDownProgress = new FileDownProgress();
+                    fileDownProgress.setTotal(contentLength);
+                    fileDownProgress.setNow(bytesRead);
+                    fileDownProgress.setLoading(done);
+                    handler.onSuccess(action, fileDownProgress);
+                }
 //				downloadProgeress.setProgress((int) ((100 * bytesRead) / contentLength));
                 //Toast.makeText(getApplicationContext(), bytesRead + " " + contentLength + " " + done, Toast.LENGTH_LONG).show();
             }
@@ -370,7 +374,9 @@ public class AppServiceOk {
 //						public void run()
 //						{
                     LogUtils.d("下载进度完成关闭进度条");
-                    handler.onSuccess(action, file1);
+                    if (handler != null) {
+                        handler.onSuccess(action, file1);
+                    }
 //						}
 //					});
                 } catch (Exception e) {
@@ -445,7 +451,9 @@ public class AppServiceOk {
 //                    LogUtils.d(response.body().string());
 
                     Object object = ApiResponseFactory.getResponse(mContext, action, response, uploadFileName, false);
-                    handler.onSuccess(action,object);
+                    if (handler != null) {
+                        handler.onSuccess(action,object);
+                    }
                 }
             };
             //构造上传请求，类似web表单

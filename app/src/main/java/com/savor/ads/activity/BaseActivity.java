@@ -216,7 +216,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                 LogUtils.d("删除多余视频");
 
                 // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
-                if (mSession.getProPeriod() == null ) {
+                if (TextUtils.isEmpty(mSession.getProPeriod())) {
                     return;
                 }
 

@@ -298,13 +298,13 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (mPlayListDialog == null) {
             mPlayListDialog = new PlayListDialog(this, this);
         }
-        if (mPlayList != null) {
+//        if (mPlayList != null) {
             if (!mPlayListDialog.isShowing()) {
                 mPlayListDialog.showPlaylist(mPlayList);
             }
-        } else {
-            ShowMessage.showToast(mContext, "播放列表为空");
-        }
+//        } else {
+//            ShowMessage.showToast(mContext, "播放列表为空");
+//        }
     }
 
     int resolutionIndex = 0;

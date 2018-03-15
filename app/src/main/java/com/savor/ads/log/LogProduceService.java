@@ -41,6 +41,14 @@ public class LogProduceService {
 			@Override
 			public void run() {
 				while (true) {
+					while (TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
+						try {
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
 					// 生成日志文件
 					createFile();
 
@@ -174,6 +182,10 @@ public class LogProduceService {
 //					||TextUtils.isEmpty(boxId)){
 //					return;
 //			}
+			File file1 = new File(AppUtils.getMainMediaPath());
+			if (!file1.exists()) {
+				LogFileUtil.writeKeyLogInfo("createFile() MainMediaPath is not exist!!!");
+			}
 			String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.log);
 			logTime = AppUtils.getCurTime("yyyyMMddHH");
 			if (session.isStandalone()){

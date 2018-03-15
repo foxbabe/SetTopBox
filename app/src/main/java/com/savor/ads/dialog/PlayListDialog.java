@@ -88,6 +88,7 @@ public class PlayListDialog extends Dialog {
                 mShowDownloadTv.setVisibility(View.GONE);
                 mPlaylistGv.setVisibility(View.GONE);
                 mDownloadListGv.setVisibility(View.VISIBLE);
+                mDownloadListGv.requestFocus();
 
                 mTitleTv.setText("下载列表");
                 mDescTv.setText(String.format("广告版本：%s    节目版本：%s\r\n宣传片版本：%s",
@@ -115,8 +116,8 @@ public class PlayListDialog extends Dialog {
 
         String adsPeriod = Session.get(getContext()).getAdsPeriod();
         String proPeriod = Session.get(getContext()).getProPeriod();
+        mTitleTv.setText("播放列表");
         if (playlist != null) {
-            mTitleTv.setText("播放列表");
             mDescTv.setText(String.format("共%s个内容    广告版本：%s    节目版本：%s", playlist.size(), adsPeriod, proPeriod));
             mPlaylistAdapter.setPlaylist(playlist);
         }
