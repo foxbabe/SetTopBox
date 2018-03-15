@@ -32,7 +32,7 @@ public class SetTopBoxBean implements Serializable{
     /**U盘更新媒体库*/
     private ArrayList<MediaLibBean> play_list;
     /**媒体库*/
-    private ArrayList<PlayListCategoryItem> playbill_list;
+    private ArrayList<ProgramBean> playbill_list;
     /** 发布时间*/
     private String pub_time;
 
@@ -134,11 +134,11 @@ public class SetTopBoxBean implements Serializable{
         this.play_list = play_list;
     }
 
-    public ArrayList<PlayListCategoryItem> getPlaybill_list() {
+    public ArrayList<ProgramBean> getPlaybill_list() {
         return playbill_list;
     }
 
-    public void setPlaybill_list(ArrayList<PlayListCategoryItem> playbill_list) {
+    public void setPlaybill_list(ArrayList<ProgramBean> playbill_list) {
         this.playbill_list = playbill_list;
     }
 

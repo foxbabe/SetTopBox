@@ -14,7 +14,6 @@ import com.google.gson.reflect.TypeToken;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.PlayListCategoryItem;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ProgramBean;
 import com.savor.ads.bean.ProgramBeanResult;
@@ -270,9 +269,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             // 保存拿到的数据到本地
             FileUtils.write(ConstantValues.PRO_DATA_PATH, configJson);
 
-            Object result = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
+            SetBoxTopResult setBoxTopResult = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
             }.getType());
-            SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
             if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 if (setBoxTopResult.getResult() != null) {
                     setTopBoxBean = setBoxTopResult.getResult();
@@ -689,368 +687,13 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
     }
 
-    //机顶盒监听电视屏,控制是否当电视屏没有通电的时候关机,false不关机,true关机
+    /**
+     * 机顶盒监听电视屏,控制是否当电视屏没有通电的时候关机
+     * @param flag false不关机,true关机
+     */
     private void setAutoClose(boolean flag) {
         try {
             TvManager.setGpioDeviceStatus(128, flag);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         } catch (TvCommonException e) {
             e.printStackTrace();
         }
@@ -1064,11 +707,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             return;
         }
         //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
-        ArrayList<PlayListCategoryItem> playbill_list = setTopBoxBean.getPlaybill_list();
+        ArrayList<ProgramBean> playbill_list = setTopBoxBean.getPlaybill_list();
         //当前最新节目期号
         String proPeriod = "";
 
-        for (PlayListCategoryItem item : playbill_list) {
+        for (ProgramBean item : playbill_list) {
             String logUUID = String.valueOf(System.currentTimeMillis());
             if (ConstantValues.PRO.equals(item.getVersion().getType())) {
                 proPeriod = item.getVersion().getVersion();
@@ -1769,14 +1412,14 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
 
         boolean isAllCompleted = true;      // 标识是否所有类型的视频都下载完成
-        ArrayList<PlayListCategoryItem> playbill_list = multicastBoxBean.getPlaybill_list();
+        ArrayList<ProgramBean> playbill_list = multicastBoxBean.getPlaybill_list();
         ArrayList<String> fileNames = new ArrayList<>();    // 下载成功的文件名集合（后面删除老视频会用到）
 
         // 抽出版本信息
         ArrayList<VersionInfo> newVersions = new ArrayList<>();
         StringBuilder versionSequence = new StringBuilder();
         for (int i = 0; i < playbill_list.size(); i++) {
-            PlayListCategoryItem item = playbill_list.get(i);
+            ProgramBean item = playbill_list.get(i);
             newVersions.add(item.getVersion());
             if (i != 0) {
                 versionSequence.append("_");
@@ -1787,7 +1430,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         session.setDownloadingVodVersion(newVersions);
 
         for (int i = 0; i < playbill_list.size(); i++) {
-            PlayListCategoryItem item = playbill_list.get(i);
+            ProgramBean item = playbill_list.get(i);
             VersionInfo versionInfo = item.getVersion();
             if (versionInfo == null || TextUtils.isEmpty(versionInfo.getType())) {
                 continue;
