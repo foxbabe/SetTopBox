@@ -19,6 +19,7 @@ import com.savor.ads.adapter.PlaylistAdapter;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.ProgramBean;
 import com.savor.ads.bean.ProgramBeanResult;
+import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -141,41 +142,62 @@ public class PlayListDialog extends Dialog {
     private void fillDownloadDataByType(String filePath, ArrayList<MediaLibBean> downloadList, DBHelper dbHelper, Gson gson) {
         String jsonData = FileUtils.read(filePath);
         if (jsonData != null) {
-            ProgramBeanResult programBean = gson.fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
-            }.getType());
-            if (programBean.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                if (programBean.getResult() != null) {
-                    if (programBean.getResult().getMedia_lib() != null && programBean.getResult().getMedia_lib().size() > 0) {
-                        for (MediaLibBean bean : programBean.getResult().getMedia_lib()) {
-                            String selection = null;
-                            String[] selectionArgs = null;
-                            if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
-                                selection = DBHelper.MediaDBInfo.FieldName.VID
-                                        + "=? and "
-                                        + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
-                                        + "=?";
-                                selectionArgs = new String[]{bean.getVid(), bean.getLocation_id()+""};
-                            } else {
-                                selection = DBHelper.MediaDBInfo.FieldName.VID
-                                        + "=? and "
-                                        + DBHelper.MediaDBInfo.FieldName.ADS_ORDER
-                                        + "=?";
-                                selectionArgs = new String[]{bean.getVid(), bean.getOrder()+""};
+            ProgramBean programBean = null;
+            if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
+                // 宣传片和广告
+                ProgramBeanResult programBeanResult = gson.fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
+                }.getType());
+                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
+                    programBean = programBeanResult.getResult();
+                }
+            } else {
+                // 节目单
+                SetBoxTopResult setBoxTopResult = gson.fromJson(jsonData, new TypeToken<SetBoxTopResult>() {
+                }.getType());
+                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                    if (setBoxTopResult.getResult() != null && setBoxTopResult.getResult().getPlaybill_list() != null) {
+                        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
+                        for (ProgramBean item : setBoxTopResult.getResult().getPlaybill_list()) {
+                            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
+                                programBean = item;
+                                break;
                             }
-
-                            List<MediaLibBean> list = null;
-                            if (ConstantValues.ADS_DATA_PATH.equals(filePath)) {
-                                list = dbHelper.findNewAdsByWhere(selection, selectionArgs);
-                            } else {
-                                list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
-                            }
-                            if (list != null && list.size() >= 1) {
-                                bean.setDownload_state(1);
-                            } else {
-                                bean.setDownload_state(0);
-                            }
-                            downloadList.add(bean);
                         }
+                    }
+                }
+            }
+
+            if (programBean != null) {
+                if (programBean.getMedia_lib() != null && programBean.getMedia_lib().size() > 0) {
+                    for (MediaLibBean bean : programBean.getMedia_lib()) {
+                        String selection = null;
+                        String[] selectionArgs = null;
+                        if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
+                            selection = DBHelper.MediaDBInfo.FieldName.VID
+                                    + "=? and "
+                                    + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
+                                    + "=?";
+                            selectionArgs = new String[]{bean.getVid(), bean.getLocation_id() + ""};
+                        } else {
+                            selection = DBHelper.MediaDBInfo.FieldName.VID
+                                    + "=? and "
+                                    + DBHelper.MediaDBInfo.FieldName.ADS_ORDER
+                                    + "=?";
+                            selectionArgs = new String[]{bean.getVid(), bean.getOrder() + ""};
+                        }
+
+                        List<MediaLibBean> list = null;
+                        if (ConstantValues.ADS_DATA_PATH.equals(filePath)) {
+                            list = dbHelper.findNewAdsByWhere(selection, selectionArgs);
+                        } else {
+                            list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
+                        }
+                        if (list != null && list.size() >= 1) {
+                            bean.setDownload_state(1);
+                        } else {
+                            bean.setDownload_state(0);
+                        }
+                        downloadList.add(bean);
                     }
                 }
             }
