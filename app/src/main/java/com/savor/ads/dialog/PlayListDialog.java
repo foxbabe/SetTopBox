@@ -3,6 +3,7 @@ package com.savor.ads.dialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -48,6 +49,10 @@ public class PlayListDialog extends Dialog {
 
     private Session mSession;
 
+    private String mProDownloadPeriod;
+    private String mAdvDownloadPeriod;
+    private String mAdsDownloadPeriod;
+
     public PlayListDialog(Context context, Callback callback) {
         super(context, R.style.box_info_dialog_theme);
         mCallback = callback;
@@ -92,7 +97,7 @@ public class PlayListDialog extends Dialog {
 
                 mTitleTv.setText("下载列表");
                 mDescTv.setText(String.format("广告版本：%s    节目版本：%s\r\n宣传片版本：%s",
-                        mSession.getAdsDownloadPeriod(), mSession.getProDownloadPeriod(), mSession.getAdvDownloadPeriod()));
+                        mAdsDownloadPeriod, mProDownloadPeriod, mAdvDownloadPeriod));
             }
         });
     }
@@ -113,6 +118,9 @@ public class PlayListDialog extends Dialog {
         mShowDownloadTv.setVisibility(View.VISIBLE);
         mPlaylistGv.setVisibility(View.VISIBLE);
         mDownloadListGv.setVisibility(View.GONE);
+        mProDownloadPeriod = "";
+        mAdvDownloadPeriod = "";
+        mAdsDownloadPeriod = "";
 
         String adsPeriod = Session.get(getContext()).getAdsPeriod();
         String proPeriod = Session.get(getContext()).getProPeriod();
@@ -142,7 +150,7 @@ public class PlayListDialog extends Dialog {
 
     private void fillDownloadDataByType(String filePath, ArrayList<MediaLibBean> downloadList, DBHelper dbHelper, Gson gson) {
         String jsonData = FileUtils.read(filePath);
-        if (jsonData != null) {
+        if (!TextUtils.isEmpty(jsonData)) {
             ProgramBean programBean = null;
             if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
                 // 宣传片和广告
@@ -169,6 +177,19 @@ public class PlayListDialog extends Dialog {
             }
 
             if (programBean != null) {
+                if (programBean.getVersion() != null) {
+                    switch (programBean.getVersion().getType()) {
+                        case ConstantValues.PRO:
+                            mProDownloadPeriod = programBean.getVersion().getVersion();
+                            break;
+                        case ConstantValues.ADV:
+                            mAdvDownloadPeriod = programBean.getVersion().getVersion();
+                            break;
+                        case ConstantValues.ADS:
+                            mAdsDownloadPeriod = programBean.getVersion().getVersion();
+                            break;
+                    }
+                }
                 if (programBean.getMedia_lib() != null && programBean.getMedia_lib().size() > 0) {
                     for (MediaLibBean bean : programBean.getMedia_lib()) {
                         String selection = null;
