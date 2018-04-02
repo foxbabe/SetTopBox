@@ -2,6 +2,7 @@ package com.savor.ads.log;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
@@ -68,6 +69,13 @@ public class LogProduceService {
                                             mLogWriter.flush();
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                            if (!TextUtils.isEmpty(e.getMessage())){
+												if (e.getMessage().contains("No space left on device")){
+													Log.e("LogProduceService","内存卡满，无法写入");
+												}else{
+													AppApi.reportSDCardState(mContext, null, 1);
+												}
+											}
                                         }
                                     }
                                 } catch (InterruptedException e) {

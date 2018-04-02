@@ -145,6 +145,8 @@ public class GiecTVOperator implements ITVOperator {
         scan.setMode(TvControlManager.ScanParas.MODE_DTV_ATV);
         scan.setAtvMode(TvControlManager.ScanType.SCAN_ATV_AUTO);
         scan.setDtvMode(TvControlManager.ScanType.SCAN_DTV_NONE);
+//        freqPair[0] = 30250000;
+//        freqPair[1] = 1308250000;
         scan.setAtvFrequency1(freqPair[0]);
         scan.setAtvFrequency2(freqPair[1]);
         scan.setDtvFrequency1(0);

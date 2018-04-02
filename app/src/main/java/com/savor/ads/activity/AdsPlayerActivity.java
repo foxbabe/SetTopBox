@@ -132,6 +132,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 Intent intent = new Intent(this, TvPlayerGiecActivity.class);
                 startActivity(intent);
             }
+            AppApi.reportSDCardState(mContext, null, 1);
             finish();
         } else {
             mPlayList = GlobalValues.PLAY_LIST;
