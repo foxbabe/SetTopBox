@@ -1648,7 +1648,18 @@ public class AppUtils {
         return null;
     }
 
-    public static boolean fillPlaylist(Context context) {
+    /**
+     * 填充播放列表
+     * @param context
+     * @param resultList 填充后的播放列表
+     * @param type  填充目的。1：播放；2：上报
+     * @return 填充是否成功
+     */
+    public static boolean fillPlaylist(Context context, ArrayList<MediaLibBean> resultList, int type) {
+        if (resultList == null && type == 2) {
+            return false;
+        }
+
         DBHelper dbHelper = DBHelper.get(context);
         ArrayList<MediaLibBean> playList = dbHelper.getOrderedPlayList();
 
@@ -1772,9 +1783,32 @@ public class AppUtils {
 
         if (playList != null && !playList.isEmpty()) {
             ArrayList<MediaLibBean> list = new ArrayList<>();
-            for (MediaLibBean bean : playList) {
+            ArrayList<MediaLibBean> tempList = dbHelper.getTempProList();
+            LogUtils.e("临时节目集合 " + tempList);
+            int tempMediaIndex = 0;
+            for (int i = playList.size() - 1; i >= 0; i--) {
+                MediaLibBean bean = playList.get(i);
                 if (!TextUtils.isEmpty(bean.getMediaPath())) {
-                    list.add(bean);
+                    if (type == 1) {
+                        boolean doReplace = false;
+                        if (tempList != null && !tempList.isEmpty()) {
+                            if(ConstantValues.PRO.equals(bean.getType()) && tempMediaIndex < tempList.size()) {
+                                doReplace = true;
+                            }
+                        }
+                        if (doReplace) {
+                            LogUtils.d("做替换 下标为" + i);
+                            MediaLibBean temp = tempList.get(tempMediaIndex++);
+                            // 这里改media本身的order是为了后面计算播放列表更新后计算播放位置做铺垫
+                            temp.setOrder(bean.getOrder());
+                            list.add(0, temp);
+                        } else {
+                            list.add(0, bean);
+                        }
+                    } else {
+                        list.add(0, bean);
+                        resultList.add(0, bean);
+                    }
                 }
             }
             GlobalValues.PLAY_LIST = list;
@@ -1790,6 +1824,9 @@ public class AppUtils {
                             bean.setMediaPath(file.getPath());
                             bean.setChinese_name(file.getName());
                             filePlayList.add(bean);
+                            if (type == 2) {
+                                resultList.add(bean);
+                            }
                         }
                     }
                 }
@@ -1797,6 +1834,7 @@ public class AppUtils {
             }
         }
 
-        return GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty();
+        return (type == 2 && resultList != null && !resultList.isEmpty()) ||
+                (type == 1 && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty());
     }
 }

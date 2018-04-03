@@ -59,8 +59,8 @@ public class UMessageIntentService extends UmengMessageService {
                     }
                     Session.get(this).setRTBPushItems(rtbPushItems);
 
-                    if (AppUtils.fillPlaylist(this)) {
-                        sendBroadcast(new Intent(ConstantValues.RTB_ADS_PUSH_ACTION));
+                    if (AppUtils.fillPlaylist(this, null, 1)) {
+                        sendBroadcast(new Intent(ConstantValues.UPDATE_PLAYLIST_ACTION));
                     }
                 }
             }

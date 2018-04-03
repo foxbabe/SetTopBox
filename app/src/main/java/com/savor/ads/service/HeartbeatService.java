@@ -118,7 +118,7 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                 if (activity instanceof BaseActivity) {
                     BaseActivity baseActivity = (BaseActivity) activity;
                     baseActivity.fillPlayList();
-                    sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
+                    sendBroadcast(new Intent(ConstantValues.UPDATE_PLAYLIST_ACTION));
                 }
             }
 
@@ -254,12 +254,13 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
     }
 
     private void reportCurrent() {
-        if (GlobalValues.PLAY_LIST != null && !TextUtils.isEmpty(Session.get(this).getProPeriod())) {
+        ArrayList<MediaLibBean> list = new ArrayList<>();
+        AppUtils.fillPlaylist(this, list, 2);
+        if (!TextUtils.isEmpty(Session.get(this).getProPeriod())) {
             PlaylistDetailRequestBean playlistDetailRequestBean = new PlaylistDetailRequestBean();
             playlistDetailRequestBean.setMenu_num(Session.get(this).getProPeriod());
             ArrayList<MediaPlaylistBean> playlist = new ArrayList<>();
-            for (MediaLibBean media :
-                    GlobalValues.PLAY_LIST) {
+            for (MediaLibBean media : list) {
                 MediaPlaylistBean bean = new MediaPlaylistBean();
                 if (!TextUtils.isEmpty(media.getVid())) {
                     bean.setMedia_id(media.getVid());

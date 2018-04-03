@@ -1,9 +1,6 @@
 package com.savor.ads.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -15,9 +12,11 @@ import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.savor.ads.R;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogProduceService;
 import com.savor.ads.log.LogUploadService;
 import com.savor.ads.service.HandleMediaDataService;
@@ -25,7 +24,6 @@ import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
 import com.savor.ads.service.SSDPMulticastService;
 import com.savor.ads.service.ServerDiscoveryService;
-import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
@@ -33,6 +31,8 @@ import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.TimeCalibrateHelper;
+
+import java.util.ArrayList;
 
 import cn.savor.small.netty.NettyClient;
 
@@ -44,9 +44,6 @@ public class MainActivity extends BaseActivity {
     Handler mHandler = new Handler();
     private ImageView main_imgIv;
 
-    /**标识5秒延时是否已过*/
-    private boolean mIsLagElapse;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -56,66 +53,33 @@ public class MainActivity extends BaseActivity {
 
         mSession.setStartTime(AppUtils.getCurTime());
 
-        registerDownloadReceiver();
-
         // 清楚Glide图片缓存
         GlideImageLoader.clearCache(mContext, true, true);
 
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mIsLagElapse = true;
                 gotoAdsActivity();
             }
         }, 5000);
     }
 
     private void gotoAdsActivity() {
-        fillPlayList();
+        ArrayList<MediaLibBean> tempList = DBHelper.get(this).getTempProList();
+        if (tempList != null && tempList.size() > 30) {
+            String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? AND " +
+                    DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " +
+                    DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
+            String[] args = new String[]{ConstantValues.PRO, mSession.getProPeriod(), mSession.getProDownloadPeriod()};
+            DBHelper.get(this).deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, args);
 
-        deleteOldMedia();
+            deleteOldMedia();
+        }
+
+        fillPlayList();
 
         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
         startActivity(intent);
-    }
-
-    private void registerDownloadReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
-        registerReceiver(mDownloadCompleteReceiver, intentFilter);
-    }
-
-    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            LogUtils.d("收到下载完成广播");
-            if (mIsLagElapse && ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity) {
-                // 停留时间已到却仍未调到Ads的话，这里做跳转
-                gotoAdsActivity();
-            }
-        }
-    };
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mDownloadCompleteReceiver);
-    }
-
-//    private boolean mIsFirstResume = true;
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (!mIsFirstResume) {
-//            fillPlayList();
-//
-//            // 防止在从Main跳到Setting后刚好下载完成，此时Main在Resume时检查一次是否跳转到Ads
-//            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
-//                Intent intent = new Intent(this, AdsPlayerActivity.class);
-//                startActivity(intent);
-//            }
-//        }
-//        mIsFirstResume = false;
     }
 
     @Override
@@ -148,7 +112,7 @@ public class MainActivity extends BaseActivity {
         startProduceLogService();
         startUploadLogService();
 
-        startMulticatSendService();
+        startMulticastSendService();
     }
 
     /**
@@ -229,7 +193,7 @@ public class MainActivity extends BaseActivity {
         startService(intent);
     }
 
-    private void startMulticatSendService() {
+    private void startMulticastSendService() {
         LogFileUtil.write("MainActivity will startMulticatSendService");
         Intent intent = new Intent(this, SSDPMulticastService.class);
         startService(intent);

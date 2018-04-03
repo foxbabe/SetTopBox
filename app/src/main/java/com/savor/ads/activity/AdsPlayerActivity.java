@@ -27,7 +27,6 @@ import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
-import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
@@ -50,8 +49,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     private ArrayList<MediaLibBean> mPlayList;
     private String mListPeriod;
-    private boolean mNeedPlayNewer;
-    private boolean mForcePlayNewer;
+    private boolean mNeedUpdatePlaylist;
     /**
      * 日志用的播放记录标识
      */
@@ -103,20 +101,16 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     }
 
     private void registerDownloadReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION);
-        intentFilter.addAction(ConstantValues.RTB_ADS_PUSH_ACTION);
+        IntentFilter intentFilter = new IntentFilter(ConstantValues.UPDATE_PLAYLIST_ACTION);
         registerReceiver(mDownloadCompleteReceiver, intentFilter);
     }
 
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION.equals(intent.getAction())) {
-                LogUtils.d("收到下载完成广播");
-                mNeedPlayNewer = true;
-            } else if (ConstantValues.RTB_ADS_PUSH_ACTION.equals(intent.getAction())) {
-                LogUtils.d("收到RTB广告推送广播");
-                mForcePlayNewer = true;
+            if (ConstantValues.UPDATE_PLAYLIST_ACTION.equals(intent.getAction())) {
+                LogUtils.d("收到更新播放列表广播");
+                mNeedUpdatePlaylist = true;
             }
         }
     };
@@ -362,12 +356,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     "");
         }
 
-        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
+        if (mNeedUpdatePlaylist) {
             // 重新获取播放列表开始播放
-            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
-            mNeedPlayNewer = false;
-            mForcePlayNewer = false;
+            LogUtils.d("更新播放列表后继续播放");
+            mNeedUpdatePlaylist = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+                int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
                 deleteOldMedia();
@@ -382,12 +376,12 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
-        if (mForcePlayNewer || (isLast && mNeedPlayNewer)) {
-            int currentOrder = mForcePlayNewer ? mPlayList.get(index).getOrder() : -1;
+        if ( mNeedUpdatePlaylist) {
+            LogUtils.d("更新播放列表后继续播放");
             // 重新获取播放列表开始播放
-            mNeedPlayNewer = false;
-            mForcePlayNewer = false;
+            mNeedUpdatePlaylist = false;
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+                int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
                 deleteOldMedia();

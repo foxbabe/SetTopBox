@@ -775,6 +775,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
                                 if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
                                     isChecked = true;
+
+                                    notifyToPlay();
                                 }
                             }
                         } else {
@@ -1075,9 +1077,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     }
 
     private void notifyToPlay() {
-        if (AppUtils.fillPlaylist(this)) {
-            LogUtils.d("发送广告下载完成广播");
-            sendBroadcast(new Intent(ConstantValues.ADS_DOWNLOAD_COMPLETE_ACTION));
+        if (AppUtils.fillPlaylist(this, null, 1)) {
+            LogUtils.d("发送通知更新播放列表广播");
+            sendBroadcast(new Intent(ConstantValues.UPDATE_PLAYLIST_ACTION));
         }
     }
 

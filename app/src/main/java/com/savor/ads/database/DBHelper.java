@@ -12,6 +12,7 @@ import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RstrSpecialty;
 import com.savor.ads.core.Session;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -775,6 +776,58 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
         return playList;
+    }
+
+    /**
+     * 查询临时节目列表
+     *
+     * @return
+     */
+    public ArrayList<MediaLibBean> getTempProList() {
+        ArrayList<MediaLibBean> proList = null;
+        Cursor cursor = null;
+        Session session = Session.get(mContext);
+        if (!TextUtils.isEmpty(session.getProPeriod())
+                && !TextUtils.isEmpty(session.getAdvPeriod())) {
+            try {
+                // 拼接查询条件
+                String selection =  MediaDBInfo.FieldName.PERIOD + "!=? AND " + MediaDBInfo.FieldName.MEDIATYPE + "=?";
+                String[] args = new String[]{session.getProPeriod(), ConstantValues.PRO};
+
+
+                cursor = db.query(MediaDBInfo.TableName.NEWPLAYLIST, null, selection, args, null, null, MediaDBInfo.FieldName.CREATETIME);
+                if (cursor != null && cursor.moveToFirst()) {
+                    proList = new ArrayList<>();
+                    do {
+                        MediaLibBean bean = new MediaLibBean();
+                        bean.setVid(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.VID)));
+                        bean.setMd5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MD5)));
+                        bean.setName(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIANAME)));
+                        bean.setChinese_name(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.CHINESE_NAME)));
+                        bean.setType(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIATYPE)));
+                        bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
+                        bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
+                        bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                        bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
+                        bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+                        bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
+
+                        proList.add(bean);
+                    } while (cursor.moveToNext());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return proList;
     }
 
     /**

@@ -130,10 +130,9 @@ public class ConstantValues {
     public static final String USB_FILE_HOTEL_LIST_JSON = "hotel.json";
     /**U盘安装酒楼配置文件-单机日志标志*/
     public static final String STANDALONE="standalone";
-    /** 广告下载完成广播Action*/
-    public static final String ADS_DOWNLOAD_COMPLETE_ACTION = "com.savor.ads.ads_download_complete";
-    /** 接到RTB广告推送Action*/
-    public static final String RTB_ADS_PUSH_ACTION = "com.savor.ads.receive_rtb_push";
+
+    /** 更新播放列表Action*/
+    public static final String UPDATE_PLAYLIST_ACTION = "com.savor.ads.action_update_playlist";
 
 
     public static final int KEY_DOWN_LAG = 2000;
