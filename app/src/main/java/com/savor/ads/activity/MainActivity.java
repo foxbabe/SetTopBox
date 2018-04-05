@@ -73,7 +73,7 @@ public class MainActivity extends BaseActivity {
     private void gotoAdsActivity() {
         fillPlayList();
 
-        deleteOldMedia();
+        AppUtils.deleteOldMedia(mContext);
 
         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
         startActivity(intent);

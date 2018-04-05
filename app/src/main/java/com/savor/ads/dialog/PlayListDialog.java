@@ -152,28 +152,32 @@ public class PlayListDialog extends Dialog {
         String jsonData = FileUtils.read(filePath);
         if (!TextUtils.isEmpty(jsonData)) {
             ProgramBean programBean = null;
-            if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
-                // 宣传片和广告
-                ProgramBeanResult programBeanResult = gson.fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
-                }.getType());
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
-                    programBean = programBeanResult.getResult();
-                }
-            } else {
-                // 节目单
-                SetBoxTopResult setBoxTopResult = gson.fromJson(jsonData, new TypeToken<SetBoxTopResult>() {
-                }.getType());
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (setBoxTopResult.getResult() != null && setBoxTopResult.getResult().getPlaybill_list() != null) {
-                        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
-                        for (ProgramBean item : setBoxTopResult.getResult().getPlaybill_list()) {
-                            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
-                                programBean = item;
-                                break;
+            try {
+                if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
+                    // 宣传片和广告
+                    ProgramBeanResult programBeanResult = gson.fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
+                    }.getType());
+                    if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
+                        programBean = programBeanResult.getResult();
+                    }
+                } else {
+                    // 节目单
+                    SetBoxTopResult setBoxTopResult = gson.fromJson(jsonData, new TypeToken<SetBoxTopResult>() {
+                    }.getType());
+                    if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                        if (setBoxTopResult.getResult() != null && setBoxTopResult.getResult().getPlaybill_list() != null) {
+                            //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
+                            for (ProgramBean item : setBoxTopResult.getResult().getPlaybill_list()) {
+                                if (ConstantValues.PRO.equals(item.getVersion().getType())) {
+                                    programBean = item;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             if (programBean != null) {

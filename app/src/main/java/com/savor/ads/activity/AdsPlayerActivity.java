@@ -369,7 +369,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
-                deleteOldMedia();
+                AppUtils.deleteOldMedia(mContext);
                 return true;
             } else {
                 return false;
@@ -389,7 +389,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
-                deleteOldMedia();
+                AppUtils.deleteOldMedia(mContext);
                 return true;
             } else {
                 return false;

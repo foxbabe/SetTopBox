@@ -119,13 +119,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             @Override
             public void run() {
 
+                // 等10秒再开始下载
+                try {
+                    Thread.sleep(1000 * 10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 while (true) {
 
-                    // 循环检查SD卡、网络、小平台信息的情况直到可用
+                    // 循环检查网络、小平台信息的情况直到可用
                     do {
                         LogFileUtil.write("HandleMediaDataService will check server info and network");
-                        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) &&
-                                AppUtils.isNetworkAvailable(context) &&
+                        if (AppUtils.isNetworkAvailable(context) &&
                                 session.getServerInfo() != null) {
                             break;
                         }
@@ -137,56 +143,57 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     } while (true);
 
-                    // 等一会再开始下载
-                    try {
-                        Thread.sleep(6000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                    // 异步更新apk、rom
-                    new UpdateUtil(context);
-
                     // 检测剩余存储空间
-                    if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                    if (TextUtils.isEmpty(AppUtils.getMainMediaPath()) ||
+                            AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
                         // 存储空间不足
-                        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
                         LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
 
-                        AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
-                    }
-
-                    getPrizeInfo();
-
-                    LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
-                    // 同步获取机顶盒基本信息，包括logo、loading图
-                    getBoxInfo();
-
-                    // 检测预约发布的播放时间是否已到达，启动时不检测因为已经在Application中检测过了
-                    if (!isFirstRun && AppUtils.checkPlayTime(context)) {
+                        // 清理可清理的视频等文件
+                        cleanMediaWhenSpaceLow();
+                        // 提前播放的pro在上面这一步可能已经被删除，这里重新填充节目单并通知播放
                         notifyToPlay();
-                    }
+                        // 上报服务器 卡满异常
+                        AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
 
-                    LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
-                    // 同步获取轮播节目媒体数据
-                    getProgramDataFromSmallPlatform();
-                    //同步获取宣传片媒体数据
-                    getAdvDataFromSmallPlatform();
-                    //同步获取广告片媒体数据
-                    getAdsDataFromSmallPlatform();
-                    LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
-                    // 同步获取点播媒体数据
-                    getOnDemandDataFromSmallPlatform();
-                    // 获取特色菜媒体数据
-                    getSpecialtyFromSmallPlatform();
-                    // 获取实时竞价媒体数据
-                    getRtbAdsFromSmallPlatform();
+                    } else {
+                        // 空间充足，开始更新资源
+
+                        LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+                        // 异步更新apk、rom
+                        new UpdateUtil(context);
+
+                        getPrizeInfo();
+
+                        LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
+                        // 同步获取机顶盒基本信息，包括logo、loading图
+                        getBoxInfo();
+
+                        // 检测预约发布的播放时间是否已到达，启动时不检测因为已经在Application中检测过了
+                        if (!isFirstRun && AppUtils.checkPlayTime(context)) {
+                            notifyToPlay();
+                        }
+
+                        LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
+                        // 同步获取轮播节目媒体数据
+                        getProgramDataFromSmallPlatform();
+                        //同步获取宣传片媒体数据
+                        getAdvDataFromSmallPlatform();
+                        //同步获取广告片媒体数据
+                        getAdsDataFromSmallPlatform();
+                        LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
+                        // 同步获取点播媒体数据
+                        getOnDemandDataFromSmallPlatform();
+                        // 获取特色菜媒体数据
+                        getSpecialtyFromSmallPlatform();
+                        // 获取实时竞价媒体数据
+                        getRtbAdsFromSmallPlatform();
 //                    setAutoClose(true);
 
-                    LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
-                    // 异步获取电视节目信息
-                    getTVMatchDataFromSmallPlatform();
+                        LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
+                        // 异步获取电视节目信息
+                        getTVMatchDataFromSmallPlatform();
+                    }
 
                     // 睡眠10分钟
                     try {
@@ -199,6 +206,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }).start();
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void cleanMediaWhenSpaceLow() {
+        // 删除下载表中的当前、非下载中的节目单的内容
+        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " +
+                DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? AND " + DBHelper.MediaDBInfo.FieldName.PERIOD + "!=? ";
+        String[] selectionArgs;
+        selectionArgs = new String[]{session.getProPeriod(), session.getProDownloadPeriod(), session.getAdvPeriod(), session.getAdvDownloadPeriod()};
+        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
+
+        AppUtils.deleteOldMedia(this);
+
+        AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
     }
 
 
@@ -1052,7 +1072,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (isAdsCompleted) {
             isAdsFirstRun = false;
             session.setAdsPeriod(adsPeriod);
-            // 从ADS下载表中删除非该期的记录
+            // 从ADS下载表拷贝到正式表
             dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWADSLIST, DBHelper.MediaDBInfo.TableName.ADSLIST);
             // 记录日志
             // 记录下载完成日志
