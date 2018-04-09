@@ -128,71 +128,77 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                 while (true) {
 
-                    // 循环检查网络、小平台信息的情况直到可用
-                    do {
-                        LogFileUtil.write("HandleMediaDataService will check server info and network");
-                        if (AppUtils.isNetworkAvailable(context) &&
-                                session.getServerInfo() != null) {
-                            break;
-                        }
+                    try {
+                        // 循环检查网络、小平台信息的情况直到可用
+                        do {
+                            LogFileUtil.write("HandleMediaDataService will check server info and network");
+                            if (AppUtils.isNetworkAvailable(context) &&
+                                    session.getServerInfo() != null &&
+                                    !TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
+                                break;
+                            }
 
-                        try {
-                            Thread.sleep(1000 * 2);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } while (true);
+                            try {
+                                Thread.sleep(1000 * 2);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } while (true);
 
-                    // 检测剩余存储空间
-                    if (TextUtils.isEmpty(AppUtils.getMainMediaPath()) ||
-                            AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
-                        // 存储空间不足
-                        LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
+                        LogFileUtil.write("HandleMediaDataService will check space available");
+                        // 检测剩余存储空间
+                        if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                            // 存储空间不足
+                            LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
 
-                        // 清理可清理的视频等文件
-                        cleanMediaWhenSpaceLow();
-                        // 提前播放的pro在上面这一步可能已经被删除，这里重新填充节目单并通知播放
-                        notifyToPlay();
-                        // 上报服务器 卡满异常
-                        AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
-
-                    } else {
-                        // 空间充足，开始更新资源
-
-                        LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                        // 异步更新apk、rom
-                        new UpdateUtil(context);
-
-                        getPrizeInfo();
-
-                        LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
-                        // 同步获取机顶盒基本信息，包括logo、loading图
-                        getBoxInfo();
-
-                        // 检测预约发布的播放时间是否已到达，启动时不检测因为已经在Application中检测过了
-                        if (!isFirstRun && AppUtils.checkPlayTime(context)) {
+                            // 清理可清理的视频等文件
+                            cleanMediaWhenSpaceLow();
+                            // 提前播放的pro在上面这一步可能已经被删除，这里重新填充节目单并通知播放
                             notifyToPlay();
+                            // 上报服务器 卡满异常
+                            AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
+
+                        } else {
+                            // 空间充足，开始更新资源
+
+                            LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+                            // 异步更新apk、rom
+                            new UpdateUtil(context);
+
+                            getPrizeInfo();
+
+                            LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
+                            // 同步获取机顶盒基本信息，包括logo、loading图
+                            getBoxInfo();
+
+                            // 检测预约发布的播放时间是否已到达，启动时不检测因为已经在Application中检测过了
+                            if (!isFirstRun && AppUtils.checkPlayTime(context)) {
+                                notifyToPlay();
+                            }
+
+                            LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
+                            // 同步获取轮播节目媒体数据
+                            getProgramDataFromSmallPlatform();
+                            //同步获取宣传片媒体数据
+                            getAdvDataFromSmallPlatform();
+                            //同步获取广告片媒体数据
+                            getAdsDataFromSmallPlatform();
+                            LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
+                            // 同步获取点播媒体数据
+                            getOnDemandDataFromSmallPlatform();
+                            // 获取特色菜媒体数据
+                            getSpecialtyFromSmallPlatform();
+                            // 获取实时竞价媒体数据
+                            getRtbAdsFromSmallPlatform();
+    //                    setAutoClose(true);
+
+                            LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
+                            // 异步获取电视节目信息
+                            getTVMatchDataFromSmallPlatform();
                         }
-
-                        LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
-                        // 同步获取轮播节目媒体数据
-                        getProgramDataFromSmallPlatform();
-                        //同步获取宣传片媒体数据
-                        getAdvDataFromSmallPlatform();
-                        //同步获取广告片媒体数据
-                        getAdsDataFromSmallPlatform();
-                        LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
-                        // 同步获取点播媒体数据
-                        getOnDemandDataFromSmallPlatform();
-                        // 获取特色菜媒体数据
-                        getSpecialtyFromSmallPlatform();
-                        // 获取实时竞价媒体数据
-                        getRtbAdsFromSmallPlatform();
-//                    setAutoClose(true);
-
-                        LogFileUtil.write("HandleMediaDataService will start getTVMatchDataFromSmallPlatform");
-                        // 异步获取电视节目信息
-                        getTVMatchDataFromSmallPlatform();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        LogFileUtil.writeException(e);
                     }
 
                     // 睡眠10分钟
