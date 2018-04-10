@@ -364,7 +364,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
-                deleteOldMedia();
+                AppUtils.deleteOldMedia(mContext);
                 return true;
             } else {
                 return false;
@@ -384,7 +384,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
-                deleteOldMedia();
+                AppUtils.deleteOldMedia(mContext);
                 return true;
             } else {
                 return false;

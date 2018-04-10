@@ -1,6 +1,9 @@
 package com.savor.ads.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -24,6 +27,7 @@ import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
 import com.savor.ads.service.SSDPMulticastService;
 import com.savor.ads.service.ServerDiscoveryService;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.GlideImageLoader;
@@ -72,11 +76,11 @@ public class MainActivity extends BaseActivity {
                     DBHelper.MediaDBInfo.FieldName.PERIOD + "!=?";
             String[] args = new String[]{ConstantValues.PRO, mSession.getProPeriod(), mSession.getProDownloadPeriod()};
             DBHelper.get(this).deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, args);
-
-            deleteOldMedia();
         }
 
         fillPlayList();
+
+        AppUtils.deleteOldMedia(mContext);
 
         Intent intent = new Intent(mContext, AdsPlayerActivity.class);
         startActivity(intent);

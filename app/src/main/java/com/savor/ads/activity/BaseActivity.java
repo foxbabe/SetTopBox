@@ -208,53 +208,6 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         }
     }
 
-    protected void deleteOldMedia() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                LogUtils.d("删除多余视频");
-
-                // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
-                if (TextUtils.isEmpty(mSession.getProPeriod())) {
-                    return;
-                }
-
-                //排除当前已经完整下载的文件和正在下载的文件，其他删除
-                String path = AppUtils.getFilePath(mContext, AppUtils.StorageFile.media);
-                File[] listFiles = new File(path).listFiles();
-                if (listFiles == null || listFiles.length == 0) {
-                    return;
-                }
-                try {
-                    DBHelper dbHelper = DBHelper.get(mContext);
-                    if (dbHelper.findPlayListByWhere(null, null) == null &&
-                            dbHelper.findNewPlayListByWhere(null, null) == null){
-                        return;
-                    }
-                    for (File file : listFiles) {
-                        if (file.isFile()) {
-                            String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?";
-                            String[] selectionArgs = new String[]{file.getName()};
-
-                            if (dbHelper.findPlayListByWhere(selection, selectionArgs) == null &&
-                                    dbHelper.findNewPlayListByWhere(selection, selectionArgs) == null &&
-                                    dbHelper.findAdsByWhere(selection, selectionArgs) == null &&
-                                    dbHelper.findNewAdsByWhere(selection, selectionArgs) == null) {
-                                file.delete();
-                                LogUtils.d("删除文件===================" + file.getName());
-                            }
-                        } else {
-                            FileUtils.deleteFile(file);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -369,6 +322,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
 
     private void handleExtsdRemoved() {
+        AppUtils.EXTERNAL_SDCARD_PATH = null;
         TechnicalLogReporter.sdcardRemoved(this);
         //SD移除时跳到TV页
         if (this instanceof AdsPlayerActivity) {

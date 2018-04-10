@@ -8,16 +8,15 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.savor.ads.activity.BaseActivity;
+import com.savor.ads.bean.DownloadDetailRequestBean;
 import com.savor.ads.bean.MediaDownloadBean;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.DownloadDetailRequestBean;
 import com.savor.ads.bean.MediaPlaylistBean;
 import com.savor.ads.bean.PlaylistDetailRequestBean;
 import com.savor.ads.bean.ProgramBean;
 import com.savor.ads.bean.ProgramBeanResult;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
-import com.savor.ads.bean.SetTopBoxBean;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
@@ -75,6 +74,20 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        // 循环检查网络情况直到可用
+        do {
+            LogFileUtil.write("HandleMediaDataService will check server info and network");
+            if (AppUtils.isNetworkAvailable(this)) {
+                break;
+            }
+
+            try {
+                Thread.sleep(1000 * 2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (true);
+
         //  启动时立即心跳一次
         doHeartbeat();
 
@@ -103,7 +116,11 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
                 doHeartbeat();
 
-                reportMediaDetail();
+                try {
+                    reportMediaDetail();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             String time = AppUtils.getCurTime("HH:mm");
@@ -169,30 +186,34 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
         ArrayList<MediaDownloadBean> medias = new ArrayList<>();
         DownloadDetailRequestBean requestBean = new DownloadDetailRequestBean();
         String jsonData = FileUtils.read(filePath);
-        if (jsonData != null) {
+        if (!TextUtils.isEmpty(jsonData)) {
             ProgramBean programBean = null;
-            if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
-                // 宣传片和广告
-                ProgramBeanResult programBeanResult = new Gson().fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
-                }.getType());
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
-                    programBean = programBeanResult.getResult();
-                }
-            } else {
-                // 节目单
-                SetBoxTopResult setBoxTopResult = new Gson().fromJson(jsonData, new TypeToken<SetBoxTopResult>() {
-                }.getType());
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (setBoxTopResult.getResult() != null && setBoxTopResult.getResult().getPlaybill_list() != null) {
-                        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
-                        for (ProgramBean item : setBoxTopResult.getResult().getPlaybill_list()) {
-                            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
-                                programBean = item;
-                                break;
+            try {
+                if (ConstantValues.ADS_DATA_PATH.equals(filePath) || ConstantValues.ADV_DATA_PATH.equals(filePath)) {
+                    // 宣传片和广告
+                    ProgramBeanResult programBeanResult = new Gson().fromJson(jsonData, new TypeToken<ProgramBeanResult>() {
+                    }.getType());
+                    if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
+                        programBean = programBeanResult.getResult();
+                    }
+                } else {
+                    // 节目单
+                    SetBoxTopResult setBoxTopResult = new Gson().fromJson(jsonData, new TypeToken<SetBoxTopResult>() {
+                    }.getType());
+                    if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                        if (setBoxTopResult.getResult() != null && setBoxTopResult.getResult().getPlaybill_list() != null) {
+                            //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
+                            for (ProgramBean item : setBoxTopResult.getResult().getPlaybill_list()) {
+                                if (ConstantValues.PRO.equals(item.getVersion().getType())) {
+                                    programBean = item;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             if (programBean != null && programBean.getVersion() != null) {
