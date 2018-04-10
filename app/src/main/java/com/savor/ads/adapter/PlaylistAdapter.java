@@ -1,6 +1,7 @@
 package com.savor.ads.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.savor.ads.R;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.ConstantValues;
 
 import java.util.ArrayList;
@@ -60,6 +62,13 @@ public class PlaylistAdapter extends BaseAdapter {
             viewHolder.mIsAdsTv.setVisibility(View.VISIBLE);
         } else {
             viewHolder.mIsAdsTv.setVisibility(View.GONE);
+        }
+        if (ConstantValues.PRO.equals(mediaLibBean.getType()) &&
+                !TextUtils.isEmpty(Session.get(mContext).getProPeriod()) &&
+                !mediaLibBean.getPeriod().equals(Session.get(mContext).getProPeriod())) {
+            viewHolder.mMediaNameTv.setTextColor(0xFF0000FF);
+        } else {
+            viewHolder.mMediaNameTv.setTextColor(0xFFFFFFFF);
         }
         return convertView;
     }

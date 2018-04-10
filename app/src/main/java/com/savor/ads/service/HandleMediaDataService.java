@@ -766,11 +766,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 continue;
             }
 
-            // 先从下载表中删除该期的记录
-            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
-            String[] selectionArgs = new String[]{versionInfo.getVersion(), versionInfo.getType()};
-            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
-
             List<MediaLibBean> mediaLibList = item.getMedia_lib();
             int downloadedCount = 0;
             if (mediaLibList != null && mediaLibList.size() > 0) {
@@ -789,6 +784,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 for (MediaLibBean mediaItem : mediaLibList) {
                     try {
                         boolean isChecked = false;
+                        boolean isNewDownload = false;
                         String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + mediaItem.getName();
                         //判断当前数据是节目还是其他，如果是节目走下载逻辑,其他则直接入库
                         if (ConstantValues.PRO.equals(versionInfo.getType())) {
@@ -801,8 +797,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
                                 if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
                                     isChecked = true;
-
-                                    notifyToPlay();
+                                    isNewDownload = true;
                                 }
                             }
                         } else {
@@ -811,8 +806,20 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         // 校验通过、插库
                         if (isChecked) {
                             mediaItem.setMediaPath(path);
-                            // 插库成功，downloadedCount加1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
+                            String selection = DBHelper.MediaDBInfo.FieldName.ADS_ORDER + "=? and " +
+                                    DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
+                            String[] selectionArgs = new String[]{mediaItem.getOrder() + "", mediaItem.getPeriod()};
+                            List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
+                            if (list == null || list.isEmpty()) {
+                                // 插库成功，downloadedCount加1
+                                if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
+                                    downloadedCount++;
+
+                                    if (isNewDownload) {
+                                        notifyToPlay();
+                                    }
+                                }
+                            } else {
                                 downloadedCount++;
                             }
                         }
@@ -875,11 +882,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
-        // 先从下载表中删除该期的记录
-        String selectionDel = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
-        String[] argsDel = new String[]{advPeriod, programAdvBean.getVersion().getType()};
-        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selectionDel, argsDel);
-
         String logUUID = String.valueOf(System.currentTimeMillis());
         // 记录下载开始日志
         int count = programAdvBean.getMedia_lib() == null ? 0 : programAdvBean.getMedia_lib().size();
@@ -906,13 +908,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         }
                     }
                     if (isChecked) {
-                        // ADV是先在handleSmallPlatformProgramData()中插入，然后在这里更新实际数据，插入时的期号是节目单号
-                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE
-                                + "=? and "
-                                + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
-                                + "=? and "
-                                + DBHelper.MediaDBInfo.FieldName.PERIOD
-                                + "=? ";
+                        // ADV是先在handleSmallPlatformProgramData()中插入，插入时的期号是节目单号，然后在这里更新实际数据
+                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
+                                DBHelper.MediaDBInfo.FieldName.LOCATION_ID + "=? and " +
+                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
                         String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), programAdvBean.getMenu_num()};
                         List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
                         int id = -1;
@@ -1019,8 +1018,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
 
         // 清空ads下载表
-//        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
-//        String[] selectionArgs = new String[]{adsPeriod};
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, null, null);
 
         String logUUID = String.valueOf(System.currentTimeMillis());

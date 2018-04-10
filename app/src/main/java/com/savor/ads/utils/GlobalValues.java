@@ -41,10 +41,11 @@ public class GlobalValues {
     /** 是否是餐厅端投屏*/
     public volatile static boolean IS_RSTR_PROJECTION;
 
-
+    /** 标识盒子是否正在忙碌中，，忙碌中则不处理投屏类请求*/
     public static volatile boolean IS_BOX_BUSY = false;
 
+    /** 标识友盟推送所需SO拷贝是否成功*/
     public static boolean IS_UPUSH_SO_COPY_SUCCESS = false;
-
+    /** 标识友盟推送注册是否成功*/
     public static boolean IS_UPUSH_REGISTER_SUCCESS = false;
 }
