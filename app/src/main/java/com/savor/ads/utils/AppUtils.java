@@ -183,7 +183,7 @@ public class AppUtils {
      * SDCard的根路径
      **/
     private static String SDCARD_PATH;
-    private static String EXTERNAL_SDCARD_PATH = "";
+    public static String EXTERNAL_SDCARD_PATH = "";
     public static final int NOCONNECTION = 0;
     public static final int WIFI = 1;
     public static final int MOBILE = 2;

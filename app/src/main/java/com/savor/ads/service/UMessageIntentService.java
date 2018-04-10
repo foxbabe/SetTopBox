@@ -8,24 +8,19 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RTBPushItem;
 import com.savor.ads.core.Session;
-import com.savor.ads.database.DBHelper;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
-import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.umeng.message.UmengMessageService;
 import com.umeng.message.entity.UMessage;
 
 import org.android.agoo.common.AgooConstants;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in

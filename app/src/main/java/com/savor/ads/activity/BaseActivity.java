@@ -322,6 +322,7 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
 
 
     private void handleExtsdRemoved() {
+        AppUtils.EXTERNAL_SDCARD_PATH = null;
         TechnicalLogReporter.sdcardRemoved(this);
         //SD移除时跳到TV页
         if (this instanceof AdsPlayerActivity) {
