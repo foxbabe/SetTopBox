@@ -176,6 +176,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 notifyToPlay();
                             }
 
+                            LogFileUtil.write("HandleMediaDataService will start getPolyAdsFromSmallPlatform");
+                            // 同步获取聚屏物料媒体数据
+                            getPolyAdsFromSmallPlatform();
+
                             LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
                             // 同步获取轮播节目媒体数据
                             getProgramDataFromSmallPlatform();
@@ -484,7 +488,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
             session.setSpecialtyPeriod(versionInfo.getVersion());
 
-            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.specialty, DBHelper.MediaDBInfo.TableName.SPECIALTY,null);
+            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.specialty, DBHelper.MediaDBInfo.TableName.SPECIALTY);
         }
     }
 
@@ -601,7 +605,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     Session.get(context).getVodPeriod(), "");
 
 
-            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.rtb_ads, DBHelper.MediaDBInfo.TableName.RTB_ADS,programBean.getVersion().getType());
+            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.rtb_ads, DBHelper.MediaDBInfo.TableName.RTB_ADS);
         } else {
             // 记录下载中止日志
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
@@ -727,7 +731,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     Session.get(context).getVodPeriod(), "");
 
 
-            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.poly_ads, DBHelper.MediaDBInfo.TableName.RTB_ADS,programBean.getVersion().getType());
+            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.poly_ads, DBHelper.MediaDBInfo.TableName.RTB_ADS);
         } else {
             // 记录下载中止日志
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
@@ -1670,7 +1674,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             session.setVodVersion(newVersions);
             session.setMulticastMediaPeriod(versionStr);
 
-            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.multicast, DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,null);
+            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.multicast, DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB);
         }
     }
 
@@ -1680,23 +1684,23 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * @param arrayList
      * @param storage
      */
-    private void deleteMediaFileNotInConfig(List<String> arrayList, AppUtils.StorageFile storage, String tableName,String type) {
+    private void deleteMediaFileNotInConfig(List<String> arrayList, AppUtils.StorageFile storage, String tableName) {
         File[] listFiles = new File(AppUtils.getFilePath(context, storage)).listFiles();
         for (File file : listFiles) {
             if (file.isFile()) {
                 String oldName = file.getName();
                 if (!arrayList.contains(oldName)) {
                     if (file.delete()) {
-                        String selection = null;
-                        String[] selectionArgs = null;
-                        if (tableName.equals(DBHelper.MediaDBInfo.TableName.RTB_ADS)){
-                            selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? and "
-                                    + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? ";
-                            selectionArgs = new String[]{oldName,type};
-                        }else{
-                            selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
-                            selectionArgs = new String[]{oldName};
-                        }
+                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
+                        String[] selectionArgs = new String[]{oldName};
+//                        if (!TextUtils.isEmpty(type)){
+//                            selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? and "
+//                                    + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? ";
+//                            selectionArgs = new String[]{oldName,type};
+//                        }else{
+//                            selection = DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
+//                            selectionArgs = new String[]{oldName};
+//                        }
 
                         dbHelper.deleteDataByWhere(tableName, selection, selectionArgs);
                     }

@@ -77,7 +77,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "dbsavor.db";
 
 
-    private static final int DB_VERSION = 17;
+    private static final int DB_VERSION = 18;
 
     private Context mContext;
 
@@ -188,6 +188,18 @@ public class DBHelper extends SQLiteOpenHelper {
             try {
                 String alterMulticast = "ALTER TABLE " + MediaDBInfo.TableName.MULTICASTMEDIALIB + " ADD " + MediaDBInfo.FieldName.CHINESE_NAME + " TEXT;";
                 sqLiteDatabase.execSQL(alterMulticast);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (oldVersion < 18) {
+            // 18版本在RTBADS表中加入TPMEDIA_ID和TP_MD5两列
+            try {
+                String alterAddType = "ALTER TABLE " + MediaDBInfo.TableName.RTB_ADS + " ADD " + MediaDBInfo.FieldName.TPMEDIA_ID + " TEXT;";
+                String alterAddMd5 = "ALTER TABLE " + MediaDBInfo.TableName.RTB_ADS + " ADD " + MediaDBInfo.FieldName.TP_MD5 + " TEXT;";
+                sqLiteDatabase.execSQL(alterAddType);
+                sqLiteDatabase.execSQL(alterAddMd5);
             } catch (Exception e) {
                 e.printStackTrace();
             }

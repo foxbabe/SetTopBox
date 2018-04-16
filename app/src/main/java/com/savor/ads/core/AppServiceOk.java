@@ -3,6 +3,7 @@ package com.savor.ads.core;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.protobuf.GeneratedMessage;
 import com.savor.ads.okhttp.OkHttpUtils;
 import com.savor.ads.okhttp.callback.Callback;
 import com.savor.ads.okhttp.callback.FileDownProgress;
@@ -10,6 +11,7 @@ import com.savor.ads.okhttp.coreProgress.ProgressHelper;
 import com.savor.ads.okhttp.coreProgress.download.UIProgressResponseListener;
 import com.savor.ads.okhttp.coreProgress.upload.UIProgressRequestListener;
 import com.savor.ads.okhttp.request.GetRequest;
+import com.savor.ads.okhttp.request.PostProtoBufferRequest;
 import com.savor.ads.okhttp.request.PostStringRequest;
 import com.savor.ads.okhttp.request.RequestCall;
 import com.savor.ads.utils.AppUtils;
@@ -33,6 +35,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import tianshu.ui.api.TsUiApiV20171122;
 
 public class AppServiceOk {
     private Context mContext;
@@ -53,11 +56,11 @@ public class AppServiceOk {
     private static long cacheSize = 1024 * 1024 * 5;
 
     public AppServiceOk(Context context, AppApi.Action action) {
-        this.mContext = context;
-        this.action = action;
-        this.appSession = Session.get(context);
-        this.okHttpUtils = OkHttpUtils.getInstance();
-        this.client = okHttpUtils.getOkHttpClient();
+        this(context, action, null);
+    }
+
+    public AppServiceOk(Context context, AppApi.Action action, ApiRequestListener handler) {
+        this(context, action, handler, null);
     }
 
     public AppServiceOk(Context context, AppApi.Action action, ApiRequestListener handler, Object params) {
@@ -66,16 +69,6 @@ public class AppServiceOk {
         this.handler = handler;
         this.mParameter = params;
         this.appSession = Session.get(context);
-        this.okHttpUtils = OkHttpUtils.getInstance();
-        this.client = okHttpUtils.getOkHttpClient();
-    }
-
-    public AppServiceOk(Context context, AppApi.Action action, ApiRequestListener handler, Object params, String payType) {
-        this.mContext = context;
-        this.action = action;
-        this.handler = handler;
-        this.mParameter = params;
-        appSession = Session.get(context);
         this.okHttpUtils = OkHttpUtils.getInstance();
         this.client = okHttpUtils.getOkHttpClient();
     }
@@ -480,4 +473,54 @@ public class AppServiceOk {
         }
     }
 
+    public void postProto(GeneratedMessage message) {
+        try {
+            String requestUrl = AppApi.API_URLS.get(action);
+            /**
+             * 1.通过一个requrest构造方法将参数传入
+             * 2.
+             */
+            Callback<Object> callback = new Callback<Object>() {
+
+                @Override
+                public Object parseNetworkResponse(Response response)
+                        throws Exception {
+                    try {
+                        System.err.println(response.cacheResponse().body().string());
+                    } catch (Exception e) {
+                    }
+
+                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", false);
+
+                    LogUtils.d(object.toString() + "");
+                    response.close();
+                    return object;
+                }
+
+                @Override
+                public void onError(Call call, Exception e) {
+                    if (handler != null) {
+                        handler.onNetworkFailed(action);
+                    }
+                }
+
+                @Override
+                public void onResponse(Object response) {
+                    if (handler != null) {
+                        if (response instanceof ResponseErrorMessage) {
+                            handler.onError(action, response);
+                        } else {
+                            handler.onSuccess(action, response);
+                        }
+                    }
+                }
+
+            };
+            PostProtoBufferRequest stringRequest = new PostProtoBufferRequest(requestUrl, action, null, null, message.toByteArray());
+            RequestCall requestCall = new RequestCall(stringRequest);
+            requestCall.execute(callback);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

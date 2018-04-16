@@ -96,4 +96,5 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.2'
     implementation project(':tvlibrary')
     implementation project(':Pushlib')
+    implementation 'com.google.protobuf:protobuf-java:3.5.1'
 }

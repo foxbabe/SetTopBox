@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import tianshu.ui.api.TsUiApiV20171122;
+
 public class AppApi {
 
     /**
@@ -29,6 +31,12 @@ public class AppApi {
     public static String SP_BASE_URL = "http://192.168.1.2/";
 
     private static String PHONE_BASE_URL = "http://192.168.0.1:8080/";
+
+    /**百度聚屏接口地址*/
+    // 联调环境
+    private static String BAIDU_AD_BASE_URL = "http://jpaccess.baidu.com/api_6";
+//    // 正式环境
+//    private static String BAIDU_AD_BASE_URL = "http://jpad.baidu.com/api_6";
 
 //    /**
 //     * 云平台测试环境
@@ -99,6 +107,8 @@ public class AppApi {
         CP_POST_PLAY_LIST_JSON,
         CP_POST_DOWNLOAD_LIST_JSON,
         CP_POST_SDCARD_STATE_JSON,
+
+        AD_BAIDU_ADS,
     }
 
 
@@ -133,6 +143,7 @@ public class AppApi {
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
+            put(Action.AD_BAIDU_ADS, BAIDU_AD_BASE_URL);
         }
     };
 
@@ -493,6 +504,16 @@ public class AppApi {
         params.put("box_mac", Session.get(context).getEthernetMac());
         params.put("type", type);
         new AppServiceOk(context, Action.CP_POST_SDCARD_STATE_JSON, handler, params).post();
+    }
+
+    /**
+     * 请求百度聚屏广告
+     * @param context
+     * @param handler
+     * @param requestBean
+     */
+    public static void requestBaiduAds(Context context, ApiRequestListener handler, TsUiApiV20171122.TsApiRequest requestBean) {
+        new AppServiceOk(context, Action.AD_BAIDU_ADS, handler).postProto(requestBean);
     }
 
     // 超时（网络）异常
