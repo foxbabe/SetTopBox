@@ -172,6 +172,11 @@ public class AppUtils {
          * RTB广告目录
          */
         rtb_ads,
+        /**
+         * poly聚屏广告目录
+         */
+        poly_ads
+
     }
 
     private static TrustManager[] trustAllCerts;
@@ -327,6 +332,10 @@ public class AppUtils {
         if (!rtbFile.exists()) {
             rtbFile.mkdir();
         }
+        File polyFile = new File(path + File.separator, "poly_ads");
+        if (!polyFile.exists()) {
+            polyFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -348,6 +357,8 @@ public class AppUtils {
             path = specialtyFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.rtb_ads) {
             path = rtbFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.poly_ads) {
+            path = polyFile.getAbsolutePath() + File.separator;
         }
         return path;
     }
@@ -1884,4 +1895,7 @@ public class AppUtils {
         return (type == 2 && resultList != null && !resultList.isEmpty()) ||
                 (type == 1 && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty());
     }
+
+
+
 }

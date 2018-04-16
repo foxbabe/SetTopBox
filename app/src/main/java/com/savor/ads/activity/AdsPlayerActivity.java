@@ -21,6 +21,7 @@ import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.SavorVideoView;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
@@ -38,6 +39,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 广告播放页面
@@ -151,8 +153,38 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 MediaLibBean bean = mPlayList.get(i);
                 urls.add(bean.getMediaPath());
             }
-
+            toCheckIfPolyAds(index);
             mSavorVideoView.setMediaFiles(urls, index, 0);
+        }
+    }
+
+    /**
+     * Play the current video while detecting the next video that needs to be played if the video is poly,
+     * and if so,
+     * call the interface to determine if there is a resource that can be played on a poly video.
+     * @param index
+     */
+    private void toCheckIfPolyAds(int index){
+        if ((index+1)<mPlayList.size()){
+            MediaLibBean bean = mPlayList.get(index+1);
+            if (ConstantValues.POLY_ADS.equals(bean.getType())){
+                // TODO: 2018/4/14  ://调用百度聚屏接口
+            }
+        }
+    }
+
+
+    private void addPolyAdsUpdatePlaylist(int next){
+        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " +
+                DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? ";
+        String[] selectionArgs = new String[]{mSession.getPolyAdsPeriod(), ConstantValues.POLY_ADS};
+        List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection,selectionArgs);
+        if (list!=null&&list.size()>0){
+            MediaLibBean bean = list.get(0);
+            if (mPlayList!=null&&next<mPlayList.size()){
+                MediaLibBean mediaLibBean = mPlayList.get(next);
+            }
+
         }
     }
 

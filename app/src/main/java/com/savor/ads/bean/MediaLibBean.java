@@ -40,7 +40,10 @@ public class MediaLibBean implements Serializable {
     private String admaster_sin;
     /**下载状态 0：未下载； 1：已下载； 2：下载中*/
     private int download_state;
-
+    /**聚屏类型：1.百度**/
+    private String tpmedia_id;
+    /**百度返回md5值**/
+    private String tp_md5;
     public int getId() {
         return id;
     }
@@ -193,6 +196,22 @@ public class MediaLibBean implements Serializable {
 
     public void setDownload_state(int download_state) {
         this.download_state = download_state;
+    }
+
+    public String getTpmedia_id() {
+        return tpmedia_id;
+    }
+
+    public void setTpmedia_id(String tpmedia_id) {
+        this.tpmedia_id = tpmedia_id;
+    }
+
+    public String getTp_md5() {
+        return tp_md5;
+    }
+
+    public void setTp_md5(String tp_md5) {
+        this.tp_md5 = tp_md5;
     }
 }
 

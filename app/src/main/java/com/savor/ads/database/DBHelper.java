@@ -54,6 +54,10 @@ public class DBHelper extends SQLiteOpenHelper {
             public static final String FOOD_ID = "food_id";
 
             public static final String ADMASTER_SIN = "admaster_sin";
+            /**聚屏类型：1.百度*/
+            public static final String TPMEDIA_ID = "tpmedia_id";
+            /**百度返回md5值*/
+            public static final String TP_MD5 = "tp_md5";
         }
 
         public static class TableName {
@@ -330,7 +334,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.ADMASTER_SIN + " TEXT, "
-                + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT" + ");";
+                + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.TPMEDIA_ID + " TEXT, "
+                + MediaDBInfo.FieldName.TP_MD5 + " TEXT" + ");";
         db.execSQL(DATABASE_CREATE);
     }
 
@@ -697,7 +703,8 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
             initialValues.put(MediaDBInfo.FieldName.ADMASTER_SIN, playList.getAdmaster_sin());
-
+            initialValues.put(MediaDBInfo.FieldName.TPMEDIA_ID,playList.getTpmedia_id());
+            initialValues.put(MediaDBInfo.FieldName.TP_MD5,playList.getTp_md5());
             long successCount = 0;
             if (isUpdate) {
                 successCount = db.update(MediaDBInfo.TableName.RTB_ADS,
@@ -1052,6 +1059,8 @@ public class DBHelper extends SQLiteOpenHelper {
                             bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                             bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
                             bean.setAdmaster_sin(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.ADMASTER_SIN)));
+                            bean.setTpmedia_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.TPMEDIA_ID)));
+                            bean.setTp_md5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.TP_MD5)));
                             list.add(bean);
                         } while (cursor.moveToNext());
                     }
@@ -1128,5 +1137,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return list;
     }
+
+
 
 }
