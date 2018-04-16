@@ -157,6 +157,8 @@ public class ConstantValues {
     public static final String ADS = "ads";
     /**节目单-RTB广告*/
     public static final String RTB_ADS = "rtbads";
+    /**节目单-poly广告*/
+    public static final String POLY_ADS = "poly";
     /**特色菜*/
     public static final String RECOMMEND = "recommend";
 

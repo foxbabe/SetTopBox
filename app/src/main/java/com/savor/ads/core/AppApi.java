@@ -94,6 +94,7 @@ public class AppApi {
         CP_GET_ADMASTER_CONFIG_JSON,
         CP_POST_DEVICE_TOKEN_JSON,
         SP_GET_RTB_ADS_JSON,
+        SP_GET_POLY_ADS_JSON,
         SP_POST_NETSTAT_JSON,
         CP_POST_PLAY_LIST_JSON,
         CP_POST_DOWNLOAD_LIST_JSON,
@@ -127,6 +128,7 @@ public class AppApi {
             put(Action.CP_GET_ADMASTER_CONFIG_JSON,BuildConfig.BASE_URL + "Box/Admaster/getConfFile");
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
+            put(Action.SP_GET_POLY_ADS_JSON, SP_BASE_URL + "small/api/download/poly/config");
             put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
@@ -230,6 +232,20 @@ public class AppApi {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_RTB_ADS_JSON, handler, params).syncGet();
+    }
+
+    /**
+     * 获取百度聚屏广告资源
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @return
+     * @throws IOException
+     */
+    public static String getPolyAdsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("boxMac",boxMac);
+        return new AppServiceOk(context, Action.SP_GET_POLY_ADS_JSON, handler, params).syncGet();
     }
 
     /**

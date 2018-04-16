@@ -107,7 +107,8 @@ public class Session {
     private String adsPeriod;
     /**RTB广告期号*/
     private String rtbadsPeriod;
-
+    /**百度聚屏广告期号*/
+    private String polyAdsPeriod;
     /**下载中的节目单期号（含节目）*/
     private String proDownloadPeriod;
     /**下载中的宣传片期号*/
@@ -115,6 +116,7 @@ public class Session {
     /**下载中的广告期号*/
     private String adsDownloadPeriod;
     private String rtbadsDownloadPeriod;
+    private String polyAdsDownloadPeriod;
     /**下一期节目单期号（含节目）*/
     private String proNextPeriod;
     /**下一期广告期号*/
@@ -249,6 +251,8 @@ public class Session {
         adsDownloadPeriod = mPreference.loadStringKey(P_APP_ADS_DOWNLOAD_MEIDA_PERIOD, "");
         rtbadsPeriod = mPreference.loadStringKey(P_APP_RTBADS_MEIDA_PERIOD,"");
         rtbadsDownloadPeriod = mPreference.loadStringKey(P_APP_RTBADS_DOWNLOAD_MEIDA_PERIOD, "");
+        polyAdsPeriod = mPreference.loadStringKey(P_APP_POLYADS_MEDIA_PERIOD,"");
+        polyAdsDownloadPeriod = mPreference.loadStringKey(P_APP_POLYADS_DOWNLOAD_MEDIA_PERIOD,"");
 
         multicastMediaPeriod = mPreference.loadStringKey(P_APP_MULTICASTMEDIAPERIOD, "");
         startTime = mPreference.loadStringKey(P_APP_STARTTIME, null);
@@ -777,6 +781,24 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_RTBADS_MEIDA_PERIOD,adsPeriod));
     }
 
+    public String getPolyAdsPeriod() {
+        return polyAdsPeriod;
+    }
+
+    public void setPolyAdsPeriod(String polyAdsPeriod) {
+        this.polyAdsPeriod = polyAdsPeriod;
+        writePreference(new Pair<String, Object>(P_APP_POLYADS_MEDIA_PERIOD,polyAdsPeriod));
+    }
+
+    public String getPolyAdsDownloadPeriod() {
+        return polyAdsDownloadPeriod;
+    }
+
+    public void setPolyAdsDownloadPeriod(String polyAdsDownloadPeriod) {
+        this.polyAdsDownloadPeriod = polyAdsDownloadPeriod;
+        writePreference(new Pair<String, Object>(P_APP_POLYADS_DOWNLOAD_MEDIA_PERIOD,polyAdsDownloadPeriod));
+    }
+
     public void setProDownloadPeriod(String proDownloadPeriod) {
         this.proDownloadPeriod = proDownloadPeriod;
         writePreference(new Pair<String, Object>(P_APP_PRO_DOWNLOAD_MEDIA_PERIOD,proDownloadPeriod));
@@ -1072,6 +1094,8 @@ public class Session {
     public static final String P_APP_ADS_DOWNLOAD_MEIDA_PERIOD = "com.savor.ads.downloadMediaPeriod";
     public static final String P_APP_RTBADS_MEIDA_PERIOD = "com.savor.ads.rtbMediaPeriod";
     public static final String P_APP_RTBADS_DOWNLOAD_MEIDA_PERIOD = "com.savor.ads.rtbDownloadMediaPeriod";
+    public static final String P_APP_POLYADS_MEDIA_PERIOD = "com.savor.ads.polyMediaPeriod";
+    public static final String P_APP_POLYADS_DOWNLOAD_MEDIA_PERIOD = "com.saovr.ads.polyDownloadMediaPeriod";
 
     /** 当前点播期号KEY*/
     public static final String P_APP_VOD_VERSION = "com.savor.ads.vod_version";
