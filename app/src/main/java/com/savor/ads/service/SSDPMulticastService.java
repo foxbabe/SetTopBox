@@ -56,7 +56,7 @@ public class SSDPMulticastService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         while (true) {
-            LogUtils.d("开始发送一次SSDP");
+            LogUtils.v("开始发送一次SSDP");
             WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final WifiManager.MulticastLock multicastLock = wm.createMulticastLock("sendLock");
             multicastLock.setReferenceCounted(false);
@@ -93,7 +93,7 @@ public class SSDPMulticastService extends IntentService {
             if (mSocketSend != null && !mSocketSend.isClosed()) {
                 mSocketSend.close();
             }
-            LogUtils.d("完成发送一次SSDP");
+            LogUtils.v("完成发送一次SSDP");
 
             // 休息
             try {

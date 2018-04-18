@@ -71,8 +71,8 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * @author 朵朵花开
- *         <p>
- *         常用系统工具类
+ * <p>
+ * 常用系统工具类
  */
 public class AppUtils {
     public static final int MSG_WHAT_TO_TVPLAY = 0x6001;
@@ -677,7 +677,7 @@ public class AppUtils {
                 try {
                     DBHelper dbHelper = DBHelper.get(context);
                     if (dbHelper.findPlayListByWhere(null, null) == null &&
-                            dbHelper.findNewPlayListByWhere(null, null) == null){
+                            dbHelper.findNewPlayListByWhere(null, null) == null) {
                         return;
                     }
                     for (File file : listFiles) {
@@ -1179,8 +1179,7 @@ public class AppUtils {
                     new InputStreamReader(is));
             String line = reader.readLine();
             if (!TextUtils.isEmpty(line)) {
-                result = line.substring(line.indexOf("HWaddr") + 6).trim()
-                        .replaceAll(":", "");
+                result = line.substring(line.indexOf("HWaddr") + 6).trim();
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -1518,6 +1517,7 @@ public class AppUtils {
             } else {
                 String mac = getEthernetMacAddr();
                 if (!TextUtils.isEmpty(mac) && mac.length() > 3) {
+                    mac = mac.replaceAll(":", "");
                     ssid = "RD" + mac.substring(mac.length() - 3);
                 } else {
                     String timestamp = String.valueOf(System.currentTimeMillis());
@@ -1706,14 +1706,16 @@ public class AppUtils {
         return null;
     }
 
+
     /**
      * 填充播放列表
+     *
      * @param context
      * @param resultList 填充后的播放列表
-     * @param type  填充目的。1：播放；2：上报
+     * @param type       填充目的。1：播放；2：上报
      * @return 填充是否成功
      */
-    public static boolean fillPlaylist(Context context, ArrayList<MediaLibBean> resultList, int type) {
+    public static <T extends MediaLibBean> boolean fillPlaylist(Context context, ArrayList<MediaLibBean> resultList, int type) {
         if (resultList == null && type == 2) {
             return false;
         }
@@ -1737,6 +1739,7 @@ public class AppUtils {
 
         if (playList != null && !playList.isEmpty()) {
             int rtbIndex = 0;
+            int polyIndex = 0;
             for (int i = 0; i < playList.size(); i++) {
                 MediaLibBean bean = playList.get(i);
 
@@ -1837,6 +1840,34 @@ public class AppUtils {
             }
 
 //                dbHelper.close();
+            // 填充聚屏数据
+            if (GlobalValues.ADS_PLAY_LIST != null && !GlobalValues.ADS_PLAY_LIST.isEmpty()) {
+                boolean stopIterator = false;
+                for (int j = 0; j < 2; j++) {
+                    if (stopIterator)
+                        break;
+                    for (int i = 0; i < playList.size(); i++) {
+                        MediaLibBean bean = playList.get(i);
+                        if (polyIndex >= GlobalValues.ADS_PLAY_LIST.size()) {
+                            stopIterator = true;
+                            break;
+                        }
+                        if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
+                                GlobalValues.LAST_POLY_ORDER <= bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
+                            MediaLibBean polyItem = GlobalValues.ADS_PLAY_LIST.get(polyIndex++);
+                            bean.setName(polyItem.getName());
+                            bean.setMediaPath(polyItem.getMediaPath());
+                            bean.setAdmaster_sin(polyItem.getAdmaster_sin());
+                            bean.setChinese_name(polyItem.getChinese_name());
+                            bean.setDuration(polyItem.getDuration());
+                            bean.setVid(polyItem.getVid());
+                            bean.setMd5(polyItem.getMd5());
+                            bean.setTp_md5(polyItem.getTp_md5());
+                            bean.setTpmedia_id(polyItem.getTpmedia_id());
+                        }
+                    }
+                }
+            }
         }
 
         if (playList != null && !playList.isEmpty()) {
@@ -1846,11 +1877,11 @@ public class AppUtils {
             int tempMediaIndex = 0;
             for (int i = playList.size() - 1; i >= 0; i--) {
                 MediaLibBean bean = playList.get(i);
-                if (!TextUtils.isEmpty(bean.getMediaPath())) {
+                if (!TextUtils.isEmpty(bean.getMediaPath()) || ConstantValues.POLY_ADS.equals(bean.getType())) {
                     if (type == 1) {
                         boolean doReplace = false;
                         if (tempList != null && !tempList.isEmpty()) {
-                            if(ConstantValues.PRO.equals(bean.getType()) && tempMediaIndex < tempList.size()) {
+                            if (ConstantValues.PRO.equals(bean.getType()) && tempMediaIndex < tempList.size()) {
                                 doReplace = true;
                             }
                         }
@@ -1895,7 +1926,5 @@ public class AppUtils {
         return (type == 2 && resultList != null && !resultList.isEmpty()) ||
                 (type == 1 && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty());
     }
-
-
 
 }

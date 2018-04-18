@@ -182,4 +182,8 @@ public class ConstantValues {
     public static final String ADV_DATA_PATH = "/sdcard/server_data/adv_data";
     /**广告数据文件位置*/
     public static final String ADS_DATA_PATH = "/sdcard/server_data/ads_data";
+
+
+    public static final String BAIDU_ADS_APP_ID = "ce124b3c";
+    public static final String BAIDU_ADSLOT_ID = "5592208";
 }

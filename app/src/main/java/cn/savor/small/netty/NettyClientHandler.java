@@ -89,7 +89,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
             case SERVER_HEART_RESP:
                 List<String> contentMsgH = msg.getContent();
                 for (String tmp : contentMsgH) {
-                    LogUtils.i("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
+                    LogUtils.v("SERVER_HEART_RESP： 收到来自服务端的...心跳回应." + tmp + "===>>接收到内容:" + msg.getContent());
                 }
                 break;
             case SERVER_ORDER_REQ:
@@ -509,7 +509,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                 contList.add(new Gson().toJson(bean));
                 message.setContent(contList);
                 ctx.writeAndFlush(message);
-                LogUtils.i("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
+                LogUtils.v("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
                 LogFileUtil.write("NettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
             }
 

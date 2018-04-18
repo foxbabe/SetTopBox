@@ -6,16 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
 import com.admaster.sdk.api.AdmasterSdk;
+import com.google.protobuf.ByteString;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
+import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
@@ -25,21 +28,28 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.BaiduAdsResponseCode;
 import com.savor.ads.utils.ConstantValues;
+import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.RetryHandler;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import tianshu.ui.api.TsUiApiV20171122;
 
 /**
  * 广告播放页面
@@ -50,6 +60,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private SavorVideoView mSavorVideoView;
 
     private ArrayList<MediaLibBean> mPlayList;
+    private BaiduAdLocalBean mCurrentPolyMedia;
     private String mListPeriod;
     private boolean mNeedUpdatePlaylist;
     /**
@@ -153,7 +164,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 MediaLibBean bean = mPlayList.get(i);
                 urls.add(bean.getMediaPath());
             }
-            toCheckIfPolyAds(index);
             mSavorVideoView.setMediaFiles(urls, index, 0);
         }
     }
@@ -162,30 +172,85 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
      * Play the current video while detecting the next video that needs to be played if the video is poly,
      * and if so,
      * call the interface to determine if there is a resource that can be played on a poly video.
+     *
      * @param index
      */
-    private void toCheckIfPolyAds(int index){
-        if ((index+1)<mPlayList.size()){
-            MediaLibBean bean = mPlayList.get(index+1);
-            if (ConstantValues.POLY_ADS.equals(bean.getType())){
-                // TODO: 2018/4/14  ://调用百度聚屏接口
+    private void toCheckIfPolyAds(int index) {
+        if (mPlayList != null) {
+            int next = (index + 1) % mPlayList.size();
+            if (next < mPlayList.size()) {
+                MediaLibBean bean = mPlayList.get(next);
+                if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
+                        TextUtils.isEmpty(bean.getName()) &&
+                        TextUtils.isEmpty(GlobalValues.NOT_FOUND_BAIDU_ADS_KEY)) {
+                    requestBaiduAds();
+                }
             }
         }
     }
 
 
-    private void addPolyAdsUpdatePlaylist(int next){
-        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " +
-                DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? ";
-        String[] selectionArgs = new String[]{mSession.getPolyAdsPeriod(), ConstantValues.POLY_ADS};
-        List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection,selectionArgs);
-        if (list!=null&&list.size()>0){
-            MediaLibBean bean = list.get(0);
-            if (mPlayList!=null&&next<mPlayList.size()){
-                MediaLibBean mediaLibBean = mPlayList.get(next);
+    private void requestBaiduAds() {
+        String release = mSession.getBuildVersion();
+        String[] ver = release.split("[.]");
+        int verMajor = 0, verMinor = 0, verMicro = 0;
+        for (int i = 0; i < ver.length; i++) {
+            int temp = 0;
+            try {
+                temp = Integer.parseInt(ver[i]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
-
+            switch (i) {
+                case 0:
+                    verMajor = temp;
+                    break;
+                case 1:
+                    verMinor = temp;
+                    break;
+                case 2:
+                    verMicro = temp;
+                    break;
+            }
         }
+
+        Point point = DensityUtil.getScreenRealSize(this);
+
+        ByteString uuid = null, appId = null, adslotId = null, mac = null, model = null, brand = null, ip = null;
+        try {
+            uuid = ByteString.copyFrom(UUID.randomUUID().toString().replace("-", ""), "utf-8");
+            appId = ByteString.copyFrom(ConstantValues.BAIDU_ADS_APP_ID, "utf-8");
+            adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID, "utf-8");
+            mac = ByteString.copyFrom(mSession.getEthernetMacWithColon(), "utf-8");
+            model = ByteString.copyFrom(mSession.getModel(), "utf-8");
+            brand = ByteString.copyFrom(mSession.getBrand(), "utf-8");
+            ip = ByteString.copyFrom(AppUtils.getLocalIPAddress(), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        TsUiApiV20171122.TsApiRequest request = TsUiApiV20171122.TsApiRequest.newBuilder()
+                .setRequestId(uuid)
+                .setApiVersion(TsUiApiV20171122.Version.newBuilder()
+                        .setMajor(6).setMinor(0).setMicro(0))
+                .setAppId(appId)
+                .setSlot(TsUiApiV20171122.SlotInfo.newBuilder()
+                        .setAdslotId(adslotId))
+                .setDevice(TsUiApiV20171122.Device.newBuilder()
+                        .setUdid(TsUiApiV20171122.UdId.newBuilder()
+                                .setIdType(TsUiApiV20171122.UdIdType.MAC)
+                                .setId(mac))
+                        .setModel(model)
+                        .setOsType(TsUiApiV20171122.OsType.ANDROID)
+                        .setOsVersion(TsUiApiV20171122.Version.newBuilder().setMajor(verMajor).setMinor(verMinor).setMicro(verMicro))
+                        .setScreenSize(TsUiApiV20171122.Size.newBuilder().setWidth(point.x).setHeight(point.y))
+                        .setVendor(brand))
+                .setNetwork(TsUiApiV20171122.Network.newBuilder()
+                        .setConnectionType(TsUiApiV20171122.Network.ConnectionType.ETHERNET)
+                        .setOperatorType(TsUiApiV20171122.Network.OperatorType.ISP_UNKNOWN)
+                        .setIpv4(ip))
+                .build();
+        AppApi.requestBaiduAds(this, this, request);
     }
 
     private boolean mIsGoneToTv;
@@ -326,9 +391,9 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             mPlayListDialog = new PlayListDialog(this, this);
         }
 //        if (mPlayList != null) {
-            if (!mPlayListDialog.isShowing()) {
-                mPlayListDialog.showPlaylist(mPlayList);
-            }
+        if (!mPlayListDialog.isShowing()) {
+            mPlayListDialog.showPlaylist(mPlayList);
+        }
 //        } else {
 //            ShowMessage.showToast(mContext, "播放列表为空");
 //        }
@@ -388,6 +453,17 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     "");
         }
 
+        if (ConstantValues.POLY_ADS.equals(mPlayList.get(index).getType())) {
+            // 回调展现完成
+            noticeAdsMonitor(mCurrentPolyMedia);
+
+            GlobalValues.POLY_ADS_INDEX++;
+            LogUtils.d("-----调试------播放结束POLY_ADS_INDEX++");
+            mPlayList.get(index).setName(null);
+            mPlayList.get(index).setMediaPath(null);
+            mPlayList.get(index).setChinese_name("已过期");
+        }
+
         if (mNeedUpdatePlaylist) {
             // 重新获取播放列表开始播放
             LogUtils.d("更新播放列表后继续播放");
@@ -408,7 +484,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
-        if ( mNeedUpdatePlaylist) {
+        if (mNeedUpdatePlaylist) {
             LogUtils.d("更新播放列表后继续播放");
             // 重新获取播放列表开始播放
             mNeedUpdatePlaylist = false;
@@ -463,12 +539,18 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             }
             LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), action, libBean.getType(), libBean.getVid(),
-                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),"");
+                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(), "");
 
-            if (ConstantValues.RTB_ADS.equals(libBean.getType())&&!TextUtils.isEmpty(libBean.getAdmaster_sin())){
+            if (ConstantValues.RTB_ADS.equals(libBean.getType()) && !TextUtils.isEmpty(libBean.getAdmaster_sin())) {
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
             }
+
+            if (ConstantValues.POLY_ADS.equals(libBean.getType())) {
+                mCurrentPolyMedia = GlobalValues.ADS_PLAY_LIST.get(GlobalValues.POLY_ADS_INDEX);
+            }
         }
+
+        toCheckIfPolyAds(index);
 
         return false;
     }
@@ -505,11 +587,21 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         }
     }
 
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-//        LogFileUtil.write("AdsPlayerActivity onSaveInstanceState");
-        super.onSaveInstanceState(outState);
+    private void noticeAdsMonitor(BaiduAdLocalBean bean) {
+        if (bean.getWinNoticeUrlList() != null && !bean.getWinNoticeUrlList().isEmpty()) {
+            for (ByteString bString :
+                    bean.getWinNoticeUrlList()) {
+                String url = bString.toStringUtf8();
+                RetryHandler.enqueue(url, bean.getExpireTime());
+            }
+        }
+        if (bean.getThirdMonitorUrlList() != null && !bean.getThirdMonitorUrlList().isEmpty()) {
+            for (ByteString bString :
+                    bean.getThirdMonitorUrlList()) {
+                String url = bString.toStringUtf8();
+                RetryHandler.enqueue(url, bean.getExpireTime());
+            }
+        }
     }
 
     @Override
@@ -557,6 +649,66 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                     }
                 }
                 break;
+            case AD_BAIDU_ADS:
+                if (obj instanceof TsUiApiV20171122.TsApiResponse) {
+                    TsUiApiV20171122.TsApiResponse tsApiResponse = (TsUiApiV20171122.TsApiResponse) obj;
+                    if (BaiduAdsResponseCode.SUCCESS == tsApiResponse.getErrorCode()) {
+                        handleBaiduAdData(tsApiResponse);
+                    } else {
+                        LogUtils.e("请求百度聚屏错误，错误码为：" + tsApiResponse.getErrorCode());
+                    }
+                }
+                break;
+        }
+    }
+
+    private void handleBaiduAdData(TsUiApiV20171122.TsApiResponse tsApiResponse) {
+        if (tsApiResponse != null && tsApiResponse.getAdsList() != null && !tsApiResponse.getAdsList().isEmpty()) {
+            ArrayList<BaiduAdLocalBean> baiduAdList = new ArrayList<>();
+            for (TsUiApiV20171122.Ad ad :
+                    tsApiResponse.getAdsList()) {
+                if (ad.getMaterialMetasList() != null) {
+                    for (TsUiApiV20171122.MaterialMeta material :
+                            ad.getMaterialMetasList()) {
+                        switch (material.getMaterialType()) {
+                            case VIDEO:
+                                String md5 = material.getMaterialMd5().toStringUtf8();
+                                if (!TextUtils.isEmpty(md5)) {
+                                    String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
+                                    String[] selectionArgs = new String[]{md5};
+                                    List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection, selectionArgs);
+                                    if (list != null && !list.isEmpty()) {
+                                        BaiduAdLocalBean bean = new BaiduAdLocalBean(list.get(0));
+                                        bean.setMediaRemotePath(material.getVideoUrl());
+                                        bean.setWinNoticeUrlList(ad.getWinNoticeUrlList());
+                                        bean.setThirdMonitorUrlList(ad.getThirdMonitorUrlList());
+                                        bean.setExpireTime(tsApiResponse.getExpirationTime());
+
+                                        baiduAdList.add(bean);
+                                    } else {
+                                        // 返回的物料在本地没找到，记录下来物料md5，下载完之后恢复请求
+                                        GlobalValues.NOT_FOUND_BAIDU_ADS_KEY = md5;
+                                    }
+                                }
+
+                                break;
+                            case IMAGE:
+                                // TODO: 处理图片类广告
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (!baiduAdList.isEmpty()) {
+                GlobalValues.ADS_PLAY_LIST = baiduAdList;
+                GlobalValues.LAST_POLY_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
+                GlobalValues.POLY_ADS_INDEX = 0;
+                LogUtils.d("-----调试------获取到聚屏广告，当前POLY_ADS_INDEX=" + GlobalValues.POLY_ADS_INDEX +" size=" + GlobalValues.ADS_PLAY_LIST.size());
+                if (AppUtils.fillPlaylist(this, null, 1)) {
+                    mNeedUpdatePlaylist = true;
+                }
+            }
         }
     }
 

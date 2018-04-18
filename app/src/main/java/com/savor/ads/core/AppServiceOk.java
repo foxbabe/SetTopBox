@@ -1,7 +1,6 @@
 package com.savor.ads.core;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.protobuf.GeneratedMessage;
 import com.savor.ads.okhttp.OkHttpUtils;
@@ -14,7 +13,6 @@ import com.savor.ads.okhttp.request.GetRequest;
 import com.savor.ads.okhttp.request.PostProtoBufferRequest;
 import com.savor.ads.okhttp.request.PostStringRequest;
 import com.savor.ads.okhttp.request.RequestCall;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogUtils;
 
 import org.apache.commons.io.IOUtils;
@@ -35,7 +33,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import tianshu.ui.api.TsUiApiV20171122;
 
 public class AppServiceOk {
     private Context mContext;
@@ -55,8 +52,8 @@ public class AppServiceOk {
     private String uploadFileName = "";
     private static long cacheSize = 1024 * 1024 * 5;
 
-    public AppServiceOk(Context context, AppApi.Action action) {
-        this(context, action, null);
+    public AppServiceOk(Context context, ApiRequestListener handler) {
+        this(context, null, handler);
     }
 
     public AppServiceOk(Context context, AppApi.Action action, ApiRequestListener handler) {
@@ -272,6 +269,52 @@ public class AppServiceOk {
         requestCall.execute(callback);
     }
 
+    public void simpleGet(String requestUrl) {
+        Callback<Object> callback = new Callback<Object>() {
+
+            @Override
+            public Object parseNetworkResponse(Response response) {
+                Object object = null;
+                try {
+                    object = response.body().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                response.close();
+                return object;
+            }
+
+            @Override
+            public void onError(Call call, Exception e) {
+                if (handler != null) {
+                    handler.onNetworkFailed(action);
+                }
+            }
+
+            @Override
+            public void onResponse(Object response) {
+                if (handler != null) {
+                    if (response instanceof ResponseErrorMessage) {
+                        handler.onError(action, response);
+                    } else {
+                        handler.onSuccess(action, response);
+                    }
+                }
+            }
+
+            @Override
+            public void inProgress(float progress) {
+                super.inProgress(progress);
+            }
+
+        };
+
+        GetRequest getRequest = new GetRequest(requestUrl, null, null, null);
+        RequestCall requestCall = new RequestCall(getRequest);
+        requestCall.execute(callback);
+    }
+
     public String syncGet() throws IOException {
         String requestUrl = AppApi.API_URLS.get(action);
 
@@ -483,16 +526,9 @@ public class AppServiceOk {
             Callback<Object> callback = new Callback<Object>() {
 
                 @Override
-                public Object parseNetworkResponse(Response response)
-                        throws Exception {
-                    try {
-                        System.err.println(response.cacheResponse().body().string());
-                    } catch (Exception e) {
-                    }
+                public Object parseNetworkResponse(Response response) {
 
                     Object object = ApiResponseFactory.getResponse(mContext, action, response, "", false);
-
-                    LogUtils.d(object.toString() + "");
                     response.close();
                     return object;
                 }
@@ -507,11 +543,7 @@ public class AppServiceOk {
                 @Override
                 public void onResponse(Object response) {
                     if (handler != null) {
-                        if (response instanceof ResponseErrorMessage) {
-                            handler.onError(action, response);
-                        } else {
-                            handler.onSuccess(action, response);
-                        }
+                        handler.onSuccess(action, response);
                     }
                 }
 

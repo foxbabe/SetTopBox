@@ -64,6 +64,7 @@ public class Session {
     private final int osVersion;
     private final String buildVersion;
     private final String model;
+    private final String brand;
     private final String romVersion;
     private String versionName;
     private int versionCode;
@@ -161,6 +162,10 @@ public class Session {
      */
     private String mEthernetMac;
     /**
+     * 以太网卡MAC地址
+     */
+    private String mEthernetMacWithColon;
+    /**
      * 无线网卡MAC地址
      */
     private String mWlanMac;
@@ -207,6 +212,7 @@ public class Session {
         osVersion = Build.VERSION.SDK_INT;
         buildVersion = Build.VERSION.RELEASE;
         model = Build.MODEL;
+        brand = Build.BRAND;
         romVersion = Build.VERSION.INCREMENTAL;
         try {
 //            AppUtils.clearExpiredFile(context, false);
@@ -558,6 +564,10 @@ public class Session {
 
     public String getModel() {
         return model;
+    }
+
+    public String getBrand() {
+        return brand;
     }
 
     public String getRomVersion() {
@@ -925,10 +935,21 @@ public class Session {
 
     public String getEthernetMac() {
         if (TextUtils.isEmpty(mEthernetMac)) {
-            mEthernetMac = AppUtils.getEthernetMacAddr();
-            writePreference(new Pair<String, Object>(P_APP_ETHERNET_MAC, mEthernetMac));
+            String mac = AppUtils.getEthernetMacAddr();
+            if (!TextUtils.isEmpty(mac)) {
+                mEthernetMac = mac.replaceAll(":", "");
+                writePreference(new Pair<String, Object>(P_APP_ETHERNET_MAC, mEthernetMac));
+            }
         }
         return mEthernetMac == null ? "" : mEthernetMac;
+    }
+
+    public String getEthernetMacWithColon() {
+        if (TextUtils.isEmpty(mEthernetMacWithColon)) {
+            mEthernetMacWithColon = AppUtils.getEthernetMacAddr();
+            writePreference(new Pair<String, Object>(P_APP_ETHERNET_MAC_WITH_COLON, mEthernetMacWithColon));
+        }
+        return mEthernetMacWithColon == null ? "" : mEthernetMacWithColon;
     }
 
     public String getWlanMac() {
@@ -1121,6 +1142,7 @@ public class Session {
     public static final String P_APP_SERVER_INFO = "com.savor.ads.serverInfo";
     // 以太网卡MAC地址KEY
     public static final String P_APP_ETHERNET_MAC = "com.savor.ads.ethernetMac";
+    public static final String P_APP_ETHERNET_MAC_WITH_COLON = "com.savor.ads.ethernetMacWithColon";
     // 无线网卡MAC地址KEY
     public static final String P_APP_WLAN_MAC = "com.savor.ads.wlanMac";
 //    //oss桶名称

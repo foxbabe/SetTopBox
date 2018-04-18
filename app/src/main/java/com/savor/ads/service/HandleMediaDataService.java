@@ -700,6 +700,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                         if (isInsertSuccess) {
                             adsDownloadedCount++;
+                            if (!TextUtils.isEmpty(GlobalValues.NOT_FOUND_BAIDU_ADS_KEY) &&
+                                    GlobalValues.NOT_FOUND_BAIDU_ADS_KEY.equals(bean.getTp_md5())) {
+                                GlobalValues.NOT_FOUND_BAIDU_ADS_KEY = null;
+                            }
                         }
                     }
                 } catch (Exception e) {

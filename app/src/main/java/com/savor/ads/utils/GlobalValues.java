@@ -2,6 +2,7 @@ package com.savor.ads.utils;
 
 import android.graphics.Bitmap;
 
+import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
 
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ public class GlobalValues {
 
     /** 播放列表*/
     public static ArrayList<MediaLibBean> PLAY_LIST;
+    public static ArrayList<BaiduAdLocalBean> ADS_PLAY_LIST;
+    public static int LAST_POLY_ORDER = 0;
+    public static int POLY_ADS_INDEX = 0;
 
     /** 当前投屏设备ID*/
     public volatile static String CURRENT_PROJECT_DEVICE_ID;
@@ -48,4 +52,7 @@ public class GlobalValues {
     public static boolean IS_UPUSH_SO_COPY_SUCCESS = false;
     /** 标识友盟推送注册是否成功*/
     public static boolean IS_UPUSH_REGISTER_SUCCESS = false;
+
+    /** 未在本地找到的百度聚屏广告KEY（md5）*/
+    public static String NOT_FOUND_BAIDU_ADS_KEY;
 }

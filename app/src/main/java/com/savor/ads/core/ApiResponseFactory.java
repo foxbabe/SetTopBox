@@ -21,6 +21,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.savor.ads.bean.AdMasterResult;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
@@ -37,6 +38,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 import okhttp3.Response;
+import tianshu.ui.api.TsUiApiV20171122;
 
 /**
  * API 响应结果解析工厂类，所有的API响应结果解析需要在此完成。
@@ -51,6 +53,18 @@ public class ApiResponseFactory {
 
     public static Object getResponse(Context context, AppApi.Action action,
                                      Response response, String key, boolean isCache) {
+
+        if (action == AppApi.Action.AD_BAIDU_ADS) {
+            TsUiApiV20171122.TsApiResponse tsApiResponse = null;
+            try {
+                byte[] content = response.body().bytes();
+                tsApiResponse = TsUiApiV20171122.TsApiResponse.parseFrom(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return tsApiResponse;
+        }
+
         //转换器
         String requestMethod = "";
         Object result = null;

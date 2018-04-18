@@ -73,6 +73,7 @@ public class WifiApUtil {
 //            } else {
             String mac = AppUtils.getEthernetMacAddr();
             if (!TextUtils.isEmpty(mac) && mac.length() > 3) {
+                mac = mac.replaceAll(":", "");
                 ssid = ssid + mac.substring(mac.length() - 3);
             } else {
                 String timestamp = String.valueOf(System.currentTimeMillis());
