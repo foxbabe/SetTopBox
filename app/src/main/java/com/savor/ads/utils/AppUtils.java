@@ -30,7 +30,6 @@ import com.savor.ads.database.DBHelper;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -60,8 +59,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.zip.CRC32;
-import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -1844,6 +1841,7 @@ public class AppUtils {
             // 填充聚屏数据
             if (GlobalValues.ADS_PLAY_LIST != null && !GlobalValues.ADS_PLAY_LIST.isEmpty()) {
                 boolean stopIterator = false;
+                // 这里遍历两次是为了处理当末尾的情况
                 for (int j = 0; j < 2; j++) {
                     if (stopIterator)
                         break;
@@ -1854,7 +1852,7 @@ public class AppUtils {
                             break;
                         }
                         if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
-                                GlobalValues.LAST_POLY_ORDER < bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
+                                GlobalValues.CURRENT_MEDIA_ORDER < bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
                             BaiduAdLocalBean polyItem = GlobalValues.ADS_PLAY_LIST.get(polyIndex++);
                             polyItem.setOrder(bean.getOrder());
                             polyItem.setPeriod(bean.getPeriod());
@@ -1867,6 +1865,7 @@ public class AppUtils {
         }
 
         if (playList != null && !playList.isEmpty()) {
+            // 处理已下载的新节目插队
             ArrayList<MediaLibBean> list = new ArrayList<>();
             ArrayList<MediaLibBean> tempList = dbHelper.getTempProList();
             LogUtils.e("临时节目集合 " + tempList);

@@ -29,9 +29,10 @@ public class GlobalValues <T extends MediaLibBean> {
 
     /** 播放列表*/
     public ArrayList<T> PLAY_LIST;
+    /** 请求到的百度聚屏广告集合，填充节目单时会用到*/
     public static ArrayList<BaiduAdLocalBean> ADS_PLAY_LIST;
-    public static int LAST_POLY_ORDER = 0;
-    public static int POLY_ADS_INDEX = 0;
+    /** 拿到百度聚屏广告后此刻的节目order，填充节目单时会用到*/
+    public static int CURRENT_MEDIA_ORDER = 0;
 
     /** 当前投屏设备ID*/
     public volatile static String CURRENT_PROJECT_DEVICE_ID;

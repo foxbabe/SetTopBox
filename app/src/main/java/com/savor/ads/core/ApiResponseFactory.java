@@ -55,6 +55,7 @@ public class ApiResponseFactory {
                                      Response response, String key, boolean isCache) {
 
         if (action == AppApi.Action.AD_BAIDU_ADS) {
+            // 百度聚屏是特殊的类型，需要使用protobuff解析
             TsUiApiV20171122.TsApiResponse tsApiResponse = null;
             try {
                 byte[] content = response.body().bytes();

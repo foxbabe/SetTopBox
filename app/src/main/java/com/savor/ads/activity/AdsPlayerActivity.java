@@ -179,6 +179,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
             int next = (index + 1) % mPlayList.size();
             if (next < mPlayList.size()) {
                 MediaLibBean bean = mPlayList.get(next);
+                // 当下一个位置是聚屏类、且未被填充媒体内容、且当前未被“未发现百度广告”阻止时，请求百度聚屏广告
                 if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
                         TextUtils.isEmpty(bean.getName()) &&
                         TextUtils.isEmpty(GlobalValues.NOT_FOUND_BAIDU_ADS_KEY)) {
@@ -188,7 +189,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         }
     }
 
-
+    /**
+     * 请求百度聚屏广告
+     */
     private void requestBaiduAds() {
         String release = mSession.getBuildVersion();
         String[] ver = release.split("[.]");
@@ -458,8 +461,6 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 // 回调展现完成
                 noticeAdsMonitor((BaiduAdLocalBean) item);
 
-                GlobalValues.POLY_ADS_INDEX++;
-                LogUtils.d("-----调试------播放结束POLY_ADS_INDEX++");
                 mPlayList.get(index).setName(null);
                 mPlayList.get(index).setMediaPath(null);
                 mPlayList.get(index).setChinese_name("已过期");
@@ -585,6 +586,10 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         }
     }
 
+    /**
+     * 回调曝光链接
+     * @param bean
+     */
     private void noticeAdsMonitor(BaiduAdLocalBean bean) {
         if (bean.getWinNoticeUrlList() != null && !bean.getWinNoticeUrlList().isEmpty()) {
             for (ByteString bString :
@@ -700,9 +705,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
             if (!baiduAdList.isEmpty() && mPlayList != null) {
                 GlobalValues.ADS_PLAY_LIST = baiduAdList;
-                GlobalValues.LAST_POLY_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
-                GlobalValues.POLY_ADS_INDEX = 0;
-                LogUtils.d("-----调试------获取到聚屏广告，当前POLY_ADS_INDEX=" + GlobalValues.POLY_ADS_INDEX + " size=" + GlobalValues.ADS_PLAY_LIST.size());
+                GlobalValues.CURRENT_MEDIA_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
                 if (AppUtils.fillPlaylist(this, null, 1)) {
                     mNeedUpdatePlaylist = true;
                 }

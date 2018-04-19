@@ -183,7 +183,8 @@ public class ConstantValues {
     /**广告数据文件位置*/
     public static final String ADS_DATA_PATH = "/sdcard/server_data/ads_data";
 
-
+    /**百度聚屏APP ID*/
     public static final String BAIDU_ADS_APP_ID = "ce124b3c";
+    /**百度聚屏代码位ID*/
     public static final String BAIDU_ADSLOT_ID = "5592208";
 }
