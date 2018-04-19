@@ -469,12 +469,12 @@ public class TvPlayerActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.getInstance().PLAY_LIST == null || GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
             // 尝试填充播放列表
             fillPlayList();
         }
 
-        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
             Intent intent = new Intent(this, AdsPlayerActivity.class);
             startActivity(intent);
         } else {
@@ -572,7 +572,7 @@ public class TvPlayerActivity extends BaseActivity {
         boolean doInit = true;
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+            if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
                 doInit = false;
                 gotoAdsPlayer();
             }

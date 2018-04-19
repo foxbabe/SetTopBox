@@ -54,13 +54,12 @@ import tianshu.ui.api.TsUiApiV20171122;
 /**
  * 广告播放页面
  */
-public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener, PlayListDialog.Callback {
+public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity implements SavorVideoView.PlayStateCallback, ApiRequestListener, PlayListDialog.Callback {
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
 
-    private ArrayList<MediaLibBean> mPlayList;
-    private BaiduAdLocalBean mCurrentPolyMedia;
+    private ArrayList<T> mPlayList;
     private String mListPeriod;
     private boolean mNeedUpdatePlaylist;
     /**
@@ -131,7 +130,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
     private void checkAndPlay(int lastMediaOrder) {
 //        LogFileUtil.write("AdsPlayerActivity checkAndPlay GlobalValues.PLAY_LIST=" + GlobalValues.PLAY_LIST + " AppUtils.getMainMediaPath()=" + AppUtils.getMainMediaPath());
         // 未发现SD卡时跳到TV
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
+        if (GlobalValues.getInstance().PLAY_LIST == null || GlobalValues.getInstance().PLAY_LIST.isEmpty() || TextUtils.isEmpty(AppUtils.getMainMediaPath())) {
             if (AppUtils.isMstar()) {
                 Intent intent = new Intent(this, TvPlayerActivity.class);
                 startActivity(intent);
@@ -142,7 +141,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             AppApi.reportSDCardState(mContext, null, 1);
             finish();
         } else {
-            mPlayList = GlobalValues.PLAY_LIST;
+            mPlayList = GlobalValues.getInstance().PLAY_LIST;
             mListPeriod = mSession.getAdsPeriod();
             doPlay(lastMediaOrder);
         }
@@ -446,29 +445,32 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
         if (TextUtils.isEmpty(mUUID)) {
             mUUID = String.valueOf(System.currentTimeMillis());
         }
-        if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
-            LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "end", mPlayList.get(index).getType(), mPlayList.get(index).getVid(),
-                    "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
-                    "");
-        }
+        if (mPlayList != null) {
+            MediaLibBean item = mPlayList.get(index);
+            if (!TextUtils.isEmpty(item.getVid())) {
+                LogReportUtil.get(this).sendAdsLog(mUUID, mSession.getBoiteId(), mSession.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "end", item.getType(), item.getVid(),
+                        "", mSession.getVersionName(), mListPeriod, mSession.getVodPeriod(),
+                        "");
+            }
 
-        if (ConstantValues.POLY_ADS.equals(mPlayList.get(index).getType())) {
-            // 回调展现完成
-            noticeAdsMonitor(mCurrentPolyMedia);
+            if (ConstantValues.POLY_ADS.equals(item.getType()) && item instanceof BaiduAdLocalBean) {
+                // 回调展现完成
+                noticeAdsMonitor((BaiduAdLocalBean) item);
 
-            GlobalValues.POLY_ADS_INDEX++;
-            LogUtils.d("-----调试------播放结束POLY_ADS_INDEX++");
-            mPlayList.get(index).setName(null);
-            mPlayList.get(index).setMediaPath(null);
-            mPlayList.get(index).setChinese_name("已过期");
+                GlobalValues.POLY_ADS_INDEX++;
+                LogUtils.d("-----调试------播放结束POLY_ADS_INDEX++");
+                mPlayList.get(index).setName(null);
+                mPlayList.get(index).setMediaPath(null);
+                mPlayList.get(index).setChinese_name("已过期");
+            }
         }
 
         if (mNeedUpdatePlaylist) {
             // 重新获取播放列表开始播放
             LogUtils.d("更新播放列表后继续播放");
             mNeedUpdatePlaylist = false;
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+            if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.equals(mPlayList)) {
                 int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
@@ -488,7 +490,7 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
             LogUtils.d("更新播放列表后继续播放");
             // 重新获取播放列表开始播放
             mNeedUpdatePlaylist = false;
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.equals(mPlayList)) {
+            if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.equals(mPlayList)) {
                 int currentOrder = mPlayList.get(index).getOrder();
                 mSavorVideoView.stop();
                 checkAndPlay(currentOrder);
@@ -543,10 +545,6 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
 
             if (ConstantValues.RTB_ADS.equals(libBean.getType()) && !TextUtils.isEmpty(libBean.getAdmaster_sin())) {
                 AdmasterSdk.onExpose(libBean.getAdmaster_sin());
-            }
-
-            if (ConstantValues.POLY_ADS.equals(libBean.getType())) {
-                mCurrentPolyMedia = GlobalValues.ADS_PLAY_LIST.get(GlobalValues.POLY_ADS_INDEX);
             }
         }
 
@@ -700,11 +698,11 @@ public class AdsPlayerActivity extends BaseActivity implements SavorVideoView.Pl
                 }
             }
 
-            if (!baiduAdList.isEmpty()) {
+            if (!baiduAdList.isEmpty() && mPlayList != null) {
                 GlobalValues.ADS_PLAY_LIST = baiduAdList;
                 GlobalValues.LAST_POLY_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
                 GlobalValues.POLY_ADS_INDEX = 0;
-                LogUtils.d("-----调试------获取到聚屏广告，当前POLY_ADS_INDEX=" + GlobalValues.POLY_ADS_INDEX +" size=" + GlobalValues.ADS_PLAY_LIST.size());
+                LogUtils.d("-----调试------获取到聚屏广告，当前POLY_ADS_INDEX=" + GlobalValues.POLY_ADS_INDEX + " size=" + GlobalValues.ADS_PLAY_LIST.size());
                 if (AppUtils.fillPlaylist(this, null, 1)) {
                     mNeedUpdatePlaylist = true;
                 }

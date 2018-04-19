@@ -282,13 +282,13 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
             playlistDetailRequestBean.setMenu_num(Session.get(this).getProPeriod());
             ArrayList<MediaPlaylistBean> playlist = new ArrayList<>();
             for (MediaLibBean media : list) {
-                MediaPlaylistBean bean = new MediaPlaylistBean();
                 if (!TextUtils.isEmpty(media.getVid())) {
+                    MediaPlaylistBean bean = new MediaPlaylistBean();
                     bean.setMedia_id(media.getVid());
                     bean.setType(media.getType());
                     bean.setOrder(media.getOrder());
+                    playlist.add(bean);
                 }
-                playlist.add(bean);
             }
             playlistDetailRequestBean.setList(playlist);
 

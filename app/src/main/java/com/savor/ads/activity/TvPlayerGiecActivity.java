@@ -7,6 +7,7 @@ import android.media.tv.TvView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -35,6 +36,7 @@ import com.savor.tvlibrary.TVSignal;
 
 import java.util.ArrayList;
 
+@SuppressLint("NewApi")
 public class TvPlayerGiecActivity extends BaseActivity {
 
     /**
@@ -510,12 +512,12 @@ public class TvPlayerGiecActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (GlobalValues.PLAY_LIST == null || GlobalValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.getInstance().PLAY_LIST == null || GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
             // 尝试填充播放列表
             fillPlayList();
         }
 
-        if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
             Intent intent = new Intent(this, AdsPlayerActivity.class);
             startActivity(intent);
         } else {
@@ -618,7 +620,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
         boolean doInit = true;
         if (mIsGoneToSystemSetting) {
             mIsGoneToSystemSetting = false;
-            if (GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+            if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
                 doInit = false;
                 gotoAdsPlayer();
             }

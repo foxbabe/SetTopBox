@@ -171,7 +171,7 @@ public class ApiRequestFactory {
                 if (val == null) {
                     val = "";
                 }
-                if (val instanceof String || val instanceof Number) {
+                if (val instanceof String || val instanceof Number || val == null) {
                     jsonParams.accumulate(key, val);
                 } else if (val instanceof List<?>) {
                     jsonParams.accumulate(key, getJSONArray((List<?>) val));
@@ -193,7 +193,7 @@ public class ApiRequestFactory {
         JSONArray jArray = new JSONArray();
         for (int i = 0; i < list.size(); i++) {
             Object obj = list.get(i);
-            if (obj instanceof String || obj instanceof Number) {
+            if (obj instanceof String || obj instanceof Number || obj == null) {
                 jArray.put(list.get(i));
             } else {
                 jArray.put(getJSONObject(obj));
@@ -210,7 +210,7 @@ public class ApiRequestFactory {
             try {
                 field.setAccessible(true);
                 Object fieldValue = field.get(object);
-                if (fieldValue instanceof String || fieldValue instanceof Number) {
+                if (fieldValue instanceof String || fieldValue instanceof Number || fieldValue == null) {
                     jObject.put(field.getName(), fieldValue);
                 } else if(fieldValue instanceof List) {
                     jObject.put(field.getName(), getJSONArray((List<?>) fieldValue));

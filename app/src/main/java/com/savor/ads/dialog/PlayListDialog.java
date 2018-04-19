@@ -113,7 +113,7 @@ public class PlayListDialog extends Dialog {
         window.setAttributes(wl);
     }
 
-    public void showPlaylist(ArrayList<MediaLibBean> playlist) {
+    public <T extends MediaLibBean> void showPlaylist(ArrayList< T> playlist) {
         super.show();
         mShowDownloadTv.setVisibility(View.VISIBLE);
         mPlaylistGv.setVisibility(View.VISIBLE);

@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.RTBPushItem;
 import com.savor.ads.bean.VersionInfo;
@@ -1853,17 +1854,12 @@ public class AppUtils {
                             break;
                         }
                         if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
-                                GlobalValues.LAST_POLY_ORDER <= bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
-                            MediaLibBean polyItem = GlobalValues.ADS_PLAY_LIST.get(polyIndex++);
-                            bean.setName(polyItem.getName());
-                            bean.setMediaPath(polyItem.getMediaPath());
-                            bean.setAdmaster_sin(polyItem.getAdmaster_sin());
-                            bean.setChinese_name(polyItem.getChinese_name());
-                            bean.setDuration(polyItem.getDuration());
-                            bean.setVid(polyItem.getVid());
-                            bean.setMd5(polyItem.getMd5());
-                            bean.setTp_md5(polyItem.getTp_md5());
-                            bean.setTpmedia_id(polyItem.getTpmedia_id());
+                                GlobalValues.LAST_POLY_ORDER < bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
+                            BaiduAdLocalBean polyItem = GlobalValues.ADS_PLAY_LIST.get(polyIndex++);
+                            polyItem.setOrder(bean.getOrder());
+                            polyItem.setPeriod(bean.getPeriod());
+                            polyItem.setLocation_id(bean.getLocation_id());
+                            playList.set(i, polyItem);
                         }
                     }
                 }
@@ -1900,7 +1896,7 @@ public class AppUtils {
                     }
                 }
             }
-            GlobalValues.PLAY_LIST = list;
+            GlobalValues.getInstance().PLAY_LIST = list;
         } else {
             File mediaDir = new File(AppUtils.getFilePath(context, AppUtils.StorageFile.media));
             if (mediaDir.exists() && mediaDir.isDirectory()) {
@@ -1919,12 +1915,12 @@ public class AppUtils {
                         }
                     }
                 }
-                GlobalValues.PLAY_LIST = filePlayList;
+                GlobalValues.getInstance().PLAY_LIST = filePlayList;
             }
         }
 
         return (type == 2 && resultList != null && !resultList.isEmpty()) ||
-                (type == 1 && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty());
+                (type == 1 && GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty());
     }
 
 }

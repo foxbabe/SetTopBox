@@ -675,7 +675,7 @@ public class UsbUpdateHandler {
                     list.add(bean);
                 }
             }
-            GlobalValues.PLAY_LIST = list;
+            GlobalValues.getInstance().PLAY_LIST = list;
             return true;
         } else {
             return false;

@@ -132,7 +132,7 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void gotoAdsPlayer() {
-        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) && GlobalValues.PLAY_LIST != null && !GlobalValues.PLAY_LIST.isEmpty()) {
+        if (!TextUtils.isEmpty(AppUtils.getMainMediaPath()) && GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty()) {
             Intent intent = new Intent();
             intent.setClass(this, AdsPlayerActivity.class);
             startActivity(intent);

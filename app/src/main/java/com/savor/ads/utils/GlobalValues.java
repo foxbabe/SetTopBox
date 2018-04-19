@@ -11,7 +11,16 @@ import java.util.ArrayList;
  * Created by zhanghq on 2017/3/20.
  */
 
-public class GlobalValues {
+public class GlobalValues <T extends MediaLibBean> {
+
+    private static GlobalValues instance;
+
+    public static GlobalValues getInstance() {
+        if (instance == null) {
+            instance = new GlobalValues();
+        }
+        return instance;
+    }
 
     /** 二维码内容*/
     public static String QRCODE_CONTENT = "";
@@ -19,7 +28,7 @@ public class GlobalValues {
     public static String AUTH_CODE = "";
 
     /** 播放列表*/
-    public static ArrayList<MediaLibBean> PLAY_LIST;
+    public ArrayList<T> PLAY_LIST;
     public static ArrayList<BaiduAdLocalBean> ADS_PLAY_LIST;
     public static int LAST_POLY_ORDER = 0;
     public static int POLY_ADS_INDEX = 0;

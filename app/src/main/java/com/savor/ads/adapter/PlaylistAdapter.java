@@ -18,11 +18,11 @@ import java.util.ArrayList;
  * Created by zhang.haiqiang on 2018/1/17.
  */
 
-public class PlaylistAdapter extends BaseAdapter {
+public class PlaylistAdapter <T extends MediaLibBean> extends BaseAdapter {
     private Context mContext;
-    private ArrayList<MediaLibBean> mPlaylist;
+    private ArrayList<T> mPlaylist;
 
-    public PlaylistAdapter(Context context, ArrayList<MediaLibBean> playlist) {
+    public PlaylistAdapter(Context context, ArrayList<T> playlist) {
         mContext = context;
         mPlaylist = playlist;
     }
@@ -73,7 +73,7 @@ public class PlaylistAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public void setPlaylist(ArrayList<MediaLibBean> playlist) {
+    public void setPlaylist(ArrayList<T> playlist) {
         mPlaylist = playlist;
         notifyDataSetChanged();
     }
