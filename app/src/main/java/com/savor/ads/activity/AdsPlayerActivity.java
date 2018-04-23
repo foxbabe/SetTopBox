@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.admaster.sdk.api.AdmasterSdk;
@@ -33,6 +34,7 @@ import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
+import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.RetryHandler;
 import com.savor.ads.utils.ShowMessage;
@@ -183,7 +185,18 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
                         TextUtils.isEmpty(bean.getName()) &&
                         TextUtils.isEmpty(GlobalValues.NOT_FOUND_BAIDU_ADS_KEY)) {
-                    requestBaiduAds();
+                    if (GlobalValues.CURRENT_ADS_REPEAT_PAIR == null ||
+                            GlobalValues.CURRENT_ADS_REPEAT_PAIR.second < ConstantValues.MAX_BAIDU_ADS_REPEAT_COUNT) {
+                        requestBaiduAds();
+                    } else {
+                        if (GlobalValues.CURRENT_ADS_BLOCKED_COUNT < ConstantValues.BAIDU_ADS_BLOCK_COUNT) {
+                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT++;
+                        } else {
+                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT = 0;
+                            GlobalValues.CURRENT_ADS_REPEAT_PAIR = null;
+                            requestBaiduAds();
+                        }
+                    }
                 }
             }
         }
@@ -658,7 +671,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                     if (BaiduAdsResponseCode.SUCCESS == tsApiResponse.getErrorCode()) {
                         handleBaiduAdData(tsApiResponse);
                     } else {
-                        LogUtils.e("请求百度聚屏错误，错误码为：" + tsApiResponse.getErrorCode());
+                        LogUtils.e("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
+                        LogFileUtil.write("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
                     }
                 }
                 break;
@@ -676,6 +690,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                         switch (material.getMaterialType()) {
                             case VIDEO:
                                 String md5 = material.getMaterialMd5().toStringUtf8();
+                                LogUtils.d("百度聚屏请求，获取到物料md5：" + md5);
+                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
                                 if (!TextUtils.isEmpty(md5)) {
                                     String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
                                     String[] selectionArgs = new String[]{md5};
@@ -688,9 +704,21 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                                         bean.setExpireTime(tsApiResponse.getExpirationTime());
 
                                         baiduAdList.add(bean);
+
+                                        if (GlobalValues.CURRENT_ADS_REPEAT_PAIR != null) {
+                                            if (md5.equals(GlobalValues.CURRENT_ADS_REPEAT_PAIR.first)) {
+                                                GlobalValues.CURRENT_ADS_REPEAT_PAIR = new Pair<>(md5, GlobalValues.CURRENT_ADS_REPEAT_PAIR.second + 1);
+                                            } else {
+                                                GlobalValues.CURRENT_ADS_REPEAT_PAIR = new Pair<>(md5, 1);
+                                            }
+                                        } else {
+                                            GlobalValues.CURRENT_ADS_REPEAT_PAIR = new Pair<>(md5, 1);
+                                        }
                                     } else {
                                         // 返回的物料在本地没找到，记录下来物料md5，下载完之后恢复请求
                                         GlobalValues.NOT_FOUND_BAIDU_ADS_KEY = md5;
+                                        LogUtils.d("百度聚屏请求，物料未在本地发现：" + md5);
+                                        LogFileUtil.write("百度聚屏请求，物料未在本地发现：" + md5);
                                     }
                                 }
 
@@ -733,12 +761,20 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
     @Override
     public void onError(AppApi.Action method, Object obj) {
-
+        switch (method) {
+            case AD_BAIDU_ADS:
+                LogFileUtil.write("百度聚屏请求失败");
+                break;
+        }
     }
 
     @Override
     public void onNetworkFailed(AppApi.Action method) {
-
+        switch (method) {
+            case AD_BAIDU_ADS:
+                LogFileUtil.write("百度聚屏请求失败，网络异常");
+                break;
+        }
     }
 
     @Override

@@ -187,4 +187,8 @@ public class ConstantValues {
     public static final String BAIDU_ADS_APP_ID = "ce124b3c";
     /**百度聚屏代码位ID*/
     public static final String BAIDU_ADSLOT_ID = "5592208";
+    /**百度聚屏最大连续重复次数*/
+    public static final int MAX_BAIDU_ADS_REPEAT_COUNT = 5;
+    /**百度聚屏连续重复达上限后，阻塞接下来的请求的次数*/
+    public static final int BAIDU_ADS_BLOCK_COUNT = 10;
 }

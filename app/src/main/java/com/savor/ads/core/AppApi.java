@@ -32,12 +32,6 @@ public class AppApi {
 
     private static String PHONE_BASE_URL = "http://192.168.0.1:8080/";
 
-    /**百度聚屏接口地址*/
-    // 联调环境
-    private static String BAIDU_AD_BASE_URL = "http://jpaccess.baidu.com/api_6";
-//    // 正式环境
-//    private static String BAIDU_AD_BASE_URL = "http://jpad.baidu.com/api_6";
-
 //    /**
 //     * 云平台测试环境
 //     **/
@@ -143,7 +137,7 @@ public class AppApi {
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
-            put(Action.AD_BAIDU_ADS, BAIDU_AD_BASE_URL);
+            put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
         }
     };
 

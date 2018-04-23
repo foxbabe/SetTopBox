@@ -1,6 +1,7 @@
 package com.savor.ads.utils;
 
 import android.graphics.Bitmap;
+import android.util.Pair;
 
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
@@ -65,4 +66,14 @@ public class GlobalValues <T extends MediaLibBean> {
 
     /** 未在本地找到的百度聚屏广告KEY（md5）*/
     public static String NOT_FOUND_BAIDU_ADS_KEY;
+    /**
+     * 百度聚屏广告连续重复次数
+     * first: 广告md5
+     * second: 连续次数
+     */
+    public static Pair<String, Integer> CURRENT_ADS_REPEAT_PAIR;
+    /**
+     * 当前跳过的聚屏广告请求次数
+     */
+    public static int CURRENT_ADS_BLOCKED_COUNT = 0;
 }
