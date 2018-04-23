@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.tv.TvView;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,7 +16,6 @@ import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-import com.savor.ads.dialog.TvChannelListDialog;
 import com.savor.ads.dialog.TvChannelListGiecDialog;
 import com.savor.ads.dialog.TvChannelSearchingDialog;
 import com.savor.ads.log.LogReportUtil;
@@ -34,6 +31,8 @@ import com.savor.tvlibrary.ITVOperator;
 import com.savor.tvlibrary.TVOperatorFactory;
 import com.savor.tvlibrary.TVSignal;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 @SuppressLint("NewApi")
@@ -48,7 +47,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
      */
     public static final String EXTRA_LAST_VID = "extra_last_vid";
 
-//    private SurfaceView mPreviewSv;
+    //    private SurfaceView mPreviewSv;
 //    private SurfaceHolder mSurfaceHolder;
 //    private boolean mIsSurfaceCreated;
     private TvView mTvView;
@@ -164,7 +163,6 @@ public class TvPlayerGiecActivity extends BaseActivity {
         mNoChannleTipsTv = (TextView) findViewById(R.id.tv_no_channel_tips);
     }
 
-    @SuppressLint("NewApi")
     private void setView() {
 //        mSurfaceHolder = mPreviewSv.getHolder();
 //        mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
@@ -240,6 +238,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
             mTvOperate.setSignalSource(mTvView, tvSignal);
             mChannelTipRl.setVisibility(View.GONE);
         }
+        closePQ();
 
         if (mIsAutoTurning) {
             mIsAutoTurning = false;
@@ -255,6 +254,25 @@ public class TvPlayerGiecActivity extends BaseActivity {
             // 添加延时切换到广告播放的Runnable, 999被定义为不切换
             mHandler.postDelayed(mBackToAdsPlayerRunnable, 60 * 1000 * switchTime);
         }
+    }
+
+    private void closePQ() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+//                    ShowMessage.showToast(mContext, "页面将中执行echo 0");
+                    Process process = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                    //os.writeBytes("mount -o remount,rw -t yaffs /system\n");
+                    //os.flush();
+                    os.writeBytes("echo 0 > /sys/class/amvecm/pc_mode\n");
+                    os.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 2500);
     }
 
     private void initCurrentProgram() {
@@ -583,6 +601,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
         // 设置输入源
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
         mTvOperate.setSignalSource(mTvView, tvSignal);
+        closePQ();
 
         if (tvSignal == TVSignal.ATV) {
             int id = -1;

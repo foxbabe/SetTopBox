@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
+          tools:ignore="ProtectedPermissions"
           package="com.savor.ads">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
@@ -49,8 +50,8 @@
     <uses-permission android:name="android.permission.RECOVERY"/>
     <!-- 系统rom更新 -->
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <uses-feature
         android:name="android.software.live_tv"
@@ -101,6 +102,11 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".receiver.GiecPQReceiver">
+            <intent-filter>
+                <action android:name="com.giec.action.need_close_pq"/>
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".activity.MainActivity"
@@ -130,9 +136,8 @@
             android:name=".service.HandleMediaDataService"
             android:exported="false">
         </service>
-        <!-- 点播类处理和转发指令的Service-->
-        <service
-            android:name="com.jar.savor.box.services.RemoteService">
+        <!-- 点播类处理和转发指令的Service -->
+        <service android:name="com.jar.savor.box.services.RemoteService">
             <intent-filter>
                 <action android:name="com.jar.savor.box.REMOTE1"/>
             </intent-filter>
@@ -165,17 +170,6 @@
             android:name=".service.HeartbeatService"
             android:exported="false">
         </service>
-
-        <!--
-        <receiver
-            android:name=".receiver.ShutdownBroadcastReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
-            </intent-filter>
-        </receiver>
-        -->
         <activity android:name=".activity.UsbImageViewerActivity">
         </activity>
 
@@ -199,6 +193,10 @@
         </service>
         <service
             android:name=".service.UMessageIntentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".service.GiecPQService"
             android:exported="false">
         </service>
     </application>
