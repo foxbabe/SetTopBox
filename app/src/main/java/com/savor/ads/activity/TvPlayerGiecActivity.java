@@ -33,6 +33,8 @@ import com.savor.tvlibrary.ITVOperator;
 import com.savor.tvlibrary.TVOperatorFactory;
 import com.savor.tvlibrary.TVSignal;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class TvPlayerGiecActivity extends BaseActivity {
@@ -238,6 +240,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
             mTvOperate.setSignalSource(mTvView, tvSignal);
             mChannelTipRl.setVisibility(View.GONE);
         }
+        closePQ();
 
         if (mIsAutoTurning) {
             mIsAutoTurning = false;
@@ -253,6 +256,25 @@ public class TvPlayerGiecActivity extends BaseActivity {
             // 添加延时切换到广告播放的Runnable, 999被定义为不切换
             mHandler.postDelayed(mBackToAdsPlayerRunnable, 60 * 1000 * switchTime);
         }
+    }
+
+    private void closePQ() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+//                    ShowMessage.showToast(mContext, "页面将中执行echo 0");
+                    Process process = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                    //os.writeBytes("mount -o remount,rw -t yaffs /system\n");
+                    //os.flush();
+                    os.writeBytes("echo 0 > /sys/class/amvecm/pc_mode\n");
+                    os.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 2500);
     }
 
     private void initCurrentProgram() {
@@ -581,6 +603,7 @@ public class TvPlayerGiecActivity extends BaseActivity {
         // 设置输入源
         TVSignal tvSignal = TVSignal.values()[mSession.getTvInputSource()];
         mTvOperate.setSignalSource(mTvView, tvSignal);
+        closePQ();
 
         if (tvSignal == TVSignal.ATV) {
             int id = -1;
