@@ -136,7 +136,7 @@ public class InputBoiteIdDialog extends Dialog implements View.OnClickListener {
         }
 
         if (foundMatchHotel) {
-            mSession.setStandalone(true);
+//            mSession.setStandalone(true);
             mSession.setBoiteId(boiteId);
             mSession.setBoiteName(boiteName);
             if (mCallback != null) {

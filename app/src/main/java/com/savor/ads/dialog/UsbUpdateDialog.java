@@ -240,7 +240,7 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
             @Override
             public void onAllComplete() {
                 // 执行过一次U盘更新则认为已经是单机版
-                mSession.setStandalone(true);
+//                mSession.setStandalone(true);
                 mIsProcessing = false;
                 mHandler.post(new Runnable() {
                     @Override
