@@ -1,5 +1,6 @@
 package com.savor.ads.service;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,8 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.savor.ads.activity.TvPlayerActivity;
+import com.savor.ads.activity.TvPlayerGiecActivity;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
 import com.savor.ads.bean.MediaLibBean;
@@ -34,6 +37,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
@@ -591,6 +595,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     }
 
     private void getTVMatchDataFromSmallPlatform() {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof TvPlayerActivity|| activity instanceof TvPlayerGiecActivity){
+            return;
+        }
         if (AppUtils.isMstar()) {
             AppApi.getTVMatchDataFromSmallPlatform(this, this);
         } else {
