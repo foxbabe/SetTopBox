@@ -1,5 +1,6 @@
 package com.savor.ads.service;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +12,12 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.savor.ads.BuildConfig;
+import com.savor.ads.activity.TvPlayerActivity;
+import com.savor.ads.activity.TvPlayerGiecActivity;
 import com.savor.ads.bean.BoxInitBean;
 import com.savor.ads.bean.BoxInitResult;
+import com.savor.ads.bean.JsonBean;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ProgramBean;
@@ -33,6 +38,8 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
+import com.savor.ads.oss.OSSUtils;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
@@ -103,6 +110,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private boolean isProCompleted = false;  //节目是否下载完毕
     private String mProCompletedPeriod;
 
+    private int poly_timeout_count = 0;
+    private int pro_timeout_count = 0;
+    private int ads_timeout_count = 0;
+    private int adv_timeout_count = 0;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -267,14 +278,14 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getBoxInfo() {
         try {
-            String configJson = AppApi.getBoxInitInfo(this, this, session.getEthernetMac());
-            JSONObject jsonObject = new JSONObject(configJson);
+            JsonBean jsonBean = AppApi.getBoxInitInfo(this, this, session.getEthernetMac());
+            JSONObject jsonObject = new JSONObject(jsonBean.getConfigJson());
             if (jsonObject.getInt("code") != AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 LogUtils.d("接口返回的状态不对,code=" + jsonObject.getInt("code"));
                 return;
             }
 
-            Object result = gson.fromJson(configJson, new TypeToken<BoxInitResult>() {
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<BoxInitResult>() {
             }.getType());
             if (result instanceof BoxInitResult) {
                 BoxInitBean boxInitBean = ((BoxInitResult) result).getResult();
@@ -295,16 +306,16 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void getProgramDataFromSmallPlatform() {
         isProCompleted = false;
         try {
-            String configJson = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
+            JsonBean jsonBean = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
             // 保存拿到的数据到本地
-            FileUtils.write(ConstantValues.PRO_DATA_PATH, configJson);
+            FileUtils.write(ConstantValues.PRO_DATA_PATH, jsonBean.getConfigJson());
 
-            SetBoxTopResult setBoxTopResult = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
+            SetBoxTopResult setBoxTopResult = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<SetBoxTopResult>() {
             }.getType());
             if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 if (setBoxTopResult.getResult() != null) {
                     setTopBoxBean = setBoxTopResult.getResult();
-                    handleSmallPlatformProgramData();
+                    handleSmallPlatformProgramData(jsonBean.getSmallType());
                 }
             }
         } catch (Exception e) {
@@ -317,16 +328,16 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      */
     private void getAdvDataFromSmallPlatform() {
         try {
-            String configJson = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
+            JsonBean jsonBean = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
             // 保存拿到的数据到本地
-            FileUtils.write(ConstantValues.ADV_DATA_PATH, configJson);
+            FileUtils.write(ConstantValues.ADV_DATA_PATH, jsonBean.getConfigJson());
 
-            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
             ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
             if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 if (programBeanResult.getResult() != null) {
-                    handleSmallPlatformAdvData(programBeanResult.getResult());
+                    handleSmallPlatformAdvData(programBeanResult.getResult(),jsonBean.getSmallType());
                 }
             }
         } catch (Exception e) {
@@ -339,15 +350,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      */
     private void getAdsDataFromSmallPlatform() {
         try {
-            String configJson = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
+            JsonBean jsonBean = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
             // 保存拿到的数据到本地
-            FileUtils.write(ConstantValues.ADS_DATA_PATH, configJson);
-            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
+            FileUtils.write(ConstantValues.ADS_DATA_PATH, jsonBean.getConfigJson());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
             ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
             if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 if (programBeanResult.getResult() != null) {
-                    handleSmallPlatformAdsData(programBeanResult.getResult());
+                    handleSmallPlatformAdsData(programBeanResult.getResult(),jsonBean.getSmallType());
                 }
             }
         } catch (Exception e) {
@@ -357,12 +368,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getOnDemandDataFromSmallPlatform() {
         try {
-            String ondemandJson = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(ondemandJson, new TypeToken<SetBoxTopResult>() {
+            JsonBean jsonBean = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<SetBoxTopResult>() {
             }.getType());
             SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
             if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                handleSmallPlatformOnDemandData(setBoxTopResult.getResult());
+                handleSmallPlatformOnDemandData(setBoxTopResult.getResult(),jsonBean.getSmallType());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -371,19 +382,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getSpecialtyFromSmallPlatform() {
         try {
-            String json = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(json, new TypeToken<RstrSpecialtyResult>() {
+            JsonBean jsonBean = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<RstrSpecialtyResult>() {
             }.getType());
             RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
             if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                handleSpecialtyResult(setBoxTopResult.getResult());
+                handleSpecialtyResult(setBoxTopResult.getResult(),jsonBean.getSmallType());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void handleSpecialtyResult(RstrSpecialtyOuterBean bean) {
+    private void handleSpecialtyResult(RstrSpecialtyOuterBean bean,String smallType) {
         if (bean == null) {
             return;
         }
@@ -432,7 +443,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         if (file.exists() && file.isFile()) {
                             file.delete();
                         }
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        if (ConstantValues.VIRTUAL.equals(smallType)){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    mediaLib.getOss_path(),
+                                    new File(path));
+
+                            isDownloaded = ossUtils.syncDownload();
+                        } else {
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
                         if (isDownloaded && isImageDownloadCompleted(path, mediaLib.getMd5())) {
                             isChecked = true;
                         }
@@ -494,12 +515,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getRtbAdsFromSmallPlatform() {
         try {
-            String json = AppApi.getRtbadsFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(json, new TypeToken<ProgramBeanResult>() {
+            JsonBean jsonBean = AppApi.getRtbadsFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
             ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
             if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
-                handRtbasResult(programBeanResult.getResult());
+                handRtbadsResult(programBeanResult.getResult());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -511,7 +532,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      *
      * @param programBean
      */
-    private void handRtbasResult(ProgramBean programBean) {
+    private void handRtbadsResult(ProgramBean programBean) {
         if (programBean == null || programBean.getVersion() == null || TextUtils.isEmpty(programBean.getVersion().getVersion())) {
             return;
         }
@@ -552,6 +573,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         isChecked = true;
                     } else {
                         boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
@@ -619,8 +641,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      */
     private void getPolyAdsFromSmallPlatform(){
         try {
-            String json = AppApi.getPolyAdsFromSmallPlatform(this,this,session.getEthernetMac());
-            Object result = gson.fromJson(json, new TypeToken<ProgramBeanResult>() {
+            JsonBean jsonBean = AppApi.getPolyAdsFromSmallPlatform(this,this,session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
             ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
             if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
@@ -678,9 +700,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         isChecked = true;
                     } else {
                         boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
+
                     }
                     if (isChecked) {
                         bean.setMediaPath(path);
@@ -741,11 +765,21 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "suspend", "polyads_down", adsPeriod,
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
+            if(poly_timeout_count<5){
+                poly_timeout_count ++;
+                getPolyAdsFromSmallPlatform();
+            }else{
+                poly_timeout_count = 0;
+            }
         }
     }
 
 
     private void getTVMatchDataFromSmallPlatform() {
+        Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+        if (activity instanceof TvPlayerGiecActivity ||activity instanceof TvPlayerActivity){
+            return;
+        }
         if (AppUtils.isMstar()) {
             AppApi.getTVMatchDataFromSmallPlatform(this, this);
         } else {
@@ -863,7 +897,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     /**
      * 处理小平台返回的节目单数据（包含内容数据和宣传片占位和广告占位）
      */
-    private void handleSmallPlatformProgramData() {
+    private void handleSmallPlatformProgramData(String smallType) {
         if (setTopBoxBean == null || setTopBoxBean.getPlaybill_list() == null || setTopBoxBean.getPlaybill_list().isEmpty()) {
             return;
         }
@@ -924,15 +958,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         //判断当前数据是节目还是其他，如果是节目走下载逻辑,其他则直接入库
                         if (ConstantValues.PRO.equals(versionInfo.getType())) {
                             String url = baseUrl + mediaItem.getUrl();
-
+                            LogUtils.v("****开始下载pro视频:"+mediaItem.getChinese_name()+"****");
                             // 下载、校验
                             if (isDownloadCompleted(path, mediaItem.getMd5())) {
                                 isChecked = true;
+                                LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
                             } else {
-                                boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                                boolean isDownloaded = false;
+                                //虚拟小平台下载
+                                if (ConstantValues.VIRTUAL.equals(smallType)){
+                                    OSSUtils ossUtils = new OSSUtils(context,
+                                            BuildConfig.OSS_BUCKET_NAME,
+                                            mediaItem.getOss_path(),
+                                            new File(path));
+                                    isDownloaded = ossUtils.syncDownload();
+                                }else {
+                                    isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+
+                                }
                                 if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
                                     isChecked = true;
                                     isNewDownload = true;
+                                    LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
                                 }
                             }
                         } else {
@@ -988,6 +1035,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 String.valueOf(System.currentTimeMillis()), "suspend", "pro_down", proPeriod,
                                 "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
                     }
+                    if(pro_timeout_count<5){
+                        pro_timeout_count ++;
+                        getProgramDataFromSmallPlatform();
+                    }else{
+                        pro_timeout_count = 0;
+                    }
                 }
             }
         }
@@ -996,7 +1049,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     /**
      * 处理小平台返回的宣传片数据(下载完宣传片数据之后需要更新到节目单中，组合成可播放的节目单)
      */
-    private void handleSmallPlatformAdvData(ProgramBean programAdvBean) {
+    private void handleSmallPlatformAdvData(ProgramBean programAdvBean,String smallType) {
         if (programAdvBean == null || programAdvBean.getVersion() == null || TextUtils.isEmpty(programAdvBean.getVersion().getVersion())) {
             return;
         }
@@ -1033,15 +1086,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 String url = baseUrl + bean.getUrl();
                 boolean isChecked = false;
                 try {
+                    LogUtils.v("****开始下载adv视频:"+bean.getChinese_name()+"****");
                     // 下载、校验
                     if (isDownloadCompleted(path, bean.getMd5())) {
                         isChecked = true;
                     } else {
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        //虚拟小平台
+                        if (ConstantValues.VIRTUAL.equals(smallType)){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    bean.getOss_path(),
+                                    new File(path));
+                            isDownloaded = ossUtils.syncDownload();
+                        }else{
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
+
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
                     }
+                    LogUtils.v("****adv视频:"+bean.getChinese_name()+"下载完成****");
                     if (isChecked) {
                         // ADV是先在handleSmallPlatformProgramData()中插入，插入时的期号是节目单号，然后在这里更新实际数据
                         String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
@@ -1091,6 +1157,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "suspend", "adv_down", advPeriod,
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
+
         }
 
         if (isAdvCompleted && isProCompleted && !TextUtils.isEmpty(programAdvBean.getMenu_num()) &&
@@ -1138,12 +1205,20 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 notifyToPlay();
             }
         }
+        if (!isAdvCompleted){
+            if (adv_timeout_count<5){
+                adv_timeout_count ++;
+                getAdvDataFromSmallPlatform();
+            }else {
+                adv_timeout_count = 0;
+            }
+        }
     }
 
     /**
      * 通过小平台获取广告数据
      */
-    private void handleSmallPlatformAdsData(ProgramBean programAdsBean) {
+    private void handleSmallPlatformAdsData(ProgramBean programAdsBean,String smallType) {
         if (programAdsBean == null || programAdsBean.getVersion() == null || TextUtils.isEmpty(programAdsBean.getVersion().getVersion())) {
             return;
         }
@@ -1180,14 +1255,26 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 boolean isChecked = false;
                 try {
                     // 下载、校验
+                    LogUtils.v("****开始下载ads视频:"+bean.getChinese_name()+"****");
                     if (isDownloadCompleted(path, bean.getMd5())) {
                         isChecked = true;
                     } else {
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        //虚拟小平台
+                        if (ConstantValues.VIRTUAL.equals(smallType)){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    bean.getOss_path(),
+                                    new File(path));
+                            isDownloaded = ossUtils.syncDownload();
+                        }else{
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
                     }
+                    LogUtils.v("****ads视频:"+bean.getChinese_name()+"下载完成****");
                     if (isChecked) {
                         bean.setMediaPath(path);
                         // 插库成功，mDownloadedList中加入一条
@@ -1231,6 +1318,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "suspend", "ads_down", adsPeriod,
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
+            if (ads_timeout_count <5){
+                ads_timeout_count ++;
+                getAdsDataFromSmallPlatform();
+            }else{
+                ads_timeout_count = 0;
+            }
         }
     }
 
@@ -1556,7 +1649,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     /**
      * 处理小平台返回的点播视频
      */
-    private void handleSmallPlatformOnDemandData(SetTopBoxBean multicastBoxBean) {
+    private void handleSmallPlatformOnDemandData(SetTopBoxBean multicastBoxBean,String smallType) {
         if (multicastBoxBean == null || multicastBoxBean.getPlaybill_list() == null || multicastBoxBean.getPlaybill_list().isEmpty()) {
             return;
         }
@@ -1621,7 +1714,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             if (file.exists() && file.isFile()) {
                                 file.delete();
                             }
-                            boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                            boolean isDownloaded = false;
+                            //虚拟小平台
+                            if (ConstantValues.VIRTUAL.equals(smallType)){
+                                OSSUtils ossUtils = new OSSUtils(context,
+                                        BuildConfig.OSS_BUCKET_NAME,
+                                        mediaLib.getOss_path(),
+                                        new File(path));
+                                isDownloaded = ossUtils.syncDownload();
+                            }else{
+                                isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                            }
                             if (isDownloaded && isDownloadCompleted(path, mediaLib.getMd5())) {
                                 isChecked = true;
                             }

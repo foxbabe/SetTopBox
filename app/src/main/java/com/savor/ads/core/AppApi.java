@@ -5,11 +5,13 @@ import android.text.TextUtils;
 
 import com.savor.ads.BuildConfig;
 import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.ads.bean.JsonBean;
 import com.savor.ads.bean.MediaDownloadBean;
 import com.savor.ads.bean.DownloadDetailRequestBean;
 import com.savor.ads.bean.PlaylistDetailRequestBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.tvlibrary.AtvChannel;
@@ -66,8 +68,6 @@ public class AppApi {
         PHONE_BASE_URL = "http://"+newIP+":8080/";
     }
 
-    public static final String APK_DOWNLOAD_FILENAME =  "updateapksamples.apk";
-    public static final String ROM_DOWNLOAD_FILENAME =  "update_signed.zip";
     /**
      * Action-自定义行为 注意：自定义后缀必须为以下结束 _FORM:该请求是Form表单请求方式 _JSON:该请求是Json字符串
      * _XML:该请求是XML请求描述文件
@@ -147,7 +147,7 @@ public class AppApi {
      * @param handler
      * @param boxMac
      */
-    public static String getBoxInitInfo(Context context, ApiRequestListener handler, String boxMac) throws IOException {
+    public static JsonBean getBoxInitInfo(Context context, ApiRequestListener handler, String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_BOX_INIT_JSON, handler, params).syncGet();
@@ -161,7 +161,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getProgramDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getProgramDataFromSmallPlatform(Context context, ApiRequestListener handler, String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_PROGRAM_DATA_FROM_JSON, handler, params).syncGet();
@@ -176,7 +176,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getAdvDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getAdvDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ADV_DATA_FROM_JSON, handler, params).syncGet();
@@ -191,7 +191,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getAdsDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException{
+    public static JsonBean getAdsDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException{
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ADS_DATA_FROM_JSON, handler, params).syncGet();
@@ -205,7 +205,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getOnDemandDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getOnDemandDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ON_DEMAND_DATA_FROM_JSON, handler, params).syncGet();
@@ -219,7 +219,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getSpecialtyFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getSpecialtyFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_SPECIALTY_JSON, handler, params).syncGet();
@@ -233,7 +233,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getRtbadsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getRtbadsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_RTB_ADS_JSON, handler, params).syncGet();
@@ -247,7 +247,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getPolyAdsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getPolyAdsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_POLY_ADS_JSON, handler, params).syncGet();
@@ -311,9 +311,9 @@ public class AppApi {
 
             String targetApk = null;
             if (type==1){
-                targetApk=target + File.separator + ROM_DOWNLOAD_FILENAME;
+                targetApk=target + File.separator + ConstantValues.ROM_DOWNLOAD_FILENAME;
             }else{
-                targetApk=target + File.separator + APK_DOWNLOAD_FILENAME;
+                targetApk=target + File.separator + ConstantValues.APK_DOWNLOAD_FILENAME;
             }
 
             File tarFile =new File(targetApk);
@@ -354,6 +354,7 @@ public class AppApi {
         params.put("hotelId", Session.get(context).getBoiteId());
         params.put("roomId", Session.get(context).getRoomId());
         params.put("signal", AppUtils.getInputType(Session.get(context).getTvInputSource()));
+        params.put("net_speed",Session.get(context).getNetSpeed());
         new AppServiceOk(context, Action.CP_GET_HEARTBEAT_PLAIN, handler, params).get();
     }
 

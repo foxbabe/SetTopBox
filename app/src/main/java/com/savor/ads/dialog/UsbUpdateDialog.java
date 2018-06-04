@@ -238,15 +238,19 @@ public class UsbUpdateDialog extends Dialog implements View.OnClickListener {
             }
 
             @Override
-            public void onAllComplete() {
+            public void onAllComplete(boolean mIsAllSuccess) {
                 // 执行过一次U盘更新则认为已经是单机版
 //                mSession.setStandalone(true);
+                final boolean allSuccess = mIsAllSuccess;
                 mIsProcessing = false;
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mUpdateTipsTv.setText("所有动作已执行完毕");
-                        mUpdateTipsTv.setTextColor(0xFF333333);
+                        if (allSuccess){
+                            mUpdateTipsTv.setText("所有动作已执行完毕");
+                            mUpdateTipsTv.setTextColor(0xFF333333);
+                        }
+
                     }
                 });
             }

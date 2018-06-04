@@ -44,6 +44,10 @@ public class MediaLibBean implements Serializable {
     private String tpmedia_id;
     /**百度返回md5值**/
     private String tp_md5;
+    /**oss资源路径**/
+    private String oss_path;
+    /**李召返回，暂未使用**/
+    private String oss_etag;
     public int getId() {
         return id;
     }
@@ -212,6 +216,22 @@ public class MediaLibBean implements Serializable {
 
     public void setTp_md5(String tp_md5) {
         this.tp_md5 = tp_md5;
+    }
+
+    public String getOss_path() {
+        return oss_path;
+    }
+
+    public void setOss_path(String oss_path) {
+        this.oss_path = oss_path;
+    }
+
+    public String getOss_etag() {
+        return oss_etag;
+    }
+
+    public void setOss_etag(String oss_etag) {
+        this.oss_etag = oss_etag;
     }
 }
 

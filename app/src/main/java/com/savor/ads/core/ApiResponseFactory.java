@@ -28,6 +28,7 @@ import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.TvProgramGiecResponse;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.UpgradeInfo;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DesUtils;
 import com.savor.ads.utils.LogUtils;
 
@@ -50,7 +51,6 @@ public class ApiResponseFactory {
     public final static String TAG = "ApiResponseFactory";
     // 当前服务器时间
     private static String webtime = "";
-
     public static Object getResponse(Context context, AppApi.Action action,
                                      Response response, String key, boolean isCache) {
 
@@ -74,6 +74,7 @@ public class ApiResponseFactory {
         String jsonResult = null;
         try {
             jsonResult = response.body().string();
+
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -85,6 +86,7 @@ public class ApiResponseFactory {
         }
 
         String header = response.header("des");
+        key = response.header("X-SMALL-TYPE");
         if (header != null && Boolean.valueOf(header)) {
             isDes = true;
         }
@@ -177,6 +179,15 @@ public class ApiResponseFactory {
             case SP_GET_UPGRADE_INFO_JSON:
                 result = gson.fromJson(info, new TypeToken<UpgradeInfo>() {
                 }.getType());
+                if (result instanceof UpgradeInfo){
+                    UpgradeInfo upgradeInfo = (UpgradeInfo)result;
+                    if (ConstantValues.VIRTUAL.equals(key)){
+                        upgradeInfo.setVirtual(true);
+                    }else{
+                        upgradeInfo.setVirtual(false);
+                    }
+                    result =upgradeInfo;
+                }
                 break;
             case SP_POST_UPLOAD_PROGRAM_JSON:
                 result = info;

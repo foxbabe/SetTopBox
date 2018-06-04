@@ -1,38 +1,81 @@
 package com.savor.ads.oss;
 
+import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
+import com.alibaba.sdk.android.oss.ClientConfiguration;
 import com.alibaba.sdk.android.oss.ClientException;
 import com.alibaba.sdk.android.oss.OSS;
+import com.alibaba.sdk.android.oss.OSSClient;
 import com.alibaba.sdk.android.oss.ServiceException;
 import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
 import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
+import com.alibaba.sdk.android.oss.common.OSSLog;
+import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
+import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
 import com.alibaba.sdk.android.oss.internal.OSSAsyncTask;
+import com.alibaba.sdk.android.oss.model.GetObjectRequest;
+import com.alibaba.sdk.android.oss.model.GetObjectResult;
+import com.alibaba.sdk.android.oss.model.ObjectMetadata;
 import com.alibaba.sdk.android.oss.model.ResumableUploadRequest;
 import com.alibaba.sdk.android.oss.model.ResumableUploadResult;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.log.LogUploadService;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by bichao on 12/21/16.
  */
-public class ResuambleUpload {
-
+public class OSSUtils {
+    private Context context;
     private OSS oss;
+    /**桶名称**/
     private String bucketName;
+    /**阿里云上传日志所用**/
     private String objectKey;
+    /**阿里云下载视频所用*/
+    private String objectKey2;
     private String uploadFilePath;
     private LogUploadService.UploadCallback mUploadCallback;
-    public ResuambleUpload(OSS client, String bucketName, String objectKey, String uploadFilePath, LogUploadService.UploadCallback result) {
-        this.oss = client;
+    private File localFile;
+    private boolean isDownloaded;
+    public OSSUtils(Context context,String bucketName, String objectKey, String uploadFilePath, LogUploadService.UploadCallback result) {
+        this.context = context;
         this.bucketName = bucketName;
         this.objectKey = objectKey;
         this.uploadFilePath = uploadFilePath;
         this.mUploadCallback = result;
+        initOSSClient();
     }
 
+    public OSSUtils(Context context,String bucketName, String objectKey,File file) {
+        this.context = context;
+        this.bucketName = bucketName;
+        this.objectKey2 = objectKey;
+        this.localFile = file;
+        initOSSClient();
+    }
+
+    void initOSSClient(){
+        if (oss!=null){
+            return;
+        }
+        OSSCredentialProvider credentialProvider = new OSSPlainTextAKSKCredentialProvider(OSSValues.accessKeyId, OSSValues.accessKeySecret);
+
+        ClientConfiguration conf = new ClientConfiguration();
+        conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
+        conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
+        conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
+        conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
+        OSSLog.enableLog();
+        oss = new OSSClient(context, BuildConfig.OSS_ENDPOINT, credentialProvider, conf);
+    }
     // 异步断点上传，不设置记录保存路径，只在本次上传内做断点续传
     public void resumableUpload() {
         // 创建断点上传请求
@@ -120,5 +163,63 @@ public class ResuambleUpload {
         });
 
         resumableTask.waitUntilFinished();
+    }
+
+    public boolean syncDownload() {
+        isDownloaded = false;
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        //构造下载文件请求
+        GetObjectRequest get = new GetObjectRequest(bucketName, objectKey2);
+        //设置下载进度回调
+        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
+            @Override
+            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
+                OSSLog.logDebug("getobj_progress: " + currentSize + "  total_size: " + totalSize, false);
+            }
+        });
+        try {
+            // 同步执行下载请求，返回结果
+            GetObjectResult getResult = oss.getObject(get);
+            Log.d("Content-Length", "" + getResult.getContentLength());
+            outputStream = new FileOutputStream(localFile);
+            // 获取文件输入流
+            inputStream = getResult.getObjectContent();
+            byte[] buffer = new byte[2048];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                // 处理下载的数据，比如图片展示或者写入文件等
+                outputStream.write(buffer, 0, len);
+                outputStream.flush();
+            }
+            // 下载后可以查看文件元信息
+            ObjectMetadata metadata = getResult.getMetadata();
+            Log.d("ContentType", metadata.getContentType());
+            isDownloaded = true;
+        } catch (ClientException e1) {
+            // 本地异常如网络异常等
+            e1.printStackTrace();
+        } catch (ServiceException e2) {
+            // 服务异常
+            Log.e("RequestId", e2.getRequestId());
+            Log.e("ErrorCode", e2.getErrorCode());
+            Log.e("HostId", e2.getHostId());
+            Log.e("RawMessage", e2.getRawMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (inputStream!=null){
+                    inputStream.close();
+                }
+                if (outputStream!=null){
+                    outputStream.close();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        return isDownloaded;
     }
 }

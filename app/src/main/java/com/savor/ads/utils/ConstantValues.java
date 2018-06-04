@@ -191,4 +191,11 @@ public class ConstantValues {
     public static final int MAX_BAIDU_ADS_REPEAT_COUNT = 5;
     /**百度聚屏连续重复达上限后，阻塞接下来的请求的次数*/
     public static final int BAIDU_ADS_BLOCK_COUNT = 10;
+    /**实体小平台**/
+    public static final String ENTITY="entity";
+    /**虚拟小平台**/
+    public static final String VIRTUAL="virtual";
+
+    public static final String APK_DOWNLOAD_FILENAME =  "updateapksamples.apk";
+    public static final String ROM_DOWNLOAD_FILENAME =  "update_signed.zip";
 }

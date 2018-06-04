@@ -84,20 +84,17 @@ public class ProgressDownloader {
     }
 
     //startsPoint指定开始下载的点
-    public boolean download(final long startsPoint){
+    public boolean download(final long startsPoint) throws Exception{
         call = newCall(startsPoint);
-        try {
-            Response response = call.execute();
-            if(response!=null&&response.code()==200){
-                save(response,0);
-                response.close();
-            }else{
-                return false;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        Response response = call.execute();
+        if(response!=null&&response.code()==200){
+            save(response,0);
+            response.close();
+        }else{
             return false;
         }
+
         return  true;
 //        call.enqueue(new Callback() {
 //            @Override
@@ -118,7 +115,7 @@ public class ProgressDownloader {
         }
     }
 
-    private void save(Response response,long startsPoint){
+    private void save(Response response,long startsPoint) throws Exception {
         ResponseBody body = response.body();
         InputStream inputStream = body.byteStream();
 //        FileChannel channelOut = null;
@@ -151,6 +148,7 @@ public class ProgressDownloader {
                 progressResponseListener.FailedDownload();
             }
             e.printStackTrace();
+            throw new Exception();
         }finally {
             try {
                 inputStream.close();

@@ -37,8 +37,8 @@ public class DownloadManagerBak implements ProgressResponseListener{
 
 
     public void startDownload(String url,File file){
-        downloader = new ProgressDownloader(url,file,this);
-        downloader.download(this.brealPoints);
+//        downloader = new ProgressDownloader(url,file,this);
+//        downloader.download(this.brealPoints);
     }
 
     @Override

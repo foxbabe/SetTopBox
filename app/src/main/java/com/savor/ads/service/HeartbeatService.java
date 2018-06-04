@@ -3,7 +3,11 @@ package com.savor.ads.service;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
+import android.net.TrafficStats;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -68,6 +72,28 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
      */
     private int mServerInfoCheckElapsedTime = 0;
 
+    private long total_data = TrafficStats.getTotalRxBytes();
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what ==1){
+                int real_data = (int)msg.arg1;
+                if(real_data>1024){
+//                    listSpeed.add(real_data/1024+"kb/s");
+                    Session.get(HeartbeatService.this).setNetSpeed(real_data/1024+"kb/s");
+                    Log.d("speed",real_data/1024+"kb/s");
+                }else{
+                    Log.d("speed",real_data+"b/s");
+                    Session.get(HeartbeatService.this).setNetSpeed(real_data+"b/s");
+//                    listSpeed.add(real_data+"b/s");
+                }
+            }
+        }
+    };
+    /**几秒刷新一次**/
+    private final int count = 5;
+
     public HeartbeatService() {
         super("HeartbeatService");
     }
@@ -90,7 +116,7 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
         //  启动时立即心跳一次
         doHeartbeat();
-
+        monitorDownloadSpeed();
         if (!Session.get(this).isUseVirtualSp()) {
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
             executorService.scheduleAtFixedRate(mNetworkDetectionRunnable, 1, 5, TimeUnit.MINUTES);
@@ -154,6 +180,29 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
         LogFileUtil.write("开始自动上报心跳");
         AppApi.heartbeat(this, this);
     }
+
+
+    private void monitorDownloadSpeed(){
+        mHandler.postDelayed(mRunnable,0);
+
+    }
+
+    private Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(mRunnable,count*1000);
+            Message msg = mHandler.obtainMessage();
+            msg.what = 1;
+            msg.arg1 = getNetSpeed();
+            mHandler.sendMessage(msg);
+        }
+    };
+    private int getNetSpeed(){
+        long traffic_data = TrafficStats.getTotalRxBytes() - total_data;
+        total_data = TrafficStats.getTotalRxBytes();
+        return (int)traffic_data /count ;
+    }
+
 
     private void reportMediaDetail() {
         reportCurrent();

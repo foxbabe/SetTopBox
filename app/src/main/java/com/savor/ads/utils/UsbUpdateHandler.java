@@ -58,7 +58,7 @@ public class UsbUpdateHandler {
 
         void onActionComplete(int index, boolean success, String msg);
 
-        void onAllComplete();
+        void onAllComplete(boolean mIsProcessing);
 
         void onActionProgress(int index,String msg);
     }
@@ -188,6 +188,10 @@ public class UsbUpdateHandler {
                 if (isKnownAction && mCallback != null) {
                     mCallback.onActionComplete(i, isSuccess, msg);
                 }
+                /**一旦一个环节出错，就跳出循环，modify by 20180514**/
+//                if(!mIsAllSuccess){
+//                    break;
+//                }
             }
 
             if (mIsAllSuccess) {
@@ -196,7 +200,7 @@ public class UsbUpdateHandler {
             }
 
             if (mCallback != null) {
-                mCallback.onAllComplete();
+                mCallback.onAllComplete(mIsAllSuccess);
             }
         }
     }

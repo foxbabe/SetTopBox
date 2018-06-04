@@ -9,11 +9,10 @@ import com.alibaba.sdk.android.oss.OSSClient;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
-import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider;
 import com.savor.ads.BuildConfig;
 import com.savor.ads.core.Session;
 import com.savor.ads.oss.OSSValues;
-import com.savor.ads.oss.ResuambleUpload;
+import com.savor.ads.oss.OSSUtils;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 
@@ -33,7 +32,6 @@ public class LogUploadService {
         this.context = context;
         session = Session.get(context);
 
-        initOSSClient();
     }
 
     private void initOSSClient() {
@@ -132,7 +130,7 @@ public class LogUploadService {
                     if (new File(archive).exists()) {
                         final String object_key = archive.substring(1, archive.length());
                         String oss_file_path = OSSValues.uploadLotteryPath + name + ".zip";
-                        new ResuambleUpload(oss,
+                        new OSSUtils(context,
                                 BuildConfig.OSS_BUCKET_NAME,
                                 oss_file_path,
                                 object_key,
@@ -192,7 +190,7 @@ public class LogUploadService {
                             }
 
 
-                            new ResuambleUpload(oss,
+                            new OSSUtils(context,
                                     BuildConfig.OSS_BUCKET_NAME,
                                     ossFilePath,
                                     localFilePath,

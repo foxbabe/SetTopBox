@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 
 import com.amlogic.update.OtaUpgradeUtils;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.UpgradeInfo;
 import com.savor.ads.bean.UpgradeResult;
@@ -12,6 +13,7 @@ import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
+import com.savor.ads.oss.OSSUtils;
 import com.savor.ads.oss.OSSValues;
 
 
@@ -212,33 +214,7 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
             case SP_GET_UPGRADEDOWN:
                 if (obj instanceof File) {
                     File f = (File) obj;
-                    byte[] fRead;
-                    String md5Value = null;
-                    try {
-                        fRead = FileUtils.readFileToByteArray(f);
-                        md5Value = AppUtils.getMD5(fRead);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    //比较本地文件MD5是否与服务器文件一致，如果一致则启动安装
-                    String fileName = f.getName();
-                    if (AppApi.ROM_DOWNLOAD_FILENAME.equals(fileName)) {
-                        if (md5Value != null && md5Value.equals(upgradeInfo.getRomMd5())) {
-                            //升级ROM
-                            if (!AppUtils.isMstar()) {
-                                updateRom(f);
-                            }
-                        }
-                    } else if (AppApi.APK_DOWNLOAD_FILENAME.equals(fileName)) {
-                        if (md5Value != null && md5Value.equals(upgradeInfo.getApkMd5())) {
-                            //升级APK
-                            if (AppUtils.isMstar()) {
-                                updateApk(f);
-                            } else {
-                                updateApk4Giec(f);
-                            }
-                        }
-                    }
+                    handleUpdateResult(f);
                 }
                 break;
         }
@@ -248,18 +224,75 @@ public class UpdateUtil implements ApiRequestListener, OtaUpgradeUtils.ProgressL
         if (upgradeInfo == null) {
             return;
         }
-
+        String target= AppUtils.getMainMediaPath();//AppUtils.getSDCardPath();
+        if (TextUtils.isEmpty(target)) {
+            LogFileUtil.write("External SD is not exist, download canceled");
+            return;
+        }
         if (serverInfo != null && !TextUtils.isEmpty(upgradeInfo.getRomUrl())) {
             TechnicalLogReporter.romUpdate(mContext, upgradeInfo.getNewestRomVersion());
-            AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getRomUrl(), mContext, this, 1);
+//            if (upgradeInfo.isVirtual()){
+//                File file = new File(target + File.separator + ConstantValues.ROM_DOWNLOAD_FILENAME);
+//                OSSUtils ossUtils = new OSSUtils(mContext,
+//                        BuildConfig.OSS_BUCKET_NAME,
+//                        mediaLib.getOss_path(),
+//                        file);
+//                if(ossUtils.syncDownload()){
+//                    handleUpdateResult(file);
+//                }
+//            }else {
+                AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getRomUrl(), mContext, this, 1);
+//            }
         }
         if (serverInfo != null && !TextUtils.isEmpty(upgradeInfo.getApkUrl())) {
             ShowMessage.showToast(mContext, "发现新版本，开始下载");
             TechnicalLogReporter.apkUpdate(mContext, upgradeInfo.getNewestApkVersion());
-            AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getApkUrl(), mContext, this, 2);
+//            if (upgradeInfo.isVirtual()){
+//                File file = new File(target + File.separator + ConstantValues.APK_DOWNLOAD_FILENAME);
+//                OSSUtils ossUtils = new OSSUtils(mContext,
+//                        BuildConfig.OSS_BUCKET_NAME,
+//                        mediaLib.getOss_path(),
+//                        file);
+//                if(ossUtils.syncDownload()){
+//                    handleUpdateResult(file);
+//                }
+//            }else{
+                AppApi.downVersion(serverInfo.getDownloadUrl() + upgradeInfo.getApkUrl(), mContext, this, 2);
+//            }
+
         }
     }
 
+    //处理升级结果
+    private void handleUpdateResult(File file){
+        byte[] fRead;
+        String md5Value = null;
+        try {
+            fRead = FileUtils.readFileToByteArray(file);
+            md5Value = AppUtils.getMD5(fRead);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //比较本地文件MD5是否与服务器文件一致，如果一致则启动安装
+        String fileName = file.getName();
+        if (ConstantValues.ROM_DOWNLOAD_FILENAME.equals(fileName)) {
+            if (md5Value != null && md5Value.equals(upgradeInfo.getRomMd5())) {
+                //升级ROM
+                if (!AppUtils.isMstar()) {
+                    updateRom(file);
+                }
+            }
+        } else if (ConstantValues.APK_DOWNLOAD_FILENAME.equals(fileName)) {
+            if (md5Value != null && md5Value.equals(upgradeInfo.getApkMd5())) {
+                //升级APK
+                if (AppUtils.isMstar()) {
+                    updateApk(file);
+                } else {
+                    updateApk4Giec(file);
+                }
+            }
+        }
+    }
 
     @Override
     public void onError(AppApi.Action method, Object obj) {

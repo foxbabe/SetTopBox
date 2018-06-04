@@ -204,7 +204,8 @@ public class Session {
     private String lastUDiskUpdateTime;
 
     private ArrayList<RTBPushItem> mRTBPushItems;
-	
+    /**记录下载速度**/
+	private String netSpeed;
     private Session(Context context) {
 
         mContext = context;
@@ -290,6 +291,7 @@ public class Session {
         lastUDiskUpdateTime = mPreference.loadStringKey(P_APP_LAST_UDISK_UPDATE_TIME, "");
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
         mRTBPushItems = (ArrayList<RTBPushItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
+        netSpeed = mPreference.loadStringKey(P_APP_DOWNLOAD_NET_SPEED,"");
     }
 
     /*
@@ -364,7 +366,8 @@ public class Session {
                 || P_APP_LAST_UDISK_UPDATE_TIME.equals(key)
                 || P_APP_SPECIALTY_PERIOD.equals(key)
                 || P_APP_DOWNLOADING_SPECIALTY_PERIOD.equals(key)
-                || P_APP_LOADING_VERSION.equals(key)) {
+                || P_APP_LOADING_VERSION.equals(key)
+                || P_APP_DOWNLOAD_NET_SPEED.equals(key)) {
 
             mPreference.saveStringKey(key, (String) updateItem.second);
 
@@ -1079,6 +1082,15 @@ public class Session {
 
     }
 
+    public String getNetSpeed() {
+        return netSpeed;
+    }
+
+    public void setNetSpeed(String netSpeed) {
+        this.netSpeed = netSpeed;
+        writePreference(new Pair<String, Object>(P_APP_DOWNLOAD_NET_SPEED,netSpeed));
+    }
+
     //轮播播放声音
     public static final String P_APP_VOLUME = "com.savor.ads.volume";
     //投屏播放声音
@@ -1181,6 +1193,7 @@ public class Session {
 
     public static final String P_APP_RTB_PUSH_CONTENT = "com.savor.ads.rtb_push_content";
 
+    public static final String P_APP_DOWNLOAD_NET_SPEED = "com.savor.download.net_speed";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;

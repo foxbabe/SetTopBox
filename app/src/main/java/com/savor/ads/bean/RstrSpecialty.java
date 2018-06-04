@@ -33,7 +33,10 @@ public class RstrSpecialty implements Serializable {
     /** 媒体类型 1视频 2图片 3其它*/
     private String media_type;
     private String media_path;
-
+    /**oss资源路径**/
+    private String oss_path;
+    /**李召返回，暂未使用**/
+    private String oss_etag;
     public String getVid() {
         return vid;
     }
@@ -120,5 +123,21 @@ public class RstrSpecialty implements Serializable {
 
     public void setMedia_path(String media_path) {
         this.media_path = media_path;
+    }
+
+    public String getOss_path() {
+        return oss_path;
+    }
+
+    public void setOss_path(String oss_path) {
+        this.oss_path = oss_path;
+    }
+
+    public String getOss_etag() {
+        return oss_etag;
+    }
+
+    public void setOss_etag(String oss_etag) {
+        this.oss_etag = oss_etag;
     }
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.droidlogic.app.OutputModeManager;
+import com.droidlogic.app.SystemControlManager;
 import com.droidlogic.app.tv.DroidLogicTvUtils;
 import com.droidlogic.app.tv.TVChannelParams;
 import com.droidlogic.app.tv.TvControlManager;
@@ -23,7 +24,10 @@ import java.util.ArrayList;
 public class GiecTVOperator implements ITVOperator {
 
     private Context mContext;
-
+    private static final String AUTO_ATSC_C_PATH = "/sys/module/aml_fe/parameters/auto_search_std";
+    private static final String AUTO_ATSC_C_MODE_ENABLE = "1";
+    private static final String AUTO_ATSC_C_MODE_DISABLE = "0";
+    private static final String AUTO_ATSC_C_ATV_PATH = "/sys/module/aml_fe/parameters/slow_mode";
     GiecTVOperator(Context context) {
         mContext = context;
     }
@@ -130,12 +134,18 @@ public class GiecTVOperator implements ITVOperator {
                 }
             }
         });
-
-
+        /**20180509添加:电视搜台补全问题补充**/
+        SystemControlManager scm = new SystemControlManager(mContext);
+        scm.writeSysFs(AUTO_ATSC_C_PATH, AUTO_ATSC_C_MODE_DISABLE);
+        scm.writeSysFs(AUTO_ATSC_C_ATV_PATH, AUTO_ATSC_C_MODE_DISABLE);
+        /********************************/
         TvControlManager.getInstance().StartTv();
         TvControlManager.TvMode mode = new TvControlManager.TvMode(TvContract.Channels.TYPE_DTMB);
         int[] freqPair = new int[2];
         TvControlManager.getInstance().ATVGetMinMaxFreq(freqPair);
+        /**20180509添加:电视搜台补全问题补充**/
+        TvControlManager.getInstance().setAmAudioPreMute(TvControlManager.AUDIO_MUTE_FOR_TV);
+        /********************************/
         TvControlManager.getInstance().DtvSetTextCoding("GB2312");
         TvControlManager.FEParas fe = new TvControlManager.FEParas();
         fe.setMode(mode);
@@ -145,12 +155,15 @@ public class GiecTVOperator implements ITVOperator {
         scan.setMode(TvControlManager.ScanParas.MODE_DTV_ATV);
         scan.setAtvMode(TvControlManager.ScanType.SCAN_ATV_AUTO);
         scan.setDtvMode(TvControlManager.ScanType.SCAN_DTV_NONE);
-//        freqPair[0] = 30250000;
-//        freqPair[1] = 1308250000;
+//        scan.setDtvMode(TvControlManager.ScanType.SCAN_DTV_ALLBAND);
+
         scan.setAtvFrequency1(freqPair[0]);
         scan.setAtvFrequency2(freqPair[1]);
         scan.setDtvFrequency1(0);
         scan.setDtvFrequency2(0);
+        /**20180509添加:电视搜台补全问题补充**/
+        scan.setAtvModifier("mode",mode.getMode());
+        /********************************/
         TvControlManager.getInstance().OpenDevForScan(DroidLogicTvUtils.OPEN_DEV_FOR_SCAN_DTV);
         /**
          * 特别说明播放电视节目就是根据搜台后保存在系统数据库的数据来播放，地址是Channels.CONTENT_URI

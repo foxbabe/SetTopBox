@@ -29,6 +29,8 @@ public class UpgradeInfo implements Serializable {
 	private String logo_url;
 	private String logo_md5;
 	private String logo_version;
+	//是否是虚拟小平台
+	private boolean isVirtual;
 
 	public int getIsApkForceUpgrade() {
 		return isApkForceUpgrade;
@@ -164,5 +166,13 @@ public class UpgradeInfo implements Serializable {
 
 	public void setLogo_version(String logo_version) {
 		this.logo_version = logo_version;
+	}
+
+	public boolean isVirtual() {
+		return isVirtual;
+	}
+
+	public void setVirtual(boolean virtual) {
+		isVirtual = virtual;
 	}
 }
