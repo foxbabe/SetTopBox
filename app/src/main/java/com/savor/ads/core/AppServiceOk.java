@@ -227,7 +227,7 @@ public class AppServiceOk {
         LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
         headers.put("boxMac", appSession.getEthernetMac());
         headers.put("hotelId", appSession.getBoiteId());
-        headers.put("X-API-VERSION",appSession.getVersionCode()+"");
+        headers.put("X-VERSION",appSession.getVersionCode()+"");
         Callback<Object> callback = new Callback<Object>() {
 
             @Override
@@ -326,7 +326,7 @@ public class AppServiceOk {
         LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
         headers.put("boxMac", appSession.getEthernetMac());
         headers.put("hotelId", appSession.getBoiteId());
-        headers.put("X-API-VERSION",appSession.getVersionCode());
+        headers.put("X-VERSION",appSession.getVersionCode());
         requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
         LogUtils.d("url-->" + requestUrl);
         Request request = new Request.Builder()
