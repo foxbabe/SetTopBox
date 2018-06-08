@@ -164,7 +164,9 @@ public class OSSUtils {
 
         resumableTask.waitUntilFinished();
     }
-
+    /**
+     * OSS同步下载方法
+     */
     public boolean syncDownload() {
         isDownloaded = false;
         InputStream inputStream = null;
@@ -221,5 +223,63 @@ public class OSSUtils {
         }
 
         return isDownloaded;
+    }
+    /**
+     * OSS异步下载方法
+     */
+    public void asyncDownload(){
+        GetObjectRequest get = new GetObjectRequest(bucketName, objectKey2);
+        //设置下载进度回调
+        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
+            @Override
+            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
+                OSSLog.logDebug("getobj_progress: " + currentSize+"  total_size: " + totalSize, false);
+            }
+        });
+        OSSAsyncTask task = oss.asyncGetObject(get, new OSSCompletedCallback<GetObjectRequest, GetObjectResult>() {
+            @Override
+            public void onSuccess(GetObjectRequest request, GetObjectResult result) {
+                FileOutputStream outputStream = null;
+                // 请求成功
+                InputStream inputStream = result.getObjectContent();
+                byte[] buffer = new byte[2048];
+                int len;
+                try {
+                    while ((len = inputStream.read(buffer)) != -1) {
+                        // 处理下载的数据
+                        outputStream.write(buffer, 0, len);
+                        outputStream.flush();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    try {
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                        if (outputStream != null) {
+                            outputStream.close();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+            @Override
+            public void onFailure(GetObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
+                // 请求异常
+                if (clientExcepion != null) {
+                    // 本地异常如网络异常等
+                    clientExcepion.printStackTrace();
+                }
+                if (serviceException != null) {
+                    // 服务异常
+                    Log.e("ErrorCode", serviceException.getErrorCode());
+                    Log.e("RequestId", serviceException.getRequestId());
+                    Log.e("HostId", serviceException.getHostId());
+                    Log.e("RawMessage", serviceException.getRawMessage());
+                }
+            }
+        });
     }
 }

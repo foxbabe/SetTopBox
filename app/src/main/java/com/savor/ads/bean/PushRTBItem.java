@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by zhang.haiqiang on 2018/1/10.
  */
 
-public class RTBPushItem implements Serializable {
+public class PushRTBItem implements Serializable {
     private String id;
     private long remain_time;
 
