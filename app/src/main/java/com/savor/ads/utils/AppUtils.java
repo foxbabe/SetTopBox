@@ -23,7 +23,7 @@ import android.widget.EditText;
 
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
-import com.savor.ads.bean.RTBPushItem;
+import com.savor.ads.bean.PushRTBItem;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
@@ -660,7 +660,16 @@ public class AppUtils {
             public void run() {
 
                 LogUtils.d("删除多余视频");
-
+                String path4GMedia = AppUtils.getFilePath(context, StorageFile.lottery);
+                File[] list4GFiles = new File(path4GMedia).listFiles();
+                for (File file : list4GFiles) {
+                    if (file.isFile()) {
+                        file.delete();
+                        LogUtils.d("删除文件===================" + file.getName());
+                    } else {
+                        com.savor.ads.utils.FileUtils.deleteFile(file);
+                    }
+                }
                 // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
                 if (TextUtils.isEmpty(Session.get(context).getProPeriod())) {
                     return;
@@ -1724,7 +1733,7 @@ public class AppUtils {
         ArrayList<MediaLibBean> rtbMedias = new ArrayList<>();
         ArrayList<Long> rtbEndTimes = new ArrayList<>();
         if (Session.get(context).getRTBPushItems() != null) {
-            for (RTBPushItem item : Session.get(context).getRTBPushItems()) {
+            for (PushRTBItem item : Session.get(context).getRTBPushItems()) {
                 String selection = DBHelper.MediaDBInfo.FieldName.VID + "=? ";
                 String[] selectionArgs = new String[]{item.getId()};
                 List<MediaLibBean> list = dbHelper.findRtbadsMediaLibByWhere(selection, selectionArgs);

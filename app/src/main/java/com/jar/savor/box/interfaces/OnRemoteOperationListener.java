@@ -25,6 +25,8 @@ public interface OnRemoteOperationListener {
 
     PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice);
 
+    PrepareResponseVoNew showImage(int imageType, String imageUrl,boolean isThumbnail);
+
     PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice);
 
     PrepareResponseVoNew showEgg(String date, int hunger);

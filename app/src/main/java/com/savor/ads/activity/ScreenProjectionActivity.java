@@ -2,6 +2,7 @@ package com.savor.ads.activity;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,6 +17,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.jar.savor.box.vo.PlayResponseVo;
 import com.jar.savor.box.vo.PptRequestVo;
 import com.jar.savor.box.vo.PptVideoRequestVo;
@@ -38,6 +43,7 @@ import com.savor.ads.projection.action.StopAction;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.DensityUtil;
+import com.savor.ads.utils.GlideImageLoader;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
@@ -51,6 +57,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
 
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
+    public static final String EXTRA_IMAGE_PATH = "extra_image_path";
     public static final String EXTRA_MEDIA_ID = "extra_vid";
     public static final String EXTRA_VIDEO_POSITION = "extra_video_position";
     public static final String EXTRA_IMAGE_ROTATION = "extra_image_rotation";
@@ -102,6 +109,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      * 3：幻灯片图片；
      */
     private int mImageType;
+    private String mImagePath;
     private boolean mIsNewDevice;
 
     private Handler mHandler = new Handler();
@@ -356,6 +364,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mVideoInitPosition = bundle.getInt(EXTRA_VIDEO_POSITION);
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
+        mImagePath = bundle.getString(EXTRA_IMAGE_PATH);
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
         mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
@@ -482,7 +491,15 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 }
                 mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
             }
+            if (!TextUtils.isEmpty(mImagePath)){
+//                GlideImageLoader.loadImage(mContext,mImagePath,mImageView);
+                Glide.with(mContext)
+                        .load(mImagePath)
+                        .dontAnimate()
+                        .placeholder(mImageView.getDrawable())
+                        .into(mImageView);
 
+            }
             if (mIsThumbnail) {
                 // 只有当传过来是缩略图时才去重置ImageView状态
                 mImageView.setRotation(0);

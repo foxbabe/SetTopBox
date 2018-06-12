@@ -21,6 +21,7 @@ import java.io.Serializable;
 public class ImageAction extends ProjectionActionBase implements Serializable {
     private transient Context mContext;
     private int imageType;
+    private String imagePath;
     private int rotation;
     private boolean isThumbnail;
     private String seriesId;
@@ -37,6 +38,14 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.seriesId = seriesId;
         this.isNewDevice = isNewDevice;
     }
+    public ImageAction(Context context, int imageType, String imagePath) {
+        super();
+
+        mPriority = ProjectPriority.HIGH;
+        mContext = context;
+        this.imageType = imageType;
+        this.imagePath = imagePath;
+    }
 
     @Override
     public void execute() {
@@ -45,6 +54,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         // 跳转或将参数设置到ScreenProjectionActivity
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
+        data.putString(ScreenProjectionActivity.EXTRA_IMAGE_PATH,imagePath);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);

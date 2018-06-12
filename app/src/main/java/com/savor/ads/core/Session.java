@@ -30,7 +30,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import com.savor.ads.bean.PrizeInfo;
-import com.savor.ads.bean.RTBPushItem;
+import com.savor.ads.bean.PushRTBItem;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.utils.AppUtils;
@@ -203,7 +203,7 @@ public class Session {
 	/**上次U盘更新时间*/
     private String lastUDiskUpdateTime;
 
-    private ArrayList<RTBPushItem> mRTBPushItems;
+    private ArrayList<PushRTBItem> mPushRTBItems;
     /**记录下载速度**/
 	private String netSpeed;
     private Session(Context context) {
@@ -290,7 +290,7 @@ public class Session {
         standalone = mPreference.loadBooleanKey(P_APP_STAND_ALONE,false);
         lastUDiskUpdateTime = mPreference.loadStringKey(P_APP_LAST_UDISK_UPDATE_TIME, "");
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
-        mRTBPushItems = (ArrayList<RTBPushItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
+        mPushRTBItems = (ArrayList<PushRTBItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
         netSpeed = mPreference.loadStringKey(P_APP_DOWNLOAD_NET_SPEED,"");
     }
 
@@ -1276,12 +1276,12 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_LAST_UDISK_UPDATE_TIME, lastUDiskUpdateTime));
     }
 
-    public ArrayList<RTBPushItem> getRTBPushItems() {
-        return mRTBPushItems;
+    public ArrayList<PushRTBItem> getRTBPushItems() {
+        return mPushRTBItems;
     }
 
-    public void setRTBPushItems(ArrayList<RTBPushItem> RTBPushItems) {
-        mRTBPushItems = RTBPushItems;
-        writePreference(new Pair<String, Object>(P_APP_RTB_PUSH_CONTENT, mRTBPushItems));
+    public void setRTBPushItems(ArrayList<PushRTBItem> PushRTBItems) {
+        mPushRTBItems = PushRTBItems;
+        writePreference(new Pair<String, Object>(P_APP_RTB_PUSH_CONTENT, mPushRTBItems));
     }
 }
