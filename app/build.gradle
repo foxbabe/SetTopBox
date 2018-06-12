@@ -15,8 +15,8 @@ android {
         applicationId "com.savor.ads"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 2018060504
-        versionName "1.2.8.1"
+        versionCode 2018061201
+        versionName "1.2.8.2"
 
         multiDexEnabled true
     }
@@ -70,7 +70,7 @@ android {
         production {
             dimension "savor"
             buildConfigField("String", "BASE_URL", "\"https://mobile.littlehotspot.com/\"")
-            buildConfigField("String", "BAIDU_AD_BASE_URL", "\"http://jpad.baidu.com/api_6\"")
+            buildConfigField("String", "BAIDU_AD_BASE_URL", "\"https://jpad.baidu.com/api_6\"")
             buildConfigField("String", "OSS_BUCKET_NAME", "\"redian-produce\"")
             buildConfigField("String", "OSS_ENDPOINT", "\"http://oss.littlehotspot.com/\"")
         }

@@ -1453,8 +1453,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //            session.setOss_bucket(boiteBean.getOssBucketName());
 //        }
         /**桶地址*/
-        if (!TextUtils.isEmpty(boiteBean.getAreaId())) {
-            session.setOssAreaId(boiteBean.getAreaId());
+        if (!TextUtils.isEmpty(boiteBean.getArea_id())) {
+            session.setOssAreaId(boiteBean.getArea_id());
         }
 
         // 组合小平台下发的各种版本信息
