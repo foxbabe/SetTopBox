@@ -20,7 +20,7 @@ public class BoxInitBean {
     /**包间名称*/
     private String room_name;
     /**地区ID*/
-    private String areaId;
+    private String area_id;
     /**logo地址*/
     private String logo_url;
     /**logo检验MD5*/
@@ -102,12 +102,12 @@ public class BoxInitBean {
         return room_name;
     }
 
-    public void setAreaId(String areaId) {
-        this.areaId = areaId;
+    public String getArea_id() {
+        return area_id;
     }
 
-    public String getAreaId() {
-        return areaId;
+    public void setArea_id(String area_id) {
+        this.area_id = area_id;
     }
 
     public void setLogo_url(String logo_url) {

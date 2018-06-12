@@ -144,7 +144,7 @@ public class LogUploadService {
                                             new File(archive).delete();
                                         }
                                     }
-                                }).resumableUpload();
+                                }).asyncUploadFile();
                     }
                 }
             }
@@ -204,7 +204,7 @@ public class LogUploadService {
                                                 zipFile.delete();
                                             }
                                         }
-                                    }).resumableUpload();
+                                    }).asyncUploadFile();
                         }
                     }
                 }
