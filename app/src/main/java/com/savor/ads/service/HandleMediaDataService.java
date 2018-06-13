@@ -1007,7 +1007,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             isChecked = true;
                         }
                         // 校验通过、插库
-                        if (isChecked) {
+                         if (isChecked) {
                             mediaItem.setMediaPath(path);
                             String selection = DBHelper.MediaDBInfo.FieldName.ADS_ORDER + "=? and " +
                                     DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
@@ -1138,24 +1138,37 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
                                 DBHelper.MediaDBInfo.FieldName.LOCATION_ID + "=? and " +
                                 DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
-                        String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), programAdvBean.getMenu_num()};
+
+                        String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), advPeriod};
                         List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
-                        int id = -1;
-                        if (list != null) {
+                        String[] selectionArgs2 = new String[]{bean.getType(), bean.getLocation_id(), programAdvBean.getMenu_num()};
+
+                        if (list!=null&&!list.isEmpty()){
                             if (list.size() > 1) {
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
                             } else if (list.size() == 1) {
-                                id = list.get(0).getId();
+                                dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs2);
+                            }
+                        }else{
+                            list = dbHelper.findNewPlayListByWhere(selection, selectionArgs2);
+                            int id = -1;
+                            if (list != null) {
+                                if (list.size() > 1) {
+                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs2);
+                                } else if (list.size() == 1) {
+                                    id = list.get(0).getId();
+                                }
+                            }
+                            if (id != -1) {
+                                bean.setOrder(list.get(0).getOrder());
+                                bean.setMediaPath(path);
+                                // 插库成功，downloadedCount加1
+                                if (dbHelper.insertOrUpdateNewPlayListLib(bean, id)) {
+                                    advDownloadedCount++;
+                                }
                             }
                         }
-                        if (id != -1) {
-                            bean.setOrder(list.get(0).getOrder());
-                            bean.setMediaPath(path);
-                            // 插库成功，downloadedCount加1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(bean, id)) {
-                                advDownloadedCount++;
-                            }
-                        }
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
