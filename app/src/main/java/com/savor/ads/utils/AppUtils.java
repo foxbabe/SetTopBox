@@ -658,18 +658,33 @@ public class AppUtils {
         new Thread(new Runnable() {
             @Override
             public void run() {
-
-                LogUtils.d("删除多余视频");
-                String path4GMedia = AppUtils.getFilePath(context, StorageFile.lottery);
-                File[] list4GFiles = new File(path4GMedia).listFiles();
-                for (File file : list4GFiles) {
-                    if (file.isFile()) {
-                        file.delete();
-                        LogUtils.d("删除文件===================" + file.getName());
-                    } else {
-                        com.savor.ads.utils.FileUtils.deleteFile(file);
+                try{
+                    LogUtils.d("删除多余视频");
+                    String path4GMedia = AppUtils.getFilePath(context, StorageFile.lottery);
+                    File[] list4GFiles = new File(path4GMedia).listFiles();
+                    for (File file : list4GFiles) {
+                        if (file.isFile()) {
+                            file.delete();
+                            LogUtils.d("删除文件===================" + file.getName());
+                        } else {
+                            com.savor.ads.utils.FileUtils.deleteFile(file);
+                        }
                     }
+                    //内存不足情况下删除点播视频
+                    String vodMedia = AppUtils.getFilePath(context, StorageFile.multicast);
+                    File[] vodFiles = new File(vodMedia).listFiles();
+                    for (File file : vodFiles) {
+                        if (file.isFile()) {
+                            file.delete();
+                            LogUtils.d("删除文件===================" + file.getName());
+                        } else {
+                            com.savor.ads.utils.FileUtils.deleteFile(file);
+                        }
+                    }
+                }catch (Exception e){
+                   LogUtils.e("删除视频失败",e);
                 }
+
                 // PlayListVersion为空说明没有一个完整的播放列表（初装的时候），这时不做删除操作，以免删掉了手动拷入的视频
                 if (TextUtils.isEmpty(Session.get(context).getProPeriod())) {
                     return;
