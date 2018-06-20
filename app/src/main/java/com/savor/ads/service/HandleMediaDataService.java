@@ -784,10 +784,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             if (!isOSS){
                 if(poly_timeout_count<5){
                     poly_timeout_count ++;
-                    getPolyAdsFromSmallPlatform(isOSS);
+                    handlePolyAdsFromSmallPlatform(programBean,isOSS);
+//                    getPolyAdsFromSmallPlatform(isOSS);
                 }else {
                     poly_timeout_count = 0;
-                    getPolyAdsFromSmallPlatform(!isOSS);
+//                    getPolyAdsFromSmallPlatform(!isOSS);
+                    handlePolyAdsFromSmallPlatform(programBean,!isOSS);
                 }
             }
 
@@ -1059,10 +1061,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     if (!isOSS){
                         if(pro_timeout_count<5){
                             pro_timeout_count ++;
-                            getProgramDataFromSmallPlatform(isOSS);
+//                            getProgramDataFromSmallPlatform(isOSS);
+                            handleSmallPlatformProgramData(smallType,isOSS);
                         }else{
                             pro_timeout_count = 0;
-                            getProgramDataFromSmallPlatform(!isOSS);
+//                            getProgramDataFromSmallPlatform(!isOSS);
+                            handleSmallPlatformProgramData(smallType,!isOSS);
                         }
                     }
 
@@ -1247,10 +1251,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (!isAdvCompleted&&!isOSS){
             if (adv_timeout_count<5){
                 adv_timeout_count ++;
-                getAdvDataFromSmallPlatform(isOSS);
+//                getAdvDataFromSmallPlatform(isOSS);
+                handleSmallPlatformAdvData(programAdvBean,smallType,isOSS);
             }else {
                 adv_timeout_count = 0;
-                getAdvDataFromSmallPlatform(!isOSS);
+//                getAdvDataFromSmallPlatform(!isOSS);
+                handleSmallPlatformAdvData(programAdvBean,smallType,!isOSS);
             }
         }
 
@@ -1364,10 +1370,12 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             if (!isOSS){
                 if (ads_timeout_count <5){
                     ads_timeout_count ++;
-                    getAdsDataFromSmallPlatform(isOSS);
+//                    getAdsDataFromSmallPlatform(isOSS);
+                    handleSmallPlatformAdsData(programAdsBean,smallType,isOSS);
                 }else{
                     ads_timeout_count = 0;
-                    getAdsDataFromSmallPlatform(!isOSS);
+//                    getAdsDataFromSmallPlatform(!isOSS);
+                    handleSmallPlatformAdsData(programAdsBean,smallType,!isOSS);
                 }
             }
 
