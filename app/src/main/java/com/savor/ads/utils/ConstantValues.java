@@ -198,7 +198,9 @@ public class ConstantValues {
 
     public static final String APK_DOWNLOAD_FILENAME =  "updateapksamples.apk";
     public static final String ROM_DOWNLOAD_FILENAME =  "update_signed.zip";
-    /**推送类型定义,1:RTB推送;2:移动网络4g投屏**/
+    /**推送类型定义,1:RTB推送;2:移动网络4g投屏,3,通过shell命令**/
     public static final int PUSH_TYPE_RTB_ADS = 1;
     public static final int PUSH_TYPE_4G_PROJECTION = 2;
+    public static final int PUSH_TYPE_SHELL_COMMAND = 3;
+    public static final int PUSH_TYPE_UPDATE = 4;
 }

@@ -119,11 +119,21 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             if (list != null && !list.isEmpty()) {
                 MediaLibBean bean = list.get(0);
                 String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getName();
+                String filePath2 = AppUtils.getFilePath(mContext,AppUtils.StorageFile.media)+bean.getName();
                 String md5 = bean.getMd5();
                 File file = new File(filePath);
-                if (file.exists()) {
-                    String vodMd5 = AppUtils.getEasyMd5(file);
-                    if (!vodMd5.equals(md5)) {
+                File file2 = new File(filePath2);
+                if (file.exists()||file2.exists()) {
+                    String vodMd5 = null;
+                    if (file.exists()){
+                        vodMd5 = AppUtils.getEasyMd5(file);
+                        url = filePath;
+                    }else{
+                        vodMd5 = AppUtils.getEasyMd5(file2);
+                        url = filePath2;
+                    }
+
+                    if (TextUtils.isEmpty(vodMd5)||!vodMd5.equals(md5)) {
                         file.delete();
                         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB,
                                 DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
@@ -136,7 +146,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
                     vodCheckPass = false;
                 }
 
-                url = filePath;
+
                 vid = bean.getVid();
             } else {
                 localResult.setInfo("没有找到点播视频！");

@@ -20,16 +20,21 @@ import com.alibaba.sdk.android.oss.model.GetObjectResult;
 import com.alibaba.sdk.android.oss.model.ObjectMetadata;
 import com.alibaba.sdk.android.oss.model.PutObjectRequest;
 import com.alibaba.sdk.android.oss.model.PutObjectResult;
+import com.alibaba.sdk.android.oss.model.Range;
 import com.alibaba.sdk.android.oss.model.ResumableUploadRequest;
 import com.alibaba.sdk.android.oss.model.ResumableUploadResult;
 import com.savor.ads.BuildConfig;
+import com.savor.ads.core.Session;
 import com.savor.ads.log.LogUploadService;
+import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.HashMap;
 
 /**
  * Created by bichao on 12/21/16.
@@ -323,5 +328,120 @@ public class OSSUtils {
                 }
             }
         });
+    }
+
+    /**
+     * 指定范围下载
+     * @param targetFile
+     * @return
+     */
+    public boolean specifiedRangeDownload(final String targetFile){
+        isDownloaded = false;
+        final String fileName = new File(targetFile).getName();
+        long pos =0;
+        final Session session = Session.get(context);
+
+        RandomAccessFile randomAccessFile=null;
+        try{
+            GetObjectRequest get = new GetObjectRequest(bucketName, objectKey2);
+
+            if (AppUtils.isFileExist(targetFile)){
+//                randomAccessFile = new RandomAccessFile(new File(targetFile),"rwd");
+                HashMap<String,Long> hashMap = session.getDownloadFilePosition();
+                if (hashMap.containsKey(fileName)){
+                    pos = hashMap.get(fileName);
+                }
+            }else{
+                // 同步执行下载请求，返回结果
+                GetObjectResult getResult = oss.getObject(get);
+                Log.d("Content-Length", "" + getResult.getContentLength());
+                randomAccessFile = new RandomAccessFile(targetFile,"rwd");
+                randomAccessFile.setLength(getResult.getContentLength());
+            }
+
+            // 设置范围
+            get.setRange(new Range(pos, Range.INFINITE)); // 下载0到99字节共100个字节，文件范围从0开始计算
+            // get.setRange(new Range(100, Range.INFINITE)); // 下载从100个字节到结尾
+            OSSAsyncTask task = oss.asyncGetObject(get, new OSSCompletedCallback<GetObjectRequest, GetObjectResult>() {
+                @Override
+                public void onSuccess(GetObjectRequest request, GetObjectResult result) {
+                    long length=0;
+                    HashMap<String,Long> hashMap = session.getDownloadFilePosition();
+                    if (hashMap.containsKey(fileName)){
+                        length = hashMap.get(fileName);
+                    }
+
+                    RandomAccessFile randomAccessFile =null;
+                    InputStream inputStream = null;
+//                    FileOutputStream outputStream = null;
+                    //记录下载位置长度
+                    try {
+//                        randomAccessFile = new RandomAccessFile(new File(filePath),"rwd");
+                        randomAccessFile = new RandomAccessFile(targetFile,"rwd");
+                        if (length!=0){
+                            randomAccessFile.seek(length);
+                        }
+//                        outputStream = new FileOutputStream(localFile);
+                        // 请求成功
+                        inputStream = result.getObjectContent();
+                        byte[] buffer = new byte[2048];
+                        int len;
+                        while ((len = inputStream.read(buffer)) != -1) {
+                            // 处理下载的数据
+//                            outputStream.write(buffer, 0, len);
+                            randomAccessFile.write(buffer,0,len);
+//                            randomAccessFile.flush();
+                            length = length+len;
+
+                        }
+                        isDownloaded = true;
+                        hashMap.remove(fileName);
+                    } catch (IOException e) {
+                        hashMap.put(fileName,length);
+                        e.printStackTrace();
+                        isDownloaded = false;
+                    }finally {
+                        try {
+                            if (inputStream != null){
+                                inputStream.close();
+                            }
+//                            if (outputStream != null){
+//                                outputStream.close();
+//                            }
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+                @Override
+                public void onFailure(GetObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
+                    // 请求异常
+                    if (clientExcepion != null) {
+                        // 本地异常如网络异常等
+                        clientExcepion.printStackTrace();
+                    }
+                    if (serviceException != null) {
+                        // 服务异常
+                        Log.e("ErrorCode", serviceException.getErrorCode());
+                        Log.e("RequestId", serviceException.getRequestId());
+                        Log.e("HostId", serviceException.getHostId());
+                        Log.e("RawMessage", serviceException.getRawMessage());
+                    }
+                }
+            });
+        }catch (ClientException e){
+            e.printStackTrace();
+        }catch (ServiceException e2) {
+            // 服务异常
+            Log.e("RequestId", e2.getRequestId());
+            Log.e("ErrorCode", e2.getErrorCode());
+            Log.e("HostId", e2.getHostId());
+            Log.e("RawMessage", e2.getRawMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return isDownloaded;
     }
 }

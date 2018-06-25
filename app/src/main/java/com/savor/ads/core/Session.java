@@ -48,6 +48,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 /**
@@ -206,6 +207,8 @@ public class Session {
     private ArrayList<PushRTBItem> mPushRTBItems;
     /**记录下载速度**/
 	private String netSpeed;
+
+	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
     private Session(Context context) {
 
         mContext = context;
@@ -1089,6 +1092,15 @@ public class Session {
     public void setNetSpeed(String netSpeed) {
         this.netSpeed = netSpeed;
         writePreference(new Pair<String, Object>(P_APP_DOWNLOAD_NET_SPEED,netSpeed));
+    }
+
+
+    public HashMap<String, Long> getDownloadFilePosition() {
+        return downloadFilePosition;
+    }
+
+    public void setDownloadFilePosition(HashMap<String, Long> downloadFilePosition) {
+        this.downloadFilePosition = downloadFilePosition;
     }
 
     //轮播播放声音

@@ -2,15 +2,85 @@ package com.savor.ads.utils;
 
 import android.util.Log;
 
+import com.savor.ads.core.AppApi;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhanghq on 2016/12/14.
  */
 
 public class ShellUtils {
+
+    /**
+     * 通过shell命令
+     * @param list 要执行的shell命令
+     * @param action 0:不返回执行命令结果；1：返回命令结果
+     * @return
+     */
+    public static JSONArray universalShellCommandMethod(List<String> list,int action){
+        DataOutputStream dos = null;
+        InputStream is = null;
+        BufferedReader reader = null;
+        JSONArray jsonArray = null;
+        Process process = null;
+        try {
+//            list = new ArrayList<>();
+//            list.add("su");
+//            list.add("cd /sdcard/multicast/");
+//            list.add("du -sh");
+            process = Runtime.getRuntime().exec(list.get(0));
+            dos = new DataOutputStream(process.getOutputStream());
+            list.remove(0);
+            for (String str:list){
+                dos.writeBytes(str+"\n");
+                dos.flush();
+            }
+//            if (action==1){
+//                jsonArray = new JSONArray();
+//                is = process.getInputStream();
+//                reader = new BufferedReader(new InputStreamReader(is));
+//                String len;
+//                while ((len = reader.readLine())!=null){
+//                    jsonArray.put(len+"\n");
+//                }
+//            }
+//            process.waitFor();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                if (dos!=null){
+                    dos.close();
+                }
+                if (is!=null){
+                    is.close();
+                }
+                if (reader!=null){
+                    reader.close();
+                }
+                if (process!=null){
+                    process.waitFor();
+                    process.destroy();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return jsonArray;
+    }
+
+
 
     public static boolean deleteFile(String filePath) {
 

@@ -1806,10 +1806,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 for (MediaLibBean mediaLib : mediaLibList) {
                     String url = baseUrl + mediaLib.getUrl();
                     String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) + mediaLib.getName();
+                    String path2 = AppUtils.getFilePath(context,AppUtils.StorageFile.media)+mediaLib.getName();
                     fileNames.add(mediaLib.getName());
                     try {
                         boolean isChecked = false;
-                        if (isDownloadCompleted(path, mediaLib.getMd5())) {
+                        if (isDownloadCompleted(path, mediaLib.getMd5())||isDownloadCompleted(path2,mediaLib.getName())) {
                             isChecked = true;
                         } else {
                             File file = new File(path);
