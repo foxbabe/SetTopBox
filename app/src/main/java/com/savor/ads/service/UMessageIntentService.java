@@ -3,6 +3,8 @@ package com.savor.ads.service;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -24,6 +26,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShellUtils;
+import com.savor.ads.utils.ShowMessage;
 import com.savor.ads.utils.UpdateUtil;
 import com.umeng.message.UmengMessageService;
 import com.umeng.message.entity.UMessage;
@@ -126,6 +129,13 @@ public class UMessageIntentService extends UmengMessageService {
                     if (upgradeInfo==null){
                         return;
                     }
+                    Handler handler=new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable(){
+                        public void run(){
+                            ShowMessage.showToast(getApplicationContext(),"推送新版本，开始下载，准备升级");
+                        }
+                    });
+
                     downloadApk(context);
                 }
             }
