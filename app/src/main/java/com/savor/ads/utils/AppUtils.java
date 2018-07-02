@@ -670,17 +670,6 @@ public class AppUtils {
                             com.savor.ads.utils.FileUtils.deleteFile(file);
                         }
                     }
-                    //内存不足情况下删除点播视频
-                    String vodMedia = AppUtils.getFilePath(context, StorageFile.multicast);
-                    File[] vodFiles = new File(vodMedia).listFiles();
-                    for (File file : vodFiles) {
-                        if (file.isFile()) {
-                            file.delete();
-                            LogUtils.d("删除文件===================" + file.getName());
-                        } else {
-                            com.savor.ads.utils.FileUtils.deleteFile(file);
-                        }
-                    }
                 }catch (Exception e){
                    LogUtils.e("删除视频失败",e);
                 }
@@ -724,6 +713,33 @@ public class AppUtils {
             }
         }).start();
     }
+
+    public static void deleteMulticastMedia(final Context context) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    LogUtils.d("删除点播视频");
+
+                    //内存不足情况下删除点播视频
+                    String vodMedia = AppUtils.getFilePath(context, StorageFile.multicast);
+                    File[] vodFiles = new File(vodMedia).listFiles();
+                    for (File file : vodFiles) {
+                        if (file.isFile()) {
+                            file.delete();
+                            LogUtils.d("删除文件===================" + file.getName());
+                        } else {
+                            com.savor.ads.utils.FileUtils.deleteFile(file);
+                        }
+                    }
+                }catch (Exception e){
+                    LogUtils.e("删除视频失败",e);
+                }
+
+            }
+        }).start();
+    }
+
 
     public static void clearPptTmpFiles(final Context context) {
         new Thread(new Runnable() {

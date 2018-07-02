@@ -183,7 +183,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                         LogFileUtil.write("HandleMediaDataService will check space available");
                         // 检测剩余存储空间
-                        if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                        if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE/2) {
                             // 存储空间不足
                             LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
 
@@ -260,7 +260,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
         AppUtils.deleteOldMedia(this);
-
+        AppUtils.deleteMulticastMedia(this);
         AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
     }
 

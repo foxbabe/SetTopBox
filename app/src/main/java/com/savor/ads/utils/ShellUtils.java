@@ -35,10 +35,6 @@ public class ShellUtils {
         JSONArray jsonArray = null;
         Process process = null;
         try {
-//            list = new ArrayList<>();
-//            list.add("su");
-//            list.add("cd /sdcard/multicast/");
-//            list.add("du -sh");
             process = Runtime.getRuntime().exec(list.get(0));
             dos = new DataOutputStream(process.getOutputStream());
             list.remove(0);
