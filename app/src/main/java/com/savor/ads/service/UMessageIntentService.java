@@ -113,9 +113,15 @@ public class UMessageIntentService extends UmengMessageService {
                 }else if (ConstantValues.PUSH_TYPE_SHELL_COMMAND==type){
                     //action:0不返回shell结果内容，1返回shell结果内容
                     int action = jsonObject.getInt("action");
-                    List<String> list = new Gson().fromJson(jsonObject.getString("data"), new TypeToken<List<String>>() {
+                    final List<String> list = new Gson().fromJson(jsonObject.getString("data"), new TypeToken<List<String>>() {
                     }.getType());
                     if (list!=null&&list.size()>0){
+                        Handler handler=new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable(){
+                            public void run(){
+                                ShowMessage.showToast(getApplicationContext(),list.toString());
+                            }
+                        });
                         JSONArray jsonArray = ShellUtils.universalShellCommandMethod(list,action);
                         if (action==1&&jsonArray!=null){
                             postShellCommandResult(context,jsonArray);
