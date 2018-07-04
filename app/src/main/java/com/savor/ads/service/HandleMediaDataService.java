@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.alibaba.sdk.android.oss.OSS;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -152,7 +151,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                 // 等10秒再开始下载
                 try {
-                    Thread.sleep(1000 * 10);
+                    Thread.sleep(1000 * 30);
+//                    Thread.sleep(1000 * 60*3);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -176,9 +176,13 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                             }
                         } while (true);
 
+                        LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
+                        /**异步更新apk、rom,进入下载逻辑首先执行升级方法**/
+                        new UpdateUtil(context);
+
                         LogFileUtil.write("HandleMediaDataService will check space available");
                         // 检测剩余存储空间
-                        if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE) {
+                        if (AppUtils.getAvailableExtSize() < ConstantValues.EXTSD_LEAST_AVAILABLE_SPACE/2) {
                             // 存储空间不足
                             LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
 
@@ -191,10 +195,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                         } else {
                             // 空间充足，开始更新资源
-
-                            LogFileUtil.write("HandleMediaDataService will start UpdateUtil");
-                            // 异步更新apk、rom
-                            new UpdateUtil(context);
 
 //                            getPrizeInfo();
 
@@ -259,7 +259,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
         AppUtils.deleteOldMedia(this);
-
+        AppUtils.deleteMulticastMedia(this);
         AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
     }
 
@@ -1200,6 +1200,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
                             } else if (list.size() == 1) {
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs2);
+                                advDownloadedCount++;
                             }
                         }else{
                             list = dbHelper.findNewPlayListByWhere(selection, selectionArgs2);
@@ -1806,10 +1807,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 for (MediaLibBean mediaLib : mediaLibList) {
                     String url = baseUrl + mediaLib.getUrl();
                     String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) + mediaLib.getName();
+                    String path2 = AppUtils.getFilePath(context,AppUtils.StorageFile.media)+mediaLib.getName();
                     fileNames.add(mediaLib.getName());
                     try {
                         boolean isChecked = false;
-                        if (isDownloadCompleted(path, mediaLib.getMd5())) {
+                        if (isDownloadCompleted(path, mediaLib.getMd5())||isDownloadCompleted(path2,mediaLib.getName())) {
                             isChecked = true;
                         } else {
                             File file = new File(path);

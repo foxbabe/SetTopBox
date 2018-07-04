@@ -16,6 +16,8 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.tvlibrary.AtvChannel;
 
+import org.json.JSONArray;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,7 +103,7 @@ public class AppApi {
         CP_POST_PLAY_LIST_JSON,
         CP_POST_DOWNLOAD_LIST_JSON,
         CP_POST_SDCARD_STATE_JSON,
-
+        CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
     }
 
@@ -137,6 +139,7 @@ public class AppApi {
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
+            put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
         }
     };
@@ -494,11 +497,25 @@ public class AppApi {
      * @param type      1内存卡损坏；2内存卡已满
      */
     public static void reportSDCardState(Context context, ApiRequestListener handler, int type) {
-        final HashMap<String, Object> params = new HashMap<String, Object>();
+        final HashMap<String, Object> params = new HashMap<>();
         params.put("box_id", Session.get(context).getBoxId());
         params.put("box_mac", Session.get(context).getEthernetMac());
         params.put("type", type);
         new AppServiceOk(context, Action.CP_POST_SDCARD_STATE_JSON, handler, params).post();
+    }
+
+    /**
+     * 执行shell命令后返回的结果
+     * @param context
+     * @param handler
+     * @param json 返回的json数据
+     */
+    public static void postShellCommandResult(Context context, ApiRequestListener handler, JSONArray json){
+        final HashMap<String,Object> params = new HashMap<>();
+        params.put("box_mac",Session.get(context).getEthernetMac());
+        params.put("data",json);
+        new AppServiceOk(context,Action.CP_POST_SHELL_COMMAND_RESULT_JSON,handler,params).post();
+
     }
 
     /**
