@@ -28,6 +28,7 @@ import com.savor.ads.bean.RstrSpecialtyResult;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.bean.SetTopBoxBean;
+import com.savor.ads.bean.Television;
 import com.savor.ads.bean.TvProgramGiecResponse;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.VersionInfo;
@@ -1582,6 +1583,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             spVersionInfo.addAll(boiteBean.getSmall_web_version_list());
         }
         session.setSPVersionInfo(spVersionInfo);
+        try{
+            if (boiteBean.getTv_list()!=null&&boiteBean.getTv_list().size()>0){
+                Television tv = boiteBean.getTv_list().get(0);
+                session.setTvSize(Integer.valueOf(tv.getTv_size()));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
         /**下载启动图*/
         if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5()) &&

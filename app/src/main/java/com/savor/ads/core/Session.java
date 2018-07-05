@@ -185,7 +185,8 @@ public class Session {
     private String mLoadingPath;
     /** 小平台中的所有版本号期号等信息*/
     private ArrayList<VersionInfo> mSPVersionInfo;
-
+    /**电视机尺寸**/
+    private int tvSize;
     /** 启动图版本*/
     private String mSplashVersion;
     /** 加载图版本*/
@@ -281,6 +282,7 @@ public class Session {
         mSplashVersion = mPreference.loadStringKey(P_APP_SPLASH_VERSION, "");
         mLoadingVersion = mPreference.loadStringKey(P_APP_LOADING_VERSION, "");
         mSPVersionInfo = (ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_SP_VERSION_INFO, ""));
+        tvSize = mPreference.loadIntKey(P_APP_TV_SIZE,0);
         // 以下三个方法目前作为新老期号存储方式过渡使用
         setPlayListVersion((ArrayList<VersionInfo>)StringToObject(mPreference.loadStringKey(P_APP_PLAY_LIST_VERSION, "")));
         setDownloadingPlayListVersion((ArrayList<VersionInfo>) StringToObject(mPreference.loadStringKey(P_APP_DOWNLOADING_PLAY_LIST_VERSION, "")));
@@ -380,7 +382,8 @@ public class Session {
                 P_APP_TV_VOLUME.equals(key) ||
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
-                P_APP_SWITCHTIME.equals(key)) {
+                P_APP_SWITCHTIME.equals(key) ||
+                P_APP_TV_SIZE.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
         } else if (P_APP_USE_VIRTUAL_SP.equals(key)||
                 P_APP_STAND_ALONE.equals(key)) {
@@ -644,6 +647,14 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_SP_VERSION_INFO, mSPVersionInfo));
     }
 
+    public int getTvSize() {
+        return tvSize;
+    }
+
+    public void setTvSize(int tvSize) {
+        this.tvSize = tvSize;
+        writePreference(new Pair<String, Object>(P_APP_TV_SIZE, tvSize));
+    }
 
     public int getVolume() {
         return volume;
@@ -1187,6 +1198,7 @@ public class Session {
     public static final String P_APP_LOADING_VERSION = "com.savor.ads.loadingVersion";
     //小平台中的各种版本信息key
     public static final String P_APP_SP_VERSION_INFO = "com.savor.ads.spVersionInfo";
+    public static final String P_APP_TV_SIZE = "com.savor.ads.tvSize";
     // 奖项设置key
     public static final String P_APP_PRIZE_INFO = "com.savor.ads.prizeInfo";
     // 是否使用虚拟小平台key

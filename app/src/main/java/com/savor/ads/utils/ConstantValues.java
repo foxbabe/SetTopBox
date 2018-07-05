@@ -185,8 +185,16 @@ public class ConstantValues {
 
     /**百度聚屏APP ID*/
     public static final String BAIDU_ADS_APP_ID = "ce124b3c";
-    /**百度聚屏代码位ID*/
-    public static final String BAIDU_ADSLOT_ID = "5592208";
+    /**百度聚屏代码位ID-小热点餐厅包间电视小于40寸*/
+    public static final String BAIDU_ADSLOT_ID1 = "5821973";
+    /**百度聚屏代码位ID-小热点餐厅包间电视41-45寸*/
+    public static final String BAIDU_ADSLOT_ID2 = "5822033";
+    /**百度聚屏代码位ID-小热点餐厅包间电视46-50寸*/
+    public static final String BAIDU_ADSLOT_ID3 = "5822038";
+    /**百度聚屏代码位ID-小热点餐厅包间电视51-55寸*/
+    public static final String BAIDU_ADSLOT_ID4 = "5822040";
+    /**百度聚屏代码位ID-小热点餐厅包间电视55寸以上*/
+    public static final String BAIDU_ADSLOT_ID5 = "5822044";
     /**百度聚屏最大连续重复次数*/
     public static final int MAX_BAIDU_ADS_REPEAT_COUNT = 5;
     /**百度聚屏连续重复达上限后，阻塞接下来的请求的次数*/

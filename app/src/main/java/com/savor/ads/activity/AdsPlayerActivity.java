@@ -235,7 +235,17 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         try {
             uuid = ByteString.copyFrom(UUID.randomUUID().toString().replace("-", ""), "utf-8");
             appId = ByteString.copyFrom(ConstantValues.BAIDU_ADS_APP_ID, "utf-8");
-            adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID, "utf-8");
+            if (mSession.getTvSize()>0&&mSession.getTvSize()<=40){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID1, "utf-8");
+            }else if (mSession.getTvSize()>40&&mSession.getTvSize()<=45){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID2, "utf-8");
+            }else if (mSession.getTvSize()>45&&mSession.getTvSize()<=50){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID3, "utf-8");
+            }else if (mSession.getTvSize()>50&&mSession.getTvSize()<=55){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID4, "utf-8");
+            }else if (mSession.getTvSize()>55){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID5, "utf-8");
+            }
             mac = ByteString.copyFrom(mSession.getEthernetMacWithColon(), "utf-8");
             model = ByteString.copyFrom(mSession.getModel(), "utf-8");
             brand = ByteString.copyFrom(mSession.getBrand(), "utf-8");
@@ -243,7 +253,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
+        if (adslotId==null){
+            return;
+        }
         TsUiApiV20171122.TsApiRequest request = TsUiApiV20171122.TsApiRequest.newBuilder()
                 .setRequestId(uuid)
                 .setApiVersion(TsUiApiV20171122.Version.newBuilder()
