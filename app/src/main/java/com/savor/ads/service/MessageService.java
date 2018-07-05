@@ -12,6 +12,8 @@ import com.savor.ads.activity.MainActivity;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+
+import cn.savor.small.netty.MiniProNettyClient;
 import cn.savor.small.netty.NettyClient;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
@@ -25,7 +27,7 @@ import io.netty.bootstrap.Bootstrap;
  * 启动Netty服务
  * Created by bichao on 2016/12/08.
  */
-public class MessageService extends IntentService implements NettyClient.NettyMessageCallback {
+public class MessageService extends IntentService implements NettyClient.NettyMessageCallback,MiniProNettyClient.MiniNettyMsgCallback {
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
@@ -72,6 +74,10 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
                 LogUtils.d("MessageService serverInfo != null");
                 NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, /*Session.get(this).getEthernetMac()*/ getApplicationContext());
                 NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap()));
+
+
+                MiniProNettyClient.init(8010,"172.16.1.108",this,getApplicationContext());
+                MiniProNettyClient.get().connect(MiniProNettyClient.get().configureBootstrap(new Bootstrap()));
             } else {
                 LogUtils.d("MessageService serverInfo == null");
             }
@@ -165,4 +171,40 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
             }
         }
     }
+
+
+    @Override
+    public void onReceiveMiniServerMsg(String msg, String content) {
+        if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
+
+        }
+    }
+
+    @Override
+    public void onMiniConnected() {
+
+    }
+
+    @Override
+    public void onMiniReconnect() {
+
+    }
+
+
+    ApiRequestListener apiRequestListener = new ApiRequestListener() {
+        @Override
+        public void onSuccess(AppApi.Action method, Object obj) {
+
+        }
+
+        @Override
+        public void onError(AppApi.Action method, Object obj) {
+
+        }
+
+        @Override
+        public void onNetworkFailed(AppApi.Action method) {
+
+        }
+    };
 }

@@ -61,11 +61,18 @@ import io.netty.handler.timeout.IdleStateEvent;
 @ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean> {
     private NettyClient.NettyMessageCallback callback;
+    private MiniProNettyClient.MiniNettyMsgCallback miniCallback;
     private Session session;
     private Context mContext;
 
     public NettyClientHandler(NettyClient.NettyMessageCallback m, Context context) {
         this.callback = m;
+        this.mContext = context;
+        this.session = Session.get(context);
+    }
+
+    public NettyClientHandler(MiniProNettyClient.MiniNettyMsgCallback m, Context context) {
+        this.miniCallback = m;
         this.mContext = context;
         this.session = Session.get(context);
     }
@@ -146,6 +153,9 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         // 停止投屏
                         LogUtils.d("Netty command: stop projection " + params);
                         handleStopProjection(params, response);
+                    }else if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(order)){
+                        LogUtils.d("Netty command: show mini program " + params);
+
                     }
                 }
                 ctx.writeAndFlush(response);

@@ -55,6 +55,10 @@ public class ConstantValues {
     public static final String NETTY_SHOW_ADV_COMMAND = "call-adv";
 
     /**
+     * 小程序指令
+     */
+    public static final String NETTY_MINI_PROGRAM_COMMAND = "call-mini-program";
+    /**
      * 投屏类型:图片
      */
     public static final String PROJECT_TYPE_PICTURE = "pic";
