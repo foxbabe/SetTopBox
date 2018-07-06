@@ -54,8 +54,9 @@ public class ConstantValues {
      */
     public static final String NETTY_SHOW_ADV_COMMAND = "call-adv";
 
+    public static final String NETTY_MINI_TDC_COMMAND = "call-mini-tdc";
     /**
-     * 小程序指令
+     * 小程序指令-下载
      */
     public static final String NETTY_MINI_PROGRAM_COMMAND = "call-mini-program";
     /**

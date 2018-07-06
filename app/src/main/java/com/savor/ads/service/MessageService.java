@@ -21,6 +21,9 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.netty.bootstrap.Bootstrap;
 
 /**
@@ -176,13 +179,28 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
     @Override
     public void onReceiveMiniServerMsg(String msg, String content) {
         if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
+            if (!TextUtils.isEmpty(content)){
+                try {
+                    JSONObject jsonObject = new JSONObject(content);
+                    int action = jsonObject.getInt("action");
+                    if (action==1){
 
+                    }else if(action==2){
+
+                    }else if (action==3){
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 
     @Override
     public void onMiniConnected() {
-
+        //TODO:当建立NETTY连接以后请求接口获取小程序地址
     }
 
     @Override

@@ -89,7 +89,7 @@ public class MiniProNettyClient {
                         ch.pipeline().addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
                         //设置发送消息编码器
                         ch.pipeline().addLast(new ObjectEncoder());
-                        ch.pipeline().addLast(new NettyClientHandler(callback, mContext));
+                        ch.pipeline().addLast(new MiniProNettyClientHandler(callback, mContext));
                     }
                 });
 
