@@ -712,7 +712,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                                         BaiduAdLocalBean bean = new BaiduAdLocalBean(list.get(0));
                                         bean.setMediaRemotePath(material.getVideoUrl());
                                         bean.setWinNoticeUrlList(ad.getWinNoticeUrlList());
-                                        bean.setThirdMonitorUrlList(ad.getThirdMonitorUrlList());
+                                        if (ad.getThirdMonitorUrlList()!=null&&ad.getThirdMonitorUrlList().size()>0){
+                                            bean.setThirdMonitorUrlList(ad.getThirdMonitorUrlList());
+                                        }
                                         bean.setExpireTime(tsApiResponse.getExpirationTime());
 
                                         baiduAdList.add(bean);
