@@ -28,6 +28,7 @@ import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.service.MiniProgramNettyService;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.BaiduAdsResponseCode;
 import com.savor.ads.utils.ConstantValues;
@@ -36,6 +37,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
 import com.savor.ads.utils.RetryHandler;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
@@ -60,7 +62,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
-
+    private MiniProgramQrCodeWindowManager miniProgramQrCodeWindowManager;
     private ArrayList<T> mPlayList;
     private String mListPeriod;
     private boolean mNeedUpdatePlaylist;
@@ -293,8 +295,30 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 }
             }, 1000 * DELAY_TIME);
         }
+        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager();
+        startMiniProgramNettyService();
     }
 
+    private void startMiniProgramNettyService(){
+        LogFileUtil.write("MainActivity will startMiniProgramNettyService");
+        Intent intent = new Intent(this, MiniProgramNettyService.class);
+        startService(intent);
+    }
+
+
+    /**
+     * 显示小程序二维码
+     */
+    public void showMiniProgramQrCodeWindow() {
+
+//        boolean isContain = ActivitiesManager.getInstance().contains(AdsPlayerActivity.class);
+//        if (isContain){
+//
+//        }
+        LogUtils.i("showMiniProgramQrCodeWindow..................");
+        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+        miniProgramQrCodeWindowManager.showQrCode(this,url);
+    }
 
     @Override
     protected void onStart() {
@@ -753,7 +777,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 tarFile.delete();
             }
             if (!TextUtils.isEmpty(adMasterResult.getFile())) {
-                AppApi.downloadLoadingImg(adMasterResult.getFile(), mContext, this, path);
+                AppApi.downloadImg(adMasterResult.getFile(), mContext, this, path);
             }
         }
 

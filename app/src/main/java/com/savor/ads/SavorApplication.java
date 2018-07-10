@@ -1,5 +1,6 @@
 package com.savor.ads;
 
+import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -10,12 +11,14 @@ import android.util.Log;
 
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
+import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.ResponseErrorMessage;
 import com.savor.ads.core.Session;
 import com.savor.ads.service.UMessageIntentService;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
@@ -24,6 +27,7 @@ import com.savor.ads.utils.KeyCodeConstant;
 import com.savor.ads.utils.KeyCodeConstantGiec;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
 import com.savor.ads.utils.QrCodeWindowManager;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
@@ -38,6 +42,7 @@ import java.io.File;
 public class SavorApplication extends MultiDexApplication implements ApiRequestListener {
 
     private QrCodeWindowManager mQrCodeWindowManager;
+    private MiniProgramQrCodeWindowManager miniProgramQrCodeWindowManager;
     private ServiceConnection mConnection;
 
     @Override
@@ -51,6 +56,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
         mappingKeyCode();
 
         mQrCodeWindowManager = new QrCodeWindowManager();
+        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager();
         // 启动投屏类操作处理的Service
 //        startScreenProjectionService();
 
@@ -323,6 +329,19 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
         mQrCodeWindowManager.showQrCode(this, code);
     }
 
+    /**
+     * 显示小程序二维码
+     */
+    public void showMiniProgramQrCodeWindow() {
+
+//        boolean isContain = ActivitiesManager.getInstance().contains(AdsPlayerActivity.class);
+//        if (isContain){
+//
+//        }
+        LogUtils.i("showMiniProgramQrCodeWindow..................");
+        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+        miniProgramQrCodeWindowManager.showQrCode(this,url);
+    }
 
     private void startScreenProjectionService() {
         mConnection = ServiceUtil.registerService(ProjectOperationListener.getInstance(this));

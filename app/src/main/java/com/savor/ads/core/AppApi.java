@@ -105,6 +105,7 @@ public class AppApi {
         CP_POST_SDCARD_STATE_JSON,
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
+        CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON
     }
 
 
@@ -141,6 +142,7 @@ public class AppApi {
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
+            put(Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
         }
     };
 
@@ -293,7 +295,7 @@ public class AppApi {
         new AppServiceOk(context, Action.SP_GET_LOGO_DOWN, handler, params).downLoad(url, filePath);
     }
 
-    public static void downloadLoadingImg(String url,Context context, ApiRequestListener handler,String filePath){
+    public static void downloadImg(String url,Context context, ApiRequestListener handler,String filePath){
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
     }

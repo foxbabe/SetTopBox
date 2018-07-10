@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 
+import com.savor.ads.BuildConfig;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.activity.MainActivity;
@@ -24,13 +25,15 @@ import com.savor.ads.utils.LogUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 import io.netty.bootstrap.Bootstrap;
 
 /**
  * 启动Netty服务
  * Created by bichao on 2016/12/08.
  */
-public class MessageService extends IntentService implements NettyClient.NettyMessageCallback,MiniProNettyClient.MiniNettyMsgCallback {
+public class MessageService extends IntentService implements NettyClient.NettyMessageCallback {
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
@@ -78,9 +81,6 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
                 NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, /*Session.get(this).getEthernetMac()*/ getApplicationContext());
                 NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap()));
 
-
-                MiniProNettyClient.init(8010,"172.16.1.108",this,getApplicationContext());
-                MiniProNettyClient.get().connect(MiniProNettyClient.get().configureBootstrap(new Bootstrap()));
             } else {
                 LogUtils.d("MessageService serverInfo == null");
             }
@@ -176,53 +176,4 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
     }
 
 
-    @Override
-    public void onReceiveMiniServerMsg(String msg, String content) {
-        if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
-            if (!TextUtils.isEmpty(content)){
-                try {
-                    JSONObject jsonObject = new JSONObject(content);
-                    int action = jsonObject.getInt("action");
-                    if (action==1){
-
-                    }else if(action==2){
-
-                    }else if (action==3){
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-    }
-
-    @Override
-    public void onMiniConnected() {
-        //TODO:当建立NETTY连接以后请求接口获取小程序地址
-    }
-
-    @Override
-    public void onMiniReconnect() {
-
-    }
-
-
-    ApiRequestListener apiRequestListener = new ApiRequestListener() {
-        @Override
-        public void onSuccess(AppApi.Action method, Object obj) {
-
-        }
-
-        @Override
-        public void onError(AppApi.Action method, Object obj) {
-
-        }
-
-        @Override
-        public void onNetworkFailed(AppApi.Action method) {
-
-        }
-    };
 }
