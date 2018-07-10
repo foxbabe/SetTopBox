@@ -492,7 +492,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
             }
             if (!TextUtils.isEmpty(mImagePath)){
-//                GlideImageLoader.loadImage(mContext,mImagePath,mImageView);
+
                 Glide.with(mContext)
                         .load(mImagePath)
                         .dontAnimate()

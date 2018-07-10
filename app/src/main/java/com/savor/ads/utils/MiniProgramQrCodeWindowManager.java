@@ -42,8 +42,8 @@ public class MiniProgramQrCodeWindowManager {
 
 //        mHandler.removeCallbacks(mHideRunnable);
 //        mHandler.postDelayed(mHideRunnable, 10 * 1000);
-
-        if (mIsHandling) {
+        boolean isShowing = Session.get(context).isShowMiniProgramIcon();
+        if (mIsHandling||isShowing) {
             return;
         }
         mIsHandling = true;
@@ -107,6 +107,7 @@ public class MiniProgramQrCodeWindowManager {
 
                 mIsHandling = false;
 //                mIsAdded = true;
+                Session.get(context).setShowMiniProgramIcon(true);
                 return false;
             }
         });
