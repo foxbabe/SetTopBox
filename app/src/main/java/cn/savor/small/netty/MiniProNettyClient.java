@@ -43,7 +43,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 public class MiniProNettyClient {
     static int PORT;
     static String HOST;
-    public static Channel mChannel = null;
+    public static Channel miniChannel = null;
     private MiniNettyMsgCallback callback;
     private Context mContext;
     private static MiniProNettyClient instance;
@@ -82,8 +82,8 @@ public class MiniProNettyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        LogUtils.i("client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
-                        LogFileUtil.write("client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
+                        LogUtils.i("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
+                        LogFileUtil.write("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
                         ch.pipeline().addLast("ping",new IdleStateHandler(60, 60, 20, TimeUnit.SECONDS));
                         //添加POJO对象解码器 禁止缓存类加载器
                         ch.pipeline().addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
@@ -106,17 +106,17 @@ public class MiniProNettyClient {
             if (channelFuture.cause() != null) {
                 LogUtils.i("Failed to connect: " + channelFuture.cause());
             }
-            mChannel = channelFuture.channel();
+            miniChannel = channelFuture.channel();
         }
     };
 
     //关闭连接
     public void disConnect() {
-        if (mChannel != null) {
+        if (miniChannel != null) {
             try {
                 LogFileUtil.write("NettyClient disConnect");
-                mChannel.close().removeListener(channelFutureListener);
-                mChannel.close().sync();
+                miniChannel.close().removeListener(channelFutureListener);
+                miniChannel.close().sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

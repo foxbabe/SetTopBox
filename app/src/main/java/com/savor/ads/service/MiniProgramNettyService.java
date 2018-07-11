@@ -81,7 +81,7 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
         try{
             LogUtils.d("MiniProgramNettyService fetchMessage");
 
-            MiniProNettyClient.init(8010,"172.16.1.108",this,getApplicationContext());
+            MiniProNettyClient.init(ConstantValues.MINI_PROGRAM_NETTY_PORT,ConstantValues.MINI_PROGRAM_NETTY_URL,this,getApplicationContext());
             MiniProNettyClient.get().connect(MiniProNettyClient.get().configureBootstrap(new Bootstrap()));
 
         }catch (Exception e){

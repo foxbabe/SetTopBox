@@ -16,6 +16,7 @@ import com.admaster.sdk.api.AdmasterSdk;
 import com.google.protobuf.ByteString;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
@@ -24,6 +25,7 @@ import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.core.Session;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
@@ -315,8 +317,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 //        if (isContain){
 //
 //        }
-        LogUtils.i("showMiniProgramQrCodeWindow..................");
-        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+//        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
+        LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
     }
 

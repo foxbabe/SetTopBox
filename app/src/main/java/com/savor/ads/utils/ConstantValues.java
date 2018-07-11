@@ -208,4 +208,11 @@ public class ConstantValues {
     public static final int PUSH_TYPE_4G_PROJECTION = 2;
     public static final int PUSH_TYPE_SHELL_COMMAND = 3;
     public static final int PUSH_TYPE_UPDATE = 4;
+    /**小程序中用到的netty的url地址**/
+//    public static final String MINI_PROGRAM_NETTY_URL = "netty-push.littlehotspot.com";
+    public static final String MINI_PROGRAM_NETTY_URL = "172.16.1.108";
+    /**小程序中用到的netty的端口**/
+//    public static final int MINI_PROGRAM_NETTY_PORT = 8009;
+    public static final int MINI_PROGRAM_NETTY_PORT = 8010;
+
 }

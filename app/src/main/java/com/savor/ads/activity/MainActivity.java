@@ -95,7 +95,7 @@ public class MainActivity extends BaseActivity {
         startHeartbeatService();
 
         if (mSession.getServerInfo() != null) {
-            startNettyService();
+//            startNettyService();
             AppApi.resetSmallPlatformInterface(this);
 
             // source=3表示是在设置界面手动设置的

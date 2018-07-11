@@ -82,7 +82,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MessageBean msg) throws Exception {
-//        LogUtils.i(("Client received: " + ByteBufUtil.hexDump(msg.readBytes(msg.readableBytes())));
+        LogUtils.i(("mini Client received: " + msg.getCmd()));
         if (msg == null) return;
         /**来自服务端的数据包请求*/
         MessageBean.Action Order = msg.getCmd();
@@ -432,14 +432,14 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
             if (event.state().equals(IdleState.READER_IDLE)) {
                 //未进行读操作
                 LogUtils.i("READER_IDLE");
-                LogFileUtil.write("NettyClientHandler READER_IDLE");
+                LogFileUtil.write("MiniNettyClientHandler READER_IDLE");
                 // 超时关闭channel
                 ctx.close();
 
             } else if (event.state().equals(IdleState.WRITER_IDLE)) {
 
                 LogUtils.i("WRITER_IDLE");
-                LogFileUtil.write("NettyClientHandler WRITER_IDLE");
+                LogFileUtil.write("MiniNettyClientHandler WRITER_IDLE");
                 // 超时关闭channel
                 ctx.close();
             } else if (event.state().equals(IdleState.ALL_IDLE)) {
@@ -458,13 +458,13 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
                 bean.setRoomId(session.getRoomId());
                 bean.setSsid(AppUtils.getShowingSSID(mContext));
                 bean.setBoxId(session.getBoxId());
-                ArrayList<String> contList = new ArrayList<String>();
-                contList.add("I am a Heart Pakage...");
+                ArrayList<String> contList = new ArrayList<>();
+                contList.add("I am a mini Heart Pakage...");
                 contList.add(new Gson().toJson(bean));
                 message.setContent(contList);
                 ctx.writeAndFlush(message);
-                LogUtils.v("客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
-                LogFileUtil.write("NettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
+                LogUtils.v("小程序NETTY客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
+                LogFileUtil.write("MiniNettyClientHandler 客户端向服务端发送====" + channelId + "====>>>>心跳包.....流水号:" + message.getSerialnumber());
             }
 
         }
@@ -474,16 +474,16 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
 //        ctx.close();
-        LogUtils.i("客户端出现异常，退出........" + NettyClient.host + ':' + NettyClient.port);
-        LogFileUtil.write("NettyClientHandler 客户端出现异常，退出........" + NettyClient.host + ':' + NettyClient.port);
+        LogUtils.i("客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogFileUtil.write("NettyClientHandler 客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 //        super.channelUnregistered(ctx);
-        LogUtils.i("channelUnregistered......." + NettyClient.host + ':' + NettyClient.port);
-        LogFileUtil.write("NettyClientHandler channelUnregistered......." + NettyClient.host + ':' + NettyClient.port);
+        LogUtils.i("channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogFileUtil.write("NettyClientHandler channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
         reconnect(ctx);
     }
 
@@ -500,8 +500,8 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
             loop.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    LogUtils.i("Reconnecting to: " + NettyClient.host + ':' + NettyClient.port);
-                    LogFileUtil.write("NettyClientHandler Reconnecting to: " + NettyClient.host + ':' + NettyClient.port);
+                    LogUtils.i("Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+                    LogFileUtil.write("NettyClientHandler Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
                     NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap(), loop));
                 }
             }, 5, TimeUnit.SECONDS);

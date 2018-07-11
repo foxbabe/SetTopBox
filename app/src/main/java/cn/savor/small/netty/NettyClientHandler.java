@@ -61,18 +61,11 @@ import io.netty.handler.timeout.IdleStateEvent;
 @ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean> {
     private NettyClient.NettyMessageCallback callback;
-    private MiniProNettyClient.MiniNettyMsgCallback miniCallback;
     private Session session;
     private Context mContext;
 
     public NettyClientHandler(NettyClient.NettyMessageCallback m, Context context) {
         this.callback = m;
-        this.mContext = context;
-        this.session = Session.get(context);
-    }
-
-    public NettyClientHandler(MiniProNettyClient.MiniNettyMsgCallback m, Context context) {
-        this.miniCallback = m;
         this.mContext = context;
         this.session = Session.get(context);
     }
