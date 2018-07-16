@@ -38,13 +38,14 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.seriesId = seriesId;
         this.isNewDevice = isNewDevice;
     }
-    public ImageAction(Context context, int imageType, String imagePath) {
+    public ImageAction(Context context, int imageType, String imagePath,boolean isThumbnail) {
         super();
 
         mPriority = ProjectPriority.HIGH;
         mContext = context;
         this.imageType = imageType;
         this.imagePath = imagePath;
+        this.isThumbnail = isThumbnail;
     }
 
     @Override

@@ -237,7 +237,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
-        ImageAction imageAction = new ImageAction(mContext, imageType, imagePath);
+        ImageAction imageAction = new ImageAction(mContext, imageType, imagePath,isThumbnail);
         ProjectionManager.getInstance().enqueueAction(imageAction);
 
         return localResult;
