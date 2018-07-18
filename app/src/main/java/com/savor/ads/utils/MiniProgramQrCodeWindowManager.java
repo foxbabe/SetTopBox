@@ -25,12 +25,16 @@ import com.savor.ads.core.Session;
 public class MiniProgramQrCodeWindowManager {
 
     private Handler mHandler = new Handler();
-
+    private Context context;
     WindowManager mWindowManager;
     private RelativeLayout mFloatLayout;
 
     private boolean mIsAdded;
     private boolean mIsHandling;
+
+    public MiniProgramQrCodeWindowManager(Context mContext){
+        this.context = mContext;
+    }
 
     public void showQrCode(final Context context, final String url) {
         LogUtils.d("showQrCode");
@@ -140,18 +144,21 @@ public class MiniProgramQrCodeWindowManager {
     private Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
-            mIsHandling = false;
-            if (mIsAdded) {
-                mIsAdded = false;
-                hideQrCode();
+            boolean isShowing = Session.get(context).isShowMiniProgramIcon();
+            if (isShowing){
+                if (mFloatLayout.getParent() != null) {
+                    //移除悬浮窗口
+                    mWindowManager.removeViewImmediate(mFloatLayout);
+                    Session.get(context).setShowMiniProgramIcon(false);
+                }
             }
         }
     };
 
     public void hideQrCode() {
-        if (mFloatLayout.getParent() != null) {
-            //移除悬浮窗口
-            mWindowManager.removeViewImmediate(mFloatLayout);
-        }
+        mHandler.removeCallbacks(mHideRunnable);
+        mHandler.post(mHideRunnable);
+
+
     }
 }

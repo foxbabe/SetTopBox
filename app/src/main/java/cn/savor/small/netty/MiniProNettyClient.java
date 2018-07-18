@@ -22,6 +22,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -84,12 +86,13 @@ public class MiniProNettyClient {
                     public void initChannel(SocketChannel ch) throws Exception {
                         LogUtils.i("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
                         LogFileUtil.write("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
-                        ch.pipeline().addLast("ping",new IdleStateHandler(60, 60, 20, TimeUnit.SECONDS));
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast("ping",new IdleStateHandler(60, 60, 20, TimeUnit.SECONDS));
                         //添加POJO对象解码器 禁止缓存类加载器
-                        ch.pipeline().addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
+                        pipeline.addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
                         //设置发送消息编码器
-                        ch.pipeline().addLast(new ObjectEncoder());
-                        ch.pipeline().addLast(new MiniProNettyClientHandler(callback, mContext));
+                        pipeline.addLast(new ObjectEncoder());
+                        pipeline.addLast(new MiniProNettyClientHandler(callback, mContext));
                     }
                 });
 
@@ -107,6 +110,18 @@ public class MiniProNettyClient {
                 LogUtils.i("Failed to connect: " + channelFuture.cause());
             }
             miniChannel = channelFuture.channel();
+            if (!channelFuture.isSuccess()) {
+                LogUtils.i("Mini Reconnect");
+                channelFuture.channel().close().sync();
+
+                final EventLoop loop = channelFuture.channel().eventLoop();
+                loop.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        connect(configureBootstrap(new Bootstrap(), loop));
+                    }
+                }, 5L, TimeUnit.SECONDS);
+            }
         }
     };
 
@@ -128,5 +143,6 @@ public class MiniProNettyClient {
         void onReceiveMiniServerMsg(String msg, String content);
         void onMiniConnected();
         void onMiniReconnect();
+        void onMiniCloseIcon();
     }
 }

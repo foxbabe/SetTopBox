@@ -74,7 +74,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
     public void channelActive(ChannelHandlerContext ctx) {
         LogUtils.i("Client  Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
         LogUtils.i("miniCallback.................." + miniCallback);
-        LogFileUtil.write("NettyClientHandler Client Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
+        LogFileUtil.write("MiniProNettyClientHandler Client Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
         if (miniCallback != null) {
             miniCallback.onMiniConnected();
         }
@@ -176,6 +176,9 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
 //        ctx.close();
+        if (miniCallback!=null){
+            miniCallback.onMiniCloseIcon();
+        }
         LogUtils.i("客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
         LogFileUtil.write("NettyClientHandler 客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
@@ -186,27 +189,42 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
 //        super.channelUnregistered(ctx);
         LogUtils.i("channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
         LogFileUtil.write("NettyClientHandler channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+//        reconnect(ctx);
+    }
+
+    @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        LogUtils.i("channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogFileUtil.write("MiniNettyClientHandler channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+//        reconnect(ctx);
+        if (miniCallback!=null){
+            miniCallback.onMiniCloseIcon();
+        }
         reconnect(ctx);
     }
 
     public void reconnect(ChannelHandlerContext ctx) {
-        if (miniCallback != null) {
-            miniCallback.onMiniReconnect();
-        }
+//        if (miniCallback != null) {
+//            miniCallback.onMiniReconnect();
+//        }
         try {
             Thread.sleep(3000);
             if (ctx != null) {
                 ctx.close();
             }
+            ctx.channel().close().sync();
+            ctx.close().sync();
             final EventLoop loop = ctx.channel().eventLoop();
             loop.schedule(new Runnable() {
                 @Override
                 public void run() {
                     LogUtils.i("Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
                     LogFileUtil.write("NettyClientHandler Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
-                    NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap(), loop));
+                    Bootstrap bootstrap = MiniProNettyClient.get().configureBootstrap(new Bootstrap(), loop);
+                    MiniProNettyClient.get().connect(bootstrap);
                 }
-            }, 5, TimeUnit.SECONDS);
+            }, 5L, TimeUnit.SECONDS);
         } catch (Exception ex) {
             ex.toString();
         }

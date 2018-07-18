@@ -56,7 +56,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
         mappingKeyCode();
         Session.get(this).setShowMiniProgramIcon(false);
         mQrCodeWindowManager = new QrCodeWindowManager();
-        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager();
+        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
         // 启动投屏类操作处理的Service
 //        startScreenProjectionService();
 

@@ -297,7 +297,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 }
             }, 1000 * DELAY_TIME);
         }
-        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager();
+        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
         startMiniProgramNettyService();
     }
 
@@ -312,17 +312,16 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
      * 显示小程序二维码
      */
     public void showMiniProgramQrCodeWindow() {
-
-//        boolean isContain = ActivitiesManager.getInstance().contains(AdsPlayerActivity.class);
-//        if (isContain){
-//
-//        }
 //        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
         String url = AppApi.API_URLS.get(AppApi.Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
     }
 
+    public void hideMiniProgramQrCodeWindow() {
+        LogUtils.i("closeMiniProgramQrCodeWindow..................");
+        miniProgramQrCodeWindowManager.hideQrCode();
+    }
     @Override
     protected void onStart() {
 //        LogFileUtil.write("AdsPlayerActivity onStart " + this.hashCode());

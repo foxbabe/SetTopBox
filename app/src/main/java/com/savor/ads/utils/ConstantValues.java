@@ -210,7 +210,8 @@ public class ConstantValues {
     public static final int PUSH_TYPE_UPDATE = 4;
     /**小程序中用到的netty的url地址**/
     public static final String MINI_PROGRAM_NETTY_URL = "netty-push.littlehotspot.com";
-//    public static final String MINI_PROGRAM_NETTY_URL = "172.16.1.108";
+//    public static final String MINI_PROGRAM_NETTY_URL = "192.168.88.86";
+//    public static final String MINI_PROGRAM_NETTY_URL = "172.16.1.90";
     /**小程序中用到的netty的端口**/
 //    public static final int MINI_PROGRAM_NETTY_PORT = 8009;
     public static final int MINI_PROGRAM_NETTY_PORT = 8010;

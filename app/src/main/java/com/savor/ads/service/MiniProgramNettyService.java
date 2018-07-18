@@ -159,13 +159,18 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
     }
 
 
-//    private void getMiniProgramQRCode(){
-//          AppApi.downloadImg(AppApi.API_URLS.get(AppApi.Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON),this,this,);
-//    }
-
     @Override
     public void onMiniReconnect() {
+            Intent intent = new Intent(this,MiniProgramNettyService.class);
+            startService(intent);
+    }
 
+    @Override
+    public void onMiniCloseIcon() {
+        Activity activity = ActivitiesManager.getInstance().getSpecialActivity(AdsPlayerActivity.class);
+        if (activity!=null && activity instanceof AdsPlayerActivity){
+            ((AdsPlayerActivity) activity).hideMiniProgramQrCodeWindow();
+        }
     }
 
 
