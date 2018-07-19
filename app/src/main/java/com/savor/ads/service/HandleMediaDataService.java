@@ -1653,7 +1653,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         if (tarFile.exists()) {
                             tarFile.delete();
                         }
-                        AppApi.downloadLoadingImg(url, context, this, path);
+                        AppApi.downloadImg(url, context, this, path);
                     }
                 }
             } else {

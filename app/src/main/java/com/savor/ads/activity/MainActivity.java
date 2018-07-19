@@ -25,6 +25,7 @@ import com.savor.ads.log.LogUploadService;
 import com.savor.ads.service.HandleMediaDataService;
 import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.service.MessageService;
+import com.savor.ads.service.MiniProgramNettyService;
 import com.savor.ads.service.SSDPMulticastService;
 import com.savor.ads.service.ServerDiscoveryService;
 import com.savor.ads.utils.ActivitiesManager;
@@ -208,6 +209,9 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(this, MessageService.class);
         startService(intent);
     }
+
+
+
 
     /**
      * 启动下载媒体文件服务

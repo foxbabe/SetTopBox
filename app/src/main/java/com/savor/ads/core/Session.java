@@ -208,7 +208,7 @@ public class Session {
     private ArrayList<PushRTBItem> mPushRTBItems;
     /**记录下载速度**/
 	private String netSpeed;
-
+    private boolean isShowMiniProgramIcon;
 	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
     private Session(Context context) {
 
@@ -297,6 +297,7 @@ public class Session {
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
         mPushRTBItems = (ArrayList<PushRTBItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
         netSpeed = mPreference.loadStringKey(P_APP_DOWNLOAD_NET_SPEED,"");
+        isShowMiniProgramIcon = mPreference.loadBooleanKey(P_APP_SHOW_MIMIPROGRAM,false);
     }
 
     /*
@@ -1105,6 +1106,14 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_DOWNLOAD_NET_SPEED,netSpeed));
     }
 
+    public boolean isShowMiniProgramIcon() {
+        return isShowMiniProgramIcon;
+    }
+
+    public void setShowMiniProgramIcon(boolean showMiniProgramIcon) {
+        isShowMiniProgramIcon = showMiniProgramIcon;
+        writePreference(new Pair<String, Object>(P_APP_SHOW_MIMIPROGRAM,showMiniProgramIcon));
+    }
 
     public HashMap<String, Long> getDownloadFilePosition() {
         return downloadFilePosition;
@@ -1218,6 +1227,8 @@ public class Session {
     public static final String P_APP_RTB_PUSH_CONTENT = "com.savor.ads.rtb_push_content";
 
     public static final String P_APP_DOWNLOAD_NET_SPEED = "com.savor.download.net_speed";
+
+    public static final String P_APP_SHOW_MIMIPROGRAM = "com.savor.ads.show.miniprogram";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;

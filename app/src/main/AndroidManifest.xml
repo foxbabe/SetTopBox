@@ -53,6 +53,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-feature
         android:name="android.software.live_tv"
         android:required="true"/>
@@ -130,6 +132,10 @@
         <service
             android:name=".service.ServerDiscoveryService"
             android:exported="false">
+        </service>
+        <!--启动小程序NETTY服务-->
+        <service android:name=".service.MiniProgramNettyService"
+                 android:exported="false">
         </service>
         <!-- 处理媒体文件更新的服务 -->
         <service

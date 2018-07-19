@@ -533,7 +533,7 @@ public class AppServiceOk {
              * 1.通过一个requrest构造方法将参数传入
              * 2.
              */
-            Callback<Object> callback = new Callback<Object>() {
+                Callback<Object> callback = new Callback<Object>() {
 
                 @Override
                 public Object parseNetworkResponse(Response response) {
