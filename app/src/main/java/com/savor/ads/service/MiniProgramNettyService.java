@@ -23,6 +23,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
+import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -122,11 +123,14 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
                             file);
                      isDownloaded = ossUtils.syncDownload();
                      if (isDownloaded){
+                         MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
 //                        if (1==push4GProjection.getResource_type()){
                             ProjectOperationListener.getInstance(context).showImage(1,path,true);
 //                        }else if (2==push4GProjection.getResource_type()){
 //                            ProjectOperationListener.getInstance(context).showVideo(path,0,true);
 //                        }
+                     }else{
+                         MobclickAgent.onEvent(context,"screenProjctionDownloadError"+file.getName());
                      }
                     }else if (action==3){
                         ProjectOperationListener.getInstance(context).stop(GlobalValues.CURRENT_PROJECT_ID);
