@@ -105,7 +105,8 @@ public class AppApi {
         CP_POST_SDCARD_STATE_JSON,
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
-        CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON
+        CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
+        CP_MINIPROGRAM_FORSCREEN_JSON
     }
 
 
@@ -142,7 +143,8 @@ public class AppApi {
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
-            put(Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
+            put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
+            put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
         }
     };
 
@@ -528,6 +530,17 @@ public class AppApi {
      */
     public static void requestBaiduAds(Context context, ApiRequestListener handler, TsUiApiV20171122.TsApiRequest requestBean) {
         new AppServiceOk(context, Action.AD_BAIDU_ADS, handler).postProto(requestBean);
+    }
+
+    /**
+     * 请求接口查询是否
+     * @param context
+     * @param handler
+     */
+    public static void getScreenIsShowQRCode(Context context, ApiRequestListener handler){
+        final HashMap<String,Object> params = new HashMap<>();
+        params.put("box_mac",Session.get(context).getEthernetMac());
+        new AppServiceOk(context,Action.CP_MINIPROGRAM_FORSCREEN_JSON,handler,params).get();
     }
 
     // 超时（网络）异常

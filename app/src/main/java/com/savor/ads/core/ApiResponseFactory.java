@@ -236,6 +236,14 @@ public class ApiResponseFactory {
             case CP_POST_SDCARD_STATE_JSON:
                 result = info;
                 break;
+            case CP_MINIPROGRAM_FORSCREEN_JSON:
+                try {
+                    JSONObject jsonObject = new JSONObject(info);
+                    result =jsonObject.getInt("is_sapp_forscreen");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
             default:
                 break;
         }

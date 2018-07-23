@@ -33,6 +33,7 @@ import java.io.File;
 import cn.savor.small.netty.MiniProNettyClient;
 import cn.savor.small.netty.NettyClient;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.handler.codec.memcache.binary.BinaryMemcacheRequestEncoder;
 
 /**
  * 启动小程序Netty服务
@@ -148,18 +149,13 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
         //TODO:当建立NETTY连接以后请求接口获取小程序地址
 //        getMiniProgramQRCode();
         LogUtils.i("CurrentActivity.................." + ActivitiesManager.getInstance().getCurrentActivity());
-//        if (!(ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity)) {
-//            if (getApplication() instanceof SavorApplication) {
-//                ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow();
-//            }
-//        }
 
         if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
 
-                ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
-
+            ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
         }
+
     }
 
 
@@ -181,7 +177,9 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
     ApiRequestListener apiRequestListener = new ApiRequestListener() {
         @Override
         public void onSuccess(AppApi.Action method, Object obj) {
+            switch (method){
 
+            }
         }
 
         @Override

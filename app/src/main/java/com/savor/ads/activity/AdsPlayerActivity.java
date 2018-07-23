@@ -1,5 +1,6 @@
 package com.savor.ads.activity;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +32,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.service.MiniProgramNettyService;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.BaiduAdsResponseCode;
 import com.savor.ads.utils.ConstantValues;
@@ -310,7 +312,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
             }, 1000 * DELAY_TIME);
         }
         miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
-        startMiniProgramNettyService();
+
+        AppApi.getScreenIsShowQRCode(this,this);
     }
 
     private void startMiniProgramNettyService(){
@@ -325,7 +328,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
      */
     public void showMiniProgramQrCodeWindow() {
 //        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
-        String url = AppApi.API_URLS.get(AppApi.Action.CP_DOWNLOAD_MINIPROGRAM_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
     }
@@ -711,6 +714,14 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                     } else {
                         LogUtils.e("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
                         LogFileUtil.write("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
+                    }
+                }
+                break;
+            case CP_MINIPROGRAM_FORSCREEN_JSON:
+                if (obj instanceof Integer){
+                    int value = (Integer)obj;
+                    if (value==1){
+                        startMiniProgramNettyService();
                     }
                 }
                 break;

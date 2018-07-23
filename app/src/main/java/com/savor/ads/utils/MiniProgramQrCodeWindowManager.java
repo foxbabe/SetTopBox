@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -27,7 +28,7 @@ public class MiniProgramQrCodeWindowManager {
     private Handler mHandler = new Handler();
     private Context context;
     WindowManager mWindowManager;
-    private RelativeLayout mFloatLayout;
+    private LinearLayout mFloatLayout;
 
     private boolean mIsAdded;
     private boolean mIsHandling;
@@ -66,15 +67,15 @@ public class MiniProgramQrCodeWindowManager {
         //调整悬浮窗显示的停靠位置为左侧置顶
         wmParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        wmParams.x = DensityUtil.dip2px(context, 40);
-        wmParams.y = DensityUtil.dip2px(context, 40);
+        wmParams.x = DensityUtil.dip2px(context, 10);
+        wmParams.y = DensityUtil.dip2px(context, 10);
 
         //设置悬浮窗口长宽数据
-        wmParams.width = DensityUtil.dip2px(context, 228);
-        wmParams.height = DensityUtil.dip2px(context, 228);
+        wmParams.width = DensityUtil.dip2px(context, 188);
+        wmParams.height = DensityUtil.dip2px(context, 188*1.2f);
 
         //获取浮动窗口视图所在布局
-        mFloatLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.layout_miniprogram_qrcode, null);
+        mFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_miniprogram_qrcode, null);
 
         final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
