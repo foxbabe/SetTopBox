@@ -144,14 +144,22 @@ public class MiniProgramQrCodeWindowManager {
     private Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
-            boolean isShowing = Session.get(context).isShowMiniProgramIcon();
-            if (isShowing){
-                if (mFloatLayout.getParent() != null) {
-                    //移除悬浮窗口
-                    mWindowManager.removeViewImmediate(mFloatLayout);
-                    Session.get(context).setShowMiniProgramIcon(false);
+            try {
+                if (context!=null){
+                    boolean isShowing = Session.get(context).isShowMiniProgramIcon();
+                    if (isShowing){
+                        if (mFloatLayout!=null&&mFloatLayout.getParent() != null) {
+                            //移除悬浮窗口
+                            mWindowManager.removeViewImmediate(mFloatLayout);
+                            Session.get(context).setShowMiniProgramIcon(false);
+                        }
+                    }
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
+
         }
     };
 
