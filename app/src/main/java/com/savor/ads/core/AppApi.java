@@ -20,6 +20,7 @@ import org.json.JSONArray;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.PortUnreachableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -99,12 +100,15 @@ public class AppApi {
         CP_POST_DEVICE_TOKEN_JSON,
         SP_GET_RTB_ADS_JSON,
         SP_GET_POLY_ADS_JSON,
+        CP_POST_POLY_PLAY_RECORD_JSON,
         SP_POST_NETSTAT_JSON,
         CP_POST_PLAY_LIST_JSON,
         CP_POST_DOWNLOAD_LIST_JSON,
         CP_POST_SDCARD_STATE_JSON,
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
+        CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
+        CP_MINIPROGRAM_FORSCREEN_JSON
     }
 
 
@@ -135,12 +139,15 @@ public class AppApi {
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
             put(Action.SP_GET_POLY_ADS_JSON, SP_BASE_URL + "small/api/download/poly/config");
+            put(Action.CP_POST_POLY_PLAY_RECORD_JSON,BuildConfig.BASE_URL +"Box/BaiduPoly/recordPlay");
             put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
+            put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
+            put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
         }
     };
 
@@ -257,6 +264,21 @@ public class AppApi {
     }
 
     /**
+     * 百度聚屏播放记录上传接口
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @param media_id
+     * @throws IOException
+     */
+    public static void postPolyPlayRecord(Context context, ApiRequestListener handler,String boxMac,String media_id){
+        final HashMap<String, Object> params = new HashMap<>();
+        params.put("box_mac",boxMac);
+        params.put("media_id",media_id);
+        new AppServiceOk(context, Action.CP_POST_POLY_PLAY_RECORD_JSON, handler, params).post();
+    }
+
+    /**
      * 获取小平台电视频道数据
      * @param context
      * @param handler
@@ -293,7 +315,7 @@ public class AppApi {
         new AppServiceOk(context, Action.SP_GET_LOGO_DOWN, handler, params).downLoad(url, filePath);
     }
 
-    public static void downloadLoadingImg(String url,Context context, ApiRequestListener handler,String filePath){
+    public static void downloadImg(String url,Context context, ApiRequestListener handler,String filePath){
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
     }
@@ -526,6 +548,17 @@ public class AppApi {
      */
     public static void requestBaiduAds(Context context, ApiRequestListener handler, TsUiApiV20171122.TsApiRequest requestBean) {
         new AppServiceOk(context, Action.AD_BAIDU_ADS, handler).postProto(requestBean);
+    }
+
+    /**
+     * 请求接口查询是否
+     * @param context
+     * @param handler
+     */
+    public static void getScreenIsShowQRCode(Context context, ApiRequestListener handler){
+        final HashMap<String,Object> params = new HashMap<>();
+        params.put("box_mac",Session.get(context).getEthernetMac());
+        new AppServiceOk(context,Action.CP_MINIPROGRAM_FORSCREEN_JSON,handler,params).get();
     }
 
     // 超时（网络）异常

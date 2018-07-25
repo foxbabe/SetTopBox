@@ -146,6 +146,9 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageBean>
                         // 停止投屏
                         LogUtils.d("Netty command: stop projection " + params);
                         handleStopProjection(params, response);
+                    }else if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(order)){
+                        LogUtils.d("Netty command: show mini program " + params);
+
                     }
                 }
                 ctx.writeAndFlush(response);

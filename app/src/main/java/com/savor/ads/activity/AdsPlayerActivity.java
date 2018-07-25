@@ -1,5 +1,6 @@
 package com.savor.ads.activity;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,7 @@ import com.admaster.sdk.api.AdmasterSdk;
 import com.google.protobuf.ByteString;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
+import com.savor.ads.BuildConfig;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
@@ -24,10 +26,13 @@ import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.core.Session;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
+import com.savor.ads.service.MiniProgramNettyService;
+import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.BaiduAdsResponseCode;
 import com.savor.ads.utils.ConstantValues;
@@ -36,6 +41,7 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
+import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
 import com.savor.ads.utils.RetryHandler;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
@@ -60,7 +66,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
     private static final String TAG = "AdsPlayerActivity";
     private SavorVideoView mSavorVideoView;
-
+    private MiniProgramQrCodeWindowManager miniProgramQrCodeWindowManager;
     private ArrayList<T> mPlayList;
     private String mListPeriod;
     private boolean mNeedUpdatePlaylist;
@@ -235,7 +241,17 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         try {
             uuid = ByteString.copyFrom(UUID.randomUUID().toString().replace("-", ""), "utf-8");
             appId = ByteString.copyFrom(ConstantValues.BAIDU_ADS_APP_ID, "utf-8");
-            adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID, "utf-8");
+            if (mSession.getTvSize()>0&&mSession.getTvSize()<=40){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID1, "utf-8");
+            }else if (mSession.getTvSize()>40&&mSession.getTvSize()<=45){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID2, "utf-8");
+            }else if (mSession.getTvSize()>45&&mSession.getTvSize()<=50){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID3, "utf-8");
+            }else if (mSession.getTvSize()>50&&mSession.getTvSize()<=55){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID4, "utf-8");
+            }else if (mSession.getTvSize()>55){
+                adslotId = ByteString.copyFrom(ConstantValues.BAIDU_ADSLOT_ID5, "utf-8");
+            }
             mac = ByteString.copyFrom(mSession.getEthernetMacWithColon(), "utf-8");
             model = ByteString.copyFrom(mSession.getModel(), "utf-8");
             brand = ByteString.copyFrom(mSession.getBrand(), "utf-8");
@@ -243,7 +259,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
+        if (adslotId==null){
+            return;
+        }
         TsUiApiV20171122.TsApiRequest request = TsUiApiV20171122.TsApiRequest.newBuilder()
                 .setRequestId(uuid)
                 .setApiVersion(TsUiApiV20171122.Version.newBuilder()
@@ -293,9 +311,32 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 }
             }, 1000 * DELAY_TIME);
         }
+        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
+
+        AppApi.getScreenIsShowQRCode(this,this);
+    }
+
+    private void startMiniProgramNettyService(){
+        LogFileUtil.write("MainActivity will startMiniProgramNettyService");
+        Intent intent = new Intent(this, MiniProgramNettyService.class);
+        startService(intent);
     }
 
 
+    /**
+     * 显示小程序二维码
+     */
+    public void showMiniProgramQrCodeWindow() {
+//        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
+        LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
+        miniProgramQrCodeWindowManager.showQrCode(this,url);
+    }
+
+    public void hideMiniProgramQrCodeWindow() {
+        LogUtils.i("closeMiniProgramQrCodeWindow..................");
+        miniProgramQrCodeWindowManager.hideQrCode();
+    }
     @Override
     protected void onStart() {
 //        LogFileUtil.write("AdsPlayerActivity onStart " + this.hashCode());
@@ -477,6 +518,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 mPlayList.get(index).setName(null);
                 mPlayList.get(index).setMediaPath(null);
                 mPlayList.get(index).setChinese_name("已过期");
+                postPolyPlayRecord(mSession.getEthernetMac(),item.getVid());
             }
         }
 
@@ -497,6 +539,11 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
             return false;
         }
     }
+
+    private void postPolyPlayRecord(String boxMac,String mediaId){
+        AppApi.postPolyPlayRecord(this,this,boxMac,mediaId);
+    }
+
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {
@@ -676,6 +723,14 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                     }
                 }
                 break;
+            case CP_MINIPROGRAM_FORSCREEN_JSON:
+                if (obj instanceof Integer){
+                    int value = (Integer)obj;
+                    if (value==1){
+                        startMiniProgramNettyService();
+                    }
+                }
+                break;
         }
     }
 
@@ -700,7 +755,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                                         BaiduAdLocalBean bean = new BaiduAdLocalBean(list.get(0));
                                         bean.setMediaRemotePath(material.getVideoUrl());
                                         bean.setWinNoticeUrlList(ad.getWinNoticeUrlList());
-                                        bean.setThirdMonitorUrlList(ad.getThirdMonitorUrlList());
+                                        if (ad.getThirdMonitorUrlList()!=null&&ad.getThirdMonitorUrlList().size()>0){
+                                            bean.setThirdMonitorUrlList(ad.getThirdMonitorUrlList());
+                                        }
                                         bean.setExpireTime(tsApiResponse.getExpirationTime());
 
                                         baiduAdList.add(bean);
@@ -753,7 +810,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 tarFile.delete();
             }
             if (!TextUtils.isEmpty(adMasterResult.getFile())) {
-                AppApi.downloadLoadingImg(adMasterResult.getFile(), mContext, this, path);
+                AppApi.downloadImg(adMasterResult.getFile(), mContext, this, path);
             }
         }
 

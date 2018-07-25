@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">SetTopBox</string>
+    <string name="mini_program_tip1">微信扫码</string>
+    <string name="mini_program_tip2">体验照片投屏</string>
+
 </resources>

@@ -6,18 +6,26 @@ import android.content.Intent;
 import android.text.TextUtils;
 
 
+import com.savor.ads.BuildConfig;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.activity.MainActivity;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+
+import cn.savor.small.netty.MiniProNettyClient;
 import cn.savor.small.netty.NettyClient;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import io.netty.bootstrap.Bootstrap;
 
@@ -72,6 +80,7 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
                 LogUtils.d("MessageService serverInfo != null");
                 NettyClient.init(serverInfo.getNettyPort(),serverInfo.getServerIp(), this, /*Session.get(this).getEthernetMac()*/ getApplicationContext());
                 NettyClient.get().connect(NettyClient.get().configureBootstrap(new Bootstrap()));
+
             } else {
                 LogUtils.d("MessageService serverInfo == null");
             }
@@ -165,4 +174,6 @@ public class MessageService extends IntentService implements NettyClient.NettyMe
             }
         }
     }
+
+
 }
