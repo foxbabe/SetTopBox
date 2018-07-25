@@ -518,6 +518,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 mPlayList.get(index).setName(null);
                 mPlayList.get(index).setMediaPath(null);
                 mPlayList.get(index).setChinese_name("已过期");
+                postPolyPlayRecord(mSession.getEthernetMac(),item.getVid());
             }
         }
 
@@ -538,6 +539,11 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
             return false;
         }
     }
+
+    private void postPolyPlayRecord(String boxMac,String mediaId){
+        AppApi.postPolyPlayRecord(this,this,boxMac,mediaId);
+    }
+
 
     @Override
     public boolean onMediaError(int index, boolean isLast) {

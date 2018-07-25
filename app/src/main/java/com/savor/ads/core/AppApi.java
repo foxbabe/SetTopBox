@@ -20,6 +20,7 @@ import org.json.JSONArray;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.PortUnreachableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -99,6 +100,7 @@ public class AppApi {
         CP_POST_DEVICE_TOKEN_JSON,
         SP_GET_RTB_ADS_JSON,
         SP_GET_POLY_ADS_JSON,
+        CP_POST_POLY_PLAY_RECORD_JSON,
         SP_POST_NETSTAT_JSON,
         CP_POST_PLAY_LIST_JSON,
         CP_POST_DOWNLOAD_LIST_JSON,
@@ -137,6 +139,7 @@ public class AppApi {
             put(Action.CP_POST_DEVICE_TOKEN_JSON, BuildConfig.BASE_URL + "Basedata/Box/reportDeviceToken");
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
             put(Action.SP_GET_POLY_ADS_JSON, SP_BASE_URL + "small/api/download/poly/config");
+            put(Action.CP_POST_POLY_PLAY_RECORD_JSON,BuildConfig.BASE_URL +"Box/BaiduPoly/recordPlay");
             put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
             put(Action.CP_POST_PLAY_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportPlayInfo");
             put(Action.CP_POST_DOWNLOAD_LIST_JSON, BuildConfig.BASE_URL + "box/Program/reportDownloadInfo");
@@ -258,6 +261,21 @@ public class AppApi {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_POLY_ADS_JSON, handler, params).syncGet();
+    }
+
+    /**
+     * 百度聚屏播放记录上传接口
+     * @param context
+     * @param handler
+     * @param boxMac
+     * @param media_id
+     * @throws IOException
+     */
+    public static void postPolyPlayRecord(Context context, ApiRequestListener handler,String boxMac,String media_id){
+        final HashMap<String, Object> params = new HashMap<>();
+        params.put("box_mac",boxMac);
+        params.put("media_id",media_id);
+        new AppServiceOk(context, Action.CP_POST_POLY_PLAY_RECORD_JSON, handler, params).post();
     }
 
     /**
