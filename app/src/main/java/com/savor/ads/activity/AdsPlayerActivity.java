@@ -316,11 +316,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         AppApi.getScreenIsShowQRCode(this,this);
     }
 
-    private void startMiniProgramNettyService(){
-        LogFileUtil.write("MainActivity will startMiniProgramNettyService");
-        Intent intent = new Intent(this, MiniProgramNettyService.class);
-        startService(intent);
-    }
+
 
 
     /**
@@ -727,7 +723,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 if (obj instanceof Integer){
                     int value = (Integer)obj;
                     if (value==1){
-                        startMiniProgramNettyService();
+//                        this.startMiniProgramNettyService();
                     }
                 }
                 break;
