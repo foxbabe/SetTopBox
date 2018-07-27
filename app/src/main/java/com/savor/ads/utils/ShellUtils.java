@@ -1,5 +1,6 @@
 package com.savor.ads.utils;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.savor.ads.core.AppApi;
@@ -269,4 +270,18 @@ public class ShellUtils {
 //        return isflag;
 //
 //    }
+
+    public static void setAmvecmPcMode(){
+        try {
+            Process suProcess = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(suProcess.getOutputStream());
+            os.writeBytes("echo 0 > /sys/class/amvecm/pc_mode\n");
+            os.flush();
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
 }

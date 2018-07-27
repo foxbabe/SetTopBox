@@ -90,34 +90,39 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // 启动心跳服务
+                startHeartbeatService();
 
-        // 启动心跳服务
-        startHeartbeatService();
+                if (mSession.getServerInfo() != null) {
+                    startNettyService();
+                    AppApi.resetSmallPlatformInterface(mContext);
 
-        if (mSession.getServerInfo() != null) {
-            startNettyService();
-            AppApi.resetSmallPlatformInterface(this);
+                    // source=3表示是在设置界面手动设置的
+                    if (mSession.getServerInfo().getSource() != 3) {
+                        //  启动service以发现小平台
+                        startSsdpService();
+                        // 去云平台获取小平台地址
+                        getSpIpFromServer();
+                    }
+                } else {
+                    //  启动service以发现小平台
+                    startSsdpService();
+                    // 去云平台获取小平台地址
+                    getSpIpFromServer();
+                }
 
-            // source=3表示是在设置界面手动设置的
-            if (mSession.getServerInfo().getSource() != 3) {
-                //  启动service以发现小平台
-                startSsdpService();
-                // 去云平台获取小平台地址
-                getSpIpFromServer();
+                startDownloadMediaDataService();
+
+                startProduceLogService();
+                startUploadLogService();
+
+                startMulticastSendService();
             }
-        } else {
-            //  启动service以发现小平台
-            startSsdpService();
-            // 去云平台获取小平台地址
-            getSpIpFromServer();
-        }
+        },1000*10);
 
-        startDownloadMediaDataService();
-
-        startProduceLogService();
-        startUploadLogService();
-
-        startMulticastSendService();
     }
 
     /**
