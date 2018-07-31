@@ -175,5 +175,48 @@ public class ConstantValues {
 
     public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
 
+    /**节目数据文件位置*/
+    public static final String PRO_DATA_PATH = "/sdcard/server_data/pro_data";
+    /**宣传片数据文件位置*/
+    public static final String ADV_DATA_PATH = "/sdcard/server_data/adv_data";
+    /**广告数据文件位置*/
+    public static final String ADS_DATA_PATH = "/sdcard/server_data/ads_data";
+
+    /**百度聚屏APP ID*/
+    public static final String BAIDU_ADS_APP_ID = "ce124b3c";
+    /**百度聚屏代码位ID-小热点餐厅包间电视小于40寸*/
+    public static final String BAIDU_ADSLOT_ID1 = "5821973";
+    /**百度聚屏代码位ID-小热点餐厅包间电视41-45寸*/
+    public static final String BAIDU_ADSLOT_ID2 = "5822033";
+    /**百度聚屏代码位ID-小热点餐厅包间电视46-50寸*/
+    public static final String BAIDU_ADSLOT_ID3 = "5822038";
+    /**百度聚屏代码位ID-小热点餐厅包间电视51-55寸*/
+    public static final String BAIDU_ADSLOT_ID4 = "5822040";
+    /**百度聚屏代码位ID-小热点餐厅包间电视55寸以上*/
+    public static final String BAIDU_ADSLOT_ID5 = "5822044";
+    /**百度聚屏最大连续重复次数*/
+    public static final int MAX_BAIDU_ADS_REPEAT_COUNT = 5;
+    /**百度聚屏连续重复达上限后，阻塞接下来的请求的次数*/
+    public static final int BAIDU_ADS_BLOCK_COUNT = 10;
+    /**实体小平台**/
+    public static final String ENTITY="entity";
+    /**虚拟小平台**/
+    public static final String VIRTUAL="virtual";
+
+    public static final String APK_DOWNLOAD_FILENAME =  "updateapksamples.apk";
+    public static final String ROM_DOWNLOAD_FILENAME =  "update_signed.zip";
+    /**推送类型定义,1:RTB推送;2:移动网络4g投屏,3,通过shell命令**/
+    public static final int PUSH_TYPE_RTB_ADS = 1;
+    public static final int PUSH_TYPE_4G_PROJECTION = 2;
+    public static final int PUSH_TYPE_SHELL_COMMAND = 3;
+    public static final int PUSH_TYPE_UPDATE = 4;
+    /**小程序中用到的netty的url地址**/
+    public static final String MINI_PROGRAM_NETTY_URL = "netty-push.littlehotspot.com";
+//    public static final String MINI_PROGRAM_NETTY_URL = "192.168.88.86";
+//    public static final String MINI_PROGRAM_NETTY_URL = "172.16.1.90";
+    /**小程序中用到的netty的端口**/
+//    public static final int MINI_PROGRAM_NETTY_PORT = 8009;
+    public static final int MINI_PROGRAM_NETTY_PORT = 8010;
+
 
 }

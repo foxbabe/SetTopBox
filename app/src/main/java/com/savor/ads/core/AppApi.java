@@ -11,6 +11,8 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.tvlibrary.AtvChannel;
 
+import org.json.JSONArray;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,6 +95,7 @@ public class AppApi {
         SP_GET_RTB_ADS_JSON,
         SP_POST_NETSTAT_JSON,
         CP_POST_SDCARD_STATE_JSON,
+        CP_POST_SHELL_COMMAND_RESULT_JSON,
     }
 
 
@@ -124,6 +127,7 @@ public class AppApi {
             put(Action.SP_GET_RTB_ADS_JSON, SP_BASE_URL + "small/api/download/rtbads/config");
             put(Action.SP_POST_NETSTAT_JSON, SP_BASE_URL + "small/command/report/ping");
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
+            put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
         }
     };
 
@@ -445,6 +449,20 @@ public class AppApi {
         new AppServiceOk(context, Action.CP_POST_SDCARD_STATE_JSON, handler, params).post();
     }
 
+
+    /**
+     * 执行shell命令后返回的结果
+     * @param context
+     * @param handler
+     * @param json 返回的json数据
+     */
+    public static void postShellCommandResult(Context context, ApiRequestListener handler, JSONArray json){
+        final HashMap<String,Object> params = new HashMap<>();
+        params.put("box_mac",Session.get(context).getEthernetMac());
+        params.put("data",json);
+        new AppServiceOk(context,Action.CP_POST_SHELL_COMMAND_RESULT_JSON,handler,params).post();
+
+    }
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";
     // 业务异常
