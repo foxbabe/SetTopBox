@@ -162,9 +162,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
                         LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
 
-
-                        LogFileUtil.writeException(new Throwable("Low spaces in media partition"));
-
                         // 清理可清理的视频等文件
                         cleanMediaWhenSpaceLow();
                         // 提前播放的pro在上面这一步可能已经被删除，这里重新填充节目单并通知播放
@@ -213,7 +210,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 ////                    // 异步更新apk、rom
 ////                    new UpdateUtil(context);
 //
-//                    getPrizeInfo();
+//                  getPrizeInfo();
 //
 //                    LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
 //                    // 同步获取机顶盒基本信息，包括logo、loading图
