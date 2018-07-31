@@ -170,7 +170,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         // 提前播放的pro在上面这一步可能已经被删除，这里重新填充节目单并通知播放
                         notifyToPlay();
                         // 上报服务器 卡满异常
-                       // AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
+                      AppApi.reportSDCardState(context, HandleMediaDataService.this, 2);
                     }else {
 
                         LogFileUtil.write("HandleMediaDataService will start getBoxInfo");
@@ -266,8 +266,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         selectionArgs = new String[]{session.getProPeriod(), session.getProDownloadPeriod(), session.getAdvPeriod(), session.getAdvDownloadPeriod()};
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 
-//        AppUtils.deleteOldMedia(this);
-//        AppUtils.deleteMulticastMedia(this);
+        AppUtils.deleteOldMedia(this);
+        AppUtils.deleteMulticastMedia(this);
         AppUtils.clearPptTmpFiles(HandleMediaDataService.this);
     }
 
