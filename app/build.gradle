@@ -19,7 +19,6 @@ android {
         versionCode 2018072701
         versionName "1.2.8.8"
 
-
         multiDexEnabled true
     }
 
