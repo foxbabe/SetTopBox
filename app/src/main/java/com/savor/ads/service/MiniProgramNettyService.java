@@ -154,6 +154,7 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
             Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
 
             ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
+            LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
         }
 
     }

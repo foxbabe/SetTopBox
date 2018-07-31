@@ -8,6 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +29,7 @@ import com.savor.ads.dialog.BoxInfoDialog;
 import com.savor.ads.dialog.FileCopyDialog;
 import com.savor.ads.dialog.InputBoiteIdDialog;
 import com.savor.ads.dialog.UsbUpdateDialog;
+import com.savor.ads.service.MiniProgramNettyService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -116,9 +120,11 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
         intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
-//        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-//        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
         intentFilter.addDataScheme("file");
 
         registerReceiver(recevierListener, intentFilter);
@@ -167,9 +173,54 @@ public abstract class BaseActivity extends Activity implements InputBoiteIdDialo
                         }
                     }
                     break;
+                case ConnectivityManager.CONNECTIVITY_ACTION:
+                    //获取联网状态的NetworkInfo对象
+                    NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                    if (info!=null){
+                        //如果当前的网络连接成功并且网络连接可用
+                        if (NetworkInfo.State.CONNECTED == info.getState() && info.isAvailable()) {
+                            if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                                AppApi.getScreenIsShowQRCode(mContext,apiRequestListener);
+                            }
+                        }
+                    }
+                    break;
             }
         }
     };
+
+
+    ApiRequestListener apiRequestListener = new ApiRequestListener() {
+        @Override
+        public void onSuccess(AppApi.Action method, Object obj) {
+            switch (method){
+                case CP_MINIPROGRAM_FORSCREEN_JSON:
+                    if (obj instanceof Integer){
+                        int value = (Integer)obj;
+                        if (value==1){
+                            startMiniProgramNettyService();
+                        }
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void onError(AppApi.Action method, Object obj) {
+
+        }
+
+        @Override
+        public void onNetworkFailed(AppApi.Action method) {
+
+        }
+    };
+
+    public void startMiniProgramNettyService(){
+        LogFileUtil.write("MainActivity will startMiniProgramNettyService");
+        Intent intent = new Intent(this, MiniProgramNettyService.class);
+        startService(intent);
+    }
 
     private void handleExtsdMounted() {
         TechnicalLogReporter.sdcardMounted(this);

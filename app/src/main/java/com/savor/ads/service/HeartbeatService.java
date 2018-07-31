@@ -115,7 +115,9 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
         } while (true);
 
         //  启动时立即心跳一次
+        LogFileUtil.write("开机立刻上报心跳和调用是否显示小程序码接口一次");
         doHeartbeat();
+        doShowMiniProgramQRCode();
         monitorDownloadSpeed();
         if (!Session.get(this).isUseVirtualSp()) {
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -141,7 +143,7 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                 mHeartbeatElapsedTime = 0;
 
                 doHeartbeat();
-
+                doShowMiniProgramQRCode();
                 try {
                     reportMediaDetail();
                 } catch (Exception e) {
@@ -181,6 +183,14 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
         AppApi.heartbeat(this, this);
     }
 
+    private void doShowMiniProgramQRCode(){
+        LogFileUtil.write("开机立刻调用一次展示小程序接口：当前小程序码状态："+Session.get(this).isShowMiniProgramIcon());
+        boolean isShow = Session.get(this).isShowMiniProgramIcon();
+        if (!isShow){
+            AppApi.getScreenIsShowQRCode(this,this);
+        }
+
+    }
 
     private void monitorDownloadSpeed(){
         mHandler.postDelayed(mRunnable,0);
@@ -463,7 +473,22 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
             case CP_POST_PLAY_LIST_JSON:
                 LogUtils.d("上报播放列表成功");
                 break;
+            case CP_MINIPROGRAM_FORSCREEN_JSON:
+                if (obj instanceof Integer){
+                    int value = (Integer)obj;
+                    if (value==1){
+                        LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
+                        startMiniProgramNettyService();
+                    }
+                }
+                break;
         }
+    }
+
+    public void startMiniProgramNettyService(){
+        LogFileUtil.write("HeartbeatService startMiniProgramNettyService");
+        Intent intent = new Intent(this, MiniProgramNettyService.class);
+        startService(intent);
     }
 
     @Override

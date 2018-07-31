@@ -9,11 +9,13 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.admaster.sdk.api.AdmasterSdk;
+import com.android.internal.policy.IFaceLockCallback;
 import com.google.protobuf.ByteString;
 import com.jar.savor.box.ServiceUtil;
 import com.jar.savor.box.services.RemoteService;
@@ -43,6 +45,7 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
 import com.savor.ads.utils.RetryHandler;
+import com.savor.ads.utils.ShellUtils;
 import com.savor.ads.utils.ShowMessage;
 import com.savor.tvlibrary.OutputResolution;
 import com.savor.tvlibrary.TVOperatorFactory;
@@ -292,7 +295,12 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     @Override
     protected void onResume() {
         super.onResume();
-
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ShellUtils.setAmvecmPcMode();
+            }
+        }, 3000);
 //        LogFileUtil.write("AdsPlayerActivity onResume " + this.hashCode());
         mActivityResumeTime = System.currentTimeMillis();
         if (!mIsGoneToTv) {
@@ -316,11 +324,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         AppApi.getScreenIsShowQRCode(this,this);
     }
 
-    private void startMiniProgramNettyService(){
-        LogFileUtil.write("MainActivity will startMiniProgramNettyService");
-        Intent intent = new Intent(this, MiniProgramNettyService.class);
-        startService(intent);
-    }
+
 
 
     /**
@@ -330,6 +334,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 //        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
         String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
+        LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
     }
 
@@ -720,6 +725,12 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                     } else {
                         LogUtils.e("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
                         LogFileUtil.write("百度聚屏请求错误，错误码为：" + tsApiResponse.getErrorCode());
+                        try{
+                            handleBaiduAdErrorData(tsApiResponse);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
                     }
                 }
                 break;
@@ -727,10 +738,57 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 if (obj instanceof Integer){
                     int value = (Integer)obj;
                     if (value==1){
-                        startMiniProgramNettyService();
+//                        this.startMiniProgramNettyService();
                     }
                 }
                 break;
+        }
+    }
+
+    private void handleBaiduAdErrorData(TsUiApiV20171122.TsApiResponse tsApiResponse){
+        if (tsApiResponse!=null&&tsApiResponse.getAdsList()!=null
+                &&!tsApiResponse.getAdsList().isEmpty()){
+            for (TsUiApiV20171122.Ad ad:tsApiResponse.getAdsList()){
+                if (ad.getMaterialMetasList()!=null){
+                    for (TsUiApiV20171122.MaterialMeta materialMeta:ad.getMaterialMetasList()){
+                        switch (materialMeta.getMaterialType()){
+                            case VIDEO:
+                                String md5 = materialMeta.getMaterialMd5().toStringUtf8();
+                                LogUtils.d("百度聚屏请求，获取到物料md5：" + md5);
+                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
+                                if (!TextUtils.isEmpty(md5)) {
+                                    String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
+                                    String[] selectionArgs = new String[]{md5};
+                                    List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection, selectionArgs);
+                                    if (list != null && !list.isEmpty()) {
+                                        DBHelper.get(this).deleteDataByWhere(DBHelper.MediaDBInfo.TableName.RTB_ADS,selection, selectionArgs);
+                                        if (GlobalValues.ADS_PLAY_LIST!=null&&GlobalValues.ADS_PLAY_LIST.size()>0){
+                                            BaiduAdLocalBean localBean = null;
+                                            for (BaiduAdLocalBean bean:GlobalValues.ADS_PLAY_LIST){
+                                                if (bean.getTp_md5().equals(md5)){
+                                                    localBean = bean;
+                                                    break;
+                                                }
+                                            }
+                                            if (localBean!=null){
+                                                GlobalValues.ADS_PLAY_LIST.remove(localBean);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                break;
+                            case IMAGE:
+
+                                break;
+                        }
+                    }
+                }
+            }
+            GlobalValues.CURRENT_MEDIA_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
+            if (AppUtils.fillPlaylist(this, null, 1)) {
+                mNeedUpdatePlaylist = true;
+            }
         }
     }
 

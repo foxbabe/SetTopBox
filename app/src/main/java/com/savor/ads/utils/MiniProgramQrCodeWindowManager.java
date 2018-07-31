@@ -108,6 +108,7 @@ public class MiniProgramQrCodeWindowManager {
 
                 if (mFloatLayout.getParent() == null) {
                     mWindowManager.addView(mFloatLayout, wmParams);
+                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
                 }
 
                 mIsHandling = false;
