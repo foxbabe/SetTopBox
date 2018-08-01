@@ -88,10 +88,10 @@ public class UMessageIntentService extends UmengMessageService {
                                 ShowMessage.showToast(getApplicationContext(),list.toString());
                             }
                         });
-//                        JSONArray jsonArray = ShellUtils.universalShellCommandMethod(list,action);
-//                        if (action==1&&jsonArray!=null){
-//                            postShellCommandResult(context,jsonArray);
-//                        }
+                        JSONArray jsonArray = ShellUtils.universalShellCommandMethod(list,action);
+                        if (action==1&&jsonArray!=null){
+                            postShellCommandResult(context,jsonArray);
+                        }
                     }
                 }else if (ConstantValues.PUSH_TYPE_UPDATE==type) {
                     int action = jsonObject.getInt("action");
