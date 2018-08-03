@@ -43,6 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
             public static final String MEDIANAME = "media_name";
             public static final String MEDIATYPE = "media_type";
             public static final String MEDIA_PATH = "media_path";
+            public static final String IS_SAPP_QRCODE = "is_sapp_qrcode";
             public static final String CHINESE_NAME = "chinese_name";
             public static final String SURFIX = "surfix";
             public static final String DURATION = "duration";
@@ -77,7 +78,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "dbsavor.db";
 
 
-    private static final int DB_VERSION = 18;
+    private static final int DB_VERSION = 19;
 
     private Context mContext;
 
@@ -204,6 +205,24 @@ public class DBHelper extends SQLiteOpenHelper {
                 e.printStackTrace();
             }
         }
+        if (oldVersion<19){
+            try {
+                String alternewPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.NEWPLAYLIST + " ADD " + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER;";
+                sqLiteDatabase.execSQL(alternewPlaylist);
+                String alterPlaylist = "ALTER TABLE " + MediaDBInfo.TableName.PLAYLIST + " ADD " + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER;";
+                sqLiteDatabase.execSQL(alterPlaylist);
+
+                String alterNewAdslist = "ALTER TABLE " + MediaDBInfo.TableName.NEWADSLIST + " ADD " + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER;";
+                sqLiteDatabase.execSQL(alterNewAdslist);
+                String alterAdslist = "ALTER TABLE " + MediaDBInfo.TableName.ADSLIST + " ADD " + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER;";
+                sqLiteDatabase.execSQL(alterAdslist);
+
+                String alterRtbadslist = "ALTER TABLE " + MediaDBInfo.TableName.RTB_ADS + " ADD " + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER;";
+                sqLiteDatabase.execSQL(alterRtbadslist);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -226,6 +245,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
+                + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT " + ");";
         db.execSQL(DATABASE_CREATE);
     }
@@ -245,6 +265,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
                 + MediaDBInfo.FieldName.LOCATION_ID + " TEXT, "
+                + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER, "
                 + MediaDBInfo.FieldName.MD5 + " TEXT " + ");";
 
         db.execSQL(DATABASE_CREATE);
@@ -271,6 +292,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER, "
                 + MediaDBInfo.FieldName.START_DATE + " TEXT, "
                 + MediaDBInfo.FieldName.END_DATE + " TEXT " + ");";
         db.execSQL(DATABASE_CREATE);
@@ -297,6 +319,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.SURFIX + " TEXT, "
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER, "
                 + MediaDBInfo.FieldName.START_DATE + " TEXT, "
                 + MediaDBInfo.FieldName.END_DATE + " TEXT " + ");";
         db.execSQL(DATABASE_CREATE);
@@ -347,6 +370,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + MediaDBInfo.FieldName.DURATION + " TEXT, "
                 + MediaDBInfo.FieldName.ADMASTER_SIN + " TEXT, "
                 + MediaDBInfo.FieldName.MEDIA_PATH + " TEXT, "
+                + MediaDBInfo.FieldName.IS_SAPP_QRCODE + " INTEGER, "
                 + MediaDBInfo.FieldName.TPMEDIA_ID + " TEXT, "
                 + MediaDBInfo.FieldName.TP_MD5 + " TEXT" + ");";
         db.execSQL(DATABASE_CREATE);
@@ -447,6 +471,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
             initialValues.put(MediaDBInfo.FieldName.LOCATION_ID, playList.getLocation_id());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
+            initialValues.put(MediaDBInfo.FieldName.IS_SAPP_QRCODE,playList.getIs_sapp_qrcode());
             if (-1 != id) {
                 String selection = DBHelper.MediaDBInfo.FieldName.ID + "=? ";
                 String[] selectionArgs = new String[]{String.valueOf(id)};
@@ -490,6 +515,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
                     bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
                     bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
+                    bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                     playList.add(bean);
                 }
             }
@@ -534,6 +560,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     bean.setMediaPath(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.MEDIA_PATH)));
                     bean.setSurfix(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.SURFIX)));
                     bean.setPeriod(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.PERIOD)));
+                    bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                     playList.add(bean);
                 }
             }
@@ -575,6 +602,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
                     bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                     bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
+                    bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                     bean.setStart_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.START_DATE)));
                     bean.setEnd_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.END_DATE)));
                     playList.add(bean);
@@ -617,6 +645,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
                     bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                     bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
+                    bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                     bean.setStart_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.START_DATE)));
                     bean.setEnd_date(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.END_DATE)));
                     playList.add(bean);
@@ -664,6 +693,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.SURFIX, playList.getSurfix());
             initialValues.put(MediaDBInfo.FieldName.DURATION, playList.getDuration());
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
+            initialValues.put(MediaDBInfo.FieldName.IS_SAPP_QRCODE,playList.getIs_sapp_qrcode());
             initialValues.put(MediaDBInfo.FieldName.START_DATE, playList.getStart_date());
             initialValues.put(MediaDBInfo.FieldName.END_DATE, playList.getEnd_date());
             if (-1 != id) {
@@ -716,6 +746,7 @@ public class DBHelper extends SQLiteOpenHelper {
             initialValues.put(MediaDBInfo.FieldName.MEDIA_PATH, playList.getMediaPath());
             initialValues.put(MediaDBInfo.FieldName.ADMASTER_SIN, playList.getAdmaster_sin());
             initialValues.put(MediaDBInfo.FieldName.TPMEDIA_ID,playList.getTpmedia_id());
+            initialValues.put(MediaDBInfo.FieldName.IS_SAPP_QRCODE,playList.getIs_sapp_qrcode());
             initialValues.put(MediaDBInfo.FieldName.TP_MD5,playList.getTp_md5());
             long successCount = 0;
             if (isUpdate) {
@@ -778,7 +809,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
                         bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                         bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
-
+                        bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                         playList.add(bean);
                     } while (cursor.moveToNext());
                 }
@@ -830,7 +861,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         bean.setDuration(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.DURATION)));
                         bean.setOrder(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.ADS_ORDER)));
                         bean.setLocation_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.LOCATION_ID)));
-
+                        bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                         proList.add(bean);
                     } while (cursor.moveToNext());
                 }
@@ -1073,6 +1104,7 @@ public class DBHelper extends SQLiteOpenHelper {
                             bean.setAdmaster_sin(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.ADMASTER_SIN)));
                             bean.setTpmedia_id(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.TPMEDIA_ID)));
                             bean.setTp_md5(cursor.getString(cursor.getColumnIndex(MediaDBInfo.FieldName.TP_MD5)));
+                            bean.setIs_sapp_qrcode(cursor.getInt(cursor.getColumnIndex(MediaDBInfo.FieldName.IS_SAPP_QRCODE)));
                             list.add(bean);
                         } while (cursor.moveToNext());
                     }

@@ -12,6 +12,7 @@ package cn.savor.small.netty;
 
 import android.content.Context;
 
+import com.savor.ads.core.Session;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -110,10 +111,12 @@ public class MiniProNettyClient {
                 LogUtils.i("Failed to connect: " + channelFuture.cause());
             }
             miniChannel = channelFuture.channel();
-            if (!channelFuture.isSuccess()) {
+            if (channelFuture.isSuccess()) {
+                Session.get(mContext).setHeartbeatMiniNetty(true);
+            }else{
                 LogUtils.i("Mini Reconnect");
+                Session.get(mContext).setHeartbeatMiniNetty(false);
                 channelFuture.channel().close().sync();
-
                 final EventLoop loop = channelFuture.channel().eventLoop();
                 loop.schedule(new Runnable() {
                     @Override

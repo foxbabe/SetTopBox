@@ -47,8 +47,8 @@ public class MiniProgramQrCodeWindowManager {
 
 //        mHandler.removeCallbacks(mHideRunnable);
 //        mHandler.postDelayed(mHideRunnable, 10 * 1000);
-        boolean isShowing = Session.get(context).isShowMiniProgramIcon();
-        if (mIsHandling||isShowing) {
+
+        if (mIsHandling||mIsAdded) {
             return;
         }
         mIsHandling = true;
@@ -65,7 +65,7 @@ public class MiniProgramQrCodeWindowManager {
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         //调整悬浮窗显示的停靠位置为左侧置顶
-        wmParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+        wmParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = DensityUtil.dip2px(context, 10);
         wmParams.y = DensityUtil.dip2px(context, 10);
@@ -94,11 +94,12 @@ public class MiniProgramQrCodeWindowManager {
     }
 
     private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final WindowManager.LayoutParams wmParams) {
-        hideQrCode();
+
         GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
             @Override
             public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
                 mIsHandling = false;
+                mIsAdded = false;
                 ShowMessage.showToast(context, "加载二维码失败");
                 return false;
             }
@@ -112,51 +113,21 @@ public class MiniProgramQrCodeWindowManager {
                 }
 
                 mIsHandling = false;
-//                mIsAdded = true;
-                Session.get(context).setShowMiniProgramIcon(true);
+                mIsAdded = true;
                 return false;
             }
         });
-
-//        if (!TextUtils.isEmpty(code)) {
-//            StringBuilder builder = new StringBuilder();
-//            for(int i = 0; i < code.length(); i++) {
-//                builder.append(code.charAt(i));
-//                if(i + 1 < code.length()) {
-//                    builder.append(" ");
-//                }
-//            }
-//            code = builder.toString();
-//        }
-//        codeTv.setText(code);
-//
-//        if (AppUtils.isWifiEnabled(context)) {
-//            wifiNameTv.setText(ssid);
-//        } else {
-//            wifiNameTv.setText(ssid);
-//        }
-//
-//        if (mFloatLayout.getParent() == null) {
-//            mWindowManager.addView(mFloatLayout, wmParams);
-//        }
-        mIsHandling = false;
-        mIsAdded = true;
     }
 
     private Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
             try {
-                if (context!=null){
-                    boolean isShowing = Session.get(context).isShowMiniProgramIcon();
-                    if (isShowing){
-                        if (mFloatLayout!=null&&mFloatLayout.getParent() != null) {
-                            //移除悬浮窗口
-                            mWindowManager.removeViewImmediate(mFloatLayout);
-                            Session.get(context).setShowMiniProgramIcon(false);
-                        }
-                    }
+                if (context!=null&&mFloatLayout!=null) {
+                    //移除悬浮窗口
+                    mWindowManager.removeViewImmediate(mFloatLayout);
                 }
+
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -166,8 +137,12 @@ public class MiniProgramQrCodeWindowManager {
     };
 
     public void hideQrCode() {
-        mHandler.removeCallbacks(mHideRunnable);
-        mHandler.post(mHideRunnable);
+        if (mIsAdded) {
+            mIsAdded = false;
+            mHandler.removeCallbacks(mHideRunnable);
+            mHandler.post(mHideRunnable);
+        }
+
 
 
     }

@@ -48,6 +48,8 @@ public class MediaLibBean implements Serializable {
     private String oss_path;
     /**李召返回，暂未使用**/
     private String oss_etag;
+    /**0：不显示  1：显示**/
+    private int is_sapp_qrcode;
     public int getId() {
         return id;
     }
@@ -232,6 +234,14 @@ public class MediaLibBean implements Serializable {
 
     public void setOss_etag(String oss_etag) {
         this.oss_etag = oss_etag;
+    }
+
+    public int getIs_sapp_qrcode() {
+        return is_sapp_qrcode;
+    }
+
+    public void setIs_sapp_qrcode(int is_sapp_qrcode) {
+        this.is_sapp_qrcode = is_sapp_qrcode;
     }
 }
 

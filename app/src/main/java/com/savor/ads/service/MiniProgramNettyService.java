@@ -119,7 +119,8 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
                           file.delete();
                       }
                      OSSUtils ossUtils = new OSSUtils(context,
-                            BuildConfig.OSS_BUCKET_NAME,
+//                            BuildConfig.OSS_BUCKET_NAME,
+                            "redian-produce",
                             url,
                             file);
                      isDownloaded = ossUtils.syncDownload();
@@ -149,13 +150,13 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
         //TODO:当建立NETTY连接以后请求接口获取小程序地址
 //        getMiniProgramQRCode();
         LogUtils.i("CurrentActivity.................." + ActivitiesManager.getInstance().getCurrentActivity());
-
-        if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
-            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-
-            ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
-            LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
-        }
+        session.setHeartbeatMiniNetty(true);
+//        if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
+//            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
+//
+//            ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
+//            LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
+//        }
 
     }
 
@@ -170,7 +171,7 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
     public void onMiniCloseIcon() {
         Activity activity = ActivitiesManager.getInstance().getSpecialActivity(AdsPlayerActivity.class);
         if (activity!=null && activity instanceof AdsPlayerActivity){
-            ((AdsPlayerActivity) activity).hideMiniProgramQrCodeWindow();
+            ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
         }
     }
 

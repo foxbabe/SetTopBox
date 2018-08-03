@@ -185,10 +185,9 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
     private void doShowMiniProgramQRCode(){
         LogFileUtil.write("开机立刻调用一次展示小程序接口：当前小程序码状态："+Session.get(this).isShowMiniProgramIcon());
-        boolean isShow = Session.get(this).isShowMiniProgramIcon();
-        if (!isShow){
-            AppApi.getScreenIsShowQRCode(this,this);
-        }
+
+        AppApi.getScreenIsShowQRCode(this,this);
+
 
     }
 
@@ -478,7 +477,12 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                     int value = (Integer)obj;
                     if (value==1){
                         LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
-                        startMiniProgramNettyService();
+                        Session.get(HeartbeatService.this).setShowMiniProgramIcon(true);
+                        if (!Session.get(HeartbeatService.this).isHeartbeatMiniNetty()){
+                            startMiniProgramNettyService();
+                        }
+                    }else{
+                        Session.get(HeartbeatService.this).setShowMiniProgramIcon(false);
                     }
                 }
                 break;
