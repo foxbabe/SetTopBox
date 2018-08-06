@@ -119,8 +119,7 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
                           file.delete();
                       }
                      OSSUtils ossUtils = new OSSUtils(context,
-//                            BuildConfig.OSS_BUCKET_NAME,
-                            "redian-produce",
+                            BuildConfig.OSS_BUCKET_NAME,
                             url,
                             file);
                      isDownloaded = ossUtils.syncDownload();

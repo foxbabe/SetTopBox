@@ -334,8 +334,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
      * 显示小程序二维码
      */
     public void showMiniProgramQrCodeWindow() {
-        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
-//        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
