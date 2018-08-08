@@ -499,6 +499,7 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
                             if (isOverlap(face)) {
                                 // 不认为是有效的观看姿态
                                 Log.e("---------------------", "检测到侧脸！！！！");
+
                             } else {
                                 long now = System.currentTimeMillis();
 
@@ -572,10 +573,18 @@ public class FaceDetectService extends Service implements Camera.PreviewCallback
         double distanceRightEye = Math.hypot(face.points[10].x - face.points[11].x, face.points[10].y - face.points[11].y);
         Log.d("-----", "distance=" + distanceLeftEye);
         // 侧头角度大于70度或仰头大于45度时认为不在观看
-        if (/*Math.abs(yaw) > Math.PI / 3 || Math.abs(pitch) > Math.PI / 4*/
-                distanceLeftEye <= face.rect.width() / 10 || distanceRightEye <= face.rect.width() / 10) {
+//        if (/*Math.abs(yaw) > Math.PI / 3 || */
+//                Math.abs(pitch) > Math.PI / 4 || distanceLeftEye <= face.rect.width() / 10 || distanceRightEye <= face.rect.width() / 10) {
+//            overlap = true;
+//        }
+        if ( Math.abs(yaw) > Math.PI / 3 || Math.abs(pitch) > Math.PI / 5) {
             overlap = true;
+            LogFileUtil.write("----------------   检测到低头或仰头！！！！");
+        }else if ( distanceLeftEye <= face.rect.width() / 10 || distanceRightEye <= face.rect.width() / 10) {
+            overlap = true;
+            LogFileUtil.write("----------------   检测到侧脸！！！！");
         }
+
         return overlap;
     }
 
