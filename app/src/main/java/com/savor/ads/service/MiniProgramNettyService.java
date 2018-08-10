@@ -4,17 +4,27 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
+import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.savor.ads.BuildConfig;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.activity.MainActivity;
+import com.savor.ads.bean.MiniProgramProjection;
+import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.dialog.AtlasDialog;
+import com.savor.ads.dialog.AtlasDialog.UpdateDownloadedProgress;
 import com.savor.ads.oss.OSSUtils;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
@@ -23,14 +33,17 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.MiniProgramQrCodeWindowManager;
+import com.savor.ads.utils.ShowMessage;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import cn.savor.small.netty.MiniProNettyClient;
+import cn.savor.small.netty.MiniProNettyClient.MiniNettyMsgCallback;
 import cn.savor.small.netty.NettyClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.handler.codec.memcache.binary.BinaryMemcacheRequestEncoder;
@@ -39,13 +52,14 @@ import io.netty.handler.codec.memcache.binary.BinaryMemcacheRequestEncoder;
  * 启动小程序Netty服务
  * Created by zhanghq on 2018/07/09.
  */
-public class MiniProgramNettyService extends IntentService implements MiniProNettyClient.MiniNettyMsgCallback {
+public class MiniProgramNettyService extends IntentService implements MiniNettyMsgCallback{
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
      */
     private Context context;
     private Session session;
+    AtlasDialog atlasDialog =null;
     public MiniProgramNettyService() {
         super("");
     }
@@ -55,7 +69,7 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
         super.onCreate();
         context = this;
         session = Session.get(context);
-
+        atlasDialog = new AtlasDialog(context);
     }
 
     @Override
@@ -93,7 +107,9 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
 
     @Override
     public void onReceiveMiniServerMsg(String msg, String content) {
-        //action字段  1:呼玛  2：投屏：3 退出投屏
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        //action字段  1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）
         if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
             if (!TextUtils.isEmpty(content)){
                 try {
@@ -116,13 +132,14 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
                       String path = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +fileName;
                       File file = new File(path);
                       if (file.exists()){
-                          file.delete();
+                          isDownloaded = true;
+                      }else{
+                          OSSUtils ossUtils = new OSSUtils(context,
+                                  BuildConfig.OSS_BUCKET_NAME,
+                                  url,
+                                  file);
+                          isDownloaded = ossUtils.syncDownload();
                       }
-                     OSSUtils ossUtils = new OSSUtils(context,
-                            BuildConfig.OSS_BUCKET_NAME,
-                            url,
-                            file);
-                     isDownloaded = ossUtils.syncDownload();
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
 //                        if (1==push4GProjection.getResource_type()){
@@ -135,6 +152,80 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
                      }
                     }else if (action==3){
                         ProjectOperationListener.getInstance(context).stop(GlobalValues.CURRENT_PROJECT_ID);
+                    }else if (action==4){
+
+                        final MiniProgramProjection miniProgramProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
+                        Handler handler=new Handler(Looper.getMainLooper());
+                        if (miniProgramProjection==null|| TextUtils.isEmpty(miniProgramProjection.getUrl())){
+                            return;
+                        }
+                        final String openid = miniProgramProjection.getOpenid();
+                        final int img_nums = miniProgramProjection.getImg_nums();
+                        final String forscreen_id = miniProgramProjection.getForscreen_id();
+                        final String url = miniProgramProjection.getUrl();
+                        if (miniProgramProjection.getImg_nums()>1){
+
+                            handler.post(new Runnable(){
+                                public void run(){
+
+                                    if (!atlasDialog.isShowing()){
+                                        atlasDialog.show();
+                                    }
+                                    if(!TextUtils.isEmpty(GlobalValues.CURRENT_OPEN_ID)
+                                            &&!openid.equals(GlobalValues.CURRENT_OPEN_ID)){
+                                        GlobalValues.PROJECT_IMAGES.clear();
+                                        GlobalValues.CURRENT_OPEN_ID = openid;
+                                        GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                    }else if (!TextUtils.isEmpty(GlobalValues.CURRENT_OPEN_ID)
+                                            &&openid.equals(GlobalValues.CURRENT_OPEN_ID)){
+                                        if (!GlobalValues.CURRRNT_PROJECT_ID.equals(forscreen_id)){
+                                            GlobalValues.PROJECT_IMAGES.clear();
+                                            GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                        }
+                                    }else{
+                                        GlobalValues.PROJECT_IMAGES.clear();
+                                        GlobalValues.CURRENT_OPEN_ID = openid;
+                                        GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                    }
+                                    if (GlobalValues.PROJECT_IMAGES.size()>=img_nums){
+                                        atlasDialog.initContent(img_nums,GlobalValues.PROJECT_IMAGES.size());
+                                    }else{
+                                        atlasDialog.initContent(img_nums,GlobalValues.PROJECT_IMAGES.size()+1);
+                                    }
+                                    atlasDialog.initnum(GlobalValues.PROJECT_IMAGES.size()+1);
+                                    atlasDialog.projectTipAnimateIn();
+
+                                }
+                            });
+                        }
+
+                        boolean isDownloaded=false;
+                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +miniProgramProjection.getFilename();
+                        File file = new File(path);
+                        if (file.exists()){
+                            isDownloaded = true;
+                        }else{
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    url,
+                                    file);
+                            isDownloaded = ossUtils.syncDownload();
+                        }
+                        if (isDownloaded&&img_nums>1){
+                            if (!TextUtils.isEmpty(openid)){
+                                GlobalValues.PROJECT_IMAGES.add(path);
+                            }
+                            if (img_nums==GlobalValues.PROJECT_IMAGES.size()){
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        atlasDialog.projectTipAnimateOut();
+                                    }
+                                },1000 * 5);
+                            }
+                        }else if (isDownloaded&&miniProgramProjection.getImg_nums()==1){
+                            ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -193,4 +284,6 @@ public class MiniProgramNettyService extends IntentService implements MiniProNet
 
         }
     };
+
+
 }
