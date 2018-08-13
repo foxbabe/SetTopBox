@@ -143,7 +143,11 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
 //                        if (1==push4GProjection.getResource_type()){
-                            ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                         if (!TextUtils.isEmpty(GlobalValues.PROJECTION_WORDS)){
+                             ProjectOperationListener.getInstance(context).showImage(1,path,true,GlobalValues.PROJECTION_WORDS);
+                         }else{
+                             ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                         }
 //                        }else if (2==push4GProjection.getResource_type()){
 //                            ProjectOperationListener.getInstance(context).showVideo(path,0,true);
 //                        }
@@ -155,7 +159,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                     }else if (action==4){
 
                         final MiniProgramProjection miniProgramProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
-                        Handler handler=new Handler(Looper.getMainLooper());
+                        final Handler handler=new Handler(Looper.getMainLooper());
                         if (miniProgramProjection==null|| TextUtils.isEmpty(miniProgramProjection.getUrl())){
                             return;
                         }
@@ -163,6 +167,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         final int img_nums = miniProgramProjection.getImg_nums();
                         final String forscreen_id = miniProgramProjection.getForscreen_id();
                         final String url = miniProgramProjection.getUrl();
+                        final String words = miniProgramProjection.getForscreen_char();
                         if (miniProgramProjection.getImg_nums()>1){
 
                             handler.post(new Runnable(){
@@ -176,24 +181,28 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                         GlobalValues.PROJECT_IMAGES.clear();
                                         GlobalValues.CURRENT_OPEN_ID = openid;
                                         GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                        GlobalValues.PROJECTION_WORDS = words;
                                     }else if (!TextUtils.isEmpty(GlobalValues.CURRENT_OPEN_ID)
                                             &&openid.equals(GlobalValues.CURRENT_OPEN_ID)){
                                         if (!GlobalValues.CURRRNT_PROJECT_ID.equals(forscreen_id)){
                                             GlobalValues.PROJECT_IMAGES.clear();
                                             GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                            GlobalValues.PROJECTION_WORDS = words;
                                         }
                                     }else{
                                         GlobalValues.PROJECT_IMAGES.clear();
                                         GlobalValues.CURRENT_OPEN_ID = openid;
                                         GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
+                                        GlobalValues.PROJECTION_WORDS = words;
                                     }
                                     if (GlobalValues.PROJECT_IMAGES.size()>=img_nums){
                                         atlasDialog.initContent(img_nums,GlobalValues.PROJECT_IMAGES.size());
                                     }else{
                                         atlasDialog.initContent(img_nums,GlobalValues.PROJECT_IMAGES.size()+1);
                                     }
-                                    atlasDialog.initnum(GlobalValues.PROJECT_IMAGES.size()+1);
+
                                     atlasDialog.projectTipAnimateIn();
+                                    atlasDialog.initnum(GlobalValues.PROJECT_IMAGES.size()+1);
 
                                 }
                             });
@@ -215,16 +224,17 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             if (!TextUtils.isEmpty(openid)){
                                 GlobalValues.PROJECT_IMAGES.add(path);
                             }
+
                             if (img_nums==GlobalValues.PROJECT_IMAGES.size()){
                                 handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         atlasDialog.projectTipAnimateOut();
                                     }
-                                },1000 * 5);
+                                },1000 * 2);
                             }
                         }else if (isDownloaded&&miniProgramProjection.getImg_nums()==1){
-                            ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                            ProjectOperationListener.getInstance(context).showImage(1,path,true,words);
                         }
                     }
                 } catch (JSONException e) {

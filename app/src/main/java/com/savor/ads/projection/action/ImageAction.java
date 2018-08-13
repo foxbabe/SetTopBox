@@ -22,6 +22,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
     private transient Context mContext;
     private int imageType;
     private String imagePath;
+    private String projectionWords;
     private int rotation;
     private boolean isThumbnail;
     private String seriesId;
@@ -48,6 +49,17 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.isThumbnail = isThumbnail;
     }
 
+    public ImageAction(Context context, int imageType, String imagePath,boolean isThumbnail,String words) {
+        super();
+
+        mPriority = ProjectPriority.HIGH;
+        mContext = context;
+        this.imageType = imageType;
+        this.imagePath = imagePath;
+        this.isThumbnail = isThumbnail;
+        this.projectionWords = words;
+    }
+
     @Override
     public void execute() {
         onActionBegin();
@@ -56,6 +68,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         Bundle data = new Bundle();
         data.putString(ScreenProjectionActivity.EXTRA_TYPE, ConstantValues.PROJECT_TYPE_PICTURE);
         data.putString(ScreenProjectionActivity.EXTRA_IMAGE_PATH,imagePath);
+        data.putString(ScreenProjectionActivity.EXTRA_PROJECTION_WORDS,projectionWords);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_ROTATION, rotation);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);

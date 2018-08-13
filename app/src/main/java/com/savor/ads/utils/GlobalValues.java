@@ -79,8 +79,10 @@ public class GlobalValues <T extends MediaLibBean> {
 
     /**当前投屏人的微信ID**/
     public static String CURRENT_OPEN_ID;
-    /**当前投屏操作的ID**/
+    /**本次投屏操作的唯一标示ID**/
     public static String CURRRNT_PROJECT_ID;
+    /**本次投屏文字**/
+    public static String PROJECTION_WORDS;
     /**当前投屏人的投的照片的集合**/
     public static ArrayList<String> PROJECT_IMAGES=new ArrayList<>();
 }

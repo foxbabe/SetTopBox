@@ -140,7 +140,7 @@ public class DashboardView4 extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.color_white));
+        canvas.drawColor(ContextCompat.getColor(getContext(), R.color.transparent));
         /**
          * 画圆弧
          */
