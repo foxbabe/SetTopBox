@@ -55,6 +55,7 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
         // 映射真实健值
         mappingKeyCode();
         Session.get(this).setShowMiniProgramIcon(false);
+        Session.get(this).setHeartbeatMiniNetty(false);
         mQrCodeWindowManager = new QrCodeWindowManager();
         miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
         // 启动投屏类操作处理的Service
@@ -333,14 +334,15 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
      * 显示小程序二维码
      */
     public void showMiniProgramQrCodeWindow() {
-
-//        boolean isContain = ActivitiesManager.getInstance().contains(AdsPlayerActivity.class);
-//        if (isContain){
-//
-//        }
-        LogUtils.i("showMiniProgramQrCodeWindow..................");
-        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
+        LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
+        LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
         miniProgramQrCodeWindowManager.showQrCode(this,url);
+    }
+
+    public void hideMiniProgramQrCodeWindow() {
+        LogUtils.i("closeMiniProgramQrCodeWindow..................");
+        miniProgramQrCodeWindowManager.hideQrCode();
     }
 
     private void startScreenProjectionService() {

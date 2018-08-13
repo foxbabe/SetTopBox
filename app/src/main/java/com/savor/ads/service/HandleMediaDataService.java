@@ -991,7 +991,10 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     mProCompletedPeriod = proPeriod;
                     continue;
                 }
-
+                String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
+                        DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
+                String[] selectionArgs = new String[]{ConstantValues.PRO, proPeriod};
+                dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,selection, selectionArgs);
                 // 设置下载中期号
                 session.setProDownloadPeriod(proPeriod);
 

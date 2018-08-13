@@ -179,6 +179,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
         if (miniCallback!=null){
             miniCallback.onMiniCloseIcon();
         }
+        Session.get(mContext).setHeartbeatMiniNetty(false);
         LogUtils.i("客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
         LogFileUtil.write("NettyClientHandler 客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
@@ -198,6 +199,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
         LogUtils.i("channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
         LogFileUtil.write("MiniNettyClientHandler channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
+        Session.get(mContext).setHeartbeatMiniNetty(false);
         if (miniCallback!=null){
             miniCallback.onMiniCloseIcon();
         }

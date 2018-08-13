@@ -319,29 +319,12 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 }
             }, 1000 * DELAY_TIME);
         }
-        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
 
         AppApi.getScreenIsShowQRCode(this,this);
     }
 
 
 
-
-    /**
-     * 显示小程序二维码
-     */
-    public void showMiniProgramQrCodeWindow() {
-//        String url = "https://mobile.littlehotspot.com/Smallapp/index/getBoxQr?box_mac=00226D2FB21D";
-        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(mContext).getEthernetMac();
-        LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
-        LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
-        miniProgramQrCodeWindowManager.showQrCode(this,url);
-    }
-
-    public void hideMiniProgramQrCodeWindow() {
-        LogUtils.i("closeMiniProgramQrCodeWindow..................");
-        miniProgramQrCodeWindowManager.hideQrCode();
-    }
     @Override
     protected void onStart() {
 //        LogFileUtil.write("AdsPlayerActivity onStart " + this.hashCode());
@@ -353,19 +336,6 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 //        LogFileUtil.write("AdsPlayerActivity onRestart " + this.hashCode());
         super.onRestart();
 
-//        if (!TextUtils.isEmpty(mSession.getAdvertMediaPeriod())) {
-//            // Resume时判断是否期号已改变，改变的话去查新的播放表
-//            if (mSession.getAdvertMediaPeriod().equals(mPeriod)) {
-////                if (!mIsFirstResume) {
-
-//                    mSavorVideoView.onResume();
-
-////                }
-//            } else {
-//                mPeriod = mSession.getAdvertMediaPeriod();
-//                checkAndPlay();
-//            }
-//        }
     }
 
     @Override
@@ -576,6 +546,19 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     public boolean onMediaPrepared(int index) {
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
+            if (mSession.isShowMiniProgramIcon()&&mSession.isHeartbeatMiniNetty()&&libBean.getIs_sapp_qrcode()==1){
+                if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
+
+                    ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow();
+                    LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
+                }
+            }else{
+                if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
+
+                    ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
+                    LogFileUtil.write("MiniProgramNettyService closeMiniProgramQrCodeWindow");
+                }
+            }
             if (!TextUtils.isEmpty(libBean.getEnd_date())) {
                 // 检测截止时间是否已到，到达的话跳到下一个
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -208,7 +208,10 @@ public class Session {
     private ArrayList<PushRTBItem> mPushRTBItems;
     /**记录下载速度**/
 	private String netSpeed;
+	/**后台配置时候是显示小程序码的屏**/
     private boolean isShowMiniProgramIcon;
+    /**小程序NETTY服务是否存活**/
+    private boolean isHeartbeatMiniNetty;
 	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
     private Session(Context context) {
 
@@ -298,6 +301,7 @@ public class Session {
         mPushRTBItems = (ArrayList<PushRTBItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
         netSpeed = mPreference.loadStringKey(P_APP_DOWNLOAD_NET_SPEED,"");
         isShowMiniProgramIcon = mPreference.loadBooleanKey(P_APP_SHOW_MIMIPROGRAM,false);
+        isHeartbeatMiniNetty = mPreference.loadBooleanKey(P_APP_HEARTBEAT_MIMIPROGRAM,false);
     }
 
     /*
@@ -1115,6 +1119,15 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_SHOW_MIMIPROGRAM,showMiniProgramIcon));
     }
 
+    public boolean isHeartbeatMiniNetty() {
+        return isHeartbeatMiniNetty;
+    }
+
+    public void setHeartbeatMiniNetty(boolean heartbeatMiniNetty) {
+        isHeartbeatMiniNetty = heartbeatMiniNetty;
+        writePreference(new Pair<String, Object>(P_APP_HEARTBEAT_MIMIPROGRAM,heartbeatMiniNetty));
+    }
+
     public HashMap<String, Long> getDownloadFilePosition() {
         return downloadFilePosition;
     }
@@ -1229,6 +1242,7 @@ public class Session {
     public static final String P_APP_DOWNLOAD_NET_SPEED = "com.savor.download.net_speed";
 
     public static final String P_APP_SHOW_MIMIPROGRAM = "com.savor.ads.show.miniprogram";
+    public static final String P_APP_HEARTBEAT_MIMIPROGRAM = "com.savor.ads.heartbeat.miniprogram";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;

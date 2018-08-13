@@ -1814,6 +1814,7 @@ public class AppUtils {
                                 bean.setChinese_name(item.getChinese_name());
                                 bean.setStart_date(item.getStart_date());
                                 bean.setEnd_date(item.getEnd_date());
+                                bean.setIs_sapp_qrcode(item.getIs_sapp_qrcode());
                                 break;
                             }
                         }
