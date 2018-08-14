@@ -230,6 +230,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                     @Override
                                     public void run() {
                                         atlasDialog.projectTipAnimateOut();
+                                        ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words);
                                     }
                                 },1000 * 2);
                             }

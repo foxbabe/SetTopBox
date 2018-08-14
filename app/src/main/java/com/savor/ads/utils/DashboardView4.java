@@ -104,7 +104,7 @@ public class DashboardView4 extends View {
         );
         setPadding(mPadding, mPadding, mPadding, mPadding);
 
-        int width = resolveSize(dp2px(260), widthMeasureSpec);
+        int width = resolveSize(dp2px(200), widthMeasureSpec);
         mRadius = (width - mPadding * 2 - mStrokeWidth * 2) / 2;
 
         // 由起始角度确定的高度
