@@ -25,7 +25,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"/>
-
+        <TextView
+            android:id="@+id/project_words"
+            android:textSize="42dp"
+            android:textColor="@color/color_light"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="40sp"
+            android:shadowColor="@color/color_dark"
+            android:shadowRadius="1"
+            android:shadowDx="5"
+            android:shadowDy="5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <RelativeLayout
             android:id="@+id/rl_loading_tip"
             android:layout_width="wrap_content"

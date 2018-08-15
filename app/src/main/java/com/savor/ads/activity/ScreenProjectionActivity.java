@@ -58,6 +58,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
     public static final String EXTRA_IMAGE_PATH = "extra_image_path";
+    public static final String EXTRA_PROJECTION_WORDS = "extra_projection_words";
     public static final String EXTRA_MEDIA_ID = "extra_vid";
     public static final String EXTRA_VIDEO_POSITION = "extra_video_position";
     public static final String EXTRA_IMAGE_ROTATION = "extra_image_rotation";
@@ -110,6 +111,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      */
     private int mImageType;
     private String mImagePath;
+    private String mProjectionWords;
     private boolean mIsNewDevice;
 
     private Handler mHandler = new Handler();
@@ -230,6 +232,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private SavorVideoView mSavorVideoView;
     private RelativeLayout mImageArea;
     private ImageView mImageView;
+    private TextView mProjectionWordsTV;
     private RelativeLayout mImageLoadingTip;
     private CircleProgressBar mImageLoadingPb;
     private TextView mImageLoadingTv;
@@ -291,6 +294,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSavorVideoView = (SavorVideoView) findViewById(R.id.video_view);
         mImageArea = (RelativeLayout) findViewById(R.id.rl_image);
         mImageView = (ImageView) findViewById(R.id.image_view);
+        mProjectionWordsTV = (TextView) findViewById(R.id.project_words);
         mImageLoadingTip = (RelativeLayout) findViewById(R.id.rl_loading_tip);
         mImageLoadingPb = (CircleProgressBar) findViewById(R.id.pb_image);
         mImageLoadingTv = (TextView) findViewById(R.id.tv_loading_tip);
@@ -365,6 +369,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mImageRotationDegree = bundle.getInt(EXTRA_IMAGE_ROTATION);
         mImageType = bundle.getInt(EXTRA_IMAGE_TYPE);
         mImagePath = bundle.getString(EXTRA_IMAGE_PATH);
+        mProjectionWords = bundle.getString(EXTRA_PROJECTION_WORDS);
+
         mIsFromWeb = bundle.getBoolean(EXTRA_IS_FROM_WEB);
         mIsNewDevice = bundle.getBoolean(EXTRA_IS_NEW_DEVICE);
         mPptConfig = (PptRequestVo) bundle.getSerializable(EXTRA_PPT_CONFIG);
@@ -429,7 +435,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
      * 根据不同的投屏类型
      */
     private void handleProjectRequest() {
-
+        ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
         if (ConstantValues.PROJECT_TYPE_VIDEO_VOD.equals(mProjectType)) {
             // 点播
             mSavorVideoView.setVisibility(View.VISIBLE);
@@ -508,6 +514,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 rotatePicture();
 
                 rescheduleToExit(true);
+            }
+            if (!TextUtils.isEmpty(mProjectionWords)){
+                mProjectionWordsTV.setText(mProjectionWords);
+                mProjectionWordsTV.setVisibility(View.VISIBLE);
+            }else{
+                mProjectionWordsTV.setVisibility(View.GONE);
             }
         } else if (ConstantValues.PROJECT_TYPE_RSTR_PPT.equals(mProjectType)) {
             // 餐厅端幻灯片

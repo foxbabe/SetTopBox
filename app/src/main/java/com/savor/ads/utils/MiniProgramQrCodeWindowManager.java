@@ -111,7 +111,8 @@ public class MiniProgramQrCodeWindowManager {
                     mWindowManager.addView(mFloatLayout, wmParams);
                     LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
                 }
-
+                mHandler.removeCallbacks(mHideRunnable);
+                mHandler.postDelayed(mHideRunnable,1000*60*2);
                 mIsHandling = false;
                 mIsAdded = true;
                 return false;

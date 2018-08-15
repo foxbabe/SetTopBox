@@ -31,6 +31,7 @@ import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
 import com.savor.ads.customview.SavorVideoView;
 import com.savor.ads.database.DBHelper;
+import com.savor.ads.dialog.AtlasDialog;
 import com.savor.ads.dialog.PlayListDialog;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.service.MiniProgramNettyService;
@@ -104,7 +105,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         AdmasterSdk.setLogState(true);
 
 //        AppApi.getAdMasterConfig(this,this);
-
+        AtlasDialog atlasDialog = new AtlasDialog(getApplicationContext());
+        atlasDialog.show();
     }
 
 

@@ -558,6 +558,7 @@ public class AppApi {
     public static void getScreenIsShowQRCode(Context context, ApiRequestListener handler){
         final HashMap<String,Object> params = new HashMap<>();
         params.put("box_mac",Session.get(context).getEthernetMac());
+        params.put("versionCode",Session.get(context).getVersionCode());
         new AppServiceOk(context,Action.CP_MINIPROGRAM_FORSCREEN_JSON,handler,params).get();
     }
 
