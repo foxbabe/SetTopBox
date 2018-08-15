@@ -224,13 +224,14 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             if (!TextUtils.isEmpty(openid)){
                                 GlobalValues.PROJECT_IMAGES.add(path);
                             }
-
+                            if (GlobalValues.PROJECT_IMAGES!=null&&GlobalValues.PROJECT_IMAGES.size()==1){
+                                ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words);
+                            }
                             if (img_nums==GlobalValues.PROJECT_IMAGES.size()){
                                 handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         atlasDialog.projectTipAnimateOut();
-                                        ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words);
                                     }
                                 },1000 * 2);
                             }

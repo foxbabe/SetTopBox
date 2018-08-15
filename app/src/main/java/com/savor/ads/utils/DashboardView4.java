@@ -64,7 +64,7 @@ public class DashboardView4 extends View {
     }
 
     private void init() {
-        mStrokeWidth = dp2px(3);
+        mStrokeWidth = dp2px(5);
         mLength1 = dp2px(8) + mStrokeWidth;
         mLength2 = mLength1 + dp2px(4);
 
@@ -146,7 +146,7 @@ public class DashboardView4 extends View {
          */
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(mStrokeWidth);
-        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_dark));
+        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_white));
         canvas.drawArc(mRectFArc, mStartAngle, mSweepAngle, false, mPaint);
 
         /**
@@ -191,7 +191,7 @@ public class DashboardView4 extends View {
         /**
          * 画长刻度读数
          */
-        mPaint.setTextSize(sp2px(19));
+        mPaint.setTextSize(sp2px(21));
         mPaint.setStyle(Paint.Style.FILL);
         float α;
         float[] p;
