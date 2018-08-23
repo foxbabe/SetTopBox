@@ -80,7 +80,7 @@ public class MiniProgramQrCodeWindowManager {
         final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
         LogUtils.v("QrCodeWindowManager 开始addView");
-        LogFileUtil.write("QrCodeWindowManager 开始addView");
+//        LogFileUtil.write("QrCodeWindowManager 开始addView");
         if (Looper.myLooper() == Looper.getMainLooper()) {
             addToWindow(context, url, qrCodeIv, wmParams);
         } else {
@@ -109,7 +109,8 @@ public class MiniProgramQrCodeWindowManager {
 
                 if (mFloatLayout.getParent() == null) {
                     mWindowManager.addView(mFloatLayout, wmParams);
-                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
+                    LogUtils.v("QrCodeWindowManager addView SUCCESS");
+//                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
                 }
                 mHandler.removeCallbacks(mHideRunnable);
                 mHandler.postDelayed(mHideRunnable,1000*60*2);

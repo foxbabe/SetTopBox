@@ -50,7 +50,7 @@ public class AtlasDialog extends Dialog{
 //    private TextView downloadedTipTV;
     private DashboardView4 dashboard_view;
     private Handler mHandler = new Handler();
-    private static final int PROJECT_TIP_DURATION = 1000 * 5;
+    private static final int PROJECT_TIP_DURATION = 1000 * 60;
     private boolean isShowTip;
     private boolean isAnimFinished;
     public AtlasDialog(@NonNull Context context) {
@@ -209,8 +209,8 @@ public class AtlasDialog extends Dialog{
         }
     };
     public void projectTipAnimateIn() {
-//        mHandler.removeCallbacks(mProjectTipOutRunnable);
-//        mHandler.postDelayed(mProjectTipOutRunnable, PROJECT_TIP_DURATION);
+        mHandler.removeCallbacks(mProjectTipOutRunnable);
+        mHandler.postDelayed(mProjectTipOutRunnable, PROJECT_TIP_DURATION);
         if (isShowTip){
             return;
         }

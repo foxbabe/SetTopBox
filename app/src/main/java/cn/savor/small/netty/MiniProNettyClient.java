@@ -86,7 +86,7 @@ public class MiniProNettyClient {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         LogUtils.i("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
-                        LogFileUtil.write("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
+//                        LogFileUtil.write("mini client SocketChannel....................................." + MiniProNettyClient.HOST + ':' + MiniProNettyClient.PORT);
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("ping",new IdleStateHandler(60, 60, 20, TimeUnit.SECONDS));
                         //添加POJO对象解码器 禁止缓存类加载器

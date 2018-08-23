@@ -501,7 +501,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
         if (mNeedUpdatePlaylist) {
             // 重新获取播放列表开始播放
-            LogUtils.d("更新播放列表后继续播放");
+            LogUtils.v("更新播放列表后继续播放");
             mNeedUpdatePlaylist = false;
             if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.equals(mPlayList)) {
                 int currentOrder = mPlayList.get(index).getOrder();
@@ -525,7 +525,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     @Override
     public boolean onMediaError(int index, boolean isLast) {
         if (mNeedUpdatePlaylist) {
-            LogUtils.d("更新播放列表后继续播放");
+            LogUtils.v("更新播放列表后继续播放");
             // 重新获取播放列表开始播放
             mNeedUpdatePlaylist = false;
             if (GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.equals(mPlayList)) {
@@ -552,13 +552,13 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
 
                     ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow();
-                    LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
+                    LogUtils.v("MiniProgramNettyService showMiniProgramQrCodeWindow");
                 }
             }else{
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
 
                     ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
-                    LogFileUtil.write("MiniProgramNettyService closeMiniProgramQrCodeWindow");
+                    LogUtils.v("MiniProgramNettyService closeMiniProgramQrCodeWindow");
                 }
             }
             if (!TextUtils.isEmpty(libBean.getEnd_date())) {
@@ -740,7 +740,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                             case VIDEO:
                                 String md5 = materialMeta.getMaterialMd5().toStringUtf8();
                                 LogUtils.d("百度聚屏请求，获取到物料md5：" + md5);
-                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
+//                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
                                 if (!TextUtils.isEmpty(md5)) {
                                     String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
                                     String[] selectionArgs = new String[]{md5};
@@ -788,8 +788,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                         switch (material.getMaterialType()) {
                             case VIDEO:
                                 String md5 = material.getMaterialMd5().toStringUtf8();
-                                LogUtils.d("百度聚屏请求，获取到物料md5：" + md5);
-                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
+                                LogUtils.v("百度聚屏请求，获取到物料md5：" + md5);
+//                                LogFileUtil.write("百度聚屏请求，获取到物料md5：" + md5);
                                 if (!TextUtils.isEmpty(md5)) {
                                     String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
                                     String[] selectionArgs = new String[]{md5};
@@ -817,8 +817,8 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                                     } else {
                                         // 返回的物料在本地没找到，记录下来物料md5，下载完之后恢复请求
                                         GlobalValues.NOT_FOUND_BAIDU_ADS_KEY = md5;
-                                        LogUtils.d("百度聚屏请求，物料未在本地发现：" + md5);
-                                        LogFileUtil.write("百度聚屏请求，物料未在本地发现：" + md5);
+                                        LogUtils.v("百度聚屏请求，物料未在本地发现：" + md5);
+//                                        LogFileUtil.write("百度聚屏请求，物料未在本地发现：" + md5);
                                     }
                                 }
 

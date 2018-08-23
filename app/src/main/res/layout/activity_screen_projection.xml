@@ -25,6 +25,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"/>
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/image_gif_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"/>
         <TextView
             android:id="@+id/project_words"
             android:textSize="42dp"

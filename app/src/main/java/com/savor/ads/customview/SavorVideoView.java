@@ -465,17 +465,17 @@ public class SavorVideoView extends RelativeLayout {
 //        LogFileUtil.write(TAG + "setMediaPlayerSource mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (mMediaPlayer == null) {
             LogUtils.e(TAG + " setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + " setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
+//            LogFileUtil.write(TAG + " setMediaPlayerSource mMediaPlayer == null " + " " + SavorVideoView.this.hashCode());
             return false;
         }
         if (mPlayState != MediaPlayerState.IDLE) {
             LogUtils.e(TAG + " setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + " setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
+//            LogFileUtil.write(TAG + " setMediaPlayerSource in illegal state: " + mPlayState + " " + SavorVideoView.this.hashCode());
             return false;
         }
         if (mMediaFiles == null || mMediaFiles.isEmpty() || mCurrentFileIndex >= mMediaFiles.size() || TextUtils.isEmpty(mMediaFiles.get(mCurrentFileIndex))) {
             LogUtils.e(TAG + " setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
-            LogFileUtil.write(TAG + " setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
+//            LogFileUtil.write(TAG + " setMediaPlayerSource in garbled source, mCurrentFileIndex =  " + mCurrentFileIndex + " " + SavorVideoView.this.hashCode());
             return false;
         }
         try {
@@ -797,7 +797,7 @@ public class SavorVideoView extends RelativeLayout {
      */
     public void setMediaFiles(ArrayList<String> mediaFiles, int currentFileIndex, int playPosition) {
         LogUtils.w(TAG + "setMediaFiles mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "setMediaFiles mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "setMediaFiles mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         mIsPauseByOut = false;
         if (mediaFiles != null && !mediaFiles.isEmpty()) {
             mCurrentFileIndex = currentFileIndex;
@@ -833,7 +833,7 @@ public class SavorVideoView extends RelativeLayout {
      */
     public void togglePlay() {
         LogUtils.w(TAG + "togglePlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
-        LogFileUtil.write(TAG + "togglePlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
+//        LogFileUtil.write(TAG + "togglePlay mPlayState:" + mPlayState + " " + SavorVideoView.this.hashCode());
         if (MediaPlayerState.PAUSED == mPlayState) {
             tryPlay();
         } else if (MediaPlayerState.STARTED == mPlayState) {
