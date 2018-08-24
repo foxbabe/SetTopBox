@@ -129,7 +129,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       boolean isDownloaded=false;
                       String url = jsonObject.getString("url");
                       String fileName = jsonObject.getString("filename");
-                      int resourceType = jsonObject.getInt("resource_type");
+                      int resourceType = 0;
+                      if (jsonObject.has("resource_type")){
+                          resourceType = jsonObject.getInt("resource_type");
+                      }else {
+                          resourceType = 1;
+                      }
                       if (TextUtils.isEmpty(url)){
                           return;
                       }
