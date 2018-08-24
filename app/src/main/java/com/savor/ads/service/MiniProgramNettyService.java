@@ -16,6 +16,7 @@ import com.savor.ads.BuildConfig;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.activity.MainActivity;
+import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.MiniProgramProjection;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
@@ -23,6 +24,7 @@ import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.AtlasDialog;
 import com.savor.ads.dialog.AtlasDialog.UpdateDownloadedProgress;
 import com.savor.ads.oss.OSSUtils;
@@ -41,6 +43,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import cn.savor.small.netty.MiniProNettyClient;
 import cn.savor.small.netty.MiniProNettyClient.MiniNettyMsgCallback;
@@ -109,7 +112,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     public void onReceiveMiniServerMsg(String msg, String content) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        //action字段  1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）
+        //action字段  1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频
         if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
             if (!TextUtils.isEmpty(content)){
                 try {
@@ -126,6 +129,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       boolean isDownloaded=false;
                       String url = jsonObject.getString("url");
                       String fileName = jsonObject.getString("filename");
+                      int resourceType = 0;
+                      if (jsonObject.has("resource_type")){
+                          resourceType = jsonObject.getInt("resource_type");
+                      }else {
+                          resourceType = 1;
+                      }
                       if (TextUtils.isEmpty(url)){
                           return;
                       }
@@ -142,15 +151,15 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       }
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
-//                        if (1==push4GProjection.getResource_type()){
+                        if (1==resourceType){
                          if (!TextUtils.isEmpty(GlobalValues.PROJECTION_WORDS)){
                              ProjectOperationListener.getInstance(context).showImage(1,path,true,GlobalValues.PROJECTION_WORDS);
                          }else{
                              ProjectOperationListener.getInstance(context).showImage(1,path,true);
                          }
-//                        }else if (2==push4GProjection.getResource_type()){
-//                            ProjectOperationListener.getInstance(context).showVideo(path,0,true);
-//                        }
+                        }else if (2==resourceType){
+                            ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                        }
                      }else{
                          MobclickAgent.onEvent(context,"screenProjctionDownloadError"+file.getName());
                      }
@@ -238,6 +247,31 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         }else if (isDownloaded&&miniProgramProjection.getImg_nums()==1){
                             ProjectOperationListener.getInstance(context).showImage(1,path,true,words);
                         }
+                    }else if (action==5){
+                        String fileName = jsonObject.getString("filename");
+                        String url = jsonObject.getString("url");
+
+
+                        String selection=DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
+                        String[] selectionArgs=new String[]{fileName};
+                        List<MediaLibBean> listPlayList = DBHelper.get(context).findNewPlayListByWhere(selection,selectionArgs);
+                        List<MediaLibBean> listMutlicast = DBHelper.get(context).findMutlicastMediaLibByWhere(selection,selectionArgs);
+                        if (listPlayList!=null&&listPlayList.size()>0){
+                            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) +fileName;
+                            File file = new File(path);
+                            if (file.exists()){
+                                ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                            }
+                        }else if (listMutlicast!=null&&listMutlicast.size()>0){
+                            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) +fileName;
+                            File file = new File(path);
+                            if (file.exists()){
+                                ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                            }
+                        }else{
+                            ProjectOperationListener.getInstance(context).showVideo(url,0,true);
+                        }
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

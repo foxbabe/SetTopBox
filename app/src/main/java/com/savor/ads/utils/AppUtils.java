@@ -1789,8 +1789,7 @@ public class AppUtils {
                     String[] selectionArgs = new String[]{bean.getLocation_id()};
                     List<MediaLibBean> list = dbHelper.findAdsByWhere(selection, selectionArgs);
                     if (list != null && !list.isEmpty()) {
-                        for (MediaLibBean item :
-                                list) {
+                        for (MediaLibBean item : list) {
                             Date startDate = null;
                             Date endDate = null;
                             try {

@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -52,6 +53,8 @@ import com.savor.ads.utils.ShowMessage;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import pl.droidsonroids.gif.GifImageView;
 
 public class ScreenProjectionActivity extends BaseActivity implements ApiRequestListener, PptVpAdapter.ImageLoadCallback, ViewPager.OnPageChangeListener {
 
@@ -233,6 +236,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private RelativeLayout mImageArea;
     private ImageView mImageView;
     private TextView mProjectionWordsTV;
+    private GifImageView imageGifView;
     private RelativeLayout mImageLoadingTip;
     private CircleProgressBar mImageLoadingPb;
     private TextView mImageLoadingTv;
@@ -294,6 +298,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mSavorVideoView = (SavorVideoView) findViewById(R.id.video_view);
         mImageArea = (RelativeLayout) findViewById(R.id.rl_image);
         mImageView = (ImageView) findViewById(R.id.image_view);
+        imageGifView = (GifImageView) findViewById(R.id.image_gif_view);
         mProjectionWordsTV = (TextView) findViewById(R.id.project_words);
         mImageLoadingTip = (RelativeLayout) findViewById(R.id.rl_loading_tip);
         mImageLoadingPb = (CircleProgressBar) findViewById(R.id.pb_image);
@@ -498,12 +503,24 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
             }
             if (!TextUtils.isEmpty(mImagePath)){
+                if (mImagePath.endsWith("gif")){
+//                    Glide.with(mContext)
+//                            .load(mImagePath)
+//                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                            .into(imageGifView);
+                    imageGifView.setImageURI(Uri.fromFile(new File(mImagePath)));
+                    imageGifView.setVisibility(View.VISIBLE);
+                    mImageView.setVisibility(View.GONE);
+                }else{
+                    imageGifView.setVisibility(View.GONE);
+                    mImageView.setVisibility(View.VISIBLE);
+                    Glide.with(mContext)
+                            .load(mImagePath)
+                            .dontAnimate()
+                            .placeholder(mImageView.getDrawable())
+                            .into(mImageView);
+                }
 
-                Glide.with(mContext)
-                        .load(mImagePath)
-                        .dontAnimate()
-                        .placeholder(mImageView.getDrawable())
-                        .into(mImageView);
 
             }
             if (mIsThumbnail) {

@@ -16,8 +16,8 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode 2018081404
-        versionName "1.2.9"
+        versionCode 2018082303
+        versionName "1.2.9.1"
 
         multiDexEnabled true
     }
@@ -102,4 +102,5 @@ dependencies {
     implementation project(':tvlibrary')
     implementation project(':Pushlib')
     implementation 'com.google.protobuf:protobuf-java:2.4.1'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.1'
 }
