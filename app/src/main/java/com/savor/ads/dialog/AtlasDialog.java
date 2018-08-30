@@ -7,35 +7,24 @@ import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.savor.ads.R;
-import com.savor.ads.activity.BaseActivity;
-import com.savor.ads.activity.ScreenProjectionActivity;
-import com.savor.ads.service.MiniProgramNettyService;
-import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.DashboardView4;
 import com.savor.ads.utils.DensityUtil;
-import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +54,7 @@ public class AtlasDialog extends Dialog{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_atlas);
+        setContentView(R.layout.dialog_atlas);
         setDialogAttributes();
 //        initContent(0,0);
     }

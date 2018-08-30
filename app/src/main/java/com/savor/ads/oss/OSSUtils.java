@@ -2,6 +2,7 @@ package com.savor.ads.oss;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.util.Log;
 
 import com.alibaba.sdk.android.oss.ClientConfiguration;
@@ -14,6 +15,7 @@ import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSPlainTextAKSKCredentialProvider;
+import com.alibaba.sdk.android.oss.common.utils.DateUtil;
 import com.alibaba.sdk.android.oss.internal.OSSAsyncTask;
 import com.alibaba.sdk.android.oss.model.GetObjectRequest;
 import com.alibaba.sdk.android.oss.model.GetObjectResult;
@@ -26,6 +28,8 @@ import com.alibaba.sdk.android.oss.model.ResumableUploadResult;
 import com.savor.ads.BuildConfig;
 import com.savor.ads.core.Session;
 import com.savor.ads.log.LogUploadService;
+import com.savor.ads.service.MiniProgramNettyService;
+import com.savor.ads.service.MiniProgramNettyService.DownloadProgressListener;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogUtils;
 
@@ -34,12 +38,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
  * Created by bichao on 12/21/16.
  */
 public class OSSUtils {
+    public static final String SAVOR_LAST_MODIFIED = "Savor-Last-Modified";
     private Context context;
     private OSS oss;
     /**桶名称**/
@@ -52,6 +58,7 @@ public class OSSUtils {
     private LogUploadService.UploadCallback mUploadCallback;
     private File localFile;
     private boolean isDownloaded;
+    private DownloadProgressListener downloadProgressListener;
     public OSSUtils(Context context,String bucketName, String objectKey, String uploadFilePath, LogUploadService.UploadCallback result) {
         this.context = context;
         this.bucketName = bucketName;
@@ -83,6 +90,12 @@ public class OSSUtils {
         OSSLog.enableLog();
         oss = new OSSClient(context, BuildConfig.OSS_ENDPOINT, credentialProvider, conf);
     }
+
+
+    public void setDownloadProgressListener(DownloadProgressListener listener){
+        downloadProgressListener = listener;
+    }
+
     // 异步断点上传，不设置记录保存路径，只在本次上传内做断点续传
 //    public void resumableUpload() {
 //        // 创建断点上传请求
@@ -176,13 +189,24 @@ public class OSSUtils {
      * 阿里云OSS异步上传文件
      */
     public void asyncUploadFile(){
+        File uploadFile = new File(uploadFilePath);
+        Date lastModifiedDate = new Date(uploadFile.lastModified());
+        ObjectMetadata metadata = new ObjectMetadata();
+//        metadata.setContentType(org.apache.commons.io.FileUtils);
+        metadata.setContentLength(uploadFile.length());
+        metadata.setLastModified(lastModifiedDate);
+        metadata.setExpirationTime(lastModifiedDate);
+        metadata.addUserMetadata(SAVOR_LAST_MODIFIED, DateUtil.formatRfc822Date(lastModifiedDate));
         // 构造上传请求
-        PutObjectRequest put = new PutObjectRequest(bucketName, objectKey, uploadFilePath);
+        PutObjectRequest put = new PutObjectRequest(bucketName, objectKey, uploadFilePath,metadata);
         // 异步上传时可以设置进度回调
         put.setProgressCallback(new OSSProgressCallback<PutObjectRequest>() {
             @Override
             public void onProgress(PutObjectRequest request, long currentSize, long totalSize) {
                 Log.d("PutObject", "currentSize: " + currentSize + " totalSize: " + totalSize);
+                if (downloadProgressListener!=null){
+                    downloadProgressListener.getDownloadProgress(currentSize,totalSize);
+                }
             }
         });
         OSSAsyncTask task = oss.asyncPutObject(put, new OSSCompletedCallback<PutObjectRequest, PutObjectResult>() {
@@ -225,6 +249,9 @@ public class OSSUtils {
             @Override
             public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
                 OSSLog.logDebug("getobj_progress: " + currentSize + "  total_size: " + totalSize, false);
+                if (downloadProgressListener!=null){
+                    downloadProgressListener.getDownloadProgress(currentSize,totalSize);
+                }
             }
         });
         try {

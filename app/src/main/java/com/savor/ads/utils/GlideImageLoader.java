@@ -113,6 +113,7 @@ public class GlideImageLoader {
         Context appContext = context.getApplicationContext();
         Glide.with(appContext)
                 .load(imgPath)
+                .dontAnimate()
                 .placeholder(placeholderResId)
                 .error(failedResId)
                 .crossFade()

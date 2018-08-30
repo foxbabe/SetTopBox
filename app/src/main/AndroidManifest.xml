@@ -122,7 +122,10 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".activity.MonkeyGameActivity"
+            android:launchMode="singleTask">
+        </activity>
         <!-- 启动Netty服务的Service -->
         <service
             android:name=".service.MessageService"
