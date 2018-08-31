@@ -36,7 +36,7 @@ public class MonkeyGameActivity extends BaseActivity {
     private ImageView winningWeixinHeadIV;
     private TextView winningTextTV;
     private List<MiniProgramProjection> avatarList = new ArrayList<>();
-    boolean flag = true;
+    boolean isGameOver = true;
     private MiniProgramProjection miniProgramProjection;
     private Handler handler = new Handler(){
         @Override
@@ -60,6 +60,8 @@ public class MonkeyGameActivity extends BaseActivity {
         context = this;
         getViews();
         initContent();
+        handler.removeCallbacks(exitRunnable);
+        handler.postDelayed(exitRunnable,1000*60*2);
     }
 
     private void getViews(){
@@ -101,7 +103,9 @@ public class MonkeyGameActivity extends BaseActivity {
                     public void run() {
                         winningPrizeLayout.setVisibility(View.VISIBLE);
                         winningWeixinHeadIV.setImageDrawable(drawable);
-//                        winningTextTV.setText("哈哈，您中奖了，干了吧");
+                        isGameOver = true;
+                        winningTextTV.setVisibility(View.GONE);
+                        winningTextTV.setText("哈哈，您中奖了，干了吧");
                     }
                 });
 
@@ -111,6 +115,8 @@ public class MonkeyGameActivity extends BaseActivity {
 
 
     public void addWeixinAvatarToGame(MiniProgramProjection programProjection){
+        handler.removeCallbacks(exitRunnable);
+        handler.postDelayed(exitRunnable,1000*60*2);
         if (programProjection!=null&&!TextUtils.isEmpty(programProjection.getAvatarurl())){
             boolean isAdd = false;
             if (avatarList!=null&&avatarList.size()>0){
@@ -138,17 +144,31 @@ public class MonkeyGameActivity extends BaseActivity {
 
 
     public void startGame(){
-        lucky_panel.startGame();
+        if (isGameOver){
+            isGameOver = false;
+            handler.removeCallbacks(exitRunnable);
+            handler.postDelayed(exitRunnable,1000*60*2);
+            lucky_panel.startGame();
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                int stayIndex = new Random().nextInt(avatarList.size());
-                Log.e("LuckyMonkeyPanelView", "====stay===" + stayIndex);
-                lucky_panel.tryToStop(stayIndex);
-            }
-        },1000*10);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    int stayIndex = new Random().nextInt(avatarList.size());
+                    Log.e("LuckyMonkeyPanelView", "====stay===" + stayIndex);
+                    lucky_panel.tryToStop(stayIndex);
+                }
+            },1000*10);
+        }
+
     }
+
+    private Runnable exitRunnable = new Runnable() {
+        @Override
+        public void run() {
+            exitGame();
+        }
+    };
+
 
     public void exitGame(){
         finish();

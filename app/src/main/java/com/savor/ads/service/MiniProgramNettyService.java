@@ -129,6 +129,11 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                 try {
                     JSONObject jsonObject = new JSONObject(content);
                     int action = jsonObject.getInt("action");
+                    if (action!=101&&action!=102&&action!=103
+                            &&ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity){
+                        MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
+                        activity.exitGame();
+                    }
                     if (action==1){
                         int code = jsonObject.getInt("code");
                         if (!(ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity)) {
@@ -330,6 +335,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
 
                         Intent intent = new Intent(context,MonkeyGameActivity.class);
                         intent.putExtra("miniProgramProjection",programProjection);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }else if (action==102){
                         if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
