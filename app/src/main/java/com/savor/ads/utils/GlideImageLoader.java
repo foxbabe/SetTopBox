@@ -113,9 +113,11 @@ public class GlideImageLoader {
         Context appContext = context.getApplicationContext();
         Glide.with(appContext)
                 .load(imgPath)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .dontAnimate()
                 .placeholder(placeholderResId)
                 .error(failedResId)
-                .crossFade()
                 .into(imageView);
     }
 

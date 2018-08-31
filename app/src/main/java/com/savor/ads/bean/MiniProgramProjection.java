@@ -21,6 +21,13 @@ public class MiniProgramProjection implements Serializable{
     private int order;
     /**操作ID**/
     private String forscreen_id;
+    /***********************微信小程序游戏中用到的字段*******************************/
+    /**游戏活动ID*/
+    private long activity_id;
+    /**微信用户头像**/
+    private String avatarurl;
+    /**游戏邀请码地址**/
+    private String gamecode;
 
     public int getAction() {
         return action;
@@ -92,5 +99,29 @@ public class MiniProgramProjection implements Serializable{
 
     public void setForscreen_id(String forscreen_id) {
         this.forscreen_id = forscreen_id;
+    }
+
+    public long getActivity_id() {
+        return activity_id;
+    }
+
+    public void setActivity_id(long activity_id) {
+        this.activity_id = activity_id;
+    }
+
+    public String getAvatarurl() {
+        return avatarurl;
+    }
+
+    public void setAvatarurl(String avatarurl) {
+        this.avatarurl = avatarurl;
+    }
+
+    public String getGamecode() {
+        return gamecode;
+    }
+
+    public void setGamecode(String gamecode) {
+        this.gamecode = gamecode;
     }
 }

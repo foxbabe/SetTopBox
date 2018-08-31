@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import com.savor.ads.BuildConfig;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.activity.AdsPlayerActivity;
 import com.savor.ads.activity.MainActivity;
+import com.savor.ads.activity.MonkeyGameActivity;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.MiniProgramProjection;
 import com.savor.ads.bean.PrizeInfo;
@@ -27,6 +29,7 @@ import com.savor.ads.core.Session;
 import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.AtlasDialog;
 import com.savor.ads.dialog.AtlasDialog.UpdateDownloadedProgress;
+import com.savor.ads.dialog.CircularProgressDialog;
 import com.savor.ads.oss.OSSUtils;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
@@ -42,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +67,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     private Context context;
     private Session session;
     AtlasDialog atlasDialog =null;
+    CircularProgressDialog circularProgressDialog = null;
     public MiniProgramNettyService() {
         super("");
     }
@@ -73,6 +78,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
         context = this;
         session = Session.get(context);
         atlasDialog = new AtlasDialog(context);
+        circularProgressDialog = new CircularProgressDialog(context);
     }
 
     @Override
@@ -112,12 +118,22 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     public void onReceiveMiniServerMsg(String msg, String content) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        //action字段  1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频
+        /***
+         * action字段
+         * 1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频
+         * 101：发起游戏 102:开始游戏 103:加入游戏 104:退出游戏
+         */
+
         if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
             if (!TextUtils.isEmpty(content)){
                 try {
                     JSONObject jsonObject = new JSONObject(content);
                     int action = jsonObject.getInt("action");
+                    if (action!=101&&action!=102&&action!=103
+                            &&ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity){
+                        MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
+                        activity.exitGame();
+                    }
                     if (action==1){
                         int code = jsonObject.getInt("code");
                         if (!(ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity)) {
@@ -147,7 +163,49 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                   BuildConfig.OSS_BUCKET_NAME,
                                   url,
                                   file);
+                          final Handler handler=new Handler(Looper.getMainLooper());
+                          if (2==resourceType){
+                              ossUtils.setDownloadProgressListener(new DownloadProgressListener() {
+                                  @Override
+                                  public void getDownloadProgress(final long currentSize, final long totalSize) {
+
+                                      handler.post(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              if (circularProgressDialog!=null&&!circularProgressDialog.isShowing()){
+                                                  circularProgressDialog.show();
+
+                                              }
+                                              circularProgressDialog.initContent();
+                                              circularProgressDialog.projectTipAnimateIn();
+                                              BigDecimal b  =   new  BigDecimal(currentSize*1.0/totalSize);
+                                              Log.d("circularProgress","原始除法得到的值"+currentSize*1.0/totalSize);
+                                              float   f1   =  b.setScale(2,  BigDecimal.ROUND_HALF_UP).floatValue();
+                                              Log.d("circularProgress","保留两位小数得到的值"+f1);
+                                              if (f1>=0.01f){
+                                                  String value = String.valueOf(f1*100);
+                                                  int progress = Integer.valueOf(value.split("\\.")[0]);
+                                                  Log.d("circularProgress","乘以100并且转成整数得到的值"+progress);
+                                                  circularProgressDialog.initnum(progress);
+                                              }
+
+                                          }
+                                      });
+                                  }
+                              });
+                          }
+
                           isDownloaded = ossUtils.syncDownload();
+                          handler.post(new Runnable() {
+                              @Override
+                              public void run() {
+                                  if (circularProgressDialog!=null){
+                                      circularProgressDialog.projectTipAnimateOut();
+                                      circularProgressDialog.dismiss();
+                                  }
+                              }
+                          });
+
                       }
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
@@ -272,6 +330,30 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             ProjectOperationListener.getInstance(context).showVideo(url,0,true);
                         }
 
+                    }else if(action==101){
+                        MiniProgramProjection programProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
+
+                        Intent intent = new Intent(context,MonkeyGameActivity.class);
+                        intent.putExtra("miniProgramProjection",programProjection);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }else if (action==102){
+                        if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
+                            MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
+                            activity.startGame();
+                        }
+                    }else if (action==103){
+                        MiniProgramProjection programProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
+                        if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
+                            MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
+                            activity.addWeixinAvatarToGame(programProjection);
+                        }
+
+                    }else if (action==104){
+                        if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
+                            MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
+                            activity.exitGame();
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -332,4 +414,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     };
 
 
+    public interface DownloadProgressListener{
+        void getDownloadProgress(long currentSize, long totalSize);
+    }
 }
