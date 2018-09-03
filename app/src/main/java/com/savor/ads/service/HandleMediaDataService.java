@@ -312,7 +312,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             if (result instanceof BoxInitResult) {
                 BoxInitBean boxInitBean = ((BoxInitResult) result).getResult();
                 /*******************设置盒子基本信息开始************************/
-                initBoxInfo(boxInitBean);
+                initBoxInfo(boxInitBean,jsonBean.getSmallType());
                 /*******************设置盒子基本信息结束************************/
             }
         } catch (IOException e) {
@@ -1447,7 +1447,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      *
      * @param boiteBean
      */
-    void initBoxInfo(BoxInitBean boiteBean) {
+    void initBoxInfo(BoxInitBean boiteBean,String smallType) {
         if (boiteBean == null) {
             return;
         }
@@ -1609,20 +1609,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 e.printStackTrace();
             }
             if (!boiteBean.getLogo_md5().equals(md5)) {
-                ServerInfo serverInfo = session.getServerInfo();
-                if (serverInfo != null) {
-                    String baseUrl = serverInfo.getDownloadUrl();
-                    String url = baseUrl + boiteBean.getLogo_url();
-                    if (!TextUtils.isEmpty(boiteBean.getLogo_url())) {
-                        String[] split = boiteBean.getLogo_url().split("/");
-                        String logo_name = split[split.length - 1];
-                        logo_md5 = boiteBean.getLogo_md5();
-                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + logo_name;
-                        File tarFile = new File(path);
-                        if (tarFile.exists()) {
-                            tarFile.delete();
+                String[] split = boiteBean.getLogo_url().split("/");
+                String logo_name = split[split.length - 1];
+                logo_md5 = boiteBean.getLogo_md5();
+                String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + logo_name;
+                if (ConstantValues.VIRTUAL.equals(smallType)){
+                    OSSUtils ossUtils = new OSSUtils(context,
+                            BuildConfig.OSS_BUCKET_NAME,
+                            boiteBean.getLogo_url(),
+                            new File(path));
+                            ossUtils.syncDownload();
+                }else{
+                    ServerInfo serverInfo = session.getServerInfo();
+                    if (serverInfo != null) {
+                        String baseUrl = serverInfo.getDownloadUrl();
+                        String url = baseUrl + boiteBean.getLogo_url();
+                        if (!TextUtils.isEmpty(boiteBean.getLogo_url())) {
+                            File tarFile = new File(path);
+                            if (tarFile.exists()) {
+                                tarFile.delete();
+                            }
+                            AppApi.downloadLOGO(url, context, this, path);
                         }
-                        AppApi.downloadLOGO(url, context, this, path);
                     }
                 }
             } else {
@@ -1643,20 +1651,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 e.printStackTrace();
             }
             if (!boiteBean.getLoading_img_md5().equals(md5)) {
-                ServerInfo serverInfo = session.getServerInfo();
-                if (serverInfo != null) {
-                    String baseUrl = serverInfo.getDownloadUrl();
-                    String url = baseUrl + boiteBean.getLoading_img_url();
-                    if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
-                        String[] split = boiteBean.getLoading_img_url().split("/");
-                        String imageName = split[split.length - 1];
-                        loading_img_md5 = boiteBean.getLoading_img_md5();
-                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
-                        File tarFile = new File(path);
-                        if (tarFile.exists()) {
-                            tarFile.delete();
+                String[] split = boiteBean.getLoading_img_url().split("/");
+                String imageName = split[split.length - 1];
+                loading_img_md5 = boiteBean.getLoading_img_md5();
+                String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
+                if (ConstantValues.VIRTUAL.equals(smallType)){
+                    OSSUtils ossUtils = new OSSUtils(context,
+                            BuildConfig.OSS_BUCKET_NAME,
+                            boiteBean.getLoading_img_url(),
+                            new File(path));
+                    ossUtils.syncDownload();
+                }else{
+                    ServerInfo serverInfo = session.getServerInfo();
+                    if (serverInfo != null) {
+                        String baseUrl = serverInfo.getDownloadUrl();
+                        String url = baseUrl + boiteBean.getLoading_img_url();
+                        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
+                            File tarFile = new File(path);
+                            if (tarFile.exists()) {
+                                tarFile.delete();
+                            }
+                            AppApi.downloadImg(url, context, this, path);
                         }
-                        AppApi.downloadImg(url, context, this, path);
                     }
                 }
             } else {
