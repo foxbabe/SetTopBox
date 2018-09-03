@@ -1,8 +1,10 @@
 package com.savor.ads.core;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.savor.ads.bean.JsonBean;
 import com.savor.ads.okhttp.OkHttpUtils;
 import com.savor.ads.okhttp.callback.Callback;
 import com.savor.ads.okhttp.callback.FileDownProgress;
@@ -296,6 +298,36 @@ public class AppServiceOk {
         response.close();
         return body;
     }
+
+
+//    public JsonBean syncGet() throws IOException {
+//        String requestUrl = AppApi.API_URLS.get(action);
+//
+//        Map<String, Object> headers = new HashMap<>();
+//        headers.put("traceinfo", appSession.getDeviceInfo());
+//        LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
+//        headers.put("boxMac", appSession.getEthernetMac());
+//        headers.put("hotelId", appSession.getBoiteId());
+//        headers.put("X-VERSION",appSession.getVersionCode());
+//        requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
+//        LogUtils.d("url-->" + requestUrl);
+//        Request request = new Request.Builder()
+//                .url(requestUrl)
+//                .build();
+//
+//        Response response = okHttpUtils.getOkHttpClient().newCall(request).execute();
+//        String body = response.body().string();
+//        String smallType = response.header("X-SMALL-TYPE");
+//        JsonBean jsonBean = new JsonBean();
+//        jsonBean.setConfigJson(body);
+//        if (!TextUtils.isEmpty(smallType)){
+//            jsonBean.setSmallType(smallType);
+//        }
+//        response.close();
+//        return jsonBean;
+//    }
+
+
 
     /**
      * 下载文件
