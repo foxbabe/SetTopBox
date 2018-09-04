@@ -279,36 +279,14 @@ public class AppServiceOk {
         requestCall.execute(callback);
     }
 
-    public String syncGet() throws IOException {
-        String requestUrl = AppApi.API_URLS.get(action);
-
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("traceinfo", appSession.getDeviceInfo());
-        LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
-        headers.put("boxMac", appSession.getEthernetMac());
-        headers.put("hotelId", appSession.getBoiteId());
-        requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
-        LogUtils.d("url-->" + requestUrl);
-        Request request = new Request.Builder()
-                .url(requestUrl)
-                .build();
-
-        Response response = okHttpUtils.getOkHttpClient().newCall(request).execute();
-        String body = response.body().string();
-        response.close();
-        return body;
-    }
-
-
-//    public JsonBean syncGet() throws IOException {
+//    public String syncGet() throws IOException {
 //        String requestUrl = AppApi.API_URLS.get(action);
 //
-//        Map<String, Object> headers = new HashMap<>();
+//        Map<String, String> headers = new HashMap<String, String>();
 //        headers.put("traceinfo", appSession.getDeviceInfo());
 //        LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
 //        headers.put("boxMac", appSession.getEthernetMac());
 //        headers.put("hotelId", appSession.getBoiteId());
-//        headers.put("X-VERSION",appSession.getVersionCode());
 //        requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
 //        LogUtils.d("url-->" + requestUrl);
 //        Request request = new Request.Builder()
@@ -317,15 +295,37 @@ public class AppServiceOk {
 //
 //        Response response = okHttpUtils.getOkHttpClient().newCall(request).execute();
 //        String body = response.body().string();
-//        String smallType = response.header("X-SMALL-TYPE");
-//        JsonBean jsonBean = new JsonBean();
-//        jsonBean.setConfigJson(body);
-//        if (!TextUtils.isEmpty(smallType)){
-//            jsonBean.setSmallType(smallType);
-//        }
 //        response.close();
-//        return jsonBean;
+//        return body;
 //    }
+
+
+    public JsonBean syncGet() throws IOException {
+        String requestUrl = AppApi.API_URLS.get(action);
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("traceinfo", appSession.getDeviceInfo());
+        LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
+        headers.put("boxMac", appSession.getEthernetMac());
+        headers.put("hotelId", appSession.getBoiteId());
+        headers.put("X-VERSION",appSession.getVersionCode());
+        requestUrl = ApiRequestFactory.getUrlRequest(requestUrl, action, mParameter, appSession);
+        LogUtils.d("url-->" + requestUrl);
+        Request request = new Request.Builder()
+                .url(requestUrl)
+                .build();
+
+        Response response = okHttpUtils.getOkHttpClient().newCall(request).execute();
+        String body = response.body().string();
+        String smallType = response.header("X-SMALL-TYPE");
+        JsonBean jsonBean = new JsonBean();
+        jsonBean.setConfigJson(body);
+        if (!TextUtils.isEmpty(smallType)){
+            jsonBean.setSmallType(smallType);
+        }
+        response.close();
+        return jsonBean;
+    }
 
 
 

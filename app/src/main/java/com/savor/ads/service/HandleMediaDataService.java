@@ -8,8 +8,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
-import com.alibaba.sdk.android.oss.common.utils.OSSUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -30,6 +28,7 @@ import com.savor.ads.bean.RstrSpecialtyResult;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.SetBoxTopResult;
 import com.savor.ads.bean.SetTopBoxBean;
+import com.savor.ads.bean.Television;
 import com.savor.ads.bean.TvProgramGiecResponse;
 import com.savor.ads.bean.TvProgramResponse;
 import com.savor.ads.bean.VersionInfo;
@@ -40,6 +39,7 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.log.LogReportUtil;
 import com.savor.ads.log.LotteryLogUtil;
 import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
+import com.savor.ads.oss.OSSUtils;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -82,6 +82,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private Session session;
     private String logo_md5 = null;
     private String loading_img_md5 = null;
+
     /**
      * 是否连接实体小平台
      */
@@ -114,6 +115,30 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private boolean isProCompleted = false;  //节目是否下载完毕
     private String mProCompletedPeriod;
+    private int poly_timeout_count = 0;
+    private int pro_timeout_count = 0;
+    private int ads_timeout_count = 0;
+    private int adv_timeout_count = 0;
+    private int vod_timeout_count = 0;
+
+    /**
+     * 宣传片集合
+     */
+    private ProgramBean advProgramBean;
+
+    /**
+     * 广告集合
+     */
+    private ProgramBean adsProgramBean;
+
+    /**
+     * poly广告集合
+     */
+    private ProgramBean polyAdsProgramBean;
+
+    private SetTopBoxBean multicastBoxBean;
+
+
 
     @Override
     public void onCreate() {
@@ -188,20 +213,23 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
                         LogFileUtil.write("HandleMediaDataService will start getProgramDataFromSmallPlatform");
                         // 同步获取轮播节目媒体数据
-                        getProgramDataFromSmallPlatform();
-                       // getProgramDataFromSmallPlatform(false);
+                       // getProgramDataFromSmallPlatform();
+                        getProgramDataFromSmallPlatform(false);
                         LogFileUtil.write("HandleMediaDataService will start getAdvDataFromSmallPlatform");
                         //同步获取宣传片媒体数据
-                        getAdvDataFromSmallPlatform();
+                        //getAdvDataFromSmallPlatform();
+                        getAdvDataFromSmallPlatform(false);
                         LogFileUtil.write("HandleMediaDataService will start getPolyAdsFromSmallPlatform");
                         // 同步获取聚屏物料媒体数据
                         //getPolyAdsFromSmallPlatform(false);
                         LogFileUtil.write("HandleMediaDataService will start getAdsDataFromSmallPlatform");
                         //同步获取广告片媒体数据
-                        getAdsDataFromSmallPlatform();
+                        //getAdsDataFromSmallPlatform();
+                        getAdsDataFromSmallPlatform(false);
                         LogFileUtil.write("HandleMediaDataService will start getOnDemandDataFromSmallPlatform");
                         // 同步获取点播媒体数据
-                        getOnDemandDataFromSmallPlatform();
+                        //getOnDemandDataFromSmallPlatform();
+                        getOnDemandDataFromSmallPlatform(false);
                         // 获取特色菜媒体数据
                         getSpecialtyFromSmallPlatform();
                         // 获取实时竞价媒体数据
@@ -311,23 +339,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getBoxInfo() {
         try {
-
-//            JsonBean jsonBean = AppApi.getBoxInitInfo(this, this, session.getEthernetMac());
-//            JSONObject jsonObject = new JSONObject(jsonBean.getConfigJson());
-
-            String configJson = AppApi.getBoxInitInfo(this, this, session.getEthernetMac());
-            JSONObject jsonObject = new JSONObject(configJson);
+            JsonBean jsonBean = AppApi.getBoxInitInfo(this, this, session.getEthernetMac());
+            JSONObject jsonObject = new JSONObject(jsonBean.getConfigJson());
             if (jsonObject.getInt("code") != AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
                 LogUtils.d("接口返回的状态不对,code=" + jsonObject.getInt("code"));
                 return;
             }
 
-            Object result = gson.fromJson(configJson, new TypeToken<BoxInitResult>() {
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<BoxInitResult>() {
             }.getType());
             if (result instanceof BoxInitResult) {
                 BoxInitBean boxInitBean = ((BoxInitResult) result).getResult();
                 /*******************设置盒子基本信息开始************************/
-                initBoxInfo(boxInitBean);
+                initBoxInfo(boxInitBean,jsonBean.getSmallType());
                 /*******************设置盒子基本信息结束************************/
             }
         } catch (IOException e) {
@@ -335,138 +359,237 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         } catch (JSONException e) {
 
         }
+
+
     }
 
     /**
      * 获取小平台节目单媒体文件
      */
-    private void getProgramDataFromSmallPlatform() {
-        isProCompleted = false;
-        try {
-            String configJson = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
-
-            Object result = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
-            }.getType());
-            if (result instanceof SetBoxTopResult) {
-                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (setBoxTopResult.getResult() != null) {
-                        setTopBoxBean = setBoxTopResult.getResult();
-                        handleSmallPlatformProgramData();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void getProgramDataFromSmallPlatform() {
+//        isProCompleted = false;
+//        try {
+//            String configJson = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
+//
+//            Object result = gson.fromJson(configJson, new TypeToken<SetBoxTopResult>() {
+//            }.getType());
+//            if (result instanceof SetBoxTopResult) {
+//                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
+//                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+//                    if (setBoxTopResult.getResult() != null) {
+//                        setTopBoxBean = setBoxTopResult.getResult();
+//                        handleSmallPlatformProgramData();
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 获取小平台节目单媒体文件
      * OSSsource true是从OSS下载，false是从实体小平台下载
      */
-//    private void getProgramDataFromSmallPlatform(boolean OSSsource) {
-//        isProCompleted = false;
-//        try {
-//            JsonBean jsonBean = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
-//            // 保存拿到的数据到本地
-//            FileUtils.write(ConstantValues.PRO_DATA_PATH, jsonBean.getConfigJson());
+    private void getProgramDataFromSmallPlatform(boolean OSSsource) {
+        isProCompleted = false;
+        try {
+            JsonBean jsonBean = AppApi.getProgramDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.PRO_DATA_PATH, jsonBean.getConfigJson());
+
+            SetBoxTopResult setBoxTopResult = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<SetBoxTopResult>() {
+            }.getType());
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (setBoxTopResult.getResult() != null) {
+                    setTopBoxBean = setBoxTopResult.getResult();
+                    isConnectedEntity = true;
+                    handleSmallPlatformProgramData(jsonBean.getSmallType(),OSSsource);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (!TextUtils.isEmpty(e.getMessage())&&(e.getMessage().contains("failed to connect to")||e.getMessage().contains("No route to host"))){
+                isConnectedEntity = false;
+                handleSmallPlatformProgramData("",true);
+            }
+        }
+    }
+
 //
-//            SetBoxTopResult setBoxTopResult = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<SetBoxTopResult>() {
+//    /**
+//     * 获取小平台宣传片媒体文件
+//     */
+//    private void getAdvDataFromSmallPlatform() {
+//        try {
+//            String configJson = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
+//
+//            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
 //            }.getType());
-//            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-//                if (setBoxTopResult.getResult() != null) {
-//                    setTopBoxBean = setBoxTopResult.getResult();
-//                    isConnectedEntity = true;
-//                    handleSmallPlatformProgramData(jsonBean.getSmallType(),OSSsource);
+//            if (result instanceof ProgramBeanResult) {
+//                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+//                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+//                    if (programBeanResult.getResult() != null) {
+//                        handleSmallPlatformAdvData(programBeanResult.getResult());
+//                    }
 //                }
 //            }
 //        } catch (Exception e) {
 //            e.printStackTrace();
-//            if (!TextUtils.isEmpty(e.getMessage())&&(e.getMessage().contains("failed to connect to")||e.getMessage().contains("No route to host"))){
-//                isConnectedEntity = false;
-//                handleSmallPlatformProgramData("",true);
-//            }
 //        }
 //    }
 
 
+
     /**
      * 获取小平台宣传片媒体文件
+     * OSSsource true从OSS下载，false从实体小平台下载
      */
-    private void getAdvDataFromSmallPlatform() {
+    private void getAdvDataFromSmallPlatform(boolean OSSsource) {
         try {
-            String configJson = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
+            JsonBean jsonBean = AppApi.getAdvDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.ADV_DATA_PATH, jsonBean.getConfigJson());
 
-            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (programBeanResult.getResult() != null) {
-                        handleSmallPlatformAdvData(programBeanResult.getResult());
-                    }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (programBeanResult.getResult() != null) {
+                    isConnectedEntity = true;
+                    advProgramBean = programBeanResult.getResult();
+                    handleSmallPlatformAdvData(jsonBean.getSmallType(),OSSsource);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (!TextUtils.isEmpty(e.getMessage())&&(e.getMessage().contains("failed to connect to")||e.getMessage().contains("No route to host"))){
+                isConnectedEntity = false;
+                handleSmallPlatformAdvData("",true);
+            }
         }
     }
+
+//
+//    /**
+//     * 拉取小平台上广告媒体文件
+//     */
+//    private void getAdsDataFromSmallPlatform() {
+//        try {
+//            String configJson = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
+//            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
+//            }.getType());
+//            if (result instanceof ProgramBeanResult) {
+//                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+//                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+//                    if (programBeanResult.getResult() != null) {
+//                        handleSmallPlatformAdsData(programBeanResult.getResult());
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 拉取小平台上广告媒体文件
+     * @param OSSsource true是从OSS上下载，false是从实体小平台下载
      */
-    private void getAdsDataFromSmallPlatform() {
+    private void getAdsDataFromSmallPlatform(boolean OSSsource) {
         try {
-            String configJson = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(configJson, new TypeToken<ProgramBeanResult>() {
+            JsonBean jsonBean = AppApi.getAdsDataFromSmallPlatform(this, this, session.getEthernetMac());
+            // 保存拿到的数据到本地
+            FileUtils.write(ConstantValues.ADS_DATA_PATH, jsonBean.getConfigJson());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
-                    if (programBeanResult.getResult() != null) {
-                        handleSmallPlatformAdsData(programBeanResult.getResult());
-                    }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS) {
+                if (programBeanResult.getResult() != null) {
+                    isConnectedEntity = true;
+                    adsProgramBean = programBeanResult.getResult();
+                    handleSmallPlatformAdsData(jsonBean.getSmallType(),OSSsource);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (!TextUtils.isEmpty(e.getMessage())&&(e.getMessage().contains("failed to connect to")||e.getMessage().contains("No route to host"))){
+                isConnectedEntity = false;
+                handleSmallPlatformAdsData("",true);
+            }
         }
     }
 
-    private void getOnDemandDataFromSmallPlatform() {
+
+
+//    private void getOnDemandDataFromSmallPlatform() {
+//        try {
+//            String ondemandJson = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
+//            Object result = gson.fromJson(ondemandJson, new TypeToken<SetBoxTopResult>() {
+//            }.getType());
+//            if (result instanceof SetBoxTopResult) {
+//                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
+//                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+//                    handleSmallPlatformOnDemandData(setBoxTopResult.getResult());
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    private void getOnDemandDataFromSmallPlatform(boolean OSSsource) {
         try {
-            String ondemandJson = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(ondemandJson, new TypeToken<SetBoxTopResult>() {
+            JsonBean jsonBean = AppApi.getOnDemandDataFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<SetBoxTopResult>() {
             }.getType());
-            if (result instanceof SetBoxTopResult) {
-                SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                    handleSmallPlatformOnDemandData(setBoxTopResult.getResult());
-                }
+            SetBoxTopResult setBoxTopResult = (SetBoxTopResult) result;
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+                isConnectedEntity = true;
+                multicastBoxBean = setBoxTopResult.getResult();
+                handleSmallPlatformOnDemandData(jsonBean.getSmallType(),OSSsource);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (!TextUtils.isEmpty(e.getMessage())&&(e.getMessage().contains("failed to connect to")||e.getMessage().contains("No route to host"))){
+                isConnectedEntity = false;
+                handleSmallPlatformOnDemandData("",true);
+            }
         }
     }
+
+
+//    private void getSpecialtyFromSmallPlatform() {
+//        try {
+//            String json = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
+//            Object result = gson.fromJson(json, new TypeToken<RstrSpecialtyResult>() {
+//            }.getType());
+//            if (result instanceof RstrSpecialtyResult) {
+//                RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
+//                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+//                    handleSpecialtyResult(setBoxTopResult.getResult());
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void getSpecialtyFromSmallPlatform() {
         try {
-            String json = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(json, new TypeToken<RstrSpecialtyResult>() {
+            JsonBean jsonBean = AppApi.getSpecialtyFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<RstrSpecialtyResult>() {
             }.getType());
-            if (result instanceof RstrSpecialtyResult) {
-                RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
-                if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
-                    handleSpecialtyResult(setBoxTopResult.getResult());
-                }
+            RstrSpecialtyResult setBoxTopResult = (RstrSpecialtyResult) result;
+            if (setBoxTopResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && setBoxTopResult.getResult() != null) {
+                handleSpecialtyResult(setBoxTopResult.getResult(),jsonBean.getSmallType());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void handleSpecialtyResult(RstrSpecialtyOuterBean bean) {
+    private void handleSpecialtyResult(RstrSpecialtyOuterBean bean,String smallType) {
         if (bean == null) {
             return;
         }
@@ -515,7 +638,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                         if (file.exists() && file.isFile()) {
                             file.delete();
                         }
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        if (ConstantValues.VIRTUAL.equals(smallType)){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    mediaLib.getOss_path(),
+                                    new File(path));
+
+                            isDownloaded = ossUtils.syncDownload();
+                        } else {
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
                         if (isDownloaded && isImageDownloadCompleted(path, mediaLib.getMd5())) {
                             isChecked = true;
                         }
@@ -577,19 +710,131 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
     private void getRtbAdsFromSmallPlatform() {
         try {
-            String json = AppApi.getRtbadsFromSmallPlatform(this, this, session.getEthernetMac());
-            Object result = gson.fromJson(json, new TypeToken<ProgramBeanResult>() {
+            JsonBean jsonBean = AppApi.getRtbadsFromSmallPlatform(this, this, session.getEthernetMac());
+            Object result = gson.fromJson(jsonBean.getConfigJson(), new TypeToken<ProgramBeanResult>() {
             }.getType());
-            if (result instanceof ProgramBeanResult) {
-                ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
-                if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
-                    handRtbasResult(programBeanResult.getResult());
-                }
+            ProgramBeanResult programBeanResult = (ProgramBeanResult) result;
+            if (programBeanResult.getCode() == AppApi.HTTP_RESPONSE_STATE_SUCCESS && programBeanResult.getResult() != null) {
+                handRtbadsResult(programBeanResult.getResult());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
+
+    /**
+     * 处理RTB广告结果
+     *
+     * @param programBean
+     */
+    private void handRtbadsResult(ProgramBean programBean) {
+        if (programBean == null || programBean.getVersion() == null || TextUtils.isEmpty(programBean.getVersion().getVersion())) {
+            return;
+        }
+        String adsPeriod = programBean.getVersion().getVersion();
+        if (session.getRtbadsPeriod().equals(adsPeriod)) {
+            return;
+        }
+
+        String logUUID = String.valueOf(System.currentTimeMillis());
+        // 记录下载开始日志
+        int count = programBean.getMedia_lib() == null ? 0 : programBean.getMedia_lib().size();
+        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                String.valueOf(System.currentTimeMillis()), "start", "rtbads_down", adsPeriod,
+                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
+
+        session.setRtbadsDownloadPeriod(adsPeriod);
+        boolean isAdsCompleted = false;
+        int adsDownloadedCount = 0;
+        ArrayList<String> fileNames = new ArrayList<>();    // 下载成功的文件名集合（后面删除老视频会用到）
+        if (programBean.getMedia_lib() != null && programBean.getMedia_lib().size() > 0) {
+            ServerInfo serverInfo = session.getServerInfo();
+            if (serverInfo == null) {
+                return;
+            }
+            String baseUrl = serverInfo.getDownloadUrl();
+            if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
+                baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+            }
+            LogUtils.d("---------RTB广告视频开始下载---------");
+            for (MediaLibBean bean : programBean.getMedia_lib()) {
+                String path = AppUtils.getFilePath(context, AppUtils.StorageFile.rtb_ads) + bean.getName();
+                String url = baseUrl + bean.getUrl();
+                fileNames.add(bean.getName());
+                boolean isChecked = false;
+                try {
+                    // 下载、校验
+                    if (isDownloadCompleted(path, bean.getMd5())) {
+                        isChecked = true;
+                    } else {
+                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+
+                        if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
+                            isChecked = true;
+                        }
+                    }
+                    if (isChecked) {
+                        bean.setMediaPath(path);
+                        // 入库
+                        String selection = DBHelper.MediaDBInfo.FieldName.VID + "=? ";
+                        String[] selectionArgs = new String[]{bean.getVid()};
+                        List<MediaLibBean> list = dbHelper.findRtbadsMediaLibByWhere(selection, selectionArgs);
+                        boolean isInsertSuccess = false;
+                        if (list != null && list.size() > 1) {
+                            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.RTB_ADS, selection, selectionArgs);
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, false);
+                        } else if (list != null && list.size() == 1) {
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, true);
+                        } else {
+                            isInsertSuccess = dbHelper.insertOrUpdateRTBAdsList(bean, false);
+                        }
+
+                        if (isInsertSuccess) {
+                            adsDownloadedCount++;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (adsDownloadedCount == programBean.getMedia_lib().size()) {
+                isAdsCompleted = true;
+            } else {
+                isAdsCompleted = false;
+            }
+        } else {
+            isAdsCompleted = true;
+        }
+
+        if (isAdsCompleted) {
+            LogUtils.d("---------RTB广告视频下载完成---------");
+            session.setRtbAdsPeriod(adsPeriod);
+            // 记录日志
+            // 记录下载开始日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "end", "rtbads_down", adsPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
+            LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
+                    Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "update", programBean.getVersion().getType(), "",
+                    "", Session.get(context).getVersionName(), programBean.getVersion().getVersion(),
+                    Session.get(context).getVodPeriod(), "");
+
+
+            deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.rtb_ads, DBHelper.MediaDBInfo.TableName.RTB_ADS);
+        } else {
+            // 记录下载中止日志
+            LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                    String.valueOf(System.currentTimeMillis()), "suspend", "rtbads_down", adsPeriod,
+                    "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
+        }
+    }
+
+
+
 
     /**
      * 处理RTB广告结果
@@ -812,151 +1057,19 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
     }
 
-    /**
-     * 处理小平台返回的节目单数据（包含内容数据和宣传片占位和广告占位）
-     */
-    private void handleSmallPlatformProgramData() {
-        if (setTopBoxBean == null || setTopBoxBean.getPlaybill_list() == null || setTopBoxBean.getPlaybill_list().isEmpty()) {
-            return;
-        }
-        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
-        ArrayList<PlayListCategoryItem> playbill_list = setTopBoxBean.getPlaybill_list();
-        //当前最新节目期号
-        String proPeriod = "";
-
-        for (PlayListCategoryItem item : playbill_list) {
-            String logUUID = String.valueOf(System.currentTimeMillis());
-            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
-                proPeriod = item.getVersion().getVersion();
-
-                //如果期数相同，则表示数据没有改变，不需要执行后续的下载动作（第一次循环即便期号相同，也做一次遍历作为文件校验）
-                LogUtils.d("===============proMediaPeriod===========" + session.getProPeriod());
-                if (!isFirstRun &&
-                        (session.getProPeriod().equals(proPeriod) || session.getProNextPeriod().equals(proPeriod))) {
-                    isProCompleted = true;
-                    mProCompletedPeriod = proPeriod;
-                    continue;
-                }
-
-                // 设置下载中期号
-                session.setProDownloadPeriod(proPeriod);
-
-                // 记录下载开始日志
-                int count = item.getMedia_lib() == null ? 0 : item.getMedia_lib().size();
-                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                        String.valueOf(System.currentTimeMillis()), "start", "pro_down", proPeriod,
-                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
-            }
-
-            VersionInfo versionInfo = item.getVersion();
-            if (versionInfo == null || TextUtils.isEmpty(versionInfo.getType())) {
-                continue;
-            }
-
-            // 先从下载表中删除该期的记录
-            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
-            String[] selectionArgs = new String[]{versionInfo.getVersion(), versionInfo.getType()};
-            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
-
-            List<MediaLibBean> mediaLibList = item.getMedia_lib();
-            int downloadedCount = 0;
-            if (mediaLibList != null && mediaLibList.size() > 0) {
-
-                ServerInfo serverInfo = session.getServerInfo();
-                if (serverInfo == null) {
-                    break;
-                }
-
-                String baseUrl = serverInfo.getDownloadUrl();
-                if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
-                    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-                }
-
-                LogUtils.d("---------轮播视频开始下载---------");
-                for (MediaLibBean mediaItem : mediaLibList) {
-                    try {
-                        boolean isChecked = false;
-                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + mediaItem.getName();
-                        //判断当前数据是节目还是其他，如果是节目走下载逻辑,其他则直接入库
-                        if (ConstantValues.PRO.equals(versionInfo.getType())) {
-                            String url = baseUrl + mediaItem.getUrl();
-
-                            // 下载、校验
-                            if (isDownloadCompleted(path, mediaItem.getMd5())) {
-                                isChecked = true;
-                            } else {
-                                boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
-                                if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
-                                    isChecked = true;
-                                }
-                            }
-                        } else {
-                            isChecked = true;
-                        }
-                        // 校验通过、插库
-                        if (isChecked) {
-                            mediaItem.setMediaPath(path);
-                            // 插库成功，downloadedCount加1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
-                                downloadedCount++;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            if (ConstantValues.PRO.equals(versionInfo.getType())) {
-                // 下载完成（mediaLibList==null或size为0也认为是下载完成，认为新的节目单中没有该类型的数据）
-                if (mediaLibList == null || downloadedCount == mediaLibList.size()) {
-                    LogUtils.d("---------节目视频下载完成---------");
-                    isProCompleted = true;
-                    mProCompletedPeriod = proPeriod;
-                    // 记录日志
-                    // 记录下载完成日志
-                    LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                            String.valueOf(System.currentTimeMillis()), "end", "pro_down", proPeriod,
-                            "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
-                    LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
-                            Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
-                            String.valueOf(System.currentTimeMillis()), "update", versionInfo.getType(), "",
-                            "", Session.get(context).getVersionName(), versionInfo.getVersion(),
-                            Session.get(context).getVodPeriod(), "");
-                } else {
-                    isProCompleted = false;
-                    if (!isFirstRun) {
-                        // 记录下载中止日志
-                        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
-                                String.valueOf(System.currentTimeMillis()), "suspend", "pro_down", proPeriod,
-                                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
-                    }
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-
-
-    /**
-     * 处理小平台返回的节目单数据（包含内容数据和宣传片占位和广告占位）
-     * OSSsource true是从OSS下载，false是从实体小平台下载
-     */
-//    private void handleSmallPlatformProgramData(String smallType,boolean OSSsource) {
+//    /**
+//     * 处理小平台返回的节目单数据（包含内容数据和宣传片占位和广告占位）
+//     */
+//    private void handleSmallPlatformProgramData() {
 //        if (setTopBoxBean == null || setTopBoxBean.getPlaybill_list() == null || setTopBoxBean.getPlaybill_list().isEmpty()) {
 //            return;
 //        }
 //        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
-//        ArrayList<ProgramBean> playbill_list = setTopBoxBean.getPlaybill_list();
+//        ArrayList<PlayListCategoryItem> playbill_list = setTopBoxBean.getPlaybill_list();
 //        //当前最新节目期号
 //        String proPeriod = "";
-//        boolean isOSS = OSSsource;
-//        for (ProgramBean item : playbill_list) {
+//
+//        for (PlayListCategoryItem item : playbill_list) {
 //            String logUUID = String.valueOf(System.currentTimeMillis());
 //            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
 //                proPeriod = item.getVersion().getVersion();
@@ -969,10 +1082,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                    mProCompletedPeriod = proPeriod;
 //                    continue;
 //                }
-//                String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
-//                        DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
-//                String[] selectionArgs = new String[]{ConstantValues.PRO, proPeriod};
-//                dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,selection, selectionArgs);
+//
 //                // 设置下载中期号
 //                session.setProDownloadPeriod(proPeriod);
 //
@@ -987,6 +1097,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //            if (versionInfo == null || TextUtils.isEmpty(versionInfo.getType())) {
 //                continue;
 //            }
+//
+//            // 先从下载表中删除该期的记录
+//            String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
+//            String[] selectionArgs = new String[]{versionInfo.getVersion(), versionInfo.getType()};
+//            dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
 //
 //            List<MediaLibBean> mediaLibList = item.getMedia_lib();
 //            int downloadedCount = 0;
@@ -1006,33 +1121,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                for (MediaLibBean mediaItem : mediaLibList) {
 //                    try {
 //                        boolean isChecked = false;
-//                        boolean isNewDownload = false;
 //                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + mediaItem.getName();
 //                        //判断当前数据是节目还是其他，如果是节目走下载逻辑,其他则直接入库
 //                        if (ConstantValues.PRO.equals(versionInfo.getType())) {
 //                            String url = baseUrl + mediaItem.getUrl();
-//                            LogUtils.v("****开始下载pro视频:"+mediaItem.getChinese_name()+"****");
+//
 //                            // 下载、校验
 //                            if (isDownloadCompleted(path, mediaItem.getMd5())) {
 //                                isChecked = true;
-//                                LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
 //                            } else {
-//                                boolean isDownloaded = false;
-//                                //虚拟小平台下载
-//                                if (ConstantValues.VIRTUAL.equals(smallType)||isOSS){
-//                                    OSSUtils ossUtils = new OSSUtils(context,
-//                                            BuildConfig.OSS_BUCKET_NAME,
-//                                            mediaItem.getOss_path(),
-//                                            new File(path));
-//                                    isDownloaded = ossUtils.syncDownload();
-//                                }else {
-//                                    isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
-//
-//                                }
+//                                boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
 //                                if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
 //                                    isChecked = true;
-//                                    isNewDownload = true;
-//                                    LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
 //                                }
 //                            }
 //                        } else {
@@ -1041,20 +1141,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                        // 校验通过、插库
 //                        if (isChecked) {
 //                            mediaItem.setMediaPath(path);
-//                            String selection = DBHelper.MediaDBInfo.FieldName.ADS_ORDER + "=? and " +
-//                                    DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
-//                            String[] selectionArgs = new String[]{mediaItem.getOrder() + "", mediaItem.getPeriod()};
-//                            List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
-//                            if (list == null || list.isEmpty()) {
-//                                // 插库成功，downloadedCount加1
-//                                if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
-//                                    downloadedCount++;
-//
-//                                    if (isNewDownload) {
-//                                        notifyToPlay();
-//                                    }
-//                                }
-//                            } else {
+//                            // 插库成功，downloadedCount加1
+//                            if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
 //                                downloadedCount++;
 //                            }
 //                        }
@@ -1088,18 +1176,6 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //                                String.valueOf(System.currentTimeMillis()), "suspend", "pro_down", proPeriod,
 //                                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
 //                    }
-//                    if (!isOSS){
-//                        if(pro_timeout_count<5){
-//                            pro_timeout_count ++;
-////                            getProgramDataFromSmallPlatform(isOSS);
-//                            handleSmallPlatformProgramData(smallType,isOSS);
-//                        }else{
-//                            pro_timeout_count = 0;
-////                            getProgramDataFromSmallPlatform(!isOSS);
-//                            handleSmallPlatformProgramData(smallType,!isOSS);
-//                        }
-//                    }
-//
 //                }
 //            }
 //        }
@@ -1112,16 +1188,188 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 
 
 
+    /**
+     * 处理小平台返回的节目单数据（包含内容数据和宣传片占位和广告占位）
+     * OSSsource true是从OSS下载，false是从实体小平台下载
+     */
+    private void handleSmallPlatformProgramData(String smallType,boolean OSSsource) {
+        if (setTopBoxBean == null || setTopBoxBean.getPlaybill_list() == null || setTopBoxBean.getPlaybill_list().isEmpty()) {
+            return;
+        }
+        //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
+        ArrayList<ProgramBean> playbill_list = setTopBoxBean.getPlaybill_list();
+        //当前最新节目期号
+        String proPeriod = "";
+        boolean isOSS = OSSsource;
+        for (ProgramBean item : playbill_list) {
+            String logUUID = String.valueOf(System.currentTimeMillis());
+            if (ConstantValues.PRO.equals(item.getVersion().getType())) {
+                proPeriod = item.getVersion().getVersion();
+
+                //如果期数相同，则表示数据没有改变，不需要执行后续的下载动作（第一次循环即便期号相同，也做一次遍历作为文件校验）
+                LogUtils.d("===============proMediaPeriod===========" + session.getProPeriod());
+                if (!isFirstRun &&
+                        (session.getProPeriod().equals(proPeriod) || session.getProNextPeriod().equals(proPeriod))) {
+                    isProCompleted = true;
+                    mProCompletedPeriod = proPeriod;
+                    continue;
+                }
+                String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
+                        DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
+                String[] selectionArgs = new String[]{ConstantValues.PRO, proPeriod};
+                dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST,selection, selectionArgs);
+                // 设置下载中期号
+                session.setProDownloadPeriod(proPeriod);
+
+                // 记录下载开始日志
+                int count = item.getMedia_lib() == null ? 0 : item.getMedia_lib().size();
+                LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                        String.valueOf(System.currentTimeMillis()), "start", "pro_down", proPeriod,
+                        "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
+            }
+
+            VersionInfo versionInfo = item.getVersion();
+            if (versionInfo == null || TextUtils.isEmpty(versionInfo.getType())) {
+                continue;
+            }
+
+            List<MediaLibBean> mediaLibList = item.getMedia_lib();
+            int downloadedCount = 0;
+            if (mediaLibList != null && mediaLibList.size() > 0) {
+
+                ServerInfo serverInfo = session.getServerInfo();
+                if (serverInfo == null) {
+                    break;
+                }
+
+                String baseUrl = serverInfo.getDownloadUrl();
+                if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
+                    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                }
+
+                LogUtils.d("---------轮播视频开始下载---------");
+                for (MediaLibBean mediaItem : mediaLibList) {
+                    try {
+                        boolean isChecked = false;
+                        boolean isNewDownload = false;
+                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + mediaItem.getName();
+                        //判断当前数据是节目还是其他，如果是节目走下载逻辑,其他则直接入库
+                        if (ConstantValues.PRO.equals(versionInfo.getType())) {
+                            String url = baseUrl + mediaItem.getUrl();
+                            LogUtils.v("****开始下载pro视频:"+mediaItem.getChinese_name()+"****");
+                            // 下载、校验
+                            if (isDownloadCompleted(path, mediaItem.getMd5())) {
+                                isChecked = true;
+                                LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
+                            } else {
+                                boolean isDownloaded = false;
+                                //虚拟小平台下载
+                                if (ConstantValues.VIRTUAL.equals(smallType)||isOSS){
+                                    OSSUtils ossUtils = new OSSUtils(context,
+                                            BuildConfig.OSS_BUCKET_NAME,
+                                            mediaItem.getOss_path(),
+                                            new File(path));
+                                    isDownloaded = ossUtils.syncDownload();
+                                }else {
+                                    isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+
+                                }
+                                if (isDownloaded && isDownloadCompleted(path, mediaItem.getMd5())) {
+                                    isChecked = true;
+                                    isNewDownload = true;
+                                    LogUtils.v("****pro视频:"+mediaItem.getChinese_name()+"下载完成****");
+                                }
+                            }
+                        } else {
+                            isChecked = true;
+                        }
+                        // 校验通过、插库
+                        if (isChecked) {
+                            mediaItem.setMediaPath(path);
+                            String selection = DBHelper.MediaDBInfo.FieldName.ADS_ORDER + "=? and " +
+                                    DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
+                            String[] selectionArgs = new String[]{mediaItem.getOrder() + "", mediaItem.getPeriod()};
+                            List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
+                            if (list == null || list.isEmpty()) {
+                                // 插库成功，downloadedCount加1
+                                if (dbHelper.insertOrUpdateNewPlayListLib(mediaItem, -1)) {
+                                    downloadedCount++;
+
+                                    if (isNewDownload) {
+                                        notifyToPlay();
+                                    }
+                                }
+                            } else {
+                                downloadedCount++;
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (ConstantValues.PRO.equals(versionInfo.getType())) {
+                // 下载完成（mediaLibList==null或size为0也认为是下载完成，认为新的节目单中没有该类型的数据）
+                if (mediaLibList == null || downloadedCount == mediaLibList.size()) {
+                    LogUtils.d("---------节目视频下载完成---------");
+                    isProCompleted = true;
+                    mProCompletedPeriod = proPeriod;
+                    // 记录日志
+                    // 记录下载完成日志
+                    LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                            String.valueOf(System.currentTimeMillis()), "end", "pro_down", proPeriod,
+                            "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
+                    LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
+                            Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
+                            String.valueOf(System.currentTimeMillis()), "update", versionInfo.getType(), "",
+                            "", Session.get(context).getVersionName(), versionInfo.getVersion(),
+                            Session.get(context).getVodPeriod(), "");
+                } else {
+                    isProCompleted = false;
+                    if (!isFirstRun) {
+                        // 记录下载中止日志
+                        LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
+                                String.valueOf(System.currentTimeMillis()), "suspend", "pro_down", proPeriod,
+                                "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(downloadedCount));
+                    }
+                    if (!isOSS){
+                        if(pro_timeout_count<5){
+                            pro_timeout_count ++;
+//                            getProgramDataFromSmallPlatform(isOSS);
+                            handleSmallPlatformProgramData(smallType,isOSS);
+                        }else{
+                            pro_timeout_count = 0;
+//                            getProgramDataFromSmallPlatform(!isOSS);
+                            handleSmallPlatformProgramData(smallType,!isOSS);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
 
     /**
      * 处理小平台返回的宣传片数据(下载完宣传片数据之后需要更新到节目单中，组合成可播放的节目单)
      */
-    private void handleSmallPlatformAdvData(ProgramBean programAdvBean) {
-        if (programAdvBean == null || programAdvBean.getVersion() == null || TextUtils.isEmpty(programAdvBean.getVersion().getVersion())) {
+    /**
+     * 处理小平台返回的宣传片数据(下载完宣传片数据之后需要更新到节目单中，组合成可播放的节目单)
+     */
+    private void handleSmallPlatformAdvData(String smallType,boolean OSSsource) {
+        if (advProgramBean == null || advProgramBean.getVersion() == null || TextUtils.isEmpty(advProgramBean.getVersion().getVersion())) {
             return;
         }
 
-        String advPeriod = programAdvBean.getVersion().getVersion();
+        String advPeriod = advProgramBean.getVersion().getVersion();
         if (!isFirstRun &&
                 (session.getAdvPeriod().equals(advPeriod) || session.getAdvNextPeriod().equals(advPeriod))) {
             return;
@@ -1131,75 +1379,94 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (serverInfo == null) {
             return;
         }
-
+        boolean isOSS = OSSsource;
         String baseUrl = serverInfo.getDownloadUrl();
         if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
-        // 先从下载表中删除该期的记录
-        String selectionDel = DBHelper.MediaDBInfo.FieldName.PERIOD + "=? and " + DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=?";
-        String[] argsDel = new String[]{advPeriod, programAdvBean.getVersion().getType()};
-        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selectionDel, argsDel);
-
         String logUUID = String.valueOf(System.currentTimeMillis());
         // 记录下载开始日志
-        int count = programAdvBean.getMedia_lib() == null ? 0 : programAdvBean.getMedia_lib().size();
+        int count = advProgramBean.getMedia_lib() == null ? 0 : advProgramBean.getMedia_lib().size();
         LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "start", "adv_down", advPeriod,
                 "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
 
         boolean isAdvCompleted = false;
-        session.setAdvDownloadPeriod(programAdvBean.getVersion().getVersion());
+        session.setAdvDownloadPeriod(advProgramBean.getVersion().getVersion());
         int advDownloadedCount = 0;
-        if (programAdvBean.getMedia_lib() != null && programAdvBean.getMedia_lib().size() > 0) {
-            for (MediaLibBean bean : programAdvBean.getMedia_lib()) {
+        if (advProgramBean.getMedia_lib() != null && advProgramBean.getMedia_lib().size() > 0) {
+            for (MediaLibBean bean : advProgramBean.getMedia_lib()) {
                 String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + bean.getName();
                 String url = baseUrl + bean.getUrl();
                 boolean isChecked = false;
                 try {
+                    LogUtils.v("****开始下载adv视频:"+bean.getChinese_name()+"****");
                     // 下载、校验
                     if (isDownloadCompleted(path, bean.getMd5())) {
                         isChecked = true;
                     } else {
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        //虚拟小平台
+                        if (ConstantValues.VIRTUAL.equals(smallType)||isOSS){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    bean.getOss_path(),
+                                    new File(path));
+                            isDownloaded = ossUtils.syncDownload();
+                        }else{
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
+
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
                     }
+                    LogUtils.v("****adv视频:"+bean.getChinese_name()+"下载完成****");
                     if (isChecked) {
-                        // ADV是先在handleSmallPlatformProgramData()中插入，然后在这里更新实际数据，插入时的期号是节目单号
-                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE
-                                + "=? and "
-                                + DBHelper.MediaDBInfo.FieldName.LOCATION_ID
-                                + "=? and "
-                                + DBHelper.MediaDBInfo.FieldName.PERIOD
-                                + "=? ";
-                        String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), programAdvBean.getMenu_num()};
+                        // ADV是先在handleSmallPlatformProgramData()中插入，插入时的期号是节目单号，然后在这里更新实际数据
+                        String selection = DBHelper.MediaDBInfo.FieldName.MEDIATYPE + "=? and " +
+                                DBHelper.MediaDBInfo.FieldName.LOCATION_ID + "=? and " +
+                                DBHelper.MediaDBInfo.FieldName.PERIOD + "=? ";
+
+                        String[] selectionArgs = new String[]{bean.getType(), bean.getLocation_id(), advPeriod};
                         List<MediaLibBean> list = dbHelper.findNewPlayListByWhere(selection, selectionArgs);
-                        int id = -1;
-                        if (list != null) {
+                        String[] selectionArgs2 = new String[]{bean.getType(), bean.getLocation_id(), advProgramBean.getMenu_num()};
+
+                        if (list!=null&&!list.isEmpty()){
                             if (list.size() > 1) {
                                 dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs);
                             } else if (list.size() == 1) {
-                                id = list.get(0).getId();
-                            }
-                        }
-                        if (id != -1) {
-                            bean.setOrder(list.get(0).getOrder());
-                            bean.setMediaPath(path);
-                            // 插库成功，downloadedCount加1
-                            if (dbHelper.insertOrUpdateNewPlayListLib(bean, id)) {
+                                dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs2);
                                 advDownloadedCount++;
                             }
+                        }else{
+                            list = dbHelper.findNewPlayListByWhere(selection, selectionArgs2);
+                            int id = -1;
+                            if (list != null) {
+                                if (list.size() > 1) {
+                                    dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWPLAYLIST, selection, selectionArgs2);
+                                } else if (list.size() == 1) {
+                                    id = list.get(0).getId();
+                                }
+                            }
+                            if (id != -1) {
+                                bean.setOrder(list.get(0).getOrder());
+                                bean.setMediaPath(path);
+                                // 插库成功，downloadedCount加1
+                                if (dbHelper.insertOrUpdateNewPlayListLib(bean, id)) {
+                                    advDownloadedCount++;
+                                }
+                            }
                         }
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
-            if (advDownloadedCount == programAdvBean.getMedia_lib().size()) {
+            if (advDownloadedCount == advProgramBean.getMedia_lib().size()) {
                 isAdvCompleted = true;
             } else {
                 isAdvCompleted = false;
@@ -1219,16 +1486,17 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "suspend", "adv_down", advPeriod,
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(advDownloadedCount));
+
         }
 
-        if (isAdvCompleted && isProCompleted && !TextUtils.isEmpty(programAdvBean.getMenu_num()) &&
-                programAdvBean.getMenu_num().equals(mProCompletedPeriod)) {
+        if (isAdvCompleted && isProCompleted && !TextUtils.isEmpty(advProgramBean.getMenu_num()) &&
+                advProgramBean.getMenu_num().equals(mProCompletedPeriod)) {
             isFirstRun = false;
             // 记录日志
             LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                     Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "update", programAdvBean.getVersion().getType(), "",
-                    "", Session.get(context).getVersionName(), programAdvBean.getVersion().getVersion(),
+                    String.valueOf(System.currentTimeMillis()), "update", advProgramBean.getVersion().getType(), "",
+                    "", Session.get(context).getVersionName(), advProgramBean.getVersion().getVersion(),
                     Session.get(context).getVodPeriod(), "");
 
             // 标识是立即播放还是预约发布
@@ -1266,36 +1534,52 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 notifyToPlay();
             }
         }
+
+        if (!isAdvCompleted&&!isOSS){
+            if (adv_timeout_count<5){
+                adv_timeout_count ++;
+//                getAdvDataFromSmallPlatform(isOSS);
+                handleSmallPlatformAdvData(smallType,isOSS);
+            }else {
+                adv_timeout_count = 0;
+//                getAdvDataFromSmallPlatform(!isOSS);
+                handleSmallPlatformAdvData(smallType,!isOSS);
+            }
+        }
+
+
     }
 
     /**
      * 通过小平台获取广告数据
      */
-    private void handleSmallPlatformAdsData(ProgramBean programAdsBean) {
-        if (programAdsBean == null || programAdsBean.getVersion() == null || TextUtils.isEmpty(programAdsBean.getVersion().getVersion())) {
+    /**
+     * 通过小平台获取广告数据
+     */
+    private void handleSmallPlatformAdsData(String smallType,boolean OSSsource) {
+        if (adsProgramBean == null || adsProgramBean.getVersion() == null || TextUtils.isEmpty(adsProgramBean.getVersion().getVersion())) {
             return;
         }
-        String adsPeriod = programAdsBean.getVersion().getVersion();
+        String adsPeriod = adsProgramBean.getVersion().getVersion();
         if (!isAdsFirstRun && session.getAdsPeriod().equals(adsPeriod)) {
             return;
         }
 
         // 清空ads下载表
-//        String selection = DBHelper.MediaDBInfo.FieldName.PERIOD + "=?";
-//        String[] selectionArgs = new String[]{adsPeriod};
         dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.NEWADSLIST, null, null);
 
         String logUUID = String.valueOf(System.currentTimeMillis());
         // 记录下载开始日志
-        int count = programAdsBean.getMedia_lib() == null ? 0 : programAdsBean.getMedia_lib().size();
+        int count = adsProgramBean.getMedia_lib() == null ? 0 : adsProgramBean.getMedia_lib().size();
         LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                 String.valueOf(System.currentTimeMillis()), "start", "ads_down", adsPeriod,
                 "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(count));
 
         session.setAdsDownloadPeriod(adsPeriod);
+        boolean isOSS = OSSsource;
         boolean isAdsCompleted = false;
         int adsDownloadedCount = 0;
-        if (programAdsBean.getMedia_lib() != null && programAdsBean.getMedia_lib().size() > 0) {
+        if (adsProgramBean.getMedia_lib() != null && adsProgramBean.getMedia_lib().size() > 0) {
             ServerInfo serverInfo = session.getServerInfo();
             if (serverInfo == null) {
                 return;
@@ -1304,20 +1588,32 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
                 baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
             }
-            for (MediaLibBean bean : programAdsBean.getMedia_lib()) {
+            for (MediaLibBean bean : adsProgramBean.getMedia_lib()) {
                 String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) + bean.getName();
                 String url = baseUrl + bean.getUrl();
                 boolean isChecked = false;
                 try {
                     // 下载、校验
+                    LogUtils.v("****开始下载ads视频:"+bean.getChinese_name()+"****");
                     if (isDownloadCompleted(path, bean.getMd5())) {
                         isChecked = true;
                     } else {
-                        boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        boolean isDownloaded = false;
+                        //虚拟小平台
+                        if (ConstantValues.VIRTUAL.equals(smallType)||isOSS){
+                            OSSUtils ossUtils = new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    bean.getOss_path(),
+                                    new File(path));
+                            isDownloaded = ossUtils.syncDownload();
+                        }else{
+                            isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                        }
                         if (isDownloaded && isDownloadCompleted(path, bean.getMd5())) {
                             isChecked = true;
                         }
                     }
+                    LogUtils.v("****ads视频:"+bean.getChinese_name()+"下载完成****");
                     if (isChecked) {
                         bean.setMediaPath(path);
                         // 插库成功，mDownloadedList中加入一条
@@ -1330,7 +1626,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 }
             }
 
-            if (adsDownloadedCount == programAdsBean.getMedia_lib().size()) {
+            if (adsDownloadedCount == adsProgramBean.getMedia_lib().size()) {
                 isAdsCompleted = true;
             } else {
                 isAdsCompleted = false;
@@ -1342,7 +1638,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (isAdsCompleted) {
             isAdsFirstRun = false;
             session.setAdsPeriod(adsPeriod);
-            // 从ADS下载表中删除非该期的记录
+            // 从ADS下载表拷贝到正式表
             dbHelper.copyTableMethod(DBHelper.MediaDBInfo.TableName.NEWADSLIST, DBHelper.MediaDBInfo.TableName.ADSLIST);
             // 记录日志
             // 记录下载完成日志
@@ -1351,8 +1647,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
             LogReportUtil.get(context).sendAdsLog(String.valueOf(System.currentTimeMillis()),
                     Session.get(context).getBoiteId(), Session.get(context).getRoomId(),
-                    String.valueOf(System.currentTimeMillis()), "update", programAdsBean.getVersion().getType(), "",
-                    "", Session.get(context).getVersionName(), programAdsBean.getVersion().getVersion(),
+                    String.valueOf(System.currentTimeMillis()), "update", adsProgramBean.getVersion().getType(), "",
+                    "", Session.get(context).getVersionName(), adsProgramBean.getVersion().getVersion(),
                     Session.get(context).getVodPeriod(), "");
 
             notifyToPlay();
@@ -1361,6 +1657,18 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             LogReportUtil.get(this).sendAdsLog(logUUID, session.getBoiteId(), session.getRoomId(),
                     String.valueOf(System.currentTimeMillis()), "suspend", "ads_down", adsPeriod,
                     "", session.getVersionName(), session.getAdsPeriod(), session.getVodPeriod(), String.valueOf(adsDownloadedCount));
+            if (!isOSS){
+                if (ads_timeout_count <5){
+                    ads_timeout_count ++;
+//                    getAdsDataFromSmallPlatform(isOSS);
+                    handleSmallPlatformAdsData(smallType,isOSS);
+                }else{
+                    ads_timeout_count = 0;
+//                    getAdsDataFromSmallPlatform(!isOSS);
+                    handleSmallPlatformAdsData(smallType,!isOSS);
+                }
+            }
+
         }
     }
 
@@ -1371,12 +1679,13 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         }
     }
 
+
     /**
      * 初始化盒子基本信息
      *
      * @param boiteBean
      */
-    void initBoxInfo(BoxInitBean boiteBean) {
+    void initBoxInfo(BoxInitBean boiteBean,String smallType) {
         if (boiteBean == null) {
             return;
         }
@@ -1490,8 +1799,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
 //            session.setOss_bucket(boiteBean.getOssBucketName());
 //        }
         /**桶地址*/
-        if (!TextUtils.isEmpty(boiteBean.getAreaId())) {
-            session.setOssAreaId(boiteBean.getAreaId());
+        if (!TextUtils.isEmpty(boiteBean.getArea_id())) {
+            session.setOssAreaId(boiteBean.getArea_id());
         }
 
         // 组合小平台下发的各种版本信息
@@ -1515,6 +1824,15 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             spVersionInfo.addAll(boiteBean.getSmall_web_version_list());
         }
         session.setSPVersionInfo(spVersionInfo);
+        try{
+            if (boiteBean.getTv_list()!=null&&boiteBean.getTv_list().size()>0){
+                Television tv = boiteBean.getTv_list().get(0);
+                session.setTvSize(Integer.valueOf(tv.getTv_size()));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
         /**下载启动图*/
         if (!TextUtils.isEmpty(boiteBean.getLogo_url()) && !TextUtils.isEmpty(boiteBean.getLogo_md5()) &&
@@ -1529,20 +1847,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 e.printStackTrace();
             }
             if (!boiteBean.getLogo_md5().equals(md5)) {
-                ServerInfo serverInfo = session.getServerInfo();
-                if (serverInfo != null) {
-                    String baseUrl = serverInfo.getDownloadUrl();
-                    String url = baseUrl + boiteBean.getLogo_url();
-                    if (!TextUtils.isEmpty(boiteBean.getLogo_url())) {
-                        String[] split = boiteBean.getLogo_url().split("/");
-                        String logo_name = split[split.length - 1];
-                        logo_md5 = boiteBean.getLogo_md5();
-                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + logo_name;
-                        File tarFile = new File(path);
-                        if (tarFile.exists()) {
-                            tarFile.delete();
+                String[] split = boiteBean.getLogo_url().split("/");
+                String logo_name = split[split.length - 1];
+                logo_md5 = boiteBean.getLogo_md5();
+                String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + logo_name;
+                if (ConstantValues.VIRTUAL.equals(smallType)){
+                    OSSUtils ossUtils = new OSSUtils(context,
+                            BuildConfig.OSS_BUCKET_NAME,
+                            boiteBean.getLogo_url(),
+                            new File(path));
+                    ossUtils.syncDownload();
+                }else{
+                    ServerInfo serverInfo = session.getServerInfo();
+                    if (serverInfo != null) {
+                        String baseUrl = serverInfo.getDownloadUrl();
+                        String url = baseUrl + boiteBean.getLogo_url();
+                        if (!TextUtils.isEmpty(boiteBean.getLogo_url())) {
+                            File tarFile = new File(path);
+                            if (tarFile.exists()) {
+                                tarFile.delete();
+                            }
+                            AppApi.downloadLOGO(url, context, this, path);
                         }
-                        AppApi.downloadLOGO(url, context, this, path);
                     }
                 }
             } else {
@@ -1563,20 +1889,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 e.printStackTrace();
             }
             if (!boiteBean.getLoading_img_md5().equals(md5)) {
-                ServerInfo serverInfo = session.getServerInfo();
-                if (serverInfo != null) {
-                    String baseUrl = serverInfo.getDownloadUrl();
-                    String url = baseUrl + boiteBean.getLoading_img_url();
-                    if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
-                        String[] split = boiteBean.getLoading_img_url().split("/");
-                        String imageName = split[split.length - 1];
-                        loading_img_md5 = boiteBean.getLoading_img_md5();
-                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
-                        File tarFile = new File(path);
-                        if (tarFile.exists()) {
-                            tarFile.delete();
+                String[] split = boiteBean.getLoading_img_url().split("/");
+                String imageName = split[split.length - 1];
+                loading_img_md5 = boiteBean.getLoading_img_md5();
+                String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + imageName;
+                if (ConstantValues.VIRTUAL.equals(smallType)){
+                    OSSUtils ossUtils = new OSSUtils(context,
+                            BuildConfig.OSS_BUCKET_NAME,
+                            boiteBean.getLoading_img_url(),
+                            new File(path));
+                    ossUtils.syncDownload();
+                }else{
+                    ServerInfo serverInfo = session.getServerInfo();
+                    if (serverInfo != null) {
+                        String baseUrl = serverInfo.getDownloadUrl();
+                        String url = baseUrl + boiteBean.getLoading_img_url();
+                        if (!TextUtils.isEmpty(boiteBean.getLoading_img_url())) {
+                            File tarFile = new File(path);
+                            if (tarFile.exists()) {
+                                tarFile.delete();
+                            }
+                            AppApi.downloadImg(url, context, this, path);
                         }
-                        AppApi.downloadLoadingImg(url, context, this, path);
                     }
                 }
             } else {
@@ -1585,6 +1919,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             }
         }
     }
+
+
 
 //    /**
 //     * 如果发现酒楼ID发生改变，那么证明盒子换酒楼了，需要把视频和数据清空重新下载
@@ -1686,7 +2022,8 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     /**
      * 处理小平台返回的点播视频
      */
-    private void handleSmallPlatformOnDemandData(SetTopBoxBean multicastBoxBean) {
+
+    private void handleSmallPlatformOnDemandData(String smallType,boolean OSSsource) {
         if (multicastBoxBean == null || multicastBoxBean.getPlaybill_list() == null || multicastBoxBean.getPlaybill_list().isEmpty()) {
             return;
         }
@@ -1694,22 +2031,21 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         if (serverInfo == null) {
             return;
         }
-
-
+        boolean isOSS = OSSsource;
         String baseUrl = serverInfo.getDownloadUrl();
         if (!TextUtils.isEmpty(baseUrl) && baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
         boolean isAllCompleted = true;      // 标识是否所有类型的视频都下载完成
-        ArrayList<PlayListCategoryItem> playbill_list = multicastBoxBean.getPlaybill_list();
+        ArrayList<ProgramBean> playbill_list = multicastBoxBean.getPlaybill_list();
         ArrayList<String> fileNames = new ArrayList<>();    // 下载成功的文件名集合（后面删除老视频会用到）
 
         // 抽出版本信息
         ArrayList<VersionInfo> newVersions = new ArrayList<>();
         StringBuilder versionSequence = new StringBuilder();
         for (int i = 0; i < playbill_list.size(); i++) {
-            PlayListCategoryItem item = playbill_list.get(i);
+            ProgramBean item = playbill_list.get(i);
             newVersions.add(item.getVersion());
             if (i != 0) {
                 versionSequence.append("_");
@@ -1720,7 +2056,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         session.setDownloadingVodVersion(newVersions);
 
         for (int i = 0; i < playbill_list.size(); i++) {
-            PlayListCategoryItem item = playbill_list.get(i);
+            ProgramBean item = playbill_list.get(i);
             VersionInfo versionInfo = item.getVersion();
             if (versionInfo == null || TextUtils.isEmpty(versionInfo.getType())) {
                 continue;
@@ -1741,17 +2077,28 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
                 for (MediaLibBean mediaLib : mediaLibList) {
                     String url = baseUrl + mediaLib.getUrl();
                     String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) + mediaLib.getName();
+                    String path2 = AppUtils.getFilePath(context,AppUtils.StorageFile.media)+mediaLib.getName();
                     fileNames.add(mediaLib.getName());
                     try {
                         boolean isChecked = false;
-                        if (isDownloadCompleted(path, mediaLib.getMd5())) {
+                        if (isDownloadCompleted(path, mediaLib.getMd5())||isDownloadCompleted(path2,mediaLib.getName())) {
                             isChecked = true;
                         } else {
                             File file = new File(path);
                             if (file.exists() && file.isFile()) {
                                 file.delete();
                             }
-                            boolean isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                            boolean isDownloaded = false;
+                            //虚拟小平台
+                            if (ConstantValues.VIRTUAL.equals(smallType)||isOSS){
+                                OSSUtils ossUtils = new OSSUtils(context,
+                                        BuildConfig.OSS_BUCKET_NAME,
+                                        mediaLib.getOss_path(),
+                                        new File(path));
+                                isDownloaded = ossUtils.syncDownload();
+                            }else{
+                                isDownloaded = new ProgressDownloader(url, new File(path)).download(0);
+                            }
                             if (isDownloaded && isDownloadCompleted(path, mediaLib.getMd5())) {
                                 isChecked = true;
                             }
@@ -1809,6 +2156,16 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
             session.setMulticastMediaPeriod(versionStr);
 
             deleteMediaFileNotInConfig(fileNames, AppUtils.StorageFile.multicast, DBHelper.MediaDBInfo.TableName.MULTICASTMEDIALIB);
+        }else{
+            if (!isOSS){
+                if (vod_timeout_count<5){
+                    vod_timeout_count ++;
+                    getOnDemandDataFromSmallPlatform(isOSS);
+                }else {
+                    vod_timeout_count =0;
+                    getOnDemandDataFromSmallPlatform(!isOSS);
+                }
+            }
         }
     }
 

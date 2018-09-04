@@ -39,6 +39,19 @@ public class MediaLibBean implements Serializable {
     /** ADMaster 曝光*/
     private String admaster_sin;
 
+    /**下载状态 0：未下载； 1：已下载； 2：下载中*/
+    private int download_state;
+    /**聚屏类型：1.百度**/
+    private String tpmedia_id;
+    /**百度返回md5值**/
+    private String tp_md5;
+    /**oss资源路径**/
+    private String oss_path;
+    /**李召返回，暂未使用**/
+    private String oss_etag;
+    /**0：不显示  1：显示**/
+    private int is_sapp_qrcode;
+
     public int getId() {
         return id;
     }
@@ -183,6 +196,54 @@ public class MediaLibBean implements Serializable {
 
     public void setAdmaster_sin(String admaster_sin) {
         this.admaster_sin = admaster_sin;
+    }
+
+    public int getDownload_state() {
+        return download_state;
+    }
+
+    public void setDownload_state(int download_state) {
+        this.download_state = download_state;
+    }
+
+    public String getTpmedia_id() {
+        return tpmedia_id;
+    }
+
+    public void setTpmedia_id(String tpmedia_id) {
+        this.tpmedia_id = tpmedia_id;
+    }
+
+    public String getTp_md5() {
+        return tp_md5;
+    }
+
+    public void setTp_md5(String tp_md5) {
+        this.tp_md5 = tp_md5;
+    }
+
+    public String getOss_path() {
+        return oss_path;
+    }
+
+    public void setOss_path(String oss_path) {
+        this.oss_path = oss_path;
+    }
+
+    public String getOss_etag() {
+        return oss_etag;
+    }
+
+    public void setOss_etag(String oss_etag) {
+        this.oss_etag = oss_etag;
+    }
+
+    public int getIs_sapp_qrcode() {
+        return is_sapp_qrcode;
+    }
+
+    public void setIs_sapp_qrcode(int is_sapp_qrcode) {
+        this.is_sapp_qrcode = is_sapp_qrcode;
     }
 }
 

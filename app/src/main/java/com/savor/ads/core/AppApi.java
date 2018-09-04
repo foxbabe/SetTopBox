@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.savor.ads.BuildConfig;
 import com.savor.ads.bean.AtvProgramInfo;
+import com.savor.ads.bean.JsonBean;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.LogFileUtil;
@@ -137,11 +138,27 @@ public class AppApi {
      * @param handler
      * @param boxMac
      */
-    public static String getBoxInitInfo(Context context, ApiRequestListener handler, String boxMac) throws IOException {
+    public static JsonBean getBoxInitInfo(Context context, ApiRequestListener handler, String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_BOX_INIT_JSON, handler, params).syncGet();
     }
+
+//    /**
+//     * 处理小平台返回的节目数据
+//     * @param context
+//     * @param handler
+//     * @param boxMac
+//     * @return
+//     * @throws IOException
+//     */
+//    public static String getProgramDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+//        final HashMap<String, Object> params = new HashMap<String, Object>();
+//        params.put("boxMac",boxMac);
+//        return new AppServiceOk(context, Action.SP_GET_PROGRAM_DATA_FROM_JSON, handler, params).syncGet();
+//
+//    }
+
 
     /**
      * 处理小平台返回的节目数据
@@ -151,12 +168,13 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getProgramDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getProgramDataFromSmallPlatform(Context context, ApiRequestListener handler, String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_PROGRAM_DATA_FROM_JSON, handler, params).syncGet();
 
     }
+
 
     /**
      * 获取小平台宣传片文件
@@ -166,12 +184,27 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getAdvDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getAdvDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ADV_DATA_FROM_JSON, handler, params).syncGet();
 
     }
+
+//    /**
+//     *获取小平台广告列表
+//     * @param context
+//     * @param handler
+//     * @param boxMac
+//     * @return
+//     * @throws IOException
+//     */
+//    public static String getAdsDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException{
+//        final HashMap<String, Object> params = new HashMap<String, Object>();
+//        params.put("boxMac",boxMac);
+//        return new AppServiceOk(context, Action.SP_GET_ADS_DATA_FROM_JSON, handler, params).syncGet();
+//    }
+
 
     /**
      *获取小平台广告列表
@@ -181,12 +214,11 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getAdsDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException{
+    public static JsonBean getAdsDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException{
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ADS_DATA_FROM_JSON, handler, params).syncGet();
     }
-
     /**
      * 获取小平台点播数据
      * @param context
@@ -195,7 +227,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getOnDemandDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getOnDemandDataFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_ON_DEMAND_DATA_FROM_JSON, handler, params).syncGet();
@@ -209,7 +241,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getSpecialtyFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getSpecialtyFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_SPECIALTY_JSON, handler, params).syncGet();
@@ -223,7 +255,7 @@ public class AppApi {
      * @return
      * @throws IOException
      */
-    public static String getRtbadsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
+    public static JsonBean getRtbadsFromSmallPlatform(Context context, ApiRequestListener handler,String boxMac) throws IOException {
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("boxMac",boxMac);
         return new AppServiceOk(context, Action.SP_GET_RTB_ADS_JSON, handler, params).syncGet();
@@ -267,6 +299,11 @@ public class AppApi {
     }
 
     public static void downloadLoadingImg(String url,Context context, ApiRequestListener handler,String filePath){
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
+    }
+
+    public static void downloadImg(String url,Context context, ApiRequestListener handler,String filePath){
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
     }

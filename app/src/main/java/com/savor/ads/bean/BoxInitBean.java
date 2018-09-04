@@ -20,7 +20,7 @@ public class BoxInitBean {
     /**包间名称*/
     private String room_name;
     /**地区ID*/
-    private String areaId;
+    private String area_id;
     /**logo地址*/
     private String logo_url;
     /**logo检验MD5*/
@@ -53,6 +53,8 @@ public class BoxInitBean {
     private ArrayList<VersionInfo> loading_version_list;
     private ArrayList<VersionInfo> apk_version_list;
     private ArrayList<VersionInfo> small_web_version_list;
+    /**电视信号**/
+    private ArrayList<Television> tv_list;
 
     public void setSwitch_time(int switch_time) {
         this.switch_time = switch_time;
@@ -102,12 +104,12 @@ public class BoxInitBean {
         return room_name;
     }
 
-    public void setAreaId(String areaId) {
-        this.areaId = areaId;
+    public String getArea_id() {
+        return area_id;
     }
 
-    public String getAreaId() {
-        return areaId;
+    public void setArea_id(String area_id) {
+        this.area_id = area_id;
     }
 
     public void setLogo_url(String logo_url) {
@@ -252,5 +254,13 @@ public class BoxInitBean {
 
     public void setSmall_web_version_list(ArrayList<VersionInfo> small_web_version_list) {
         this.small_web_version_list = small_web_version_list;
+    }
+
+    public ArrayList<Television> getTv_list() {
+        return tv_list;
+    }
+
+    public void setTv_list(ArrayList<Television> tv_list) {
+        this.tv_list = tv_list;
     }
 }

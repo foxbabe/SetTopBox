@@ -197,6 +197,9 @@ public class Session {
     private String lastUDiskUpdateTime;
 
     private ArrayList<RTBPushItem> mRTBPushItems;
+
+    /**电视机尺寸**/
+    private int tvSize;
 	
     private Session(Context context) {
 
@@ -280,6 +283,7 @@ public class Session {
         lastUDiskUpdateTime = mPreference.loadStringKey(P_APP_LAST_UDISK_UPDATE_TIME, "");
         admaster_update_time = mPreference.loadIntKey(P_APP_ADMASTER_UPDATE_TIME,0);
         mRTBPushItems = (ArrayList<RTBPushItem>) StringToObject(mPreference.loadStringKey(P_APP_RTB_PUSH_CONTENT, ""));
+        tvSize = mPreference.loadIntKey(P_APP_TV_SIZE,0);
     }
 
     /*
@@ -364,7 +368,8 @@ public class Session {
                 P_APP_TV_VOLUME.equals(key) ||
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
-                P_APP_SWITCHTIME.equals(key)) {
+                P_APP_SWITCHTIME.equals(key)||
+                P_APP_TV_SIZE.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
         } else if (P_APP_USE_VIRTUAL_SP.equals(key)||
                 P_APP_STAND_ALONE.equals(key)) {
@@ -648,6 +653,15 @@ public class Session {
     public void setVodVolume(int volume) {
         this.vodVolume = volume;
         writePreference(new Pair<String, Object>(P_APP_VOD_VOLUME, volume));
+    }
+
+    public int getTvSize() {
+        return tvSize;
+    }
+
+    public void setTvSize(int tvSize) {
+        this.tvSize = tvSize;
+        writePreference(new Pair<String, Object>(P_APP_TV_SIZE, tvSize));
     }
     public int getTvVolume() {
         return tvVolume;
@@ -1135,6 +1149,7 @@ public class Session {
 
     public static final String P_APP_RTB_PUSH_CONTENT = "com.savor.ads.rtb_push_content";
 
+    public static final String P_APP_TV_SIZE = "com.savor.ads.tvSize";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;
