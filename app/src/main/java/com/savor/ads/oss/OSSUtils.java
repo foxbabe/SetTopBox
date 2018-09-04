@@ -244,15 +244,15 @@ public class OSSUtils {
         //构造下载文件请求
         GetObjectRequest get = new GetObjectRequest(bucketName, objectKey2);
         //设置下载进度回调
-        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
-            @Override
-            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
-                OSSLog.logDebug("getobj_progress: " + currentSize + "  total_size: " + totalSize, false);
-//                if (downloadProgressListener!=null){
-//                    downloadProgressListener.getDownloadProgress(currentSize,totalSize);
-//                }
-            }
-        });
+//        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
+//            @Override
+//            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
+//                OSSLog.logDebug("getobj_progress: " + currentSize + "  total_size: " + totalSize, false);
+////                if (downloadProgressListener!=null){
+////                    downloadProgressListener.getDownloadProgress(currentSize,totalSize);
+////                }
+//            }
+//        });
         try {
             // 同步执行下载请求，返回结果
             GetObjectResult getResult = oss.getObject(get);
@@ -303,12 +303,12 @@ public class OSSUtils {
     public void asyncDownload(){
         GetObjectRequest get = new GetObjectRequest(bucketName, objectKey2);
         //设置下载进度回调
-        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
-            @Override
-            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
-                OSSLog.logDebug("getobj_progress: " + currentSize+"  total_size: " + totalSize, false);
-            }
-        });
+//        get.setProgressListener(new OSSProgressCallback<GetObjectRequest>() {
+//            @Override
+//            public void onProgress(GetObjectRequest request, long currentSize, long totalSize) {
+//                OSSLog.logDebug("getobj_progress: " + currentSize+"  total_size: " + totalSize, false);
+//            }
+//        });
         OSSAsyncTask task = oss.asyncGetObject(get, new OSSCompletedCallback<GetObjectRequest, GetObjectResult>() {
             @Override
             public void onSuccess(GetObjectRequest request, GetObjectResult result) {
