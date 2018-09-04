@@ -3,6 +3,7 @@ package com.savor.ads.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -30,11 +31,13 @@ import java.util.Random;
 public class MonkeyGameActivity extends BaseActivity {
 
     private Context context;
+    private MediaPlayer mPlayer;
     private LuckyMonkeyPanelView lucky_panel;
     private Button btn_action;
     private LinearLayout winningPrizeLayout;
     private ImageView winningWeixinHeadIV;
     private TextView winningTextTV;
+    private ImageView winningImgIV;
     private List<MiniProgramProjection> avatarList = new ArrayList<>();
     boolean isGameOver = true;
     private MiniProgramProjection miniProgramProjection;
@@ -60,6 +63,7 @@ public class MonkeyGameActivity extends BaseActivity {
         context = this;
         getViews();
         initContent();
+        initSounds();
         handler.removeCallbacks(exitRunnable);
         handler.postDelayed(exitRunnable,1000*60*2);
     }
@@ -71,6 +75,7 @@ public class MonkeyGameActivity extends BaseActivity {
         winningPrizeLayout = (LinearLayout) findViewById(R.id.winning_prize_layout);
         winningWeixinHeadIV = (ImageView) findViewById(R.id.winning_weixin_head);
         winningTextTV = (TextView) findViewById(R.id.winning_text);
+        winningImgIV = (ImageView) findViewById(R.id.winning_img);
     }
 
     private void initContent(){
@@ -104,8 +109,9 @@ public class MonkeyGameActivity extends BaseActivity {
                         winningPrizeLayout.setVisibility(View.VISIBLE);
                         winningWeixinHeadIV.setImageDrawable(drawable);
                         isGameOver = true;
-                        winningTextTV.setVisibility(View.GONE);
-                        winningTextTV.setText("哈哈，您中奖了，干了吧");
+                        winningTextTV.setVisibility(View.VISIBLE);
+                        winningTextTV.setText("该你喝酒了");
+                        winningImgIV.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -113,6 +119,12 @@ public class MonkeyGameActivity extends BaseActivity {
         });
     }
 
+
+    private void initSounds(){
+        mPlayer = MediaPlayer.create(this,R.raw.doudizhu);
+        mPlayer.start();
+        mPlayer.setLooping(true);
+    }
 
     public void addWeixinAvatarToGame(MiniProgramProjection programProjection){
         handler.removeCallbacks(exitRunnable);
@@ -169,6 +181,14 @@ public class MonkeyGameActivity extends BaseActivity {
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mPlayer!=null){
+            mPlayer.stop();
+            mPlayer.release();
+        }
+    }
 
     public void exitGame(){
         finish();

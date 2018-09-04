@@ -477,8 +477,10 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                     int value = (Integer)obj;
                     if (value==1){
                         LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
+                        Log.d("HeartbeatService","showMiniProgramIcon(true)");
                         Session.get(HeartbeatService.this).setShowMiniProgramIcon(true);
                         if (!Session.get(HeartbeatService.this).isHeartbeatMiniNetty()){
+                            Log.d("HeartbeatService","startMiniProgramNettyService");
                             startMiniProgramNettyService();
                         }
                     }else{

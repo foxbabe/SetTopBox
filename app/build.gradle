@@ -16,8 +16,8 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode 2018083005
-        versionName "1.2.9.2"
+        versionCode 2018090401
+        versionName "1.2.9.3"
 
         multiDexEnabled true
     }
