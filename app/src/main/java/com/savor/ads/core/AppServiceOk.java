@@ -427,6 +427,9 @@ public class AppServiceOk {
 //					});
                 } catch (Exception e) {
                     LogUtils.e("下载文件写入异常", e);
+                    if (handler!=null){
+                        handler.onError(action,null);
+                    }
                 } finally {
                     IOUtils.closeQuietly(fileOutputStream);
                     IOUtils.closeQuietly(inputStream);

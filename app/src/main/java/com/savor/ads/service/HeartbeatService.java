@@ -34,6 +34,7 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -119,6 +120,7 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
         doHeartbeat();
         doShowMiniProgramQRCode();
         monitorDownloadSpeed();
+        downloadMiniProgramIcon();
         if (!Session.get(this).isUseVirtualSp()) {
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
             executorService.scheduleAtFixedRate(mNetworkDetectionRunnable, 1, 5, TimeUnit.MINUTES);
@@ -194,6 +196,19 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
     private void monitorDownloadSpeed(){
         mHandler.postDelayed(mRunnable,0);
 
+    }
+
+    /**
+     * 小程序码下载到本地
+     */
+    private void downloadMiniProgramIcon(){
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
+        String path = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
+        File tarFile = new File(path);
+        if (tarFile.exists()) {
+            tarFile.delete();
+        }
+        AppApi.downloadImg(url,this,this,path);
     }
 
     private Runnable mRunnable = new Runnable() {
@@ -477,13 +492,20 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                     int value = (Integer)obj;
                     if (value==1){
                         LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
+                        Log.d("HeartbeatService","showMiniProgramIcon(true)");
                         Session.get(HeartbeatService.this).setShowMiniProgramIcon(true);
                         if (!Session.get(HeartbeatService.this).isHeartbeatMiniNetty()){
+                            Log.d("HeartbeatService","startMiniProgramNettyService");
                             startMiniProgramNettyService();
                         }
                     }else{
                         Session.get(HeartbeatService.this).setShowMiniProgramIcon(false);
                     }
+                }
+                break;
+            case SP_GET_LOADING_IMG_DOWN:
+                if (obj instanceof File){
+                    Session.get(HeartbeatService.this).setDownloadMiniProgramIcon(true);
                 }
                 break;
         }
