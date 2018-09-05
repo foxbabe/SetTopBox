@@ -138,8 +138,7 @@ public class Session {
     private String multicastMediaPeriod;
     private String vodPeriod;
     private String vodDownloadPeriod;
-    //点播视频用到的期号
-//    private String multicastDownloadingPeriod;
+
     //开机时间
     private String startTime;
     private String lastStartTime;
@@ -213,6 +212,8 @@ public class Session {
     /**小程序NETTY服务是否存活**/
     private boolean isHeartbeatMiniNetty;
 	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
+	/**是否已经下载小程序码**/
+	private boolean isDownloadMiniProgramIcon;
     private Session(Context context) {
 
         mContext = context;
@@ -1134,6 +1135,14 @@ public class Session {
 
     public void setDownloadFilePosition(HashMap<String, Long> downloadFilePosition) {
         this.downloadFilePosition = downloadFilePosition;
+    }
+
+    public boolean isDownloadMiniProgramIcon() {
+        return isDownloadMiniProgramIcon;
+    }
+
+    public void setDownloadMiniProgramIcon(boolean downloadMiniProgramIcon) {
+        isDownloadMiniProgramIcon = downloadMiniProgramIcon;
     }
 
     //轮播播放声音

@@ -57,13 +57,12 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
         Session.get(this).setShowMiniProgramIcon(false);
         Session.get(this).setHeartbeatMiniNetty(false);
         mQrCodeWindowManager = new QrCodeWindowManager();
-        miniProgramQrCodeWindowManager = new MiniProgramQrCodeWindowManager(this);
+        miniProgramQrCodeWindowManager = MiniProgramQrCodeWindowManager.get(this);
         // 启动投屏类操作处理的Service
 //        startScreenProjectionService();
 
         // 检测播放时间
         AppUtils.checkPlayTime(SavorApplication.this);
-
         initPush();
     }
 
@@ -418,10 +417,13 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
 
     @Override
     public void onSuccess(AppApi.Action method, Object obj) {
-        if (AppApi.Action.CP_POST_DEVICE_TOKEN_JSON.equals(method)) {
-            LogUtils.d("Report DeviceToken onSuccess!");
-            LogFileUtil.write("Report DeviceToken onSuccess!");
+        switch (method){
+            case CP_POST_DEVICE_TOKEN_JSON:
+                LogUtils.d("Report DeviceToken onSuccess!");
+                LogFileUtil.write("Report DeviceToken onSuccess!");
+                break;
         }
+
     }
 
     @Override

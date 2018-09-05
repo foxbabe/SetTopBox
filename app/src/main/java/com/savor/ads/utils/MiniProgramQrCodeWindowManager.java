@@ -3,6 +3,7 @@ package com.savor.ads.utils;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -17,7 +18,10 @@ import android.widget.TextView;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.savor.ads.R;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+
+import java.io.File;
 
 /**
  * Created by zhanghq on 2018/7/9.
@@ -27,6 +31,8 @@ public class MiniProgramQrCodeWindowManager {
 
     private Handler mHandler = new Handler();
     private Context context;
+    private static MiniProgramQrCodeWindowManager mInstance;
+    final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
     WindowManager mWindowManager;
     private LinearLayout mFloatLayout;
 
@@ -35,27 +41,14 @@ public class MiniProgramQrCodeWindowManager {
 
     public MiniProgramQrCodeWindowManager(Context mContext){
         this.context = mContext;
-    }
-
-    public void showQrCode(final Context context, final String url) {
-        LogUtils.d("showQrCode");
-        if (TextUtils.isEmpty(url)) {
-            LogUtils.e("Code is empty, will not show code window!!");
-            return;
-        }
-//        Session.get(context).setAuthCode(code);
-
-//        mHandler.removeCallbacks(mHideRunnable);
-//        mHandler.postDelayed(mHideRunnable, 10 * 1000);
-
-        if (mIsHandling||mIsAdded) {
+        if (mIsHandling) {
             return;
         }
         mIsHandling = true;
 
         final String ssid = AppUtils.getShowingSSID(context);
 
-        final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
+
         //获取WindowManager
         mWindowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         //设置window type
@@ -76,6 +69,29 @@ public class MiniProgramQrCodeWindowManager {
 
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_miniprogram_qrcode, null);
+    }
+
+    public static MiniProgramQrCodeWindowManager get(Context context){
+        if (mInstance==null){
+            mInstance = new MiniProgramQrCodeWindowManager(context);
+        }
+        return mInstance;
+
+    }
+
+
+    public void showQrCode(final Context context, final String url) {
+        LogUtils.d("showQrCode");
+        if (TextUtils.isEmpty(url)) {
+            LogUtils.e("Code is empty, will not show code window!!");
+            return;
+        }
+//        Session.get(context).setAuthCode(code);
+
+//        mHandler.removeCallbacks(mHideRunnable);
+//        mHandler.postDelayed(mHideRunnable, 10 * 1000);
+
+
 
         final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
@@ -95,30 +111,35 @@ public class MiniProgramQrCodeWindowManager {
 
     private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final WindowManager.LayoutParams wmParams) {
 
-        GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
-            @Override
-            public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
-                mIsHandling = false;
-                mIsAdded = false;
-                ShowMessage.showToast(context, "加载二维码失败");
-                return false;
+        if (Session.get(context).isDownloadMiniProgramIcon()){
+            ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
+            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
+            File tarFile = new File(path);
+            if (tarFile.exists()){
+                Uri uri = Uri.fromFile(tarFile);
+                qrCodeIV.setImageURI(uri);
+                handleWindowLayout();
             }
 
-            @Override
-            public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
-
-                if (mFloatLayout.getParent() == null) {
-                    mWindowManager.addView(mFloatLayout, wmParams);
-                    LogUtils.v("QrCodeWindowManager addView SUCCESS");
-//                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
+        }else{
+            GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
+                @Override
+                public boolean onException(Exception e, Object model, Target target, boolean isFirstResource) {
+                    mIsHandling = false;
+                    mIsAdded = false;
+                    ShowMessage.showToast(context, "加载二维码失败");
+                    return false;
                 }
-                mHandler.removeCallbacks(mHideRunnable);
-                mHandler.postDelayed(mHideRunnable,1000*60*2);
-                mIsHandling = false;
-                mIsAdded = true;
-                return false;
-            }
-        });
+
+                @Override
+                public boolean onResourceReady(Object resource, Object model, Target target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    handleWindowLayout();
+                    return false;
+                }
+            });
+        }
+
+
     }
 
     private Runnable mHideRunnable = new Runnable() {
@@ -147,5 +168,28 @@ public class MiniProgramQrCodeWindowManager {
 
 
 
+    }
+
+
+    private void handleWindowLayout(){
+        try {
+            if (mIsAdded&&context!=null&&mFloatLayout!=null) {
+                //移除悬浮窗口
+                mWindowManager.removeViewImmediate(mFloatLayout);
+                mIsAdded = false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if (mFloatLayout.getParent() == null) {
+            //设置悬浮窗口长宽数据
+            mWindowManager.addView(mFloatLayout, wmParams);
+            LogUtils.v("QrCodeWindowManager addView SUCCESS");
+//                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
+        }
+        mHandler.removeCallbacks(mHideRunnable);
+        mHandler.postDelayed(mHideRunnable,1000*60*2);
+        mIsHandling = false;
+        mIsAdded = true;
     }
 }

@@ -32,12 +32,12 @@
 
         <ImageView
             android:id="@+id/iv_mini_program_qrcode"
-            android:padding="10dp"
+            android:layout_margin="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"
             android:src="@mipmap/get_box_qr"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 
