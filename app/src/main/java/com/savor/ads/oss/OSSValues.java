@@ -13,8 +13,8 @@ public class OSSValues {
     public static final String uploadFilePath = "log/box/";
     //单机日志上传路径
     public static final String uploadStandaloneFilePath = "log/box_standalone/";
-    //抽奖结果上传路径
-    public static final String uploadLotteryPath = "lottery/box/";
+    //小程序码显示结果上传路径
+    public static final String uploadQRCodePath = "qrcode/box/";
 
 
 }

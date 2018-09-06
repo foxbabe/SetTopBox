@@ -47,6 +47,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cn.savor.small.netty.MiniProNettyClient;
@@ -134,6 +135,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                         activity.exitGame();
                     }
+                    MiniProgramProjection miniProgramProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
                     if (action==1){
                         int code = jsonObject.getInt("code");
                         if (!(ActivitiesManager.getInstance().getCurrentActivity() instanceof MainActivity)) {
@@ -142,9 +144,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             }
                         }
                     }else if(action==2){
+                      if (miniProgramProjection==null){
+                          return;
+                      }
                       boolean isDownloaded=false;
-                      String url = jsonObject.getString("url");
-                      String fileName = jsonObject.getString("filename");
+                      String url = miniProgramProjection.getUrl();
+                      String fileName = miniProgramProjection.getFilename();
                       int resourceType = 0;
                       if (jsonObject.has("resource_type")){
                           resourceType = jsonObject.getInt("resource_type");
@@ -164,7 +169,13 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                   url,
                                   file);
                           final Handler handler=new Handler(Looper.getMainLooper());
+                          HashMap<String,Object> params = new HashMap<>();
+                          params.put("action","1");
+                          params.put("openid",miniProgramProjection.getOpenid());
+                          params.put("order_time",System.currentTimeMillis());
                           if (2==resourceType){
+                              params.put("video_id",miniProgramProjection.getVideo_id());
+                              postProjectionVideosLog(params);
                               ossUtils.setDownloadProgressListener(new DownloadProgressListener() {
                                   @Override
                                   public void getDownloadProgress(final long currentSize, final long totalSize) {
@@ -193,8 +204,10 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                       });
                                   }
                               });
+                          }else{
+                              params.put("img_id",miniProgramProjection.getImg_id());
+                              postProjectionImagesLog(params);
                           }
-
                           isDownloaded = ossUtils.syncDownload();
                           handler.post(new Runnable() {
                               @Override
@@ -209,13 +222,24 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       }
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
+                         HashMap<String,Object> params = new HashMap<>();
                         if (1==resourceType){
+                            params.put("action","2");
+                            params.put("openid",miniProgramProjection.getOpenid());
+                            params.put("img_id",miniProgramProjection.getImg_id());
+                            params.put("order_time",System.currentTimeMillis());
+                            postProjectionImagesLog(params);
                          if (!TextUtils.isEmpty(GlobalValues.PROJECTION_WORDS)){
                              ProjectOperationListener.getInstance(context).showImage(1,path,true,GlobalValues.PROJECTION_WORDS);
                          }else{
                              ProjectOperationListener.getInstance(context).showImage(1,path,true);
                          }
                         }else if (2==resourceType){
+                            params.put("action","2");
+                            params.put("openid",miniProgramProjection.getOpenid());
+                            params.put("video_id",miniProgramProjection.getVideo_id());
+                            params.put("order_time",System.currentTimeMillis());
+                            postProjectionVideosLog(params);
                             ProjectOperationListener.getInstance(context).showVideo(path,0,true);
                         }
                      }else{
@@ -225,7 +249,6 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         ProjectOperationListener.getInstance(context).stop(GlobalValues.CURRENT_PROJECT_ID);
                     }else if (action==4){
 
-                        final MiniProgramProjection miniProgramProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
                         final Handler handler=new Handler(Looper.getMainLooper());
                         if (miniProgramProjection==null|| TextUtils.isEmpty(miniProgramProjection.getUrl())){
                             return;
@@ -274,7 +297,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                 }
                             });
                         }
-
+                        HashMap<String,Object> params = new HashMap<>();
+                        params.put("action","1");
+                        params.put("openid",miniProgramProjection.getOpenid());
+                        params.put("img_id",miniProgramProjection.getImg_id());
+                        params.put("order_time",System.currentTimeMillis());
+                        postProjectionImagesLog(params);
                         boolean isDownloaded=false;
                         String path = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +miniProgramProjection.getFilename();
                         File file = new File(path);
@@ -286,6 +314,14 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                     url,
                                     file);
                             isDownloaded = ossUtils.syncDownload();
+                        }
+                        if (isDownloaded){
+                            params.clear();
+                            params.put("action","2");
+                            params.put("openid",miniProgramProjection.getOpenid());
+                            params.put("img_id",miniProgramProjection.getImg_id());
+                            params.put("order_time",System.currentTimeMillis());
+                            postProjectionImagesLog(params);
                         }
                         if (isDownloaded&&img_nums>1){
                             if (!TextUtils.isEmpty(openid)){
@@ -331,22 +367,25 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         }
 
                     }else if(action==101){
-                        MiniProgramProjection programProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
 
                         Intent intent = new Intent(context,MonkeyGameActivity.class);
-                        intent.putExtra("miniProgramProjection",programProjection);
+                        intent.putExtra("miniProgramProjection",miniProgramProjection);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+                        postMiniProgramProjectionParam(action,miniProgramProjection);
                     }else if (action==102){
                         if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
                             MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                             activity.startGame();
+                            postMiniProgramProjectionParam(action,miniProgramProjection);
                         }
+
                     }else if (action==103){
-                        MiniProgramProjection programProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
+
                         if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
                             MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
-                            activity.addWeixinAvatarToGame(programProjection);
+                            activity.addWeixinAvatarToGame(miniProgramProjection);
+                            postMiniProgramProjectionParam(action,miniProgramProjection);
                         }
 
                     }else if (action==104){
@@ -355,6 +394,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             activity.exitGame();
                         }
                     }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -412,7 +452,60 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
 
         }
     };
+    /**
+     * 上传小程序投屏参数到云
+     * */
+    private void postMiniProgramProjectionParam(int action,MiniProgramProjection programProjection){
+        if (programProjection==null){
+            return;
+        }
+        HashMap<String,Object> params = new HashMap<>();
+        switch (action){
+            case 101:
+                params.put("action","1");
+                params.put("activity_id",programProjection.getActivity_id());
+                params.put("order_time",System.currentTimeMillis());
+                postProjectionGamesLog(params);
+                break;
+            case 102:
+                params.put("action","3");
+                params.put("activity_id",programProjection.getActivity_id());
+                params.put("order_time",System.currentTimeMillis());
+                postProjectionGamesLog(params);
+                break;
 
+            case 103:
+                params.put("action","2");
+                params.put("activity_id",programProjection.getActivity_id());
+                params.put("openid",programProjection.getOpenid());
+                params.put("order_time",System.currentTimeMillis());
+                postProjectionGamesLog(params);
+                break;
+        }
+    }
+
+    /**
+     * 视频投屏数据上报
+     * @param params
+     */
+    private void postProjectionVideosLog(HashMap<String,Object> params){
+        AppApi.postProjectionVideosParam(context,apiRequestListener,params);
+    }
+
+    /**
+     * 图片投屏数据上报
+     * @param params
+     */
+    private void postProjectionImagesLog(HashMap<String,Object> params){
+        AppApi.postProjectionImagesParam(context,apiRequestListener,params);
+    }
+
+    /**
+     * 互动游戏数据上传
+     * */
+    private void postProjectionGamesLog(HashMap<String,Object> params){
+        AppApi.postProjectionGamesParam(context,apiRequestListener,params);
+    }
 
     public interface DownloadProgressListener{
         void getDownloadProgress(long currentSize, long totalSize);

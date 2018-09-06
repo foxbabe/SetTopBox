@@ -20,6 +20,7 @@ import com.bumptech.glide.request.target.Target;
 import com.savor.ads.R;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.log.LogReportUtil;
 
 import java.io.File;
 
@@ -28,9 +29,12 @@ import java.io.File;
  */
 
 public class MiniProgramQrCodeWindowManager {
-
+    private String ACTION_SHOW_START="start";
+    private String ACTION_SHOW_END = "end";
+    private Session session;
     private Handler mHandler = new Handler();
     private Context context;
+    private LogReportUtil logReportUtil;
     private static MiniProgramQrCodeWindowManager mInstance;
     final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
     WindowManager mWindowManager;
@@ -41,6 +45,8 @@ public class MiniProgramQrCodeWindowManager {
 
     public MiniProgramQrCodeWindowManager(Context mContext){
         this.context = mContext;
+        session = Session.get(context);
+        logReportUtil = LogReportUtil.get(context);
         if (mIsHandling) {
             return;
         }
@@ -111,15 +117,14 @@ public class MiniProgramQrCodeWindowManager {
 
     private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final WindowManager.LayoutParams wmParams) {
 
-        if (Session.get(context).isDownloadMiniProgramIcon()){
+        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
+        File tarFile = new File(path);
+        if (Session.get(context).isDownloadMiniProgramIcon()&&tarFile.exists()){
             ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
-            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
-            File tarFile = new File(path);
-            if (tarFile.exists()){
-                Uri uri = Uri.fromFile(tarFile);
-                qrCodeIV.setImageURI(uri);
-                handleWindowLayout();
-            }
+
+            Uri uri = Uri.fromFile(tarFile);
+            qrCodeIV.setImageURI(uri);
+            handleWindowLayout();
 
         }else{
             GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
@@ -150,7 +155,8 @@ public class MiniProgramQrCodeWindowManager {
                     //移除悬浮窗口
                     mWindowManager.removeViewImmediate(mFloatLayout);
                 }
-
+//                String time = String.valueOf(System.currentTimeMillis());
+//                logReportUtil.sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_END);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -177,6 +183,8 @@ public class MiniProgramQrCodeWindowManager {
                 //移除悬浮窗口
                 mWindowManager.removeViewImmediate(mFloatLayout);
                 mIsAdded = false;
+//                String time = String.valueOf(System.currentTimeMillis());
+//                logReportUtil.sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_END);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -186,6 +194,14 @@ public class MiniProgramQrCodeWindowManager {
             mWindowManager.addView(mFloatLayout, wmParams);
             LogUtils.v("QrCodeWindowManager addView SUCCESS");
 //                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
+//            String id
+//            String boxId,
+//            String hotel_id,
+//            String room_id,
+//            String time,
+//            String action
+//            String time = String.valueOf(System.currentTimeMillis());
+//            LogReportUtil.get(context).sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_START);
         }
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable,1000*60*2);

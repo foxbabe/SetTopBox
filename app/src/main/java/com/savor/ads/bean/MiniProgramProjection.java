@@ -28,6 +28,13 @@ public class MiniProgramProjection implements Serializable{
     private String avatarurl;
     /**游戏邀请码地址**/
     private String gamecode;
+    /**投图片ID*/
+    private String img_id;
+
+    /**投视频ID**/
+    private String video_id;
+    /**动作操作时间**/
+    private String order_time;
 
     public int getAction() {
         return action;
@@ -123,5 +130,29 @@ public class MiniProgramProjection implements Serializable{
 
     public void setGamecode(String gamecode) {
         this.gamecode = gamecode;
+    }
+
+    public String getImg_id() {
+        return img_id;
+    }
+
+    public void setImg_id(String img_id) {
+        this.img_id = img_id;
+    }
+
+    public String getVideo_id() {
+        return video_id;
+    }
+
+    public void setVideo_id(String video_id) {
+        this.video_id = video_id;
+    }
+
+    public String getOrder_time() {
+        return order_time;
+    }
+
+    public void setOrder_time(String order_time) {
+        this.order_time = order_time;
     }
 }
