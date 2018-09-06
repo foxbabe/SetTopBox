@@ -108,6 +108,7 @@ public class AppUtils {
     public static final String BoxMediaDir = "media/";
     public static final String BoxMulticast = "multicast/";
     public static final String BoxLotteryDir = "lottery/";
+    public static final String BoxQRCodeLog = "qrcode_log/";
     // UTF-8 encoding
     private static final String ENCODING_UTF8 = "UTF-8";
 
@@ -173,7 +174,11 @@ public class AppUtils {
         /**
          * poly聚屏广告目录
          */
-        poly_ads
+        poly_ads,
+        /**
+         * 小程序码显示log
+         */
+        qrcode_log
 
     }
 
@@ -334,6 +339,10 @@ public class AppUtils {
         if (!polyFile.exists()) {
             polyFile.mkdir();
         }
+        File qrcodeFile = new File(path+File.separator,"qrcode_log");
+        if (!qrcodeFile.exists()){
+            qrcodeFile.mkdir();
+        }
         File targetConfigTxtFile = new File(path + File.separator + ConstantValues.CONFIG_TXT);
         if (mode == StorageFile.log) {
             path = targetLogFile.getAbsolutePath() + File.separator;
@@ -357,6 +366,8 @@ public class AppUtils {
             path = rtbFile.getAbsolutePath() + File.separator;
         } else if (mode == StorageFile.poly_ads) {
             path = polyFile.getAbsolutePath() + File.separator;
+        } else if (mode == StorageFile.qrcode_log) {
+            path = qrcodeFile.getAbsolutePath() + File.separator;
         }
         return path;
     }

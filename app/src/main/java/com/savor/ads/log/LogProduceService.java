@@ -19,6 +19,7 @@ import java.io.IOException;
  */
 public class LogProduceService {
 	private FileWriter mLogWriter = null;
+	private FileWriter mQRCodeLogWriter = null;
 	private Context mContext=null;
 	private String logTime=null;
 	private LogReportUtil logReportUtil = null;
@@ -87,6 +88,28 @@ public class LogProduceService {
 							createFile();
 						}
 
+//						if (mQRCodeLogWriter!=null){
+//                        	if (logReportUtil.getQRCodeLogNum()>0){
+//								try {
+//									QRCodeLogBean logBean = logReportUtil.takeCodeLog();
+//									if (logBean != null) {
+//										String log = makeCodeLog(logBean);
+//										LogUtils.i("log:" + log);
+//										try {
+//											mQRCodeLogWriter.write(log);
+//											mQRCodeLogWriter.flush();
+//										} catch (IOException e) {
+//											e.printStackTrace();
+//										}
+//									}
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
+//							}
+//						}else {
+//							createFile();
+//						}
+
 						try {
 							Thread.sleep(5*1000);
 						} catch (InterruptedException e) {
@@ -154,27 +177,18 @@ public class LogProduceService {
 	}
 
 	/**
-	 * 生成餐厅端日志内容
+	 * 创建小程序码显示日志
+	 * @param codeLogBean
+	 * @return
 	 */
-	private String makeRstrLog(RestaurantLogBean mparam){
-		String ret = mparam.getUUid() + ","
-					+ mparam.getHotel_id() + ","
-					+ mparam.getRoom_id() + ","
-					+ mparam.getTime() + ","
-					+ mparam.getAction() + ","
-					+ mparam.getType()+ ","
-					+ mparam.getMobile_id() + ","
-					+ mparam.getApk_version() + ","
-					+ mparam.getDuration() + ","
-					+ mparam.getPptSize() + ","
-					+ mparam.getPptInterval() + ","
-					+ mparam.getInnerType() + ","
-					+ mparam.getCustom1() + ","
-					+ mparam.getCustom2() + ","
-					+ mparam.getCustom3() + ","
-					+ mparam.getBoxId() + ","
-					+ logTime
-					+ "\r\n";
+	private String makeCodeLog(QRCodeLogBean codeLogBean){
+		String end = "\r\n";
+		String ret = codeLogBean.getHotel_id()+","
+				+ codeLogBean.getRoom_id()+","
+				+ codeLogBean.getBoxId()+","
+				+ codeLogBean.getAction()+","
+				+ codeLogBean.getTime()+","
+				+ end;
 		return ret;
 	}
 	/**
@@ -182,14 +196,9 @@ public class LogProduceService {
 	 */
 	private void createFile() {
 		try {
-//			String roomId = session.getRoomId();
-//			String boiteid = session.getBoiteId();
+
 			String boxMac = session.getEthernetMac();
-//			if (TextUtils.isEmpty(roomId)
-//					||TextUtils.isEmpty(boiteid)
-//					||TextUtils.isEmpty(boxId)){
-//					return;
-//			}
+
 			File file1 = new File(AppUtils.getMainMediaPath());
 			if (!file1.exists()) {
 				LogFileUtil.writeKeyLogInfo("createFile() MainMediaPath is not exist!!!");
@@ -203,6 +212,9 @@ public class LogProduceService {
 				mLogWriter = new FileWriter(path + boxMac + "_" + logTime + ".blog",true);
 				file = new File(path + boxMac + "_" + logTime + ".blog");
 			}
+
+//			String pathCode = AppUtils.getFilePath(mContext,AppUtils.StorageFile.qrcode_log);
+//			mQRCodeLogWriter = new FileWriter(pathCode+boxMac+"_"+logTime+".blog",true);
 		} catch (Exception e2) {
 			e2.printStackTrace();
 			LogFileUtil.writeException(e2);

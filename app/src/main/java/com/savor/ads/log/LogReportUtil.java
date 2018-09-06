@@ -12,14 +12,14 @@ import java.util.concurrent.BlockingQueue;
 
 public class LogReportUtil {
     private static BlockingQueue<LogReportParam> mLogQueue = null;
-    private static BlockingQueue<RestaurantLogBean> mRstrLogQueue = null;
+    private static BlockingQueue<QRCodeLogBean> mQRCodeLogQueue = null;
     Context mContext = null;
     Session session = null;
     private static LogReportUtil instance = null;
 
     private LogReportUtil(Context context) {
         mLogQueue = new ArrayBlockingQueue<>(15);
-        mRstrLogQueue = new ArrayBlockingQueue<>(15);
+        mQRCodeLogQueue = new ArrayBlockingQueue<>(15);
         this.mContext = context;
         session = Session.get(mContext);
         initLog();
@@ -86,9 +86,9 @@ public class LogReportUtil {
         }
     }
 
-    private void offerRstr(RestaurantLogBean arg) {
-        if (mRstrLogQueue != null) {
-            mRstrLogQueue.offer(arg);
+    private void offerQRCode(QRCodeLogBean arg) {
+        if (mQRCodeLogQueue != null) {
+            mQRCodeLogQueue.offer(arg);
         }
     }
 
@@ -103,9 +103,9 @@ public class LogReportUtil {
             return null;
     }
 
-    public RestaurantLogBean takeRstrLog() throws InterruptedException {
-        if (mRstrLogQueue != null)
-            return mRstrLogQueue.take();
+    public QRCodeLogBean takeCodeLog() throws InterruptedException {
+        if (mQRCodeLogQueue != null)
+            return mQRCodeLogQueue.take();
         else
             return null;
     }
@@ -114,8 +114,8 @@ public class LogReportUtil {
         return mLogQueue.size();
     }
 
-    public static int getRstrLogNum() {
-        return mRstrLogQueue.size();
+    public int getQRCodeLogNum() {
+        return mQRCodeLogQueue.size();
     }
 
     /**
@@ -162,53 +162,24 @@ public class LogReportUtil {
     }
 
     /**
-     * @param uuid
-     * @param hotel_id    酒楼ID
-     * @param room_id     包间ID
-     * @param time        发生时间
-     * @param action      动作
-     * @param type        类型
-     * @param mobile_id   手机ID
-     * @param apk_version apk版本
-     * @param duration      媒体时长
-     * @param pptSize       幻灯片图片数量
-     * @param pptInterval   幻灯片间隔
-     * @param custom1       预留参数1
-     * @param custom2       预留参数2
-     * @param custom3       预留参数3
+     * 写小程序码显示日志
+     * @param boxId
+     * @param hotel_id
+     * @param room_id
+     * @param time
+     * @param action
      */
-    public void sendRstrLog(String uuid,
+    public void sendQRCodeLog(String boxId,
                             String hotel_id,
                             String room_id,
                             String time,
-                            String action,
-                            String type,
-                            String mobile_id,
-                            String apk_version,
-                            String duration,
-                            int pptSize,
-                            int pptInterval,
-                            String innerType,
-                            String custom1,
-                            String custom2,
-                            String custom3) {
-        RestaurantLogBean mLogEn = new RestaurantLogBean();
-
-        mLogEn.setUUid(uuid);
-        mLogEn.setHotel_id(hotel_id);
-        mLogEn.setRoom_id(room_id);
-        mLogEn.setTime(time);
-        mLogEn.setAction(action);
-        mLogEn.setType(type);
-        mLogEn.setMobile_id(mobile_id);
-        mLogEn.setApk_version(apk_version);
-        mLogEn.setDuration(duration);
-        mLogEn.setPptSize(pptSize);
-        mLogEn.setPptInterval(pptInterval);
-        mLogEn.setInnerType(innerType);
-        mLogEn.setCustom1(custom1);
-        mLogEn.setCustom2(custom2);
-        mLogEn.setCustom3(custom3);
-//        offerRstr(mLogEn);
+                            String action){
+        QRCodeLogBean codeLogBean = new QRCodeLogBean();
+        codeLogBean.setHotel_id(hotel_id);
+        codeLogBean.setRoom_id(room_id);
+        codeLogBean.setBoxId(boxId);
+        codeLogBean.setAction(action);
+        codeLogBean.setTime(time);
+        offerQRCode(codeLogBean);
     }
 }

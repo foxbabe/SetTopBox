@@ -108,7 +108,10 @@ public class AppApi {
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
         CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
-        CP_MINIPROGRAM_FORSCREEN_JSON
+        CP_MINIPROGRAM_FORSCREEN_JSON,
+        CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,
+        CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,
+        CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON
     }
 
 
@@ -148,6 +151,9 @@ public class AppApi {
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
             put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
             put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
+            put(Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/videos");
+            put(Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/images");
+            put(Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/activity");
         }
     };
 
@@ -551,7 +557,7 @@ public class AppApi {
     }
 
     /**
-     * 请求接口查询是否
+     * 请求接口查询是否展示投屏码
      * @param context
      * @param handler
      */
@@ -560,6 +566,36 @@ public class AppApi {
         params.put("box_mac",Session.get(context).getEthernetMac());
         params.put("versionCode",Session.get(context).getVersionCode());
         new AppServiceOk(context,Action.CP_MINIPROGRAM_FORSCREEN_JSON,handler,params).get();
+    }
+
+    /**
+     * 上报小程序投视频参数
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void postProjectionVideosParam(Context context, ApiRequestListener handler,HashMap<String,Object> params){
+        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,handler,params).post();
+    }
+
+    /**
+     * 上报小程序投图片参数
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void postProjectionImagesParam(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,handler,params).post();
+    }
+
+    /**
+     * 上报小程序互动游戏参数
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void postProjectionGamesParam(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,handler,params).post();
     }
 
     // 超时（网络）异常

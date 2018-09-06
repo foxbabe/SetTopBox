@@ -93,9 +93,10 @@ public class LogUploadService {
                     }
                 }
                 if (AppUtils.isNetworkAvailable(context)){
-                    uploadLotteryRecordFile();
+//                    uploadLotteryRecordFile();
                     while (true) {
                         uploadFile();
+                        uploadQRCodeLogFile();
                         try {
                             Thread.sleep(1000 * 5);
                         } catch (InterruptedException e) {
@@ -110,47 +111,6 @@ public class LogUploadService {
 
     }
 
-    private void uploadLotteryRecordFile() {
-        File[] files = getAllLogInfo(AppUtils.StorageFile.lottery);
-        if (files != null && files.length > 0) {
-            for (final File file : files) {
-                final String name = file.getName();
-                final String path = file.getPath();
-                if (file.isFile()) {
-
-                    if (name.contains(AppUtils.getCurTime("yyyyMMdd"))) {
-                        continue;
-                    }
-                    final String archive = path + ".zip";
-                    try {
-                        AppUtils.zipFile(new File(path), new File(archive), name + ".zip");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    if (new File(archive).exists()) {
-                        final String object_key = archive.substring(1, archive.length());
-                        String oss_file_path = OSSValues.uploadLotteryPath + name + ".zip";
-                        new OSSUtils(context,
-                                BuildConfig.OSS_BUCKET_NAME,
-                                oss_file_path,
-                                object_key,
-                                new UploadCallback() {
-                                    @Override
-                                    public void isSuccessOSSUpload(boolean flag) {
-                                        if (flag) {
-                                            file.delete();
-                                        }
-                                        if (new File(archive).exists()) {
-                                            new File(archive).delete();
-                                        }
-                                    }
-                                }).asyncUploadFile();
-                    }
-                }
-            }
-        }
-
-    }
 
     private void uploadFile() {
         File[] files = getAllLogInfo(AppUtils.StorageFile.log);
@@ -213,6 +173,57 @@ public class LogUploadService {
 
     }
 
+    /**
+     * 上传小程序码显示的日志
+     */
+    private void uploadQRCodeLogFile(){
+        File[] files = getAllLogInfo(AppUtils.StorageFile.qrcode_log);
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                final String name = file.getName();
+                final String path = file.getPath();
+                if (file.isFile()) {
+                    String[] split = name.split("_");
+
+                    final String time = split[1].substring(0, 10);
+                    if (time.equals(AppUtils.getCurTime("yyyyMMddHH"))) {
+                        continue;
+                    }
+                    final String archivePath = path + ".zip";
+
+                    if (!TextUtils.isEmpty(session.getOssAreaId())) {
+
+                        File sourceFile = new File(path);
+                        final File zipFile = new File(archivePath);
+                        try {
+                            AppUtils.zipFile(sourceFile, zipFile, zipFile.getName());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        if (zipFile.exists()) {
+                            String localFilePath = archivePath.substring(1, archivePath.length());
+                            String ossFilePath = OSSValues.uploadQRCodePath + session.getOssAreaId() + File.separator + AppUtils.getCurTime("yyyyMMdd") + File.separator + name + ".zip";
+                            new OSSUtils(context,
+                                    BuildConfig.OSS_BUCKET_NAME,
+                                    ossFilePath,
+                                    localFilePath,
+                                    new UploadCallback() {
+                                        @Override
+                                        public void isSuccessOSSUpload(boolean flag) {
+                                            if (flag) {
+//                                                afterOSSUpload(name, time);
+                                            }
+                                            if (zipFile.exists()) {
+                                                zipFile.delete();
+                                            }
+                                        }
+                                    }).asyncUploadFile();
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 获取log目录下所有日志
