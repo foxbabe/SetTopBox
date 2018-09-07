@@ -122,7 +122,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
         /***
          * action字段
          * 1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频
-         * 101：发起游戏 102:开始游戏 103:加入游戏 104:退出游戏
+         * 101：发起游戏 102:开始游戏 103:加入游戏 104:退出游戏 105:原班人马，在玩一次
          */
 
         if (ConstantValues.NETTY_MINI_PROGRAM_COMMAND.equals(msg)){
@@ -130,7 +130,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                 try {
                     JSONObject jsonObject = new JSONObject(content);
                     int action = jsonObject.getInt("action");
-                    if (action!=101&&action!=102&&action!=103
+                    if (action!=101&&action!=102&&action!=103&&action!=105
                             &&ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity){
                         MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                         activity.exitGame();
@@ -373,11 +373,13 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         postMiniProgramProjectionParam(action,miniProgramProjection);
-                    }else if (action==102){
+                    }else if (action==102||action==105){
                         if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
                             MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                             activity.startGame();
-                            postMiniProgramProjectionParam(action,miniProgramProjection);
+                            if (action!=105){
+                                postMiniProgramProjectionParam(action,miniProgramProjection);
+                            }
                         }
 
                     }else if (action==103){
