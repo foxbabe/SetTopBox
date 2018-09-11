@@ -111,7 +111,8 @@ public class AppApi {
         CP_MINIPROGRAM_FORSCREEN_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,
-        CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON
+        CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,
+        CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON
     }
 
 
@@ -154,6 +155,7 @@ public class AppApi {
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/videos");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/images");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/activity");
+            put(Action.CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/sunCodeLog");
         }
     };
 
@@ -598,6 +600,15 @@ public class AppApi {
         new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,handler,params).post();
     }
 
+    /**
+     * 上报小程序码的显示隐藏日志
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void postMiniProgramIconShowLog(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,handler,params).post();
+    }
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";
     // 业务异常

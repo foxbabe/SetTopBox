@@ -135,6 +135,8 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                         activity.exitGame();
                     }
+                    //如果是小程序投屏的话，就将app投屏状态情况
+                    GlobalValues.CURRENT_PROJECT_BITMAP = null;
                     MiniProgramProjection miniProgramProjection = gson.fromJson(content, new TypeToken<MiniProgramProjection>() {}.getType());
                     if (action==1){
                         int code = jsonObject.getInt("code");
@@ -209,16 +211,17 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                               postProjectionImagesLog(params);
                           }
                           isDownloaded = ossUtils.syncDownload();
-                          handler.post(new Runnable() {
-                              @Override
-                              public void run() {
-                                  if (circularProgressDialog!=null){
-                                      circularProgressDialog.projectTipAnimateOut();
-                                      circularProgressDialog.dismiss();
+                          if (resourceType==2){
+                              handler.post(new Runnable() {
+                                  @Override
+                                  public void run() {
+                                      if (circularProgressDialog!=null){
+                                          circularProgressDialog.projectTipAnimateOut();
+                                          circularProgressDialog.dismiss();
+                                      }
                                   }
-                              }
-                          });
-
+                              });
+                          }
                       }
                      if (isDownloaded){
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
