@@ -548,6 +548,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     public boolean onMediaPrepared(int index) {
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
+            MiniProgramQrCodeWindowManager.get(this).setCurrentPlayMediaId(libBean.getVid());
             if (mSession.isShowMiniProgramIcon()&&mSession.isHeartbeatMiniNetty()&&libBean.getIs_sapp_qrcode()==1){
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
 

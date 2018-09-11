@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -18,23 +19,28 @@ import android.widget.TextView;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.savor.ads.R;
+import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
+import com.savor.ads.core.AppServiceOk;
 import com.savor.ads.core.Session;
 import com.savor.ads.log.LogReportUtil;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by zhanghq on 2018/7/9.
  */
 
 public class MiniProgramQrCodeWindowManager {
-    private String ACTION_SHOW_START="start";
-    private String ACTION_SHOW_END = "end";
+    private String ACTION_SHOW_START="1";
+    private String ACTION_SHOW_END = "2";
     private Session session;
     private Handler mHandler = new Handler();
     private Context context;
     private LogReportUtil logReportUtil;
+    private String mediaId;
+    private String preMediaId;
     private static MiniProgramQrCodeWindowManager mInstance;
     final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
     WindowManager mWindowManager;
@@ -42,6 +48,7 @@ public class MiniProgramQrCodeWindowManager {
 
     private boolean mIsAdded;
     private boolean mIsHandling;
+    private String currentTime = null;
 
     public MiniProgramQrCodeWindowManager(Context mContext){
         this.context = mContext;
@@ -83,6 +90,11 @@ public class MiniProgramQrCodeWindowManager {
         }
         return mInstance;
 
+    }
+
+
+    public void setCurrentPlayMediaId(String mediaid){
+        this.mediaId = mediaid;
     }
 
 
@@ -155,8 +167,14 @@ public class MiniProgramQrCodeWindowManager {
                     //移除悬浮窗口
                     mWindowManager.removeViewImmediate(mFloatLayout);
                 }
-//                String time = String.valueOf(System.currentTimeMillis());
-//                logReportUtil.sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_END);
+                mIsAdded = false;
+                String id = currentTime;
+                String box_mac = session.getEthernetMac();
+                String media_id = preMediaId;
+                String action = ACTION_SHOW_END;
+                String log_time = String.valueOf(System.currentTimeMillis());;
+                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+                Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -176,15 +194,19 @@ public class MiniProgramQrCodeWindowManager {
 
     }
 
-
     private void handleWindowLayout(){
         try {
             if (mIsAdded&&context!=null&&mFloatLayout!=null) {
                 //移除悬浮窗口
                 mWindowManager.removeViewImmediate(mFloatLayout);
                 mIsAdded = false;
-//                String time = String.valueOf(System.currentTimeMillis());
-//                logReportUtil.sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_END);
+                String id = currentTime;
+                String box_mac = session.getEthernetMac();
+                String media_id = preMediaId;
+                String log_time = String.valueOf(System.currentTimeMillis());
+                String action = ACTION_SHOW_END;
+                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+                Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -194,18 +216,55 @@ public class MiniProgramQrCodeWindowManager {
             mWindowManager.addView(mFloatLayout, wmParams);
             LogUtils.v("QrCodeWindowManager addView SUCCESS");
 //                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
-//            String id
-//            String boxId,
-//            String hotel_id,
-//            String room_id,
-//            String time,
-//            String action
-//            String time = String.valueOf(System.currentTimeMillis());
-//            LogReportUtil.get(context).sendQRCodeLog(session.getBoxId(),session.getBoiteId(),session.getRoomId(),time,ACTION_SHOW_START);
+            currentTime = String.valueOf(System.currentTimeMillis());
+            String id = currentTime;
+            String box_mac = session.getEthernetMac();
+            String media_id = mediaId;
+            String action = ACTION_SHOW_START;
+            String log_time = currentTime;
+            sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+            preMediaId = mediaId;
+            Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
         }
         mHandler.removeCallbacks(mHideRunnable);
         mHandler.postDelayed(mHideRunnable,1000*60*2);
         mIsHandling = false;
         mIsAdded = true;
     }
+
+    /**
+     *
+     * @param id 开始结束成对存在的流水号
+     * @param box_mac 机顶盒mac
+     * @param media_id 当前播放视频id
+     * @param log_time 二维码动作时间
+     * @param action 二维码动作是开始还是结束
+     */
+    private void sendMiniProgramIconShowLog(String id,String box_mac,String media_id,String log_time,String action){
+        HashMap<String,Object> params = new HashMap<>();
+        params.put("id",id);
+        params.put("box_mac",box_mac);
+        params.put("media_id",media_id);
+        params.put("log_time",log_time);
+        params.put("action",action);
+        AppApi.postMiniProgramIconShowLog(context,requestListener,params);
+
+    }
+
+    ApiRequestListener requestListener = new ApiRequestListener() {
+        @Override
+        public void onSuccess(AppApi.Action method, Object obj) {
+
+        }
+
+        @Override
+        public void onError(AppApi.Action method, Object obj) {
+
+        }
+
+        @Override
+        public void onNetworkFailed(AppApi.Action method) {
+
+        }
+    };
 }

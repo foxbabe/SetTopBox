@@ -501,8 +501,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                             GlobalValues.CURRENT_PROJECT_BITMAP.getHeight() * DensityUtil.getScreenRealSize(this).x / GlobalValues.CURRENT_PROJECT_BITMAP.getWidth(), true);
                 }
                 mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
-            }
-            if (!TextUtils.isEmpty(mImagePath)){
+            }else if (!TextUtils.isEmpty(mImagePath)){
                 if (mImagePath.endsWith("gif")){
 //                    Glide.with(mContext)
 //                            .load(mImagePath)
