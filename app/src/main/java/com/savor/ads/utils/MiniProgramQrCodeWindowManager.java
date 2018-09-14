@@ -173,7 +173,7 @@ public class MiniProgramQrCodeWindowManager {
                 String media_id = preMediaId;
                 String action = ACTION_SHOW_END;
                 String log_time = String.valueOf(System.currentTimeMillis());;
-                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+//                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
                 Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
             }catch (Exception e){
                 e.printStackTrace();
@@ -205,7 +205,7 @@ public class MiniProgramQrCodeWindowManager {
                 String media_id = preMediaId;
                 String log_time = String.valueOf(System.currentTimeMillis());
                 String action = ACTION_SHOW_END;
-                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+//                sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
                 Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
             }
         }catch (Exception e){
@@ -222,7 +222,7 @@ public class MiniProgramQrCodeWindowManager {
             String media_id = mediaId;
             String action = ACTION_SHOW_START;
             String log_time = currentTime;
-            sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
+//            sendMiniProgramIconShowLog(id,box_mac,media_id,log_time,action);
             preMediaId = mediaId;
             Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
         }

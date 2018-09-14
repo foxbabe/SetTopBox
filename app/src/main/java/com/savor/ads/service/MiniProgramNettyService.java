@@ -398,6 +398,44 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();
                             activity.exitGame();
                         }
+                    }else if (action==999){
+                        if (miniProgramProjection==null){
+                            return;
+                        }
+                        boolean isDownloaded=false;
+                        String url = miniProgramProjection.getUrl();
+                        String fileName = miniProgramProjection.getFilename();
+
+                        if (TextUtils.isEmpty(url)){
+                            return;
+                        }
+                        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +fileName;
+                        File file = new File(path);
+                        if (file.exists()){
+                            file.delete();
+                        }
+                        OSSUtils ossUtils = new OSSUtils(context,
+                                BuildConfig.OSS_BUCKET_NAME,
+                                url,
+                                file);
+                        HashMap<String,Object> params = new HashMap<>();
+                        params.put("action","1");
+                        params.put("openid",miniProgramProjection.getOpenid());
+                        params.put("order_time",System.currentTimeMillis());
+                        params.put("video_id",miniProgramProjection.getVideo_id());
+                        postProjectionVideosLog(params);
+
+                        isDownloaded = ossUtils.syncDownload();
+
+
+                        if (isDownloaded){
+                            params = new HashMap<>();
+                            params.put("action","2");
+                            params.put("openid",miniProgramProjection.getOpenid());
+                            params.put("video_id",miniProgramProjection.getVideo_id());
+                            params.put("order_time",System.currentTimeMillis());
+                            postProjectionVideosLog(params);
+                        }
                     }
 
                 } catch (JSONException e) {
