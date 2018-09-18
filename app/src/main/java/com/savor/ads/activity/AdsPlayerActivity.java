@@ -551,8 +551,12 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
             MiniProgramQrCodeWindowManager.get(this).setCurrentPlayMediaId(libBean.getVid());
             if (mSession.isShowMiniProgramIcon()&&mSession.isHeartbeatMiniNetty()&&libBean.getIs_sapp_qrcode()==1){
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
+                    if ("17614".equals(libBean.getVid())){
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(false);
+                    }else {
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(true);
+                    }
 
-                    ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow();
                     LogUtils.v("MiniProgramNettyService showMiniProgramQrCodeWindow");
                 }
             }else{

@@ -2,7 +2,6 @@ package com.savor.ads.utils;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,15 +12,12 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.savor.ads.R;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
-import com.savor.ads.core.AppServiceOk;
 import com.savor.ads.core.Session;
 import com.savor.ads.log.LogReportUtil;
 
@@ -43,14 +39,15 @@ public class MiniProgramQrCodeWindowManager {
     private String preMediaId;
     private static MiniProgramQrCodeWindowManager mInstance;
     final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
+    final WindowManager.LayoutParams wmBigParams = new WindowManager.LayoutParams();
     WindowManager mWindowManager;
     private LinearLayout mFloatLayout;
-
+    private LinearLayout mBigFloatLayout;
     private boolean mIsAdded;
     private boolean mIsHandling;
     private String currentTime = null;
 
-    public MiniProgramQrCodeWindowManager(Context mContext){
+        public MiniProgramQrCodeWindowManager(Context mContext){
         this.context = mContext;
         session = Session.get(context);
         logReportUtil = LogReportUtil.get(context);
@@ -65,23 +62,28 @@ public class MiniProgramQrCodeWindowManager {
         //获取WindowManager
         mWindowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         //设置window type
-        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        wmBigParams.type = wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         //设置图片格式，效果为背景透明
-        wmParams.format = PixelFormat.RGBA_8888;
+        wmBigParams.format = wmParams.format = PixelFormat.RGBA_8888;
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
-        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        wmBigParams.flags = wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         //调整悬浮窗显示的停靠位置为左侧置顶
         wmParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
+        wmBigParams.gravity = Gravity.LEFT|Gravity.CENTER_VERTICAL;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = DensityUtil.dip2px(context, 10);
         wmParams.y = DensityUtil.dip2px(context, 10);
 
+        wmBigParams.x = DensityUtil.dip2px(context, 110);
+        wmBigParams.y = DensityUtil.dip2px(context, 30);
         //设置悬浮窗口长宽数据
         wmParams.width = DensityUtil.dip2px(context, 188);
         wmParams.height = DensityUtil.dip2px(context, 188*1.2f);
-
+        wmBigParams.width = DensityUtil.dip2px(context, 400);
+        wmBigParams.height = DensityUtil.dip2px(context,400);
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_miniprogram_qrcode, null);
+        mBigFloatLayout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.layout_miniprogram_big_qrcode,null);
     }
 
     public static MiniProgramQrCodeWindowManager get(Context context){
@@ -98,44 +100,61 @@ public class MiniProgramQrCodeWindowManager {
     }
 
 
-    public void showQrCode(final Context context, final String url) {
+    public void showQrCode(final Context context, final String url,final boolean isSmall) {
         LogUtils.d("showQrCode");
         if (TextUtils.isEmpty(url)) {
             LogUtils.e("Code is empty, will not show code window!!");
             return;
         }
-//        Session.get(context).setAuthCode(code);
 
-//        mHandler.removeCallbacks(mHideRunnable);
-//        mHandler.postDelayed(mHideRunnable, 10 * 1000);
+        if (isSmall){
+            final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
+            LogUtils.v("QrCodeWindowManager 开始addView");
 
-
-        final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
-
-        LogUtils.v("QrCodeWindowManager 开始addView");
-//        LogFileUtil.write("QrCodeWindowManager 开始addView");
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            addToWindow(context, url, qrCodeIv, wmParams);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    addToWindow(context, url,qrCodeIv,  wmParams);
-                }
-            });
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                addToWindow(context, url, qrCodeIv,isSmall);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        addToWindow(context, url,qrCodeIv,isSmall);
+                    }
+                });
+            }
+        }else{
+            final ImageView bigQRCodeIv = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                addToWindow(context, url, bigQRCodeIv,isSmall);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        addToWindow(context, url,bigQRCodeIv,isSmall);
+                    }
+                });
+            }
         }
+
     }
 
-    private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final WindowManager.LayoutParams wmParams) {
+    private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final boolean isSmall) {
 
         String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
         File tarFile = new File(path);
         if (Session.get(context).isDownloadMiniProgramIcon()&&tarFile.exists()){
-            ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
+            if (isSmall){
+                ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
-            Uri uri = Uri.fromFile(tarFile);
-            qrCodeIV.setImageURI(uri);
+                Uri uri = Uri.fromFile(tarFile);
+                qrCodeIV.setImageURI(uri);
+            }else {
+                ImageView qrCodeIV = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
+
+                Uri uri = Uri.fromFile(tarFile);
+                qrCodeIV.setImageURI(uri);
+            }
+
             handleWindowLayout();
 
         }else{
@@ -163,8 +182,9 @@ public class MiniProgramQrCodeWindowManager {
         @Override
         public void run() {
             try {
-                if (context!=null&&mFloatLayout!=null) {
-                    //移除悬浮窗口
+                if (preMediaId.equals("17614")){
+                    mWindowManager.removeViewImmediate(mBigFloatLayout);
+                }else{
                     mWindowManager.removeViewImmediate(mFloatLayout);
                 }
                 mIsAdded = false;
@@ -198,7 +218,11 @@ public class MiniProgramQrCodeWindowManager {
         try {
             if (mIsAdded&&context!=null&&mFloatLayout!=null) {
                 //移除悬浮窗口
-                mWindowManager.removeViewImmediate(mFloatLayout);
+                if (preMediaId.equals("17614")){
+                    mWindowManager.removeViewImmediate(mBigFloatLayout);
+                }else{
+                    mWindowManager.removeViewImmediate(mFloatLayout);
+                }
                 mIsAdded = false;
                 String id = currentTime;
                 String box_mac = session.getEthernetMac();
@@ -213,7 +237,12 @@ public class MiniProgramQrCodeWindowManager {
         }
         if (mFloatLayout.getParent() == null) {
             //设置悬浮窗口长宽数据
-            mWindowManager.addView(mFloatLayout, wmParams);
+            if (mediaId.equals("17614")){
+                mWindowManager.addView(mBigFloatLayout, wmBigParams);
+            }else {
+                mWindowManager.addView(mFloatLayout, wmParams);
+            }
+
             LogUtils.v("QrCodeWindowManager addView SUCCESS");
 //                    LogFileUtil.write("QrCodeWindowManager addView SUCCESS");
             currentTime = String.valueOf(System.currentTimeMillis());
