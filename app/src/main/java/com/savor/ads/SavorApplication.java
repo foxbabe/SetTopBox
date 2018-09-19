@@ -332,11 +332,11 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
     /**
      * 显示小程序二维码
      */
-    public void showMiniProgramQrCodeWindow() {
+    public void showMiniProgramQrCodeWindow(boolean isSmall) {
         String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
-        miniProgramQrCodeWindowManager.showQrCode(this,url);
+        miniProgramQrCodeWindowManager.showQrCode(this,url,isSmall);
     }
 
     public void hideMiniProgramQrCodeWindow() {
