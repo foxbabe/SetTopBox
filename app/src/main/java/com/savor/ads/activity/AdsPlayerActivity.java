@@ -549,14 +549,16 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(index).getVid())) {
             MediaLibBean libBean = mPlayList.get(index);
             MiniProgramQrCodeWindowManager.get(this).setCurrentPlayMediaId(libBean.getVid());
-            if (mSession.isShowMiniProgramIcon()&&mSession.isHeartbeatMiniNetty()&&libBean.getIs_sapp_qrcode()==1){
+            if (AppUtils.isNetworkAvailable(mContext)
+                    &&mSession.isShowMiniProgramIcon()
+                    &&mSession.isHeartbeatMiniNetty()
+                    &&libBean.getIs_sapp_qrcode()==1){
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
                     if ("17614".equals(libBean.getVid())){
                         ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(false);
                     }else {
                         ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(true);
                     }
-
                     LogUtils.v("MiniProgramNettyService showMiniProgramQrCodeWindow");
                 }
             }else{
@@ -564,8 +566,15 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
                     ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
                     LogUtils.v("MiniProgramNettyService closeMiniProgramQrCodeWindow");
+                    if ("17614".equals(libBean.getVid())){
+                        mSavorVideoView.playNext();
+                        return true;
+                    }
                 }
+
+
             }
+
             if (!TextUtils.isEmpty(libBean.getEnd_date())) {
                 // 检测截止时间是否已到，到达的话跳到下一个
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
