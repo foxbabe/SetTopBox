@@ -4,9 +4,12 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
 import com.savor.ads.core.Session;
+import com.savor.ads.service.HeartbeatService;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
@@ -53,7 +56,7 @@ public class LogProduceService {
 
 					// 生成日志文件
 					createFile();
-
+					downloadMiniProgramIcon();
 					while (true) {
                         if (TextUtils.isEmpty(logTime) || !logTime.equals(AppUtils.getCurTime("yyyyMMddHH"))){
                             break;
@@ -127,6 +130,41 @@ public class LogProduceService {
 			}
 		}.start();
 	}
+
+	/**
+	 * 小程序码下载到本地
+	 */
+	private void downloadMiniProgramIcon(){
+        String box_mac = Session.get(mContext).getEthernetMac();
+
+		String urlSmall = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ box_mac+"&type="+ ConstantValues.MINI_PROGRAM_SMALL_TYPE;
+        String pathSmall = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_SMALL_NAME;
+        File tarFile = new File(pathSmall);
+        if (tarFile.exists()) {
+            tarFile.delete();
+        }
+        Session.get(mContext).setDownloadMiniProgramSmallIcon(false);
+        AppApi.downloadQRCodeSmallImg(urlSmall,mContext,apiRequestListener,pathSmall);
+        //-----------------------------------
+        String urlBig = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ box_mac+"&type="+ ConstantValues.MINI_PROGRAM_BIG_TYPE;
+        String pathBig = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_BIG_NAME;
+        tarFile = new File(urlBig);
+        if (tarFile.exists()) {
+            tarFile.delete();
+        }
+        Session.get(mContext).setDownloadMiniProgramBigIcon(false);
+        AppApi.downloadQRCodeBigImg(urlBig,mContext,apiRequestListener,pathBig);
+        //-----------------------------------
+        String urlCall = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ box_mac+"&type="+ ConstantValues.MINI_PROGRAM_CALL_TYPE;
+		String pathCall = AppUtils.getFilePath(mContext, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_CALL_NAME;
+        tarFile = new File(urlBig);
+        if (tarFile.exists()) {
+            tarFile.delete();
+        }
+        Session.get(mContext).setDownloadMiniProgramCallIcon(false);
+        AppApi.downloadQRCodeCallImg(urlCall,mContext,apiRequestListener,pathCall);
+	}
+
 
 	private void closeWriter() {
 		if (mLogWriter != null) {
@@ -224,5 +262,38 @@ public class LogProduceService {
 	}
 
 
+	ApiRequestListener apiRequestListener = new ApiRequestListener() {
+		@Override
+		public void onSuccess(AppApi.Action method, Object obj) {
+			switch (method){
+                case SP_GET_QRCODE_SMALL_JSON:
+					if (obj instanceof File){
+						Session.get(mContext).setDownloadMiniProgramSmallIcon(true);
+					}
+					break;
+                case SP_GET_QRCODE_BIG_JSON:
+                    if (obj instanceof File){
+                        Session.get(mContext).setDownloadMiniProgramBigIcon(true);
+                    }
+                    break;
+                case SP_GET_QRCODE_CALL_JSON:
+                    if (obj instanceof File){
+                        Session.get(mContext).setDownloadMiniProgramCallIcon(true);
+                    }
+                    break;
+			}
+
+		}
+
+		@Override
+		public void onError(AppApi.Action method, Object obj) {
+
+		}
+
+		@Override
+		public void onNetworkFailed(AppApi.Action method) {
+
+		}
+	};
 
 }

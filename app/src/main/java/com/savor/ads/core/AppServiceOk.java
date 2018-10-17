@@ -352,8 +352,8 @@ public class AppServiceOk {
      * @param targetFile
      */
     public void downLoad(String url, final String targetFile) {
-        Map<String, String> requestParams = new HashMap<String, String>();
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> requestParams = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
         int read = 0;
         //这个是ui线程回调，可直接操作UI
         final UIProgressResponseListener uiProgressResponseListener = new UIProgressResponseListener() {
@@ -399,7 +399,7 @@ public class AppServiceOk {
             }
 
             @Override
-            public void onResponse(Call var1, Response response) throws IOException {
+            public void onResponse(Call var1, Response response){
                 //将返回结果转化为流，并写入文件
                 InputStream inputStream = null;
                 FileOutputStream fileOutputStream = null;

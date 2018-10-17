@@ -2,6 +2,7 @@ package com.savor.ads;
 
 import android.app.ActivityManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import com.savor.ads.core.Session;
 import com.savor.ads.service.UMessageIntentService;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
+import com.savor.ads.utils.ConstantValues;
 import com.savor.ads.utils.FileUtils;
 import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.KeyCode;
@@ -44,10 +46,11 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
     private QrCodeWindowManager mQrCodeWindowManager;
     private MiniProgramQrCodeWindowManager miniProgramQrCodeWindowManager;
     private ServiceConnection mConnection;
-
+    private Context context;
     @Override
     public void onCreate() {
         super.onCreate();
+        context = this;
         // 设置异常捕获处理类
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         // 初始化文件记录类
@@ -332,11 +335,20 @@ public class SavorApplication extends MultiDexApplication implements ApiRequestL
     /**
      * 显示小程序二维码
      */
-    public void showMiniProgramQrCodeWindow(boolean isSmall) {
-        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ Session.get(this).getEthernetMac();
+    public void showMiniProgramQrCodeWindow(int QRCodeType) {
+        String box_mac = Session.get(this).getEthernetMac();
+        String path= null;
+        if (QRCodeType==1){
+            path = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_SMALL_NAME;
+        }else if (QRCodeType==2){
+            path = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_BIG_NAME;
+        }else {
+            path = AppUtils.getFilePath(this, AppUtils.StorageFile.cache) + ConstantValues.MINI_PROGRAM_CALL_NAME;
+        }
+        String url = AppApi.API_URLS.get(AppApi.Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON)+"?box_mac="+ box_mac+"&type="+QRCodeType;
         LogUtils.i("showMiniProgramQrCodeWindow.................."+url);
         LogFileUtil.write("showMiniProgramQrCodeWindow.................."+url);
-        miniProgramQrCodeWindowManager.showQrCode(this,url,isSmall);
+        miniProgramQrCodeWindowManager.showQrCode(this,url,path,QRCodeType);
     }
 
     public void hideMiniProgramQrCodeWindow() {

@@ -46,8 +46,9 @@ public class MiniProgramQrCodeWindowManager {
     private boolean mIsAdded;
     private boolean mIsHandling;
     private String currentTime = null;
+    private int QRCodeType=0;
 
-        public MiniProgramQrCodeWindowManager(Context mContext){
+    public MiniProgramQrCodeWindowManager(Context mContext){
         this.context = mContext;
         session = Session.get(context);
         logReportUtil = LogReportUtil.get(context);
@@ -99,38 +100,45 @@ public class MiniProgramQrCodeWindowManager {
         this.mediaId = mediaid;
     }
 
-
-    public void showQrCode(final Context context, final String url,final boolean isSmall) {
+    /**
+     *
+     * @param context
+     * @param url 小程序码外网地址
+     * @param path 小程序码本地地址
+     * @param type 小程序码类型
+     */
+    public void showQrCode(final Context context, final String url,final String path,final int type) {
         LogUtils.d("showQrCode");
         if (TextUtils.isEmpty(url)) {
             LogUtils.e("Code is empty, will not show code window!!");
             return;
         }
 
-        if (isSmall){
+        QRCodeType = type;
+        if (QRCodeType==ConstantValues.MINI_PROGRAM_SMALL_TYPE){
             final ImageView qrCodeIv = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
             LogUtils.v("QrCodeWindowManager 开始addView");
 
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                addToWindow(context, url, qrCodeIv,isSmall);
+                addToWindow(context, url,path, qrCodeIv);
             } else {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        addToWindow(context, url,qrCodeIv,isSmall);
+                        addToWindow(context, url,path,qrCodeIv);
                     }
                 });
             }
         }else{
             final ImageView bigQRCodeIv = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                addToWindow(context, url, bigQRCodeIv,isSmall);
+                addToWindow(context, url,path,bigQRCodeIv);
             } else {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        addToWindow(context, url,bigQRCodeIv,isSmall);
+                        addToWindow(context, url,path,bigQRCodeIv);
                     }
                 });
             }
@@ -138,25 +146,27 @@ public class MiniProgramQrCodeWindowManager {
 
     }
 
-    private void addToWindow(final Context context,final String url,final ImageView qrCodeIv,final boolean isSmall) {
+    private void addToWindow(final Context context,final String url,final String path,final ImageView qrCodeIv) {
 
-        String path = AppUtils.getFilePath(context, AppUtils.StorageFile.cache) + "getBoxQr.jpg";
+
         File tarFile = new File(path);
-        if (Session.get(context).isDownloadMiniProgramIcon()&&tarFile.exists()){
-            if (isSmall){
-                ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
 
-                Uri uri = Uri.fromFile(tarFile);
-                qrCodeIV.setImageURI(uri);
-            }else {
-                ImageView qrCodeIV = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
-
-                Uri uri = Uri.fromFile(tarFile);
-                qrCodeIV.setImageURI(uri);
-            }
-
+        if (QRCodeType==ConstantValues.MINI_PROGRAM_SMALL_TYPE
+                &&Session.get(context).isDownloadMiniProgramSmallIcon()
+                &&tarFile.exists()) {
+            ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
+            Uri uri = Uri.fromFile(tarFile);
+            qrCodeIV.setImageURI(uri);
             handleWindowLayout();
-
+        }else if ((QRCodeType==ConstantValues.MINI_PROGRAM_BIG_TYPE
+                &&Session.get(context).isDownloadMiniProgramBigIcon())
+                ||(QRCodeType==ConstantValues.MINI_PROGRAM_CALL_TYPE
+                &&Session.get(context).isDownloadMiniProgramCallIcon())
+                &&tarFile.exists()){
+            ImageView qrCodeIV = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
+            Uri uri = Uri.fromFile(tarFile);
+            qrCodeIV.setImageURI(uri);
+            handleWindowLayout();
         }else{
             GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
                 @Override
@@ -256,7 +266,8 @@ public class MiniProgramQrCodeWindowManager {
             Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
         }
         mHandler.removeCallbacks(mHideRunnable);
-        mHandler.postDelayed(mHideRunnable,1000*60*2);
+
+        mHandler.postDelayed(mHideRunnable,1000*45);
         mIsHandling = false;
         mIsAdded = true;
     }

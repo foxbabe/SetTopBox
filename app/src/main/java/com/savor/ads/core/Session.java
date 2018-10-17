@@ -212,8 +212,12 @@ public class Session {
     /**小程序NETTY服务是否存活**/
     private boolean isHeartbeatMiniNetty;
 	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
-	/**是否已经下载小程序码**/
-	private boolean isDownloadMiniProgramIcon;
+	/**是否已经下载小程序码小码**/
+	private boolean isDownloadMiniProgramSmallIcon;
+	/**是否已经下载小程序码大码**/
+	private boolean isDownloadMiniProgramBigIcon;
+	/**是否已经下载小程序码呼码**/
+	private boolean isDownloadMiniProgramCallIcon;
     private Session(Context context) {
 
         mContext = context;
@@ -1137,12 +1141,32 @@ public class Session {
         this.downloadFilePosition = downloadFilePosition;
     }
 
-    public boolean isDownloadMiniProgramIcon() {
-        return isDownloadMiniProgramIcon;
+    public static String getTAG() {
+        return TAG;
     }
 
-    public void setDownloadMiniProgramIcon(boolean downloadMiniProgramIcon) {
-        isDownloadMiniProgramIcon = downloadMiniProgramIcon;
+    public boolean isDownloadMiniProgramSmallIcon() {
+        return isDownloadMiniProgramSmallIcon;
+    }
+
+    public void setDownloadMiniProgramSmallIcon(boolean downloadMiniProgramSmallIcon) {
+        isDownloadMiniProgramSmallIcon = downloadMiniProgramSmallIcon;
+    }
+
+    public boolean isDownloadMiniProgramBigIcon() {
+        return isDownloadMiniProgramBigIcon;
+    }
+
+    public void setDownloadMiniProgramBigIcon(boolean downloadMiniProgramBigIcon) {
+        isDownloadMiniProgramBigIcon = downloadMiniProgramBigIcon;
+    }
+
+    public boolean isDownloadMiniProgramCallIcon() {
+        return isDownloadMiniProgramCallIcon;
+    }
+
+    public void setDownloadMiniProgramCallIcon(boolean downloadMiniProgramCallIcon) {
+        isDownloadMiniProgramCallIcon = downloadMiniProgramCallIcon;
     }
 
     //轮播播放声音
@@ -1194,7 +1218,6 @@ public class Session {
     public static final String P_APP_DOWNLOADING_SPECIALTY_PERIOD = "com.savor.ads.downloading_specialty_period";
     //点播视频期号
     public static final String P_APP_MULTICASTMEDIAPERIOD = "com.savor.ads.multicastMediaPeriod";
-//    public static final String P_APP_MULTICASTDOWNLOADINGPERIOD = "com.savor.ads.multicastDownloadPeriod";
     //开机时间
     public static final String P_APP_STARTTIME = "com.savor.ads.startTime";
     public static final String P_APP_LASTSTARTTIME = "com.savor.ads.laststartTime";
@@ -1211,10 +1234,6 @@ public class Session {
     public static final String P_APP_ETHERNET_MAC_WITH_COLON = "com.savor.ads.ethernetMacWithColon";
     // 无线网卡MAC地址KEY
     public static final String P_APP_WLAN_MAC = "com.savor.ads.wlanMac";
-//    //oss桶名称
-//    public static final String P_APP_OSS_BUCKET = "com.savor.ads.oss.bucket";
-//    //oss上传路径
-//    public static final String P_APP_OSS_PATH = "com.savor.ads.oss.path";
     //oss区域ID
     public static final String P_APP_OSS_AREA_ID = "com.savor.ads.oss.areaId";
     //启动图版本key

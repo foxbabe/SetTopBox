@@ -25,10 +25,11 @@ public interface OnRemoteOperationListener {
 
     PrepareResponseVoNew showImage(int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice);
 
-    PrepareResponseVoNew showImage(int imageType, String imageUrl,boolean isThumbnail);
-    PrepareResponseVoNew showImage(int imageType, String imageUrl,boolean isThumbnail,String words);
+    PrepareResponseVoNew showImage(int imageType, String imageUrl,boolean isThumbnail,String avatarUrl,String nickname);
+    PrepareResponseVoNew showImage(int imageType, String imageUrl,boolean isThumbnail,String words,String avatarUrl,String nickname);
 
     PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice);
+    PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice,String avatarUrl,String nickname);
 
     PrepareResponseVoNew showEgg(String date, int hunger);
 

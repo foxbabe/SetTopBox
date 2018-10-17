@@ -112,7 +112,10 @@ public class AppApi {
         CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,
-        CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON
+        CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,
+        SP_GET_QRCODE_SMALL_JSON,
+        SP_GET_QRCODE_BIG_JSON,
+        SP_GET_QRCODE_CALL_JSON
     }
 
 
@@ -326,6 +329,42 @@ public class AppApi {
     public static void downloadImg(String url,Context context, ApiRequestListener handler,String filePath){
         final HashMap<String, Object> params = new HashMap<String, Object>();
         new AppServiceOk(context, Action.SP_GET_LOADING_IMG_DOWN, handler, params).downLoad(url, filePath);
+    }
+
+    /**
+     * 下载小程序小码
+     * @param url
+     * @param context
+     * @param handler
+     * @param filePath
+     */
+    public static void downloadQRCodeSmallImg(String url,Context context, ApiRequestListener handler,String filePath){
+        final HashMap<String, Object> params = new HashMap<>();
+        new AppServiceOk(context, Action.SP_GET_QRCODE_SMALL_JSON, handler, params).downLoad(url, filePath);
+    }
+
+    /**
+     * 下载小程序大码
+     * @param url
+     * @param context
+     * @param handler
+     * @param filePath
+     */
+    public static void downloadQRCodeBigImg(String url,Context context, ApiRequestListener handler,String filePath){
+        final HashMap<String, Object> params = new HashMap<>();
+        new AppServiceOk(context, Action.SP_GET_QRCODE_BIG_JSON, handler, params).downLoad(url, filePath);
+    }
+
+    /**
+     * 下载小程序码呼码
+     * @param url
+     * @param context
+     * @param handler
+     * @param filePath
+     */
+    public static void downloadQRCodeCallImg(String url,Context context, ApiRequestListener handler,String filePath){
+        final HashMap<String, Object> params = new HashMap<>();
+        new AppServiceOk(context, Action.SP_GET_QRCODE_CALL_JSON, handler, params).downLoad(url, filePath);
     }
 
     /**

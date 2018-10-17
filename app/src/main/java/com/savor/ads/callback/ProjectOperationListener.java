@@ -222,7 +222,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showImage(int imageType, String imagePath,boolean isThumbnail) {
+    public PrepareResponseVoNew showImage(int imageType, String imagePath,boolean isThumbnail,String avatarUrl,String nickname) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (isThumbnail) {
             if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
@@ -244,7 +244,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
     }
 
     @Override
-    public PrepareResponseVoNew showImage(int imageType, String imagePath,boolean isThumbnail,String words) {
+    public PrepareResponseVoNew showImage(int imageType, String imagePath,boolean isThumbnail,String words,String avatarUrl,String nickname) {
         PrepareResponseVoNew localResult = new PrepareResponseVoNew();
         if (isThumbnail) {
             if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
@@ -259,7 +259,7 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
         localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
         localResult.setInfo("加载成功！");
 
-        ImageAction imageAction = new ImageAction(mContext, imageType, imagePath,isThumbnail,words);
+        ImageAction imageAction = new ImageAction(mContext, imageType, imagePath,isThumbnail,words,avatarUrl,nickname);
         ProjectionManager.getInstance().enqueueAction(imageAction);
 
         return localResult;
@@ -337,6 +337,23 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 //        }
 
         VideoAction videoAction = new VideoAction(mContext, videoPath, position, isNewDevice);
+        ProjectionManager.getInstance().enqueueAction(videoAction);
+
+        return localResult;
+    }
+
+    @Override
+    public PrepareResponseVoNew showVideo(String videoPath, int position, boolean isNewDevice,String avatarUrl,String nickname) {
+        PrepareResponseVoNew localResult = new PrepareResponseVoNew();
+        if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_ID)) {
+            GlobalValues.LAST_PROJECT_ID = GlobalValues.CURRENT_PROJECT_ID;
+        }
+
+        localResult.setProjectId(GlobalValues.CURRENT_PROJECT_ID = UUID.randomUUID().toString());
+        localResult.setResult(ConstantValues.SERVER_RESPONSE_CODE_SUCCESS);
+        localResult.setInfo("加载成功！");
+
+        VideoAction videoAction = new VideoAction(mContext, videoPath, position, isNewDevice,avatarUrl,nickname);
         ProjectionManager.getInstance().enqueueAction(videoAction);
 
         return localResult;
