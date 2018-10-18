@@ -99,7 +99,7 @@ public class UMessageIntentService extends UmengMessageService {
 
                             if (isDownloaded){
                                 if (1==push4GProjection.getResource_type()){
-                                    ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                                    ProjectOperationListener.getInstance(context).showImage(1,path,true,"","");
                                 }else if (2==push4GProjection.getResource_type()){
                                     ProjectOperationListener.getInstance(context).showVideo(path,0,true);
                                 }

@@ -224,4 +224,13 @@ public class ConstantValues {
 //    public static final int MINI_PROGRAM_NETTY_PORT = 8009;
     public static final int MINI_PROGRAM_NETTY_PORT = 8010;
 
+    /**1为小码，2为大码，3为小程序呼出来的码**/
+    public static final int MINI_PROGRAM_SMALL_TYPE = 1;
+    public static final int MINI_PROGRAM_BIG_TYPE = 2;
+    public static final int MINI_PROGRAM_CALL_TYPE = 3;
+    /**存储到本地图片的名称**/
+    public static final String MINI_PROGRAM_SMALL_NAME = "getBoxQrSmall.jpg";
+    public static final String MINI_PROGRAM_BIG_NAME = "getBoxQrBig.jpg";
+    public static final String MINI_PROGRAM_CALL_NAME = "getBoxQrCall.jpg";
+
 }

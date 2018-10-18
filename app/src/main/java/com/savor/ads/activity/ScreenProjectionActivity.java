@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,6 +52,8 @@ import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.ShowMessage;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -61,6 +64,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     public static final String EXTRA_TYPE = "extra_type";
     public static final String EXTRA_URL = "extra_url";
     public static final String EXTRA_IMAGE_PATH = "extra_image_path";
+    public static final String EXTRA_AVATAR_URL = "extra_avatar_url";
+    public static final String EXTRA_NICKNAME = "extra_nickname";
     public static final String EXTRA_PROJECTION_WORDS = "extra_projection_words";
     public static final String EXTRA_MEDIA_ID = "extra_vid";
     public static final String EXTRA_VIDEO_POSITION = "extra_video_position";
@@ -116,7 +121,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private String mImagePath;
     private String mProjectionWords;
     private boolean mIsNewDevice;
-
+    private String avatar_url;
+    private String nickname;
     private Handler mHandler = new Handler();
 
     /**
@@ -282,6 +288,9 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private ArrayList<String> mAdvFileList;
     private int[] mPptImgStates;
 
+    private LinearLayout wxProjectionTipLayout;
+    private ImageView wxProjectionIconTipIV;
+    private TextView wxProjectionTxtTipTV;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -311,6 +320,10 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
         mPptVp = (ViewPager) findViewById(R.id.vp_images);
         mGreetingRl = (RelativeLayout) findViewById(R.id.rl_greeting);
         mGreetingTv = (TextView) findViewById(R.id.tv_greeting_words);
+
+        wxProjectionTipLayout = (LinearLayout) findViewById(R.id.wx_projection_tip_layout);
+        wxProjectionIconTipIV = (ImageView) findViewById(R.id.wx_projection_icon_tip);
+        wxProjectionTxtTipTV = (TextView) findViewById(R.id.wx_projection_txt_tip);
     }
 
     private void setView() {
@@ -355,7 +368,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        if (mIsNewDevice) {
+        if (mIsNewDevice&&!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
             projectTipAnimateIn();
             mUUID = null;
         } else {
@@ -366,6 +379,8 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     private void handleBundleData(Bundle bundle) {
         mProjectType = bundle.getString(EXTRA_TYPE);
         mMediaPath = bundle.getString(EXTRA_URL);
+        avatar_url = bundle.getString(EXTRA_AVATAR_URL);
+        nickname = bundle.getString(EXTRA_NICKNAME);
         mIsThumbnail = bundle.getBoolean(EXTRA_IS_THUMBNAIL, true);
         if (mIsThumbnail) {
             mMediaId = bundle.getString(EXTRA_MEDIA_ID, "");
@@ -447,6 +462,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -463,11 +479,21 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
+                wxProjectionTipLayout.setVisibility(View.GONE);
+            }else{
+                wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            }
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
             mHandler.removeCallbacks(mPlaySpecialtyRunnable);
-
+            if (!TextUtils.isEmpty(avatar_url)){
+                GlideImageLoader.loadRoundImage(mContext,avatar_url,wxProjectionIconTipIV,R.mipmap.wxavatar);
+            }
+            if (!TextUtils.isEmpty(nickname)){
+                wxProjectionTxtTipTV.setText(nickname);
+            }
             ArrayList<String> list = new ArrayList<>();
             list.add(mMediaPath);
 //            mSavorVideoView.release();
@@ -479,6 +505,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.VISIBLE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
+                wxProjectionTipLayout.setVisibility(View.GONE);
+            }else{
+                wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            }
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPlaySpecialtyRunnable);
@@ -502,6 +533,12 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
                 }
                 mImageView.setImageBitmap(GlobalValues.CURRENT_PROJECT_BITMAP);
             }else if (!TextUtils.isEmpty(mImagePath)){
+                if (!TextUtils.isEmpty(avatar_url)){
+                    GlideImageLoader.loadRoundImage(mContext,avatar_url,wxProjectionIconTipIV,R.mipmap.wxavatar,R.mipmap.wxavatar);
+                }
+                if (!TextUtils.isEmpty(nickname)){
+                    wxProjectionTxtTipTV.setText(nickname);
+                }
                 if (mImagePath.endsWith("gif")){
 //                    Glide.with(mContext)
 //                            .load(mImagePath)
@@ -544,6 +581,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -566,6 +604,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -588,6 +627,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
             mPptVp.setVisibility(View.VISIBLE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -606,6 +646,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.VISIBLE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -649,6 +690,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.VISIBLE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -692,6 +734,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
+            wxProjectionTipLayout.setVisibility(View.GONE);
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);

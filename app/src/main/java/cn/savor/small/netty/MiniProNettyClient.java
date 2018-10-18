@@ -90,7 +90,7 @@ public class MiniProNettyClient {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("ping",new IdleStateHandler(60, 60, 20, TimeUnit.SECONDS));
                         //添加POJO对象解码器 禁止缓存类加载器
-                        pipeline.addLast(new ObjectDecoder(1024, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
+                        pipeline.addLast(new ObjectDecoder(1024*5, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
                         //设置发送消息编码器
                         pipeline.addLast(new ObjectEncoder());
                         pipeline.addLast(new MiniProNettyClientHandler(callback, mContext));

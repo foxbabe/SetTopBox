@@ -30,7 +30,10 @@ import com.savor.ads.database.DBHelper;
 import com.savor.ads.dialog.AtlasDialog;
 import com.savor.ads.dialog.AtlasDialog.UpdateDownloadedProgress;
 import com.savor.ads.dialog.CircularProgressDialog;
+import com.savor.ads.okhttp.coreProgress.download.ProgressDownloader;
 import com.savor.ads.oss.OSSUtils;
+import com.savor.ads.projection.ProjectionManager;
+import com.savor.ads.projection.action.VodAction;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
 import com.savor.ads.utils.ConstantValues;
@@ -46,6 +49,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.security.spec.ECField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +125,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
         Gson gson = builder.create();
         /***
          * action字段
-         * 1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频
+         * 1:呼玛  2：投屏：3 退出投屏 4:投屏多张图片（包括单张）5:点播机顶盒内存在的视频 9:手机小程序呼出大码
          * 101：发起游戏 102:开始游戏 103:加入游戏 104:退出游戏 105:原班人马，在玩一次
          */
 
@@ -152,6 +156,16 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       boolean isDownloaded=false;
                       String url = miniProgramProjection.getUrl();
                       String fileName = miniProgramProjection.getFilename();
+                      String avatarUrl = miniProgramProjection.getAvatarUrl();
+                      String nickName = miniProgramProjection.getNickName();
+//                      try {
+//                          String avatarlPath = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +miniProgramProjection.getOpenid()+".jpg";
+//                          isDownloaded = new ProgressDownloader(url, new File(avatarlPath)).download(0);
+//
+//                      }catch (Exception e){
+//                          e.printStackTrace();
+//                      }
+
                       int resourceType = 0;
                       if (jsonObject.has("resource_type")){
                           resourceType = jsonObject.getInt("resource_type");
@@ -233,9 +247,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             params.put("order_time",System.currentTimeMillis());
                             postProjectionImagesLog(params);
                          if (!TextUtils.isEmpty(GlobalValues.PROJECTION_WORDS)){
-                             ProjectOperationListener.getInstance(context).showImage(1,path,true,GlobalValues.PROJECTION_WORDS);
+                             ProjectOperationListener.getInstance(context).showImage(1,path,true,GlobalValues.PROJECTION_WORDS,avatarUrl,nickName);
                          }else{
-                             ProjectOperationListener.getInstance(context).showImage(1,path,true);
+                             ProjectOperationListener.getInstance(context).showImage(1,path,true,avatarUrl,nickName);
                          }
                         }else if (2==resourceType){
                             params.put("action","2");
@@ -243,7 +257,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             params.put("video_id",miniProgramProjection.getVideo_id());
                             params.put("order_time",System.currentTimeMillis());
                             postProjectionVideosLog(params);
-                            ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                            ProjectOperationListener.getInstance(context).showVideo(path,0,true,avatarUrl,nickName);
                         }
                      }else{
                          MobclickAgent.onEvent(context,"screenProjctionDownloadError"+file.getName());
@@ -256,6 +270,8 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         if (miniProgramProjection==null|| TextUtils.isEmpty(miniProgramProjection.getUrl())){
                             return;
                         }
+                        String avatarUrl = miniProgramProjection.getAvatarUrl();
+                        String nickName = miniProgramProjection.getNickName();
                         final String openid = miniProgramProjection.getOpenid();
                         final int img_nums = miniProgramProjection.getImg_nums();
                         final String forscreen_id = miniProgramProjection.getForscreen_id();
@@ -331,7 +347,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                 GlobalValues.PROJECT_IMAGES.add(path);
                             }
                             if (GlobalValues.PROJECT_IMAGES!=null&&GlobalValues.PROJECT_IMAGES.size()==1){
-                                ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words);
+                                ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words,avatarUrl,nickName);
                             }
                             if (img_nums==GlobalValues.PROJECT_IMAGES.size()){
                                 handler.postDelayed(new Runnable() {
@@ -342,7 +358,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                 },1000 * 2);
                             }
                         }else if (isDownloaded&&miniProgramProjection.getImg_nums()==1){
-                            ProjectOperationListener.getInstance(context).showImage(1,path,true,words);
+                            ProjectOperationListener.getInstance(context).showImage(1,path,true,words,avatarUrl,nickName);
                         }
                     }else if (action==5){
                         String fileName = jsonObject.getString("filename");
@@ -357,17 +373,50 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) +fileName;
                             File file = new File(path);
                             if (file.exists()){
-                                ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                                ProjectOperationListener.getInstance(context).showVod(fileName,"",0,false,true);
                             }
                         }else if (listMutlicast!=null&&listMutlicast.size()>0){
                             String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) +fileName;
                             File file = new File(path);
                             if (file.exists()){
-                                ProjectOperationListener.getInstance(context).showVideo(path,0,true);
+                                ProjectOperationListener.getInstance(context).showVod(fileName,"",0,false,true);
                             }
                         }else{
                             ProjectOperationListener.getInstance(context).showVideo(url,0,true);
                         }
+
+                    }else if(action==9){
+
+                        String selection=DBHelper.MediaDBInfo.FieldName.VID + "=? ";
+                        String[] selectionArgs=new String[]{"17614"};
+                        List<MediaLibBean> listPlayList = DBHelper.get(context).findNewPlayListByWhere(selection,selectionArgs);
+                        List<MediaLibBean> listMutlicast = DBHelper.get(context).findMutlicastMediaLibByWhere(selection,selectionArgs);
+                        if (listPlayList!=null&&listPlayList.size()>0){
+                            MediaLibBean bean = listPlayList.get(0);
+                            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.media) +bean.getName();
+                            File file = new File(path);
+                            if (file.exists()){
+                                VodAction vodAction = new VodAction(context, "17614", path, 0, false, true);
+                                ProjectionManager.getInstance().enqueueAction(vodAction);
+                            }
+                        }else if (listMutlicast!=null&&listMutlicast.size()>0){
+                            MediaLibBean bean = listMutlicast.get(0);
+                            String path = AppUtils.getFilePath(context, AppUtils.StorageFile.multicast) +bean.getName();
+                            File file = new File(path);
+                            if (file.exists()){
+                                VodAction vodAction = new VodAction(context, "17614", path, 0, false, true);
+                                ProjectionManager.getInstance().enqueueAction(vodAction);
+                            }
+                        }
+
+                        Handler handler=new Handler(Looper.getMainLooper());
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                MiniProgramQrCodeWindowManager.get(context).setCurrentPlayMediaId("17614");
+                                ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_CALL_TYPE);
+                            }
+                        },1000);
 
                     }else if(action==101){
 
@@ -376,6 +425,7 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         postMiniProgramProjectionParam(action,miniProgramProjection);
+
                     }else if (action==102||action==105){
                         if (ActivitiesManager.getInstance().getCurrentActivity() instanceof MonkeyGameActivity) {
                             MonkeyGameActivity activity = (MonkeyGameActivity) ActivitiesManager.getInstance().getCurrentActivity();

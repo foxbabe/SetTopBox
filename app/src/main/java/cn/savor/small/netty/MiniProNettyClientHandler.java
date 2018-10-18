@@ -72,7 +72,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        LogUtils.i("Client  Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
+         LogUtils.i("Client  Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
         LogUtils.i("miniCallback.................." + miniCallback);
 //        LogFileUtil.write("MiniProNettyClientHandler Client Channel Active.................." + NettyClient.host + ':' + NettyClient.port);
         if (miniCallback != null) {

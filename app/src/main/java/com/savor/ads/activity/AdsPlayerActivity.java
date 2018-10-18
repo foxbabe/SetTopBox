@@ -379,7 +379,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         } else if (keyCode == KeyCode.KEY_CODE_CHANGE_MODE) {
             switchToTvPlayer();
             handled = true;
-
+            ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
             // 呼出二维码
         } else if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
             ((SavorApplication) getApplication()).showQrCodeWindow(null);
@@ -555,9 +555,9 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                     &&libBean.getIs_sapp_qrcode()==1){
                 if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
                     if ("17614".equals(libBean.getVid())){
-                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(false);
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_BIG_TYPE);
                     }else {
-                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(true);
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_SMALL_TYPE);
                     }
                     LogUtils.v("MiniProgramNettyService showMiniProgramQrCodeWindow");
                 }

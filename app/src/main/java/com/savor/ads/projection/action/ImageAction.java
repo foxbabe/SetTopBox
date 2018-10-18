@@ -28,6 +28,9 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
     private String seriesId;
     private boolean isNewDevice;
 
+    private String avatarUrl;
+    private String nickname;
+
     public ImageAction(Context context, int imageType, int rotation, boolean isThumbnail, String seriesId, boolean isNewDevice) {
         super();
 
@@ -49,7 +52,7 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.isThumbnail = isThumbnail;
     }
 
-    public ImageAction(Context context, int imageType, String imagePath,boolean isThumbnail,String words) {
+    public ImageAction(Context context, int imageType, String imagePath,boolean isThumbnail,String words, String avatarUrl,String nickname) {
         super();
 
         mPriority = ProjectPriority.HIGH;
@@ -58,6 +61,8 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         this.imagePath = imagePath;
         this.isThumbnail = isThumbnail;
         this.projectionWords = words;
+        this.avatarUrl = avatarUrl;
+        this.nickname = nickname;
     }
 
     @Override
@@ -73,6 +78,8 @@ public class ImageAction extends ProjectionActionBase implements Serializable {
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_THUMBNAIL, isThumbnail);
         data.putInt(ScreenProjectionActivity.EXTRA_IMAGE_TYPE, imageType);
         data.putString(ScreenProjectionActivity.EXTRA_MEDIA_ID, seriesId);
+        data.putString(ScreenProjectionActivity.EXTRA_AVATAR_URL, avatarUrl);
+        data.putString(ScreenProjectionActivity.EXTRA_NICKNAME, nickname);
         data.putBoolean(ScreenProjectionActivity.EXTRA_IS_NEW_DEVICE, isNewDevice);
         data.putSerializable(ScreenProjectionActivity.EXTRA_PROJECT_ACTION, this);
         Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
