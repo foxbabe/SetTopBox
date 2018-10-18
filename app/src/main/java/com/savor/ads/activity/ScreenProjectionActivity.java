@@ -368,7 +368,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        if (mIsNewDevice) {
+        if (mIsNewDevice&&!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
             projectTipAnimateIn();
             mUUID = null;
         } else {
@@ -479,7 +479,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.GONE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
-            wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
+                wxProjectionTipLayout.setVisibility(View.GONE);
+            }else{
+                wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            }
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mExitProjectionRunnable);
@@ -501,7 +505,11 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
             mImageArea.setVisibility(View.VISIBLE);
             mPptVp.setVisibility(View.GONE);
             mGreetingRl.setVisibility(View.GONE);
-            wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmpty(GlobalValues.CURRENT_PROJECT_DEVICE_NAME)) {
+                wxProjectionTipLayout.setVisibility(View.GONE);
+            }else{
+                wxProjectionTipLayout.setVisibility(View.VISIBLE);
+            }
             mHandler.removeCallbacks(mPPTPlayFinishRunnable);
             mHandler.removeCallbacks(mPPTPlayNextRunnable);
             mHandler.removeCallbacks(mPlaySpecialtyRunnable);

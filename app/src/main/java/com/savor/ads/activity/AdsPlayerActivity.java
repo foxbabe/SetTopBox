@@ -379,7 +379,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         } else if (keyCode == KeyCode.KEY_CODE_CHANGE_MODE) {
             switchToTvPlayer();
             handled = true;
-
+            ((SavorApplication) getApplication()).hideMiniProgramQrCodeWindow();
             // 呼出二维码
         } else if (keyCode == KeyCode.KEY_CODE_SHOW_QRCODE) {
             ((SavorApplication) getApplication()).showQrCodeWindow(null);

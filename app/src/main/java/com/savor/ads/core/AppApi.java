@@ -153,7 +153,7 @@ public class AppApi {
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
-            put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp/index/getBoxQr");
+            put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp21/index/getBoxQr");
             put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/videos");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/images");

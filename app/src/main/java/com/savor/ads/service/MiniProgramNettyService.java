@@ -409,9 +409,15 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             }
                         }
 
+                        Handler handler=new Handler(Looper.getMainLooper());
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                MiniProgramQrCodeWindowManager.get(context).setCurrentPlayMediaId("17614");
+                                ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_CALL_TYPE);
+                            }
+                        },1000);
 
-                        MiniProgramQrCodeWindowManager.get(this).setCurrentPlayMediaId("17614");
-                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_CALL_TYPE);
                     }else if(action==101){
 
                         Intent intent = new Intent(context,MonkeyGameActivity.class);

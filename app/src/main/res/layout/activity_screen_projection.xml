@@ -112,6 +112,7 @@
         android:layout_margin="20dp"
         android:background="@drawable/bg_round_translucence"
         android:padding="10dp"
+        android:visibility="gone"
         android:textColor="@android:color/white"
         android:textSize="24sp"/>
     <LinearLayout
