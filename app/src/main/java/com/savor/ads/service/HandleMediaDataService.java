@@ -443,7 +443,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     }
 
     private void handleSpecialtyResult(RstrSpecialtyOuterBean bean,String smallType) {
-        if (bean == null) {
+        if (bean == null||bean.getMedia_lib()==null||bean.getMedia_lib().size()==0) {
             return;
         }
         ServerInfo serverInfo = session.getServerInfo();
@@ -581,7 +581,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * @param programBean
      */
     private void handRtbadsResult(ProgramBean programBean) {
-        if (programBean == null || programBean.getVersion() == null || TextUtils.isEmpty(programBean.getVersion().getVersion())) {
+        if (programBean == null
+                || programBean.getVersion() == null
+                || TextUtils.isEmpty(programBean.getVersion().getVersion())
+                || programBean.getMedia_lib()==null
+                || programBean.getMedia_lib().size()==0) {
             return;
         }
         String adsPeriod = programBean.getVersion().getVersion();
@@ -715,7 +719,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * @param
      */
     private void handlePolyAdsFromSmallPlatform(boolean OSSsource){
-        if (polyAdsProgramBean == null || polyAdsProgramBean.getVersion() == null || TextUtils.isEmpty(polyAdsProgramBean.getVersion().getVersion())) {
+        if (polyAdsProgramBean == null
+                || polyAdsProgramBean.getVersion() == null
+                || TextUtils.isEmpty(polyAdsProgramBean.getVersion().getVersion())
+                || polyAdsProgramBean.getMedia_lib()==null
+                || polyAdsProgramBean.getMedia_lib().size()==0) {
             return;
         }
         String adsPeriod = polyAdsProgramBean.getVersion().getVersion();
@@ -970,7 +978,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * OSSsource true是从OSS下载，false是从实体小平台下载
      */
     private void handleSmallPlatformProgramData(String smallType,boolean OSSsource) {
-        if (setTopBoxBean == null || setTopBoxBean.getPlaybill_list() == null || setTopBoxBean.getPlaybill_list().isEmpty()) {
+        if (setTopBoxBean == null
+                || setTopBoxBean.getPlaybill_list() == null
+                || setTopBoxBean.getPlaybill_list().isEmpty()) {
             return;
         }
         //该集合包含三部分数据，1:真实节目，2：宣传片占位符.3:广告占位符
@@ -979,6 +989,9 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
         String proPeriod = "";
         boolean isOSS = OSSsource;
         for (ProgramBean item : playbill_list) {
+            if (item.getMedia_lib()==null||item.getMedia_lib().size()==0){
+                continue;
+            }
             String logUUID = String.valueOf(System.currentTimeMillis());
             if (ConstantValues.PRO.equals(item.getVersion().getType())) {
                 proPeriod = item.getVersion().getVersion();
@@ -1131,7 +1144,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * 处理小平台返回的宣传片数据(下载完宣传片数据之后需要更新到节目单中，组合成可播放的节目单)
      */
     private void handleSmallPlatformAdvData(String smallType,boolean OSSsource) {
-        if (advProgramBean == null || advProgramBean.getVersion() == null || TextUtils.isEmpty(advProgramBean.getVersion().getVersion())) {
+        if (advProgramBean == null
+                || advProgramBean.getVersion() == null
+                || TextUtils.isEmpty(advProgramBean.getVersion().getVersion())
+                || advProgramBean.getMedia_lib()==null
+                || advProgramBean.getMedia_lib().size()==0) {
             return;
         }
 
@@ -1320,7 +1337,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * 通过小平台获取广告数据
      */
     private void handleSmallPlatformAdsData(String smallType,boolean OSSsource) {
-        if (adsProgramBean == null || adsProgramBean.getVersion() == null || TextUtils.isEmpty(adsProgramBean.getVersion().getVersion())) {
+        if (adsProgramBean == null
+                || adsProgramBean.getVersion() == null
+                || TextUtils.isEmpty(adsProgramBean.getVersion().getVersion())
+                || adsProgramBean.getMedia_lib()==null
+                || adsProgramBean.getMedia_lib().size()==0) {
             return;
         }
         String adsPeriod = adsProgramBean.getVersion().getVersion();
@@ -1783,7 +1804,11 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
      * 处理小平台返回的点播视频
      */
     private void handleSmallPlatformOnDemandData(String smallType,boolean OSSsource) {
-        if (multicastBoxBean == null || multicastBoxBean.getPlaybill_list() == null || multicastBoxBean.getPlaybill_list().isEmpty()) {
+        if (multicastBoxBean == null
+                || multicastBoxBean.getPlaybill_list() == null
+                || multicastBoxBean.getPlaybill_list().isEmpty()
+                || multicastBoxBean.getPlaybill_list()==null
+                || multicastBoxBean.getPlaybill_list().size()==0) {
             return;
         }
         ServerInfo serverInfo = session.getServerInfo();

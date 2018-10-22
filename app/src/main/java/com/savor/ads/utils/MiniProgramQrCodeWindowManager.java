@@ -150,10 +150,10 @@ public class MiniProgramQrCodeWindowManager {
 
 
         File tarFile = new File(path);
-
+        boolean isCompletePicture = FileUtils.isCompletePicture(path);
         if (QRCodeType==ConstantValues.MINI_PROGRAM_SMALL_TYPE
                 &&Session.get(context).isDownloadMiniProgramSmallIcon()
-                &&tarFile.exists()) {
+                &&isCompletePicture) {
             ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
             Uri uri = Uri.fromFile(tarFile);
             qrCodeIV.setImageURI(uri);
@@ -162,7 +162,7 @@ public class MiniProgramQrCodeWindowManager {
                 &&Session.get(context).isDownloadMiniProgramBigIcon())
                 ||(QRCodeType==ConstantValues.MINI_PROGRAM_CALL_TYPE
                 &&Session.get(context).isDownloadMiniProgramCallIcon())
-                &&tarFile.exists()){
+                &&isCompletePicture){
             ImageView qrCodeIV = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
             Uri uri = Uri.fromFile(tarFile);
             qrCodeIV.setImageURI(uri);
