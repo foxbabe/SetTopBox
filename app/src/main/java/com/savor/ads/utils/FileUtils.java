@@ -2,7 +2,9 @@ package com.savor.ads.utils;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.spec.ECField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -343,5 +346,39 @@ public class FileUtils {
         }
         return buffer;
 
+    }
+
+    /**
+     * 判断图片是否是完整的
+     * @param path
+     * @return
+     */
+    public static boolean isCompletePicture(String path){
+        boolean flag = true;
+        try {
+            File tarFile = new File(path);
+            if (tarFile.exists()){
+                BitmapFactory.Options options = null;
+                if (options == null){
+                    options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+
+                    BitmapFactory.decodeFile(path, options); //filePath代表图片路径
+                    if (options.mCancel || options.outWidth == -1
+                            || options.outHeight == -1) {
+                        //表示图片已损毁
+                        Log.e("MainActivity","图片已损坏");
+                        flag = false;
+                    }
+                }
+            }else {
+                flag = false;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            flag = false;
+        }
+        return flag;
     }
 }
