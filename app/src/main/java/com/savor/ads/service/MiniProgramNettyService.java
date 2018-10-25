@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.android.internal.policy.IFaceLockCallback;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -73,6 +74,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     private Session session;
     AtlasDialog atlasDialog =null;
     CircularProgressDialog circularProgressDialog = null;
+    private int INTERVAL_TIME=1000*8;
+    private int currentIndex;
+    private String words;
+    private String avatarUrl;
+    private String nickName;
+    Handler handler=new Handler(Looper.getMainLooper());
     public MiniProgramNettyService() {
         super("");
     }
@@ -158,13 +165,6 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                       String fileName = miniProgramProjection.getFilename();
                       String avatarUrl = miniProgramProjection.getAvatarUrl();
                       String nickName = miniProgramProjection.getNickName();
-//                      try {
-//                          String avatarlPath = AppUtils.getFilePath(context, AppUtils.StorageFile.lottery) +miniProgramProjection.getOpenid()+".jpg";
-//                          isDownloaded = new ProgressDownloader(url, new File(avatarlPath)).download(0);
-//
-//                      }catch (Exception e){
-//                          e.printStackTrace();
-//                      }
 
                       int resourceType = 0;
                       if (jsonObject.has("resource_type")){
@@ -190,6 +190,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                           params.put("openid",miniProgramProjection.getOpenid());
                           params.put("order_time",System.currentTimeMillis());
                           if (2==resourceType){
+                              if (atlasDialog!=null&&atlasDialog.isShowing()){
+                                  atlasDialog.projectTipAnimateOut();
+                              }
                               params.put("video_id",miniProgramProjection.getVideo_id());
                               postProjectionVideosLog(params);
                               ossUtils.setDownloadProgressListener(new DownloadProgressListener() {
@@ -238,6 +241,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                           }
                       }
                      if (isDownloaded){
+                         if (handler!=null){
+                             handler.removeCallbacks(mProjectShowImageRunnable);
+                         }
                          MobclickAgent.onEvent(context,"screenProjctionDownloadSuccess"+file.getName());
                          HashMap<String,Object> params = new HashMap<>();
                         if (1==resourceType){
@@ -263,6 +269,12 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                          MobclickAgent.onEvent(context,"screenProjctionDownloadError"+file.getName());
                      }
                     }else if (action==3){
+                        if (handler!=null){
+                            handler.removeCallbacks(mProjectShowImageRunnable);
+                        }
+                        if (atlasDialog!=null&&atlasDialog.isShowing()){
+                            atlasDialog.projectTipAnimateOut();
+                        }
                         ProjectOperationListener.getInstance(context).stop(GlobalValues.CURRENT_PROJECT_ID);
                     }else if (action==4){
 
@@ -270,13 +282,13 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         if (miniProgramProjection==null|| TextUtils.isEmpty(miniProgramProjection.getUrl())){
                             return;
                         }
-                        String avatarUrl = miniProgramProjection.getAvatarUrl();
-                        String nickName = miniProgramProjection.getNickName();
+                        avatarUrl = miniProgramProjection.getAvatarUrl();
+                        nickName = miniProgramProjection.getNickName();
+                        words = miniProgramProjection.getForscreen_char();
                         final String openid = miniProgramProjection.getOpenid();
                         final int img_nums = miniProgramProjection.getImg_nums();
                         final String forscreen_id = miniProgramProjection.getForscreen_id();
                         final String url = miniProgramProjection.getUrl();
-                        final String words = miniProgramProjection.getForscreen_char();
                         if (miniProgramProjection.getImg_nums()>1){
 
                             handler.post(new Runnable(){
@@ -291,18 +303,27 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                         GlobalValues.CURRENT_OPEN_ID = openid;
                                         GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
                                         GlobalValues.PROJECTION_WORDS = words;
+                                        if (handler!=null){
+                                            handler.removeCallbacks(mProjectShowImageRunnable);
+                                        }
                                     }else if (!TextUtils.isEmpty(GlobalValues.CURRENT_OPEN_ID)
                                             &&openid.equals(GlobalValues.CURRENT_OPEN_ID)){
                                         if (!GlobalValues.CURRRNT_PROJECT_ID.equals(forscreen_id)){
                                             GlobalValues.PROJECT_IMAGES.clear();
                                             GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
                                             GlobalValues.PROJECTION_WORDS = words;
+                                            if (handler!=null){
+                                                handler.removeCallbacks(mProjectShowImageRunnable);
+                                            }
                                         }
                                     }else{
                                         GlobalValues.PROJECT_IMAGES.clear();
                                         GlobalValues.CURRENT_OPEN_ID = openid;
                                         GlobalValues.CURRRNT_PROJECT_ID = forscreen_id;
                                         GlobalValues.PROJECTION_WORDS = words;
+                                        if (handler!=null){
+                                            handler.removeCallbacks(mProjectShowImageRunnable);
+                                        }
                                     }
                                     if (GlobalValues.PROJECT_IMAGES.size()>=img_nums){
                                         atlasDialog.initContent(img_nums,GlobalValues.PROJECT_IMAGES.size());
@@ -347,7 +368,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                                 GlobalValues.PROJECT_IMAGES.add(path);
                             }
                             if (GlobalValues.PROJECT_IMAGES!=null&&GlobalValues.PROJECT_IMAGES.size()==1){
-                                ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words,avatarUrl,nickName);
+                                currentIndex = 0;
+                                projectShowImage(currentIndex,words,avatarUrl,nickName);
+//                                ProjectOperationListener.getInstance(context).showImage(1,GlobalValues.PROJECT_IMAGES.get(0),true,words,avatarUrl,nickName);
                             }
                             if (img_nums==GlobalValues.PROJECT_IMAGES.size()){
                                 handler.postDelayed(new Runnable() {
@@ -361,9 +384,11 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                             ProjectOperationListener.getInstance(context).showImage(1,path,true,words,avatarUrl,nickName);
                         }
                     }else if (action==5){
+                        if (handler!=null){
+                            handler.removeCallbacks(mProjectShowImageRunnable);
+                        }
                         String fileName = jsonObject.getString("filename");
                         String url = jsonObject.getString("url");
-
 
                         String selection=DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
                         String[] selectionArgs=new String[]{fileName};
@@ -386,7 +411,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         }
 
                     }else if(action==9){
-
+                        if (handler!=null){
+                            handler.removeCallbacks(mProjectShowImageRunnable);
+                        }
                         String selection=DBHelper.MediaDBInfo.FieldName.VID + "=? ";
                         String[] selectionArgs=new String[]{"17614"};
                         List<MediaLibBean> listPlayList = DBHelper.get(context).findNewPlayListByWhere(selection,selectionArgs);
@@ -419,7 +446,9 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
                         },1000);
 
                     }else if(action==101){
-
+                        if (handler!=null){
+                            handler.removeCallbacks(mProjectShowImageRunnable);
+                        }
                         Intent intent = new Intent(context,MonkeyGameActivity.class);
                         intent.putExtra("miniProgramProjection",miniProgramProjection);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -499,18 +528,41 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     @Override
     public void onMiniConnected() {
         //TODO:当建立NETTY连接以后请求接口获取小程序地址
-//        getMiniProgramQRCode();
         LogUtils.i("CurrentActivity.................." + ActivitiesManager.getInstance().getCurrentActivity());
         session.setHeartbeatMiniNetty(true);
-//        if ((ActivitiesManager.getInstance().getCurrentActivity() instanceof AdsPlayerActivity)) {
-//            Activity activity = ActivitiesManager.getInstance().getCurrentActivity();
-//
-//            ((AdsPlayerActivity) activity).showMiniProgramQrCodeWindow();
-//            LogFileUtil.write("MiniProgramNettyService showMiniProgramQrCodeWindow");
-//        }
 
     }
 
+    private void projectShowImage(int currentIndex,String words,String avatarUrl,String nickName){
+        if (GlobalValues.PROJECT_IMAGES!=null&&GlobalValues.PROJECT_IMAGES.size()>0){
+            boolean flag = true;
+            if (GlobalValues.PROJECT_IMAGES.size()>currentIndex){
+                String uri = GlobalValues.PROJECT_IMAGES.get(currentIndex);
+                ProjectOperationListener.getInstance(context).showImage(1,uri,true,words,avatarUrl,nickName);
+            }else{
+                flag = false;
+            }
+            if (handler!=null){
+                if (flag){
+                    handler.postDelayed(mProjectShowImageRunnable,INTERVAL_TIME);
+                }else {
+                    handler.removeCallbacks(mProjectShowImageRunnable);
+                }
+            }
+
+
+        }
+
+    }
+
+    private Runnable  mProjectShowImageRunnable = new Runnable(){
+
+        @Override
+        public void run() {
+            currentIndex ++;
+            projectShowImage(currentIndex,words,avatarUrl,nickName);
+        }
+    };
 
     @Override
     public void onMiniReconnect() {
