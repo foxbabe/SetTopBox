@@ -155,17 +155,19 @@ public class MiniProgramQrCodeWindowManager {
                 &&Session.get(context).isDownloadMiniProgramSmallIcon()
                 &&isCompletePicture) {
             ImageView qrCodeIV = (ImageView) mFloatLayout.findViewById(R.id.iv_mini_program_qrcode);
-            Uri uri = Uri.fromFile(tarFile);
-            qrCodeIV.setImageURI(uri);
+//            Uri uri = Uri.fromFile(tarFile);
+//            qrCodeIV.setImageURI(uri);
+            GlideImageLoader.loadImage(context,path,qrCodeIV);
             handleWindowLayout();
-        }else if ((QRCodeType==ConstantValues.MINI_PROGRAM_BIG_TYPE
+        }else if (((QRCodeType==ConstantValues.MINI_PROGRAM_BIG_TYPE
                 &&Session.get(context).isDownloadMiniProgramBigIcon())
                 ||(QRCodeType==ConstantValues.MINI_PROGRAM_CALL_TYPE
-                &&Session.get(context).isDownloadMiniProgramCallIcon())
+                &&Session.get(context).isDownloadMiniProgramCallIcon()))
                 &&isCompletePicture){
             ImageView qrCodeIV = (ImageView) mBigFloatLayout.findViewById(R.id.iv_mini_program_big_qrcode);
-            Uri uri = Uri.fromFile(tarFile);
-            qrCodeIV.setImageURI(uri);
+//            Uri uri = Uri.fromFile(tarFile);
+//            qrCodeIV.setImageURI(uri);
+            GlideImageLoader.loadImage(context,path,qrCodeIV);
             handleWindowLayout();
         }else{
             GlideImageLoader.loadImageWithoutCache(context, url, qrCodeIv, new RequestListener() {
@@ -265,9 +267,9 @@ public class MiniProgramQrCodeWindowManager {
             preMediaId = mediaId;
             Log.d("mpqcwm","sendMiniProgramIconShowLog(id="+id+"|box_mac="+box_mac+"|media_id="+media_id+"|log_time="+log_time+"|action="+action);
         }
-        mHandler.removeCallbacks(mHideRunnable);
-
-        mHandler.postDelayed(mHideRunnable,1000*45);
+//        mHandler.removeCallbacks(mHideRunnable);
+//
+//        mHandler.postDelayed(mHideRunnable,1000*45);
         mIsHandling = false;
         mIsAdded = true;
     }

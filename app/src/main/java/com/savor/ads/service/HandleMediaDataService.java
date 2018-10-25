@@ -1146,9 +1146,7 @@ public class HandleMediaDataService extends Service implements ApiRequestListene
     private void handleSmallPlatformAdvData(String smallType,boolean OSSsource) {
         if (advProgramBean == null
                 || advProgramBean.getVersion() == null
-                || TextUtils.isEmpty(advProgramBean.getVersion().getVersion())
-                || advProgramBean.getMedia_lib()==null
-                || advProgramBean.getMedia_lib().size()==0) {
+                || TextUtils.isEmpty(advProgramBean.getVersion().getVersion())) {
             return;
         }
 

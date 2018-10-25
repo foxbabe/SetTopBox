@@ -114,9 +114,11 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
             }
         } else {
             // 普通点播视频点播
-            List<MediaLibBean> list = dbHelper.findMutlicastMediaLibByWhere(DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=?", new String[]{mediaName});
-
-            if (list != null && !list.isEmpty()) {
+            String selection=DBHelper.MediaDBInfo.FieldName.MEDIANAME + "=? ";
+            String[] selectionArgs=new String[]{mediaName};
+            List<MediaLibBean> list = dbHelper.findMutlicastMediaLibByWhere(selection, selectionArgs);
+            List<MediaLibBean> listPlayList = dbHelper.findPlayListByWhere(selection,selectionArgs);
+            if ((list != null && !list.isEmpty())) {
                 MediaLibBean bean = list.get(0);
                 String filePath = AppUtils.getFilePath(mContext, AppUtils.StorageFile.multicast) + bean.getName();
                 String filePath2 = AppUtils.getFilePath(mContext,AppUtils.StorageFile.media)+bean.getName();
@@ -148,7 +150,34 @@ public class ProjectOperationListener implements OnRemoteOperationListener {
 
 
                 vid = bean.getVid();
-            } else {
+            }else if (listPlayList!=null&&listPlayList.size()>0){
+                MediaLibBean bean = listPlayList.get(0);
+                String filePath = AppUtils.getFilePath(mContext,AppUtils.StorageFile.media)+bean.getName();
+                String md5 = bean.getMd5();
+                File file = new File(filePath);
+                if (file.exists()) {
+                    String vodMd5 = null;
+                    if (file.exists()){
+                        vodMd5 = AppUtils.getEasyMd5(file);
+                        url = filePath;
+                    }else{
+                        vodMd5 = AppUtils.getEasyMd5(file);
+                        url = filePath;
+                    }
+
+                    if (TextUtils.isEmpty(vodMd5)||!vodMd5.equals(md5)) {
+                        file.delete();
+                        dbHelper.deleteDataByWhere(DBHelper.MediaDBInfo.TableName.PLAYLIST,selection, selectionArgs);
+
+                        localResult.setInfo("该点播视频无法播放，请稍后再试");
+                        vodCheckPass = false;
+                    }
+                } else {
+                    localResult.setInfo("没有找到点播视频！");
+                    vodCheckPass = false;
+                }
+                vid = bean.getVid();
+            }else {
                 localResult.setInfo("没有找到点播视频！");
                 vodCheckPass = false;
             }

@@ -323,6 +323,26 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         }
 
         AppApi.getScreenIsShowQRCode(this,this);
+        try{
+            if (mPlayList != null && !TextUtils.isEmpty(mPlayList.get(mCurrentPlayingIndex).getVid())) {
+                MediaLibBean libBean = mPlayList.get(mCurrentPlayingIndex);
+                MiniProgramQrCodeWindowManager.get(this).setCurrentPlayMediaId(libBean.getVid());
+                if (AppUtils.isNetworkAvailable(mContext)
+                        && mSession.isShowMiniProgramIcon()
+                        && mSession.isHeartbeatMiniNetty()
+                        && libBean.getIs_sapp_qrcode() == 1) {
+                    if ("17614".equals(libBean.getVid())) {
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_BIG_TYPE);
+                    } else {
+                        ((SavorApplication) getApplication()).showMiniProgramQrCodeWindow(ConstantValues.MINI_PROGRAM_SMALL_TYPE);
+                    }
+                    LogUtils.v("MiniProgramNettyService showMiniProgramQrCodeWindow");
+
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 

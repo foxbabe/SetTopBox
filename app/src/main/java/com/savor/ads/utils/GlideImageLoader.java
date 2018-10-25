@@ -113,8 +113,8 @@ public class GlideImageLoader {
         Context appContext = context.getApplicationContext();
         Glide.with(appContext)
                 .load(imgPath)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)//不使用内存缓存
+                .diskCacheStrategy(DiskCacheStrategy.NONE)//不使用硬盘缓存
                 .dontAnimate()
                 .placeholder(placeholderResId)
                 .error(failedResId)
