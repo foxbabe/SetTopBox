@@ -9,7 +9,7 @@
     <!--<solid android:color= "@android:color/transparent" />-->
 
     <stroke
-        android:width= "0.1sp"
+        android:width= "0.5sp"
         android:color= "#295775" />
     <size android:height="20dp"
           android:width="20dp"/>

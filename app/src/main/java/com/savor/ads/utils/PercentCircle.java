@@ -108,7 +108,8 @@ public class PercentCircle extends View {
         mTextPaint.setColor(mTextColor);
         mTextPaint.setAntiAlias(true);
         mTextPaint.setStyle(Paint.Style.FILL);
-        mTextPaint.setStrokeWidth((int) (0.025*mRadius));
+//        mTextPaint.setStrokeWidth((int) (0.025*mRadius));
+        mTextPaint.setStrokeWidth((int) (0.05*mRadius));
         mTextPaint.setTextSize(mRadius/2);   //文字大小为半径的一半
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
@@ -117,7 +118,8 @@ public class PercentCircle extends View {
         mRingPaint.setAntiAlias(true);
         mRingPaint.setColor(mRingColor);
         mRingPaint.setStyle(Paint.Style.STROKE);
-        mRingPaint.setStrokeWidth((float) (0.075*mRadius));
+//        mRingPaint.setStrokeWidth((float) (0.075*mRadius));
+        mRingPaint.setStrokeWidth((float) (0.15*mRadius));
 
         //获得文字的字号 因为要设置文字在圆的中心位置
         mTextSize = (int) mTextPaint.getTextSize();

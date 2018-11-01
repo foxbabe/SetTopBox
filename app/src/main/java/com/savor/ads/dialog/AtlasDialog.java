@@ -39,7 +39,7 @@ public class AtlasDialog extends Dialog{
 //    private TextView downloadedTipTV;
     private DashboardView4 dashboard_view;
     private Handler mHandler = new Handler();
-    private static final int PROJECT_TIP_DURATION = 1000 * 60;
+    private static final int PROJECT_TIP_DURATION = 1000 * 10;
     private boolean isShowTip;
     private boolean isAnimFinished;
     public AtlasDialog(@NonNull Context context) {
@@ -84,7 +84,7 @@ public class AtlasDialog extends Dialog{
     }
 
 
-    public void initContent(int num,int order){
+    public void initContent(){
 //        list.add(R.mipmap.egg1);
 //        list.add(R.mipmap.egg2);
 //        list.add(R.mipmap.egg3);
@@ -116,9 +116,7 @@ public class AtlasDialog extends Dialog{
         atlas_all_layout = (LinearLayout) findViewById(R.id.atlas_all_layout);
 //        downloadedTipTV = (TextView) findViewById(R.id.downloaded_tip);
         dashboard_view = (DashboardView4) findViewById(R.id.dashboard_view);
-        if (num!=0){
-//            downloadedTipTV.setText("本次下载共总："+num+"张，当前下载第"+order+"张");
-        }
+
 
 
     }
@@ -178,6 +176,8 @@ public class AtlasDialog extends Dialog{
                     case 9:
                         value = 180;
                         break;
+                     default:
+                         break;
                 }
 
                 dashboard_view.setVelocity(value);

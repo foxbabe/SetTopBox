@@ -87,7 +87,7 @@ public class ScreenProjectionActivity extends BaseActivity implements ApiRequest
     /**
      * 投屏静止状态持续时间，超时自动退出投屏
      */
-    private static final int PROJECT_DURATION = 1000 * 30 * 5;
+    private static final int PROJECT_DURATION = 1000 * 30;
     /**
      * 文件投屏持续时间
      */

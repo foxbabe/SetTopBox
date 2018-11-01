@@ -18,8 +18,8 @@
             app:circleBackground="#00000000"
             app:ringColor="#ffffff"
             app:textColor="#ffffff"
-            android:layout_marginLeft="32dp"
-            android:layout_marginTop="13dp"
+            android:layout_marginLeft="34dp"
+            android:layout_marginTop="15dp"
             />
 
         <ImageView
