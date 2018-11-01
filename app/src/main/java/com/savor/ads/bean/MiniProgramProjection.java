@@ -33,6 +33,8 @@ public class MiniProgramProjection implements Serializable{
 
     /**投视频ID**/
     private String video_id;
+    /**资源ID**/
+    private String resource_id;
     /**动作操作时间**/
     private String order_time;
     /**微信头像*/
@@ -40,6 +42,7 @@ public class MiniProgramProjection implements Serializable{
     /**微信昵称*/
     private String nickName;
 
+    private int resource_type;
     public int getAction() {
         return action;
     }
@@ -152,6 +155,14 @@ public class MiniProgramProjection implements Serializable{
         this.video_id = video_id;
     }
 
+    public String getResource_id() {
+        return resource_id;
+    }
+
+    public void setResource_id(String resource_id) {
+        this.resource_id = resource_id;
+    }
+
     public String getOrder_time() {
         return order_time;
     }
@@ -174,5 +185,13 @@ public class MiniProgramProjection implements Serializable{
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public int getResource_type() {
+        return resource_type;
+    }
+
+    public void setResource_type(int resource_type) {
+        this.resource_type = resource_type;
     }
 }

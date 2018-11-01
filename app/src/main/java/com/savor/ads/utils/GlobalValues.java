@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.MiniProgramProjection;
 
 import java.util.ArrayList;
 
@@ -85,4 +86,5 @@ public class GlobalValues <T extends MediaLibBean> {
     public static String PROJECTION_WORDS;
     /**当前投屏人的投的照片的集合**/
     public static ArrayList<String> PROJECT_IMAGES=new ArrayList<>();
+    public static ArrayList<MiniProgramProjection> PROJECT_LIST = new ArrayList<>();
 }

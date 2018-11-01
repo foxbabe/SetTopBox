@@ -109,8 +109,7 @@ public class AppApi {
         AD_BAIDU_ADS,
         CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
         CP_MINIPROGRAM_FORSCREEN_JSON,
-        CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,
-        CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,
+        CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,
         CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,
         SP_GET_QRCODE_SMALL_JSON,
@@ -155,8 +154,7 @@ public class AppApi {
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
             put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp21/index/getBoxQr");
             put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
-            put(Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/videos");
-            put(Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/images");
+            put(Action.CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,BuildConfig.BASE_URL+"Smallapp21/BuriedPoint/netLogs");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/activity");
             put(Action.CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/sunCodeLog");
         }
@@ -609,26 +607,16 @@ public class AppApi {
         new AppServiceOk(context,Action.CP_MINIPROGRAM_FORSCREEN_JSON,handler,params).get();
     }
 
+
     /**
-     * 上报小程序投视频参数
+     * 上报小程序投屏日志参数
      * @param context
      * @param handler
      * @param params
      */
-    public static void postProjectionVideosParam(Context context, ApiRequestListener handler,HashMap<String,Object> params){
-        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_VIDEOS_JSON,handler,params).post();
+    public static void postProjectionResourceParam(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,handler,params).post();
     }
-
-    /**
-     * 上报小程序投图片参数
-     * @param context
-     * @param handler
-     * @param params
-     */
-    public static void postProjectionImagesParam(Context context,ApiRequestListener handler,HashMap<String,Object> params){
-        new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_PROJECTION_IMAGES_JSON,handler,params).post();
-    }
-
     /**
      * 上报小程序互动游戏参数
      * @param context
