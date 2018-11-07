@@ -200,10 +200,10 @@ public class ConstantValues {
     public static final String BAIDU_ADSLOT_ID4 = "5822040";
     /**百度聚屏代码位ID-小热点餐厅包间电视55寸以上*/
     public static final String BAIDU_ADSLOT_ID5 = "5822044";
-    /**百度聚屏最大连续重复次数*/
-    public static final int MAX_BAIDU_ADS_REPEAT_COUNT = 5;
-    /**百度聚屏连续重复达上限后，阻塞接下来的请求的次数*/
-    public static final int BAIDU_ADS_BLOCK_COUNT = 10;
+    /**聚屏最大连续重复次数*/
+    public static final int MAX_POLY_ADS_REPEAT_COUNT = 5;
+    /**聚屏连续重复达上限后，阻塞接下来的请求的次数*/
+    public static final int POLY_ADS_BLOCK_COUNT = 10;
     /**实体小平台**/
     public static final String ENTITY="entity";
     /**虚拟小平台**/
@@ -232,5 +232,13 @@ public class ConstantValues {
     public static final String MINI_PROGRAM_SMALL_NAME = "getBoxQrSmall.jpg";
     public static final String MINI_PROGRAM_BIG_NAME = "getBoxQrBig.jpg";
     public static final String MINI_PROGRAM_CALL_NAME = "getBoxQrCall.jpg";
+
+    /**MeiSSP平台广告**/
+    public static final String MEI_SSP_ADS_URL = "http://meiadx.meichuanmei.com/ps/std_json";
+    public static String MEI_SSP_ADS_MONITOR_URL = "";
+    /**MeiSSP视频key**/
+    public static final String MEI_SSP_VIDEO_KEY = "067e67da-6429-44d5-a2d8-bc5e682c8463";
+    /**MeiSSP图片key**/
+    public static final String MEI_SSP_IMAGE_KEY = "06910ca2-68ac-440c-b33d-17cc8031307b";
 
 }

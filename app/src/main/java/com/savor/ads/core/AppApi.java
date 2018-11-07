@@ -107,6 +107,9 @@ public class AppApi {
         CP_POST_SDCARD_STATE_JSON,
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
+        AD_MEI_VIDEO_ADS_JSON,
+        AD_MEI_IMAGE_ADS_JSON,
+        CP_GET_NOTICE_ADS_MONITOR_JSON,
         CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
         CP_MINIPROGRAM_FORSCREEN_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,
@@ -152,6 +155,9 @@ public class AppApi {
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
+            put(Action.AD_MEI_VIDEO_ADS_JSON,ConstantValues.MEI_SSP_ADS_URL);
+            put(Action.AD_MEI_IMAGE_ADS_JSON,ConstantValues.MEI_SSP_ADS_URL);
+            put(Action.CP_GET_NOTICE_ADS_MONITOR_JSON,"");
             put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp21/index/getBoxQr");
             put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,BuildConfig.BASE_URL+"Smallapp21/BuriedPoint/netLogs");
@@ -595,6 +601,37 @@ public class AppApi {
         new AppServiceOk(context, Action.AD_BAIDU_ADS, handler).postProto(requestBean);
     }
 
+    /**
+     * 请求taimei视频广告
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void requestMeiVideoAds(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+
+        new AppServiceOk(context,Action.AD_MEI_VIDEO_ADS_JSON,handler,params).post();
+    }
+
+    /**
+     * 请求taimei图片广告
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void requestMeiImageAds(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+
+        new AppServiceOk(context,Action.AD_MEI_IMAGE_ADS_JSON,handler,params).post();
+    }
+
+    /**
+     * 调用Mei平台聚屏广告曝光地址
+     * @param context
+     * @param handler
+     */
+    public static void getNoticeAdsMonitor(Context context,ApiRequestListener handler,String url){
+        API_URLS.put(Action.CP_GET_NOTICE_ADS_MONITOR_JSON,url);
+        new AppServiceOk(context,Action.CP_GET_NOTICE_ADS_MONITOR_JSON,handler).get();
+    }
     /**
      * 请求接口查询是否展示投屏码
      * @param context

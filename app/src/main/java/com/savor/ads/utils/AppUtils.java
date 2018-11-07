@@ -16,6 +16,8 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -23,6 +25,7 @@ import android.widget.EditText;
 
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.MeiAdLocalBean;
 import com.savor.ads.bean.PushRTBItem;
 import com.savor.ads.bean.VersionInfo;
 import com.savor.ads.core.Session;
@@ -59,6 +62,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -1913,6 +1917,31 @@ public class AppUtils {
                     }
                 }
             }
+
+            if (GlobalValues.POLY_ADS_PLAY_LIST!=null&&!GlobalValues.POLY_ADS_PLAY_LIST.isEmpty()){
+                boolean stopIterator = false;
+                // 这里遍历两次是为了处理当末尾的情况
+                for (int j = 0; j < 2; j++) {
+                    if (stopIterator)
+                        break;
+                    for (int i = 0; i < playList.size(); i++) {
+                        MediaLibBean bean = playList.get(i);
+                        if (polyIndex >= GlobalValues.POLY_ADS_PLAY_LIST.size()) {
+                            stopIterator = true;
+                            break;
+                        }
+                        if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
+                                GlobalValues.CURRENT_MEDIA_ORDER < bean.getOrder() + playList.get(playList.size() - 1).getOrder() * j) {
+                            MeiAdLocalBean polyItem = GlobalValues.POLY_ADS_PLAY_LIST.get(polyIndex++);
+                            polyItem.setOrder(bean.getOrder());
+                            polyItem.setPeriod(bean.getPeriod());
+                            polyItem.setLocation_id(bean.getLocation_id());
+                            playList.set(i, polyItem);
+                        }
+                    }
+                }
+                GlobalValues.POLY_ADS_PLAY_LIST.clear();
+            }
         }
 
         if (playList != null && !playList.isEmpty()) {
@@ -1972,5 +2001,50 @@ public class AppUtils {
         return (type == 2 && resultList != null && !resultList.isEmpty()) ||
                 (type == 1 && GlobalValues.getInstance().PLAY_LIST != null && !GlobalValues.getInstance().PLAY_LIST.isEmpty());
     }
+
+    public static String getDeviceId(Context context) {
+        String deviceId = "";
+        try {
+            deviceId = getIMEI(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (deviceId == null || "".equals(deviceId) || "0".equals(deviceId)) {
+            try {
+                deviceId = getLocalMac(context).replace(":", "");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (deviceId == null || "".equals(deviceId) || "0".equals(deviceId)) {
+            try {
+                deviceId = getAndroidId(context);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return deviceId;
+    }
+    //IMEI号
+    public static String getIMEI(Context context){
+        TelephonyManager telephonyManager=(TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        String imei=telephonyManager.getDeviceId();
+        return imei;
+    }
+    // Mac地址
+    private static String getLocalMac(Context context) {
+        WifiManager wifi = (WifiManager) context
+                .getSystemService(Context.WIFI_SERVICE);
+        WifiInfo info = wifi.getConnectionInfo();
+        return info.getMacAddress();
+    }
+    // Mac地址
+    private static String getAndroidId(Context context) {
+        String androidId = Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return androidId;
+    }
+
 
 }

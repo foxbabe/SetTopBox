@@ -83,7 +83,7 @@ public class DensityUtil {
      * @param prop 0:宽，1:高
      * @return
      */
-    public static int getScreenWidth(Context context,int prop){
+    public static int getScreenWidthOrHeight(Context context,int prop){
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(dm);

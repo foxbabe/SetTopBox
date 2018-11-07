@@ -23,8 +23,11 @@ import com.savor.ads.BuildConfig;
 import com.savor.ads.R;
 import com.savor.ads.SavorApplication;
 import com.savor.ads.bean.AdMasterResult;
+import com.savor.ads.bean.AdsMeiSSPBean;
+import com.savor.ads.bean.AdsMeiSSPResult;
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.MeiAdLocalBean;
 import com.savor.ads.callback.ProjectOperationListener;
 import com.savor.ads.core.ApiRequestListener;
 import com.savor.ads.core.AppApi;
@@ -58,6 +61,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,6 +78,10 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     private ArrayList<T> mPlayList;
     private String mListPeriod;
     private boolean mNeedUpdatePlaylist;
+
+    private boolean mIsGoneToTv;
+    /**请求参数：0为视频，1，为图片**/
+    private int meiSSPAdsType = 0;
     /**
      * 日志用的播放记录标识
      */
@@ -84,6 +92,10 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
     private AdMasterResult adMasterResult = null;
 
     private PlayListDialog mPlayListDialog;
+    //是否已经返回video广告
+    private boolean isResponseVideo;
+    //是否已经返回image广告
+    private boolean isResponseImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,26 +200,33 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
      * @param index
      */
     private void toCheckIfPolyAds(int index) {
+//        requestMeiSSPAds();
         if (mPlayList != null) {
             int next = (index + 1) % mPlayList.size();
             if (next < mPlayList.size()) {
                 MediaLibBean bean = mPlayList.get(next);
                 // 当下一个位置是聚屏类、且未被填充媒体内容、且当前未被“未发现百度广告”阻止时，请求百度聚屏广告
                 if (ConstantValues.POLY_ADS.equals(bean.getType()) &&
-                        TextUtils.isEmpty(bean.getName()) &&
-                        TextUtils.isEmpty(GlobalValues.NOT_FOUND_BAIDU_ADS_KEY)) {
-                    if (GlobalValues.CURRENT_ADS_REPEAT_PAIR == null ||
-                            GlobalValues.CURRENT_ADS_REPEAT_PAIR.second < ConstantValues.MAX_BAIDU_ADS_REPEAT_COUNT) {
-                        requestBaiduAds();
-                    } else {
-                        if (GlobalValues.CURRENT_ADS_BLOCKED_COUNT < ConstantValues.BAIDU_ADS_BLOCK_COUNT) {
-                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT++;
-                        } else {
-                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT = 0;
-                            GlobalValues.CURRENT_ADS_REPEAT_PAIR = null;
-                            requestBaiduAds();
-                        }
+                        TextUtils.isEmpty(bean.getName()) ) {
+                    requestMeiSSPVideoAds();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                    requestMeiSSPImageAds();
+//                    if (GlobalValues.CURRENT_ADS_REPEAT_PAIR == null ||
+//                            GlobalValues.CURRENT_ADS_REPEAT_PAIR.second < ConstantValues.MAX_POLY_ADS_REPEAT_COUNT) {
+//                        requestBaiduAds();
+//                    } else {
+//                        if (GlobalValues.CURRENT_ADS_BLOCKED_COUNT < ConstantValues.POLY_ADS_BLOCK_COUNT) {
+//                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT++;
+//                        } else {
+//                            GlobalValues.CURRENT_ADS_BLOCKED_COUNT = 0;
+//                            GlobalValues.CURRENT_ADS_REPEAT_PAIR = null;
+//                            requestBaiduAds();
+//                        }
+//                    }
                 }
             }
         }
@@ -290,8 +309,65 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                 .build();
         AppApi.requestBaiduAds(this, this, request);
     }
+    private void requestMeiSSPVideoAds(){
 
-    private boolean mIsGoneToTv;
+        HashMap<String,Object> param = new HashMap<>();
+        param.put("key",ConstantValues.MEI_SSP_VIDEO_KEY);
+        param.put("appid","2005");
+        param.put("userid","2005");
+        param.put("count",1);
+        param.put("ua","");
+        param.put("ip",AppUtils.getEthernetIP());
+        param.put("did",AppUtils.getDeviceId(this));
+        param.put("didsha1","");
+        param.put("didmd5","");
+        param.put("dpid","");
+        param.put("dpidsha1","");
+        param.put("dpidmd5","");
+        param.put("os",mSession.getOsVersion());
+        param.put("osv",mSession.getBuildVersion());
+        param.put("screen_w",DensityUtil.getScreenWidthOrHeight(this,0));
+        param.put("screen_h",DensityUtil.getScreenWidthOrHeight(this,1));
+        param.put("devicetype",0);
+        param.put("carrier",0);
+        param.put("connectiontype",0);
+        param.put("lat","");
+        param.put("lon","");
+
+        AppApi.requestMeiVideoAds(this,this,param);
+        isResponseVideo = false;
+
+    }
+    private void requestMeiSSPImageAds(){
+
+        HashMap<String,Object> param = new HashMap<>();
+
+        param.put("key",ConstantValues.MEI_SSP_IMAGE_KEY);
+        param.put("appid","2005");
+        param.put("userid","2005");
+        param.put("count",1);
+        param.put("ua","");
+        param.put("ip",AppUtils.getEthernetIP());
+        param.put("did",AppUtils.getDeviceId(this));
+        param.put("didsha1","");
+        param.put("didmd5","");
+        param.put("dpid","");
+        param.put("dpidsha1","");
+        param.put("dpidmd5","");
+        param.put("os",mSession.getOsVersion());
+        param.put("osv",mSession.getBuildVersion());
+        param.put("screen_w",DensityUtil.getScreenWidthOrHeight(this,0));
+        param.put("screen_h",DensityUtil.getScreenWidthOrHeight(this,1));
+        param.put("devicetype",0);
+        param.put("carrier",0);
+        param.put("connectiontype",0);
+        param.put("lat","");
+        param.put("lon","");
+
+        AppApi.requestMeiImageAds(this,this,param);
+        isResponseImage = false;
+
+    }
 
 
     @Override
@@ -510,13 +586,16 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
             if (ConstantValues.POLY_ADS.equals(item.getType()) && item instanceof BaiduAdLocalBean) {
                 // 回调展现完成
-                noticeAdsMonitor((BaiduAdLocalBean) item);
-
+//                noticeAdsMonitor((BaiduAdLocalBean) item);
+            }else if (ConstantValues.POLY_ADS.equals(item.getType()) && item instanceof MeiAdLocalBean){
+                noticeAdsMonitor((MeiAdLocalBean)item);
                 mPlayList.get(index).setName(null);
                 mPlayList.get(index).setMediaPath(null);
                 mPlayList.get(index).setChinese_name("已过期");
+                GlobalValues.POLY_ADS_PLAY_LIST.remove(item);
                 postPolyPlayRecord(mSession.getEthernetMac(),item.getVid());
             }
+
         }
 
         if (mNeedUpdatePlaylist) {
@@ -634,7 +713,6 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         }
 
         toCheckIfPolyAds(index);
-
         return false;
     }
 
@@ -674,20 +752,29 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
      * 回调曝光链接
      * @param bean
      */
-    private void noticeAdsMonitor(BaiduAdLocalBean bean) {
-        if (bean.getWinNoticeUrlList() != null && !bean.getWinNoticeUrlList().isEmpty()) {
-            for (ByteString bString :
-                    bean.getWinNoticeUrlList()) {
-                String url = bString.toStringUtf8();
-                RetryHandler.enqueue(url, bean.getExpireTime());
-            }
-        }
-        if (bean.getThirdMonitorUrlList() != null && !bean.getThirdMonitorUrlList().isEmpty()) {
-            for (ByteString bString :
-                    bean.getThirdMonitorUrlList()) {
-                String url = bString.toStringUtf8();
-                RetryHandler.enqueue(url, bean.getExpireTime());
-            }
+//    private void noticeAdsMonitor(BaiduAdLocalBean bean) {
+//        if (bean.getWinNoticeUrlList() != null && !bean.getWinNoticeUrlList().isEmpty()) {
+//            for (ByteString bString :
+//                    bean.getWinNoticeUrlList()) {
+//                String url = bString.toStringUtf8();
+//                RetryHandler.enqueue(url, bean.getExpireTime());
+//            }
+//        }
+//        if (bean.getThirdMonitorUrlList() != null && !bean.getThirdMonitorUrlList().isEmpty()) {
+//            for (ByteString bString :
+//                    bean.getThirdMonitorUrlList()) {
+//                String url = bString.toStringUtf8();
+//                RetryHandler.enqueue(url, bean.getExpireTime());
+//            }
+//        }
+//    }
+
+    private void noticeAdsMonitor(MeiAdLocalBean bean){
+        if (!TextUtils.isEmpty(bean.getImpression())){
+            ConstantValues.MEI_SSP_ADS_MONITOR_URL = bean.getImpression();
+            AppApi.getNoticeAdsMonitor(this,this,bean.getImpression());
+        }else{
+            ConstantValues.MEI_SSP_ADS_MONITOR_URL = null;
         }
     }
 
@@ -751,6 +838,18 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
                         }
 
                     }
+                }
+                break;
+            case AD_MEI_VIDEO_ADS_JSON:
+                if (obj instanceof List<?>){
+                    List<AdsMeiSSPResult> adsMeiSSPResultList = (List<AdsMeiSSPResult>)obj;
+                    handleMeiSSPVideoAdsData(adsMeiSSPResultList);
+                }
+                break;
+            case AD_MEI_IMAGE_ADS_JSON:
+                if (obj instanceof List<?>){
+                    List<AdsMeiSSPResult> adsMeiSSPResultList = (List<AdsMeiSSPResult>)obj;
+                    handleMeiSSPImageAdsData(adsMeiSSPResultList);
                 }
                 break;
             case CP_MINIPROGRAM_FORSCREEN_JSON:
@@ -893,11 +992,84 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
 
     }
 
+    private void handleMeiSSPVideoAdsData(List<AdsMeiSSPResult> results){
+        ArrayList<MeiAdLocalBean> adsMeiSSPBeanList = new ArrayList<>();
+        if (results!=null){
+            for (AdsMeiSSPResult result:results){
+                if (result.getVideo()!=null&&!TextUtils.isEmpty(result.getVideo().getUrl())){
+                    AdsMeiSSPBean bean = result.getVideo();
+                    String url = bean.getUrl();
+                    String[] names = url.split("\\/");
+                    String fileName = names[names.length-1];
+                    String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
+                    String[] selectionArgs = new String[]{fileName};
+                    List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection, selectionArgs);
+                    if (list!=null){
+                        MeiAdLocalBean meiAdLocalBean = new MeiAdLocalBean(list.get(0));
+                        meiAdLocalBean.setImpression(result.getImpression()[0]);
+                        adsMeiSSPBeanList.add(meiAdLocalBean);
+                    }
+                }
+            }
+
+        }
+        isResponseVideo = true;
+        LogUtils.d("MEISSP--VideoAds下载完成");
+        updateAdsToPlaylist(adsMeiSSPBeanList);
+    }
+    private void handleMeiSSPImageAdsData(List<AdsMeiSSPResult> results){
+        ArrayList<MeiAdLocalBean> adsMeiSSPBeanList = new ArrayList<>();
+        if (results!=null){
+            for (AdsMeiSSPResult result:results){
+                if (result.getImage()!=null&&!TextUtils.isEmpty(result.getImage().getUrl())){
+                    AdsMeiSSPBean bean = result.getImage();
+                    String url = bean.getUrl();
+                    String[] names = url.split("\\/");
+                    String fileName = names[names.length-1];
+                    String selection = DBHelper.MediaDBInfo.FieldName.TP_MD5 + "=? ";
+                    String[] selectionArgs = new String[]{fileName};
+                    List<MediaLibBean> list = DBHelper.get(this).findRtbadsMediaLibByWhere(selection, selectionArgs);
+                    if (list!=null){
+                        MeiAdLocalBean meiAdLocalBean = new MeiAdLocalBean(list.get(0));
+                        meiAdLocalBean.setImpression(result.getImpression()[0]);
+                        adsMeiSSPBeanList.add(meiAdLocalBean);
+                    }
+                }
+            }
+
+        }
+        isResponseImage = true;
+        LogUtils.d("MEISSP--ImageAds下载完成");
+        updateAdsToPlaylist(adsMeiSSPBeanList);
+    }
+    private void updateAdsToPlaylist(ArrayList<MeiAdLocalBean> adsMeiSSPBeanList){
+        if (GlobalValues.POLY_ADS_PLAY_LIST == null){
+            GlobalValues.POLY_ADS_PLAY_LIST = new ArrayList<>();
+        }
+        GlobalValues.POLY_ADS_PLAY_LIST.addAll(adsMeiSSPBeanList);
+        LogUtils.d("MEISSP--GlobalValues.POLY_ADS_PLAY_LIST大小="+GlobalValues.POLY_ADS_PLAY_LIST.size());
+        if (!GlobalValues.POLY_ADS_PLAY_LIST.isEmpty() && mPlayList != null) {
+            if (isResponseVideo&&isResponseImage){
+                LogUtils.d("MEISSP--VideoAds&ImageAds下载完成");
+                GlobalValues.CURRENT_MEDIA_ORDER = mPlayList.get(mCurrentPlayingIndex).getOrder();
+                if (AppUtils.fillPlaylist(this, null, 1)) {
+                    mNeedUpdatePlaylist = true;
+                }
+            }
+
+        }
+    }
     @Override
     public void onError(AppApi.Action method, Object obj) {
         switch (method) {
             case AD_BAIDU_ADS:
                 LogFileUtil.write("百度聚屏请求失败");
+                break;
+            case AD_MEI_VIDEO_ADS_JSON:
+                isResponseVideo = true;
+                break;
+            case AD_MEI_IMAGE_ADS_JSON:
+                isResponseImage = true;
                 break;
         }
     }

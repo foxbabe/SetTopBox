@@ -21,8 +21,8 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.savor.ads.bean.AdMasterResult;
+import com.savor.ads.bean.AdsMeiSSPResult;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.TvProgramGiecResponse;
@@ -37,6 +37,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Response;
 import tianshu.ui.api.TsUiApiV20171122;
@@ -240,6 +242,27 @@ public class ApiResponseFactory {
                 try {
                     JSONObject jsonObject = new JSONObject(info);
                     result =jsonObject.getInt("is_sapp_forscreen");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            case AD_MEI_VIDEO_ADS_JSON:
+            case AD_MEI_IMAGE_ADS_JSON:
+                try{
+                    List<AdsMeiSSPResult> adsMeiSSPResults = new ArrayList<>();
+                    JSONArray jsonArray= ret.getJSONArray("ad");
+                    for (int i=0;i<jsonArray.length();i++){
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        String admnative = jsonObject.getString("admnative");
+                        AdsMeiSSPResult adsMeiSSPResult = gson.fromJson(admnative, new TypeToken<AdsMeiSSPResult>() {
+                        }.getType());
+                        adsMeiSSPResults.add(adsMeiSSPResult);
+                    }
+                    result = adsMeiSSPResults;
+                    LogUtils.d("213");
+//                    JSONArray impression = admnativeJSON.getJSONArray("impression");
+//                    JSONObject image = admnativeJSON.getJSONObject("image");
+//                    JSONObject video = admnativeJSON.getJSONObject("video");
                 }catch (Exception e){
                     e.printStackTrace();
                 }
