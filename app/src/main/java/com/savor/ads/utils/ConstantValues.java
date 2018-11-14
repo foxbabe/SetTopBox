@@ -1,6 +1,5 @@
 package com.savor.ads.utils;
 
-import com.savor.ads.BuildConfig;
 
 /**
  * Created by zhanghq on 2016/12/8.
@@ -167,17 +166,11 @@ public class ConstantValues {
     /**特色菜*/
     public static final String RECOMMEND = "recommend";
 
-    /** 虚拟小平台地址*/
-    public static final String VIRTUAL_SP_HOST = "v-small.littlehotspot.com";
+
 
     /**外置SD卡至少保留的可用空间*/
     public static final long EXTSD_LEAST_AVAILABLE_SPACE = 1024 * 1024 * 1024;
 
-
-    /**
-     * sdkconfig.xml配置文件服务器存放地址,如果为空的话，默认去加载本地assets目录
-     */
-    public static final String CONFIG_URL = BuildConfig.BASE_URL+"/Public/admaster/admaster_sdkconfig.xml";
 
     public static final String APK_INSTALLED_PATH = "/system/priv-app/savormedia/";
 
@@ -216,13 +209,7 @@ public class ConstantValues {
     public static final int PUSH_TYPE_4G_PROJECTION = 2;
     public static final int PUSH_TYPE_SHELL_COMMAND = 3;
     public static final int PUSH_TYPE_UPDATE = 4;
-    /**小程序中用到的netty的url地址**/
-    public static final String MINI_PROGRAM_NETTY_URL = "netty-push.littlehotspot.com";
-//    public static final String MINI_PROGRAM_NETTY_URL = "192.168.88.86";
-//    public static final String MINI_PROGRAM_NETTY_URL = "172.16.1.90";
-    /**小程序中用到的netty的端口**/
-//    public static final int MINI_PROGRAM_NETTY_PORT = 8009;
-    public static final int MINI_PROGRAM_NETTY_PORT = 8010;
+
 
     /**1为小码，2为大码，3为小程序呼出来的码**/
     public static final int MINI_PROGRAM_SMALL_TYPE = 1;
@@ -233,12 +220,13 @@ public class ConstantValues {
     public static final String MINI_PROGRAM_BIG_NAME = "getBoxQrBig.jpg";
     public static final String MINI_PROGRAM_CALL_NAME = "getBoxQrCall.jpg";
 
-    /**MeiSSP平台广告**/
-    public static final String MEI_SSP_ADS_URL = "http://meiadx.meichuanmei.com/ps/std_json";
+
     public static String MEI_SSP_ADS_MONITOR_URL = "";
     /**MeiSSP视频key**/
     public static final String MEI_SSP_VIDEO_KEY = "067e67da-6429-44d5-a2d8-bc5e682c8463";
     /**MeiSSP图片key**/
     public static final String MEI_SSP_IMAGE_KEY = "06910ca2-68ac-440c-b33d-17cc8031307b";
+
+    public static final String PROJECTION_THUMBNAIL_PARAM = "?x-oss-process=image/resize,m_lfit,h_100,w_100";
 
 }

@@ -22,6 +22,11 @@ import android.text.TextUtils;
 import com.savor.ads.utils.LogUtils;
 import com.savor.ads.utils.StringUtils;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,9 +63,9 @@ public class ApiRequestFactory {
 
         } else if (nameSpace.contains("JSON")) {
             return getJsonRequest(params, appSession);
-        } /*else if (nameSpace.contains("FORM")) {
-            return getFormRequest(action, params, appSession);
-        } else if (nameSpace.contains("NOSIGN")) {
+        } else if (nameSpace.contains("FORM")) {
+            return getFormRequestWithoutSign(action, params, appSession);
+        } /*else if (nameSpace.contains("NOSIGN")) {
             return getFormRequestWithoutSign(action, params, appSession);
         } */else {
             // 不需要请求内容
@@ -121,32 +127,35 @@ public class ApiRequestFactory {
 //        return new UrlEncodedFormEntity(pm, HTTP.UTF_8);
 //    }
 //
-//    public static StringEntity getFormRequestWithoutSign(AppApi.Action action, Object params,
-//                                                         Session appSession) throws UnsupportedEncodingException {
-//        if (params == null) {
-//            return null;
-//        }
-//        HashMap<String, Object> requestParams;
-//        if (params instanceof HashMap) {
-//            requestParams = (HashMap<String, Object>) params;
-//        } else {
-//            return null;
-//        }
-//        final Iterator<String> keySet = requestParams.keySet().iterator();
-//        ArrayList<NameValuePair> pm = new ArrayList<NameValuePair>();
-//        try {
-//            while (keySet.hasNext()) {
-//                final String key = keySet.next();
+    public static HashMap<String, Object> getFormRequestWithoutSign(AppApi.Action action, Object params,
+                                                         Session appSession) throws UnsupportedEncodingException {
+        if (params == null) {
+            return null;
+        }
+        HashMap<String, Object> requestParams;
+        if (params instanceof HashMap) {
+            requestParams = (HashMap<String, Object>) params;
+        } else {
+            return null;
+        }
+        final Iterator<String> keySet = requestParams.keySet().iterator();
+//        ArrayList<NameValuePair> pm = new ArrayList<>();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            while (keySet.hasNext()) {
+                final String key = keySet.next();
 //                pm.add(new BasicNameValuePair(key, (String) requestParams
 //                        .get(key)));
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
+                jsonObject.put(key,requestParams.get(key));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return requestParams;
 //        return new UrlEncodedFormEntity(pm, HTTP.UTF_8);
-//    }
+    }
 
     private static JSONObject getJsonRequest(Object params, Session appSession) throws JSONException {
         if (params == null) {

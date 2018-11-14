@@ -117,10 +117,10 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
     private void fetchMessage() throws InterruptedException {
         try{
             LogUtils.d("MiniProgramNettyService fetchMessage");
-
-            MiniProNettyClient.init(ConstantValues.MINI_PROGRAM_NETTY_PORT,ConstantValues.MINI_PROGRAM_NETTY_URL,this,getApplicationContext());
-            MiniProNettyClient.get().connect(MiniProNettyClient.get().configureBootstrap(new Bootstrap()));
-
+            if (!TextUtils.isEmpty(session.getNettyUrl())&&session.getNettyPort()!=0) {
+                MiniProNettyClient.init(session.getNettyPort(), session.getNettyUrl(), this, getApplicationContext());
+                MiniProNettyClient.get().connect(MiniProNettyClient.get().configureBootstrap(new Bootstrap()));
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -539,6 +539,11 @@ public class MiniProgramNettyService extends IntentService implements MiniNettyM
 
             //----------------------------------------------------//
             GlobalValues.PROJECT_LIST.add(miniProgramProjection);
+            if (GlobalValues.PROJECT_LIST.size()==1){
+                MiniProgramProjection mini = GlobalValues.PROJECT_LIST.get(0);
+                String url = BuildConfig.OSS_ENDPOINT+mini.getUrl()+ConstantValues.PROJECTION_THUMBNAIL_PARAM;
+                ProjectOperationListener.getInstance(context).showImage(1, url, true, words, avatarUrl, nickName);
+            }
             if (!isDownloadRunnable){
                 handler.removeCallbacks(downloadFileRunnable);
                 downloadIndex =0;

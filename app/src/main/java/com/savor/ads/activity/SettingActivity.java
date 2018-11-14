@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.savor.ads.R;
 import com.savor.ads.bean.ServerInfo;
+import com.savor.ads.core.AppApi;
 import com.savor.ads.customview.IPEditText;
 import com.savor.ads.utils.ActivitiesManager;
 import com.savor.ads.utils.AppUtils;
@@ -94,7 +95,7 @@ public class SettingActivity extends BaseActivity {
             mStandaloneSwitch.setChecked(false);
 
             if (mSession.isUseVirtualSp()) {
-                mServerIpTv.setText(ConstantValues.VIRTUAL_SP_HOST);
+                mServerIpTv.setText(AppApi.VIRTUAL_SP_HOST);
                 mUseVirtualSwitch.setChecked(true);
                 mServerIpRl.setFocusable(false);
             } else {
@@ -238,7 +239,7 @@ public class SettingActivity extends BaseActivity {
             if (mUseVirtualDialog == null) {
                 mUseVirtualDialog = new AlertDialog.Builder(SettingActivity.this)
                         .setTitle("提示")
-                        .setMessage("确定使用虚拟小平台:" + ConstantValues.VIRTUAL_SP_HOST + "?")
+                        .setMessage("确定使用虚拟小平台:" + AppApi.VIRTUAL_SP_HOST + "?")
                         .setNegativeButton("是", new DialogInterface.OnClickListener() {
 
                             @Override
@@ -247,7 +248,7 @@ public class SettingActivity extends BaseActivity {
                                 mSession.setUseVirtualSp(true);
                                 mUseVirtualSwitch.setChecked(true);
 
-                                mSession.setServerInfo(new ServerInfo(ConstantValues.VIRTUAL_SP_HOST, 3));
+                                mSession.setServerInfo(new ServerInfo(AppApi.VIRTUAL_SP_HOST, 3));
 
                                 ShellUtils.reboot();
                             }

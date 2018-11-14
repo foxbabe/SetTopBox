@@ -113,7 +113,7 @@ public class AdsPlayerActivity<T extends MediaLibBean> extends BaseActivity impl
         startScreenProjectionService();
 //        LogFileUtil.write("AdsPlayerActivity onCreate " + System.currentTimeMillis());
         // SDK初始化
-        AdmasterSdk.init(this, ConstantValues.CONFIG_URL);
+        AdmasterSdk.init(this, AppApi.CONFIG_URL);
         AdmasterSdk.setLogState(true);
 
 //        AppApi.getAdMasterConfig(this,this);
