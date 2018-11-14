@@ -17,12 +17,14 @@ package com.savor.ads.core;
  */
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.savor.ads.bean.AdMasterResult;
+import com.savor.ads.bean.AdsMeiSSPResult;
+import com.savor.ads.bean.NettyBalancingResult;
 import com.savor.ads.bean.PrizeInfo;
 import com.savor.ads.bean.ServerInfo;
 import com.savor.ads.bean.TvProgramGiecResponse;
@@ -37,6 +39,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Response;
 import tianshu.ui.api.TsUiApiV20171122;
@@ -49,10 +53,11 @@ import tianshu.ui.api.TsUiApiV20171122;
  */
 public class ApiResponseFactory {
     public final static String TAG = "ApiResponseFactory";
+
     // 当前服务器时间
     private static String webtime = "";
     public static Object getResponse(Context context, AppApi.Action action,
-                                     Response response, String key, boolean isCache) {
+                                     Response response, String key, String other_param) {
 
         if (action == AppApi.Action.AD_BAIDU_ADS) {
             // 百度聚屏是特殊的类型，需要使用protobuff解析
@@ -158,7 +163,7 @@ public class ApiResponseFactory {
                     }
                 }
             }
-            result = parseResponse(action, infoJson, rSet,key);
+            result = parseResponse(context,action, infoJson, rSet,key,other_param);
         } catch (Exception e) {
             LogUtils.d(requestMethod + " has other unknown Exception", e);
             e.printStackTrace();
@@ -167,7 +172,7 @@ public class ApiResponseFactory {
         return result;
     }
 
-    public static Object parseResponse(AppApi.Action action, String info, JSONObject ret,String key) {
+    public static Object parseResponse(Context context,AppApi.Action action, String info, JSONObject ret,String key,String other_param) {
         Object result = null;
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
@@ -237,10 +242,34 @@ public class ApiResponseFactory {
                 result = info;
                 break;
             case CP_MINIPROGRAM_FORSCREEN_JSON:
-                try {
-                    JSONObject jsonObject = new JSONObject(info);
-                    result =jsonObject.getInt("is_sapp_forscreen");
+                result = info;
+
+                break;
+            case AD_MEI_VIDEO_ADS_JSON:
+            case AD_MEI_IMAGE_ADS_JSON:
+                try{
+                    List<AdsMeiSSPResult> adsMeiSSPResults = new ArrayList<>();
+                    JSONArray jsonArray= ret.getJSONArray("ad");
+                    for (int i=0;i<jsonArray.length();i++){
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        String admnative = jsonObject.getString("admnative");
+                        AdsMeiSSPResult adsMeiSSPResult = gson.fromJson(admnative, new TypeToken<AdsMeiSSPResult>() {
+                        }.getType());
+                        adsMeiSSPResults.add(adsMeiSSPResult);
+                    }
+                    result = adsMeiSSPResults;
+                    LogUtils.d("213");
                 }catch (Exception e){
+                    e.printStackTrace();
+                }
+                break;
+            case CP_GET_NETTY_BALANCING_FORM:
+                try {
+                    if (!TextUtils.isEmpty(other_param)&&other_param.equals(ret.getString("req_id"))){
+                        result = gson.fromJson(ret.toString(), new TypeToken<NettyBalancingResult>() {}.getType());
+
+                    }
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 break;

@@ -211,6 +211,17 @@ public class Session {
     private boolean isShowMiniProgramIcon;
     /**小程序NETTY服务是否存活**/
     private boolean isHeartbeatMiniNetty;
+    private String nettyUrl;
+    private int nettyPort;
+    /**是否开机请求过netty最新负载地址*/
+    private boolean isGetNettyBalancing;
+    /**
+     * 当前apk版本是否支持负载均衡
+     *0:不支持
+     *1:支持
+     */
+    private int localSupportNettyBalance=1;
+    private boolean isSupportNettyBalance;
 	private HashMap<String,Long> downloadFilePosition = new HashMap<>();
 	/**是否已经下载小程序码小码**/
 	private boolean isDownloadMiniProgramSmallIcon;
@@ -307,6 +318,8 @@ public class Session {
         netSpeed = mPreference.loadStringKey(P_APP_DOWNLOAD_NET_SPEED,"");
         isShowMiniProgramIcon = mPreference.loadBooleanKey(P_APP_SHOW_MIMIPROGRAM,false);
         isHeartbeatMiniNetty = mPreference.loadBooleanKey(P_APP_HEARTBEAT_MIMIPROGRAM,false);
+        nettyUrl = mPreference.loadStringKey(P_APP_NETTY_URL,null);
+        nettyPort = mPreference.loadIntKey(P_APP_NETTY_PORT,0);
     }
 
     /*
@@ -382,7 +395,8 @@ public class Session {
                 || P_APP_SPECIALTY_PERIOD.equals(key)
                 || P_APP_DOWNLOADING_SPECIALTY_PERIOD.equals(key)
                 || P_APP_LOADING_VERSION.equals(key)
-                || P_APP_DOWNLOAD_NET_SPEED.equals(key)) {
+                || P_APP_DOWNLOAD_NET_SPEED.equals(key)
+                || P_APP_NETTY_URL.equals(key)) {
 
             mPreference.saveStringKey(key, (String) updateItem.second);
 
@@ -393,7 +407,8 @@ public class Session {
                 P_APP_TV_DEFAULT_CHANNEL.equals(key) ||
                 P_APP_TV_CURRENT_INPUT.equals(key) ||
                 P_APP_SWITCHTIME.equals(key) ||
-                P_APP_TV_SIZE.equals(key)) {
+                P_APP_TV_SIZE.equals(key)||
+                P_APP_NETTY_PORT.equals(key)) {
             mPreference.saveIntKey(key, (int) updateItem.second);
         } else if (P_APP_USE_VIRTUAL_SP.equals(key)||
                 P_APP_STAND_ALONE.equals(key)) {
@@ -1133,6 +1148,48 @@ public class Session {
         writePreference(new Pair<String, Object>(P_APP_HEARTBEAT_MIMIPROGRAM,heartbeatMiniNetty));
     }
 
+    public String getNettyUrl() {
+        return nettyUrl;
+    }
+
+    public void setNettyUrl(String nettyUrl) {
+        this.nettyUrl = nettyUrl;
+        writePreference(new Pair<String, Object>(P_APP_NETTY_URL,nettyUrl));
+    }
+
+    public int getNettyPort() {
+        return nettyPort;
+    }
+
+    public void setNettyPort(int nettyPort) {
+        this.nettyPort = nettyPort;
+        writePreference(new Pair<String, Object>(P_APP_NETTY_PORT,nettyPort));
+    }
+
+    public boolean isGetNettyBalancing() {
+        return isGetNettyBalancing;
+    }
+
+    public void setGetNettyBalancing(boolean getNettyBalancing) {
+        isGetNettyBalancing = getNettyBalancing;
+    }
+
+    public int getLocalSupportNettyBalance() {
+        return localSupportNettyBalance;
+    }
+
+    public void setLocalSupportNettyBalance(int localSupportNettyBalance) {
+        this.localSupportNettyBalance = localSupportNettyBalance;
+    }
+
+    public boolean isSupportNettyBalance() {
+        return isSupportNettyBalance;
+    }
+
+    public void setSupportNettyBalance(boolean supportNettyBalance) {
+        isSupportNettyBalance = supportNettyBalance;
+    }
+
     public HashMap<String, Long> getDownloadFilePosition() {
         return downloadFilePosition;
     }
@@ -1271,6 +1328,8 @@ public class Session {
 
     public static final String P_APP_SHOW_MIMIPROGRAM = "com.savor.ads.show.miniprogram";
     public static final String P_APP_HEARTBEAT_MIMIPROGRAM = "com.savor.ads.heartbeat.miniprogram";
+    public static final String P_APP_NETTY_URL = "com.savor.ads.netty_url";
+    public static final String P_APP_NETTY_PORT = "com.savor.ads.netty_port";
 
     public String getAdsPeriod() {
         return adsPeriod == null ? "" : adsPeriod;

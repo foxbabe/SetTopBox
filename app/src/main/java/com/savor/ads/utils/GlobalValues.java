@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import com.savor.ads.bean.BaiduAdLocalBean;
 import com.savor.ads.bean.MediaLibBean;
+import com.savor.ads.bean.MeiAdLocalBean;
 import com.savor.ads.bean.MiniProgramProjection;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class GlobalValues <T extends MediaLibBean> {
     public ArrayList<T> PLAY_LIST;
     /** 请求到的百度聚屏广告集合，填充节目单时会用到*/
     public static ArrayList<BaiduAdLocalBean> ADS_PLAY_LIST;
+    public static ArrayList<MeiAdLocalBean> POLY_ADS_PLAY_LIST;
     /** 拿到百度聚屏广告后此刻的节目order，填充节目单时会用到*/
     public static int CURRENT_MEDIA_ORDER = 0;
 

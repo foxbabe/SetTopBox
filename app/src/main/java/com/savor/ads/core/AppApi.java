@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import java.io.File;
 import java.io.IOException;
 import java.net.PortUnreachableException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,7 +37,20 @@ public class AppApi {
     public static String SP_BASE_URL = "http://192.168.1.2/";
 
     private static String PHONE_BASE_URL = "http://192.168.0.1:8080/";
-
+    /**小程序中用到的netty的url地址(旧)**/
+    public static final String MINI_PROGRAM_NETTY_URL = "netty-push.littlehotspot.com";
+    /**小程序中用到的netty的端口(旧)**/
+    public static final int MINI_PROGRAM_NETTY_PORT = 8010;
+    /**负载均衡广告地址*/
+    public static final String BALANCING_NETTY_BASE = "https://api-nzb.littlehotspot.com";
+    /**MeiSSP平台广告**/
+    public static final String MEI_SSP_ADS_URL = "http://meiadx.meichuanmei.com/ps/std_json";
+    /** 虚拟小平台地址*/
+    public static final String VIRTUAL_SP_HOST = "v-small.littlehotspot.com";
+    /**
+     * sdkconfig.xml配置文件服务器存放地址,如果为空的话，默认去加载本地assets目录
+     */
+    public static final String CONFIG_URL = BuildConfig.BASE_URL+"/Public/admaster/admaster_sdkconfig.xml";
 //    /**
 //     * 云平台测试环境
 //     **/
@@ -107,6 +121,9 @@ public class AppApi {
         CP_POST_SDCARD_STATE_JSON,
         CP_POST_SHELL_COMMAND_RESULT_JSON,
         AD_BAIDU_ADS,
+        AD_MEI_VIDEO_ADS_JSON,
+        AD_MEI_IMAGE_ADS_JSON,
+        CP_GET_NOTICE_ADS_MONITOR_JSON,
         CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,
         CP_MINIPROGRAM_FORSCREEN_JSON,
         CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,
@@ -114,7 +131,8 @@ public class AppApi {
         CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,
         SP_GET_QRCODE_SMALL_JSON,
         SP_GET_QRCODE_BIG_JSON,
-        SP_GET_QRCODE_CALL_JSON
+        SP_GET_QRCODE_CALL_JSON,
+        CP_GET_NETTY_BALANCING_FORM
     }
 
 
@@ -152,11 +170,15 @@ public class AppApi {
             put(Action.CP_POST_SDCARD_STATE_JSON, BuildConfig.BASE_URL + "Opclient20/BoxMem/boxMemoryInfo");
             put(Action.CP_POST_SHELL_COMMAND_RESULT_JSON,BuildConfig.BASE_URL+"Box/ShellCallback/pushResult");
             put(Action.AD_BAIDU_ADS, BuildConfig.BAIDU_AD_BASE_URL);
+            put(Action.AD_MEI_VIDEO_ADS_JSON,MEI_SSP_ADS_URL);
+            put(Action.AD_MEI_IMAGE_ADS_JSON,MEI_SSP_ADS_URL);
+            put(Action.CP_GET_NOTICE_ADS_MONITOR_JSON,"");
             put(Action.CP_MINIPROGRAM_DOWNLOAD_QRCODE_JSON,BuildConfig.BASE_URL+"Smallapp21/index/getBoxQr");
             put(Action.CP_MINIPROGRAM_FORSCREEN_JSON,BuildConfig.BASE_URL+"Smallapp/index/isSmallappForscreen");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_RESOURCE_JSON,BuildConfig.BASE_URL+"Smallapp21/BuriedPoint/netLogs");
             put(Action.CP_POST_MINIPROGRAM_PROJECTION_GAME_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/activity");
             put(Action.CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,BuildConfig.BASE_URL+"Smallapp/BuriedPoint/sunCodeLog");
+            put(Action.CP_GET_NETTY_BALANCING_FORM,BALANCING_NETTY_BASE+"/netty/balancing");
         }
     };
 
@@ -596,6 +618,37 @@ public class AppApi {
     }
 
     /**
+     * 请求taimei视频广告
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void requestMeiVideoAds(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+
+        new AppServiceOk(context,Action.AD_MEI_VIDEO_ADS_JSON,handler,params).post();
+    }
+
+    /**
+     * 请求taimei图片广告
+     * @param context
+     * @param handler
+     * @param params
+     */
+    public static void requestMeiImageAds(Context context,ApiRequestListener handler,HashMap<String,Object> params){
+
+        new AppServiceOk(context,Action.AD_MEI_IMAGE_ADS_JSON,handler,params).post();
+    }
+
+    /**
+     * 调用Mei平台聚屏广告曝光地址
+     * @param context
+     * @param handler
+     */
+    public static void getNoticeAdsMonitor(Context context,ApiRequestListener handler,String url){
+        API_URLS.put(Action.CP_GET_NOTICE_ADS_MONITOR_JSON,url);
+        new AppServiceOk(context,Action.CP_GET_NOTICE_ADS_MONITOR_JSON,handler).get();
+    }
+    /**
      * 请求接口查询是否展示投屏码
      * @param context
      * @param handler
@@ -635,6 +688,22 @@ public class AppApi {
      */
     public static void postMiniProgramIconShowLog(Context context,ApiRequestListener handler,HashMap<String,Object> params){
         new AppServiceOk(context,Action.CP_POST_MINIPROGRAM_ICON_SHOW_LOG_JSON,handler,params).post();
+    }
+
+    /**
+     * 获取netty负载均衡ip和端口
+     * @param context
+     * @param hanler
+     * @param param
+     */
+    public static void getNettyBalancingInfo(Context context,ApiRequestListener hanler,HashMap<String,String> param){
+        try {
+            String reqid = (String)param.get("req_id");
+            new AppServiceOk(context,Action.CP_GET_NETTY_BALANCING_FORM,hanler,param,reqid).requestPostByAsynWithForm(param);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
     // 超时（网络）异常
     public static final String ERROR_TIMEOUT = "3001";

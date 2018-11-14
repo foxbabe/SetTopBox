@@ -16,8 +16,8 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode 2018110102
-        versionName "1.3.0.2"
+        versionCode 2018111402
+        versionName "1.3.0.4"
 
         multiDexEnabled true
     }
@@ -87,7 +87,7 @@ android {
         }
     }
 }
-
+android{useLibrary 'org.apache.http.legacy'}
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     compileOnly fileTree(include: ['*.jar'], dir: 'provided')

@@ -180,7 +180,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
             miniCallback.onMiniCloseIcon();
         }
         Session.get(mContext).setHeartbeatMiniNetty(false);
-        LogUtils.i("客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogUtils.i("客户端出现异常，退出........" + session.getNettyUrl() + ':' + session.getNettyPort());
 //        LogFileUtil.write("NettyClientHandler 客户端出现异常，退出........" + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
     }
@@ -188,7 +188,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 //        super.channelUnregistered(ctx);
-        LogUtils.i("channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogUtils.i("channelUnregistered......." + session.getNettyUrl() + ':' + session.getNettyPort());
 //        LogFileUtil.write("NettyClientHandler channelUnregistered......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
     }
@@ -196,7 +196,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
     @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        LogUtils.i("channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+        LogUtils.i("channelInactive......." + session.getNettyUrl() + ':' + session.getNettyPort());
 //        LogFileUtil.write("MiniNettyClientHandler channelInactive......." + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
 //        reconnect(ctx);
         Session.get(mContext).setHeartbeatMiniNetty(false);
@@ -221,7 +221,7 @@ public class MiniProNettyClientHandler extends SimpleChannelInboundHandler<Messa
             loop.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    LogUtils.i("Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
+                    LogUtils.i("Reconnecting to: " + session.getNettyUrl() + ':' + session.getNettyPort());
 //                    LogFileUtil.write("NettyClientHandler Reconnecting to: " + ConstantValues.MINI_PROGRAM_NETTY_URL + ':' + ConstantValues.MINI_PROGRAM_NETTY_PORT);
                     Bootstrap bootstrap = MiniProNettyClient.get().configureBootstrap(new Bootstrap(), loop);
                     MiniProNettyClient.get().connect(bootstrap);

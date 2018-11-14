@@ -1,7 +1,9 @@
 package com.savor.ads.core;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.protobuf.GeneratedMessage;
 import com.savor.ads.bean.JsonBean;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -35,6 +38,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 public class AppServiceOk {
     private Context mContext;
@@ -49,7 +54,7 @@ public class AppServiceOk {
      * 应用Session
      */
     protected Session appSession;
-
+    private String req_id;
 
     private String uploadFileName = "";
     private static long cacheSize = 1024 * 1024 * 5;
@@ -71,7 +76,16 @@ public class AppServiceOk {
         this.okHttpUtils = OkHttpUtils.getInstance();
         this.client = okHttpUtils.getOkHttpClient();
     }
-
+    public AppServiceOk(Context context, AppApi.Action action, ApiRequestListener handler, Object params,String reqid) {
+        this.mContext = context;
+        this.action = action;
+        this.handler = handler;
+        this.mParameter = params;
+        this.req_id = reqid;
+        this.appSession = Session.get(context);
+        this.okHttpUtils = OkHttpUtils.getInstance();
+        this.client = okHttpUtils.getOkHttpClient();
+    }
     public void cancelTag(Object tag) {
         okHttpUtils.cancelTag(tag);
 
@@ -112,7 +126,7 @@ public class AppServiceOk {
             }
             requestUrl = AppApi.API_URLS.get(action);
 
-            final Map<String, String> headers = new HashMap<String, String>();
+            final Map<String, String> headers = new HashMap<>();
             headers.put("traceinfo", appSession.getDeviceInfo());
             LogUtils.d("url-->" + requestUrl);
             LogUtils.d("traceinfo-->" + appSession.getDeviceInfo());
@@ -128,24 +142,6 @@ public class AppServiceOk {
                 headers.put("des", "true");
             }
 
-//			OkHttpClient okHttpClient = this.client.newBuilder().cache(cache).addNetworkInterceptor(new Interceptor() {
-//				@Override
-//				public Response intercept(Chain chain) throws IOException {
-//					Response originalResponse = chain.proceed(chain.request());
-//					return originalResponse.newBuilder()
-//							.removeHeader("Pragma")
-//							.removeHeader("Cache-Control")
-//							.header("Cache-Control", "public, only-if-cached, max-stale="+60).build();
-//				}
-//			}).addInterceptor(new Interceptor() {
-//				@Override
-//				public Response intercept(Chain chain) throws IOException {
-//					Request request = chain.request();
-//					request = request.newBuilder().header("Cache-Control", "public, max-age=" + 60)
-//							.build();
-//					return chain.proceed(request);
-//				}
-//			}).build();
 
             /**
              * 1.通过一个requrest构造方法将参数传入
@@ -162,7 +158,7 @@ public class AppServiceOk {
                     } catch (Exception e) {
                     }
 
-                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", isCache);
+                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", req_id);
 
                     LogUtils.d(object.toString() + "");
                     response.close();
@@ -202,6 +198,54 @@ public class AppServiceOk {
         }
     }
 
+
+    public void requestPostByAsynWithForm(HashMap<String, String> paramsMap) {
+        try {
+            String requestUrl = AppApi.API_URLS.get(action);
+            FormBody.Builder builder = new FormBody.Builder();
+            for (String key : paramsMap.keySet()) {
+                builder.add(key, paramsMap.get(key));
+            }
+            RequestBody formBody = builder.build();
+            final Request request = addHeaders().url(requestUrl).post(formBody).build();
+            final Call call = client.newCall(request);
+            call.enqueue(new okhttp3.Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    handler.onNetworkFailed(action);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", req_id);
+                    if (handler != null) {
+                        if (object instanceof ResponseErrorMessage) {
+                            handler.onError(action, object);
+                        } else {
+                            handler.onSuccess(action, object);
+                        }
+                    }
+                    LogUtils.d(object.toString() + "");
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+    }
+    /**
+     * 统一为请求添加头信息
+     * @return
+     */
+    private Request.Builder addHeaders() {
+        Request.Builder builder = new Request.Builder()
+                .addHeader("Connection", "keep-alive")
+                .addHeader("platform", "2")
+                .addHeader("phoneModel", Build.MODEL)
+                .addHeader("systemVersion", Build.VERSION.RELEASE)
+                .addHeader("appVersion", "3.2.0");
+        return builder;
+    }
     /**
      * get请求，一般是需要baseURL的
      */
@@ -233,7 +277,7 @@ public class AppServiceOk {
             @Override
             public Object parseNetworkResponse(Response response)
                     throws Exception {
-                Object object = ApiResponseFactory.getResponse(mContext, action, response, "", isCache);
+                Object object = ApiResponseFactory.getResponse(mContext, action, response, "", "");
 
                 LogUtils.d(object.toString() + "");
                 response.close();
@@ -499,7 +543,7 @@ public class AppServiceOk {
                 public void onResponse(Call var1, Response response) throws IOException {
 //                    LogUtils.d(response.body().string());
 
-                    Object object = ApiResponseFactory.getResponse(mContext, action, response, uploadFileName, false);
+                    Object object = ApiResponseFactory.getResponse(mContext, action, response, uploadFileName, "");
                     if (handler != null) {
                         handler.onSuccess(action,object);
                     }
@@ -541,7 +585,7 @@ public class AppServiceOk {
                 @Override
                 public Object parseNetworkResponse(Response response) {
 
-                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", false);
+                    Object object = ApiResponseFactory.getResponse(mContext, action, response, "", "");
                     response.close();
                     return object;
                 }

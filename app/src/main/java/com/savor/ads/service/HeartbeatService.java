@@ -16,6 +16,7 @@ import com.savor.ads.bean.DownloadDetailRequestBean;
 import com.savor.ads.bean.MediaDownloadBean;
 import com.savor.ads.bean.MediaLibBean;
 import com.savor.ads.bean.MediaPlaylistBean;
+import com.savor.ads.bean.NettyBalancingResult;
 import com.savor.ads.bean.PlaylistDetailRequestBean;
 import com.savor.ads.bean.ProgramBean;
 import com.savor.ads.bean.ProgramBeanResult;
@@ -33,12 +34,15 @@ import com.savor.ads.utils.GlobalValues;
 import com.savor.ads.utils.LogFileUtil;
 import com.savor.ads.utils.LogUtils;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -94,7 +98,7 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
     };
     /**几秒刷新一次**/
     private final int count = 5;
-
+    private Session session;
     public HeartbeatService() {
         super("HeartbeatService");
     }
@@ -114,10 +118,11 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                 e.printStackTrace();
             }
         } while (true);
-
+        session = Session.get(this);
         //  启动时立即心跳一次
         LogFileUtil.write("开机立刻上报心跳和调用是否显示小程序码接口一次");
         doHeartbeat();
+        getNettyBalancingInfo();
         doShowMiniProgramQRCode();
         monitorDownloadSpeed();
 
@@ -146,6 +151,8 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
                 doHeartbeat();
                 doShowMiniProgramQRCode();
+
+                getNettyBalancingInfo();
                 try {
                     reportMediaDetail();
                 } catch (Exception e) {
@@ -192,6 +199,13 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
 
 
     }
+
+        private void getNettyBalancingInfo(){
+            HashMap<String,String> params = new HashMap<>();
+            params.put("box_mac",session.getEthernetMac());
+            params.put("req_id",System.currentTimeMillis()+"");
+            AppApi.getNettyBalancingInfo(this,this,params);
+        }
 
     private void monitorDownloadSpeed(){
         mHandler.postDelayed(mRunnable,0);
@@ -477,18 +491,62 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                 LogUtils.d("上报播放列表成功");
                 break;
             case CP_MINIPROGRAM_FORSCREEN_JSON:
-                if (obj instanceof Integer){
-                    int value = (Integer)obj;
-                    if (value==1){
-                        LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
-                        Log.d("HeartbeatService","showMiniProgramIcon(true)");
-                        Session.get(HeartbeatService.this).setShowMiniProgramIcon(true);
-                        if (!Session.get(HeartbeatService.this).isHeartbeatMiniNetty()){
-                            Log.d("HeartbeatService","startMiniProgramNettyService");
+                if (obj instanceof String){
+                    try {
+                        String info = (String)obj;
+                        JSONObject jsonObject = new JSONObject(info);
+                        int is_sapp_forscreen =jsonObject.getInt("is_sapp_forscreen");
+                        if (is_sapp_forscreen==1){
+                            LogFileUtil.write("开始立刻调用小程序码接口返回成功，启动小程序NETTY服务");
+                            Log.d("HeartbeatService","showMiniProgramIcon(true)");
+                            Session.get(HeartbeatService.this).setShowMiniProgramIcon(true);
+                            if (!session.isHeartbeatMiniNetty()){
+                                Log.d("HeartbeatService","startMiniProgramNettyService");
+                                startMiniProgramNettyService();
+                            }
+                        }else{
+                            Session.get(HeartbeatService.this).setShowMiniProgramIcon(false);
+                        }
+                        if (jsonObject.has("support_netty_balance")){
+                            int support_netty_balance = jsonObject.getInt("support_netty_balance");
+                            int local_support_netty_balance = session.getLocalSupportNettyBalance();
+                            if (support_netty_balance!=local_support_netty_balance){
+                                session.setLocalSupportNettyBalance(support_netty_balance);
+                                if (1==support_netty_balance){
+
+                                    session.setSupportNettyBalance(true);
+                                }else{
+                                    session.setSupportNettyBalance(false);
+                                }
+                                startMiniProgramNettyService();
+                            }
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
+                break;
+            case CP_GET_NETTY_BALANCING_FORM:
+                if (obj instanceof NettyBalancingResult){
+                    boolean start = false;
+                    NettyBalancingResult netty = (NettyBalancingResult)obj;
+                    if (!TextUtils.isEmpty(netty.getResult())){
+                        String url = netty.getResult().split(":")[0];
+                        String port = netty.getResult().split(":")[1];
+                        if (TextUtils.isEmpty(session.getNettyUrl())||!url.equals(session.getNettyUrl())){
+                            start=true;
+                        }
+                        if (!TextUtils.isEmpty(url)){
+                            session.setNettyUrl(url);
+                        }
+                        if (!TextUtils.isEmpty(port)){
+                            session.setNettyPort(Integer.valueOf(port));
+                        }
+                        session.setGetNettyBalancing(true);
+                        if (start||!session.isHeartbeatMiniNetty()){
                             startMiniProgramNettyService();
                         }
-                    }else{
-                        Session.get(HeartbeatService.this).setShowMiniProgramIcon(false);
                     }
                 }
                 break;
@@ -520,6 +578,9 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
             case CP_POST_PLAY_LIST_JSON:
                 LogUtils.d("上报播放列表失败");
                 break;
+            case CP_GET_NETTY_BALANCING_FORM:
+                session.setGetNettyBalancing(true);
+                break;
         }
     }
 
@@ -541,6 +602,9 @@ public class HeartbeatService extends IntentService implements ApiRequestListene
                 break;
             case CP_POST_PLAY_LIST_JSON:
                 LogUtils.d("上报播放列表失败，网络异常");
+                break;
+            case CP_GET_NETTY_BALANCING_FORM:
+                session.setGetNettyBalancing(true);
                 break;
         }
     }
